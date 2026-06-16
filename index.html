@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRV SAC — Painel de Atendimento</title>
+<style>
+:root {
+  --bg: #0f1117; --bg2: #181c27; --bg3: #1e2334; --border: #2a3048;
+  --accent: #3b82f6; --text: #e2e8f0; --text2: #94a3b8; --text3: #64748b;
+  --green: #22c55e; --yellow: #eab308; --orange: #f97316; --red: #ef4444;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI',sans-serif; font-size: 13px; min-height: 100vh; }
+
+/* MODAL */
+#token-modal { position:fixed; inset:0; background:rgba(0,0,0,.82); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; z-index:9999; }
+#token-modal.hidden { display:none; }
+.modal-box { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:28px; width:420px; max-width:95vw; }
+.modal-box h2 { font-size:16px; font-weight:700; margin-bottom:8px; }
+.modal-box p { color:var(--text2); font-size:12px; margin-bottom:16px; line-height:1.5; }
+.modal-box label { display:block; font-size:11px; color:var(--text2); margin-bottom:5px; }
+.modal-box input { width:100%; padding:9px 11px; background:var(--bg3); border:1px solid var(--border); border-radius:5px; color:var(--text); font-size:13px; outline:none; margin-bottom:12px; }
+.modal-box input:focus { border-color:var(--accent); }
+.hint { font-size:11px; color:var(--text3); margin-top:-8px; margin-bottom:12px; }
+.btn-primary { width:100%; padding:10px; background:var(--accent); border:none; border-radius:5px; color:#fff; font-size:14px; font-weight:600; cursor:pointer; margin-top:4px; }
+.btn-primary:hover { opacity:.85; }
+
+/* HEADER */
+.panel-header {
+  display:flex; align-items:center; gap:10px;
+  background:var(--bg2); border-bottom:1px solid var(--border);
+  padding:0 16px; height:46px; position:sticky; top:0; z-index:100;
+}
+.panel-logo { font-weight:800; font-size:14px; white-space:nowrap; }
+.panel-logo span { color:var(--text2); font-weight:400; font-size:13px; }
+.period-badge {
+  background:var(--bg3); border:1px solid var(--border); border-radius:4px;
+  padding:3px 10px; font-size:12px; color:var(--text2); white-space:nowrap;
+}
+.hdr-sep { flex:1; }
+.hdr-countdown { font-size:12px; color:var(--text3); white-space:nowrap; }
+.hdr-updated { font-size:11px; color:var(--text3); white-space:nowrap; }
+.hdr-updated::before { content:'• '; color:var(--green); }
+.btn-hdr {
+  padding:5px 11px; background:var(--bg3); border:1px solid var(--border);
+  border-radius:4px; color:var(--text2); font-size:12px; cursor:pointer;
+  white-space:nowrap; display:inline-flex; align-items:center; gap:5px;
+}
+.btn-hdr:hover { border-color:var(--accent); color:var(--accent); }
+.btn-hdr.blue { background:var(--accent); border-color:var(--accent); color:#fff; }
+.btn-hdr.blue:hover { opacity:.85; }
+
+/* CONTENT */
+.content { padding:12px 16px; display:flex; flex-direction:column; gap:10px; }
+body.minimized .content { display:none; }
+
+/* TOP ROW */
+.top-row {
+  display:grid; grid-template-columns:1fr 420px;
+  border:1px solid var(--border); border-radius:6px; overflow:hidden;
+}
+.block-hdr {
+  padding:8px 14px; background:var(--bg3); border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.block-hdr-title { font-size:12px; font-weight:700; }
+.block-hdr-sub { font-size:11px; color:var(--text3); }
+
+/* KPI */
+.kpi-section { background:var(--bg2); border-right:1px solid var(--border); }
+.kpi-table { width:100%; border-collapse:collapse; }
+.kpi-table tr { border-bottom:1px solid rgba(42,48,72,.5); }
+.kpi-table tr:last-child { border-bottom:none; }
+.kpi-table tr.dim td { opacity:.45; }
+.kpi-table td { padding:9px 14px; vertical-align:middle; }
+.kpi-name { font-size:12px; font-weight:600; }
+.kpi-desc { font-size:11px; color:var(--text3); margin-top:1px; }
+.kpi-val { font-size:20px; font-weight:700; color:var(--accent); text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.kpi-val.dim { color:var(--text3); font-size:13px; }
+.kpi-prev { font-size:11px; color:var(--text3); text-align:right; white-space:nowrap; }
+.kpi-chg { font-size:11px; text-align:right; white-space:nowrap; font-weight:600; }
+.kpi-chg.pos { color:var(--green); }
+.kpi-chg.neg { color:var(--red); }
+.kpi-chg.nd  { color:var(--text3); font-weight:400; }
+.kpi-nd-note { padding:6px 14px; font-size:10px; color:var(--text3); border-top:1px solid var(--border); }
+
+/* AGENTS */
+.agents-section { background:var(--bg2); display:flex; flex-direction:column; }
+.agents-scroll { flex:1; overflow-y:auto; max-height:310px; }
+.ag-table { width:100%; border-collapse:collapse; }
+.ag-table th {
+  padding:7px 12px; font-size:10px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.5px; color:var(--text3); border-bottom:1px solid var(--border);
+  text-align:left; white-space:nowrap; background:var(--bg2);
+  position:sticky; top:0;
+}
+.ag-table td { padding:6px 12px; border-bottom:1px solid rgba(42,48,72,.35); vertical-align:middle; font-size:12px; }
+.ag-table tr:last-child td { border-bottom:none; }
+.ag-table tbody tr:hover { background:var(--bg3); }
+.ag-name { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:130px; }
+.dot { display:inline-block; width:10px; height:10px; border-radius:50%; }
+.dot-g { background:var(--green); }
+.dot-o { background:var(--orange); }
+.dot-r { background:var(--red); }
+.dot-x { background:var(--text3); }
+.ag-qty { text-align:center; font-variant-numeric:tabular-nums; }
+
+/* CONV BLOCKS */
+.conv-block { background:var(--bg2); border:1px solid var(--border); border-radius:6px; overflow:hidden; }
+.conv-hdr {
+  padding:9px 14px; background:var(--bg3); border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:8px;
+}
+.conv-hdr-title { font-size:13px; font-weight:700; flex:1; }
+.badge { font-size:11px; font-weight:700; padding:2px 9px; border-radius:99px; }
+.badge-blue   { background:var(--accent); color:#fff; }
+.badge-orange { background:var(--orange); color:#fff; }
+.badge-subtle { background:var(--bg); color:var(--text3); border:1px solid var(--border); }
+
+/* FILTER PILLS */
+.filter-pills { display:flex; gap:4px; }
+.pill { padding:3px 10px; background:var(--bg); border:1px solid var(--border); border-radius:99px; color:var(--text3); font-size:11px; cursor:pointer; transition:border-color .15s,color .15s,background .15s; }
+.pill:hover { border-color:var(--accent); color:var(--accent); }
+.pill.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+/* CONV TABLE */
+.cv-table { width:100%; border-collapse:collapse; }
+.cv-table th {
+  padding:7px 12px; font-size:10px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.5px; color:var(--text3); background:var(--bg2);
+  border-bottom:1px solid var(--border); text-align:left; white-space:nowrap;
+}
+.cv-table td { padding:7px 12px; border-bottom:1px solid rgba(42,48,72,.3); vertical-align:middle; font-size:12px; }
+.cv-table tr:last-child td { border-bottom:none; }
+.cv-table tbody tr.data-row:hover { background:rgba(59,130,246,.05); cursor:pointer; }
+.queue-row td {
+  background:var(--bg3); padding:4px 12px;
+  font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.8px;
+  color:var(--text3); border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+}
+
+/* Cell styles */
+.c-ticket { font-size:11px; color:var(--text3); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.c-ref    { font-size:11px; color:var(--text3); white-space:nowrap; }
+.c-client { font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px; }
+.c-svc    { color:var(--text3); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:140px; }
+.c-agent  { color:var(--text2); white-space:nowrap; }
+.c-none   { color:var(--orange); font-style:italic; }
+.c-date   { font-size:11px; color:var(--text3); white-space:nowrap; }
+.c-dur    { font-size:11px; color:var(--text3); white-space:nowrap; font-variant-numeric:tabular-nums; }
+.c-link   { color:var(--accent); text-decoration:none; font-size:11px; font-weight:500; }
+.c-link:hover { text-decoration:underline; }
+.em       { color:var(--text3); }
+.tipo-badge { display:inline-block; font-size:10px; font-weight:700; padding:2px 7px; border-radius:3px; white-space:nowrap; }
+.tipo-grupo { background:rgba(139,92,246,.15); color:#a78bfa; }
+.tipo-ind   { background:rgba(100,116,139,.12); color:var(--text3); }
+
+/* COLUMN FILTER BUTTONS IN TH */
+.th-f { white-space:nowrap; }
+.th-fb { background:none; border:none; padding:0 0 0 3px; color:var(--text3); font-size:10px; cursor:pointer; vertical-align:middle; line-height:1; }
+.th-fb:hover { color:var(--text2); }
+.th-fb.on { color:var(--accent); }
+
+/* COLUMN FILTER POPUP */
+#cfp { position:fixed; z-index:2000; background:var(--bg2); border:1px solid var(--border); border-radius:6px; box-shadow:0 8px 28px rgba(0,0,0,.55); width:220px; display:flex; flex-direction:column; overflow:hidden; }
+#cfp.hidden { display:none; }
+.cfp-head { padding:7px 10px; background:var(--bg3); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:5px; }
+.cfp-head-title { font-size:12px; font-weight:700; flex:1; }
+.cfp-xs { font-size:10px; padding:2px 7px; background:transparent; border:1px solid var(--border); border-radius:3px; color:var(--text3); cursor:pointer; white-space:nowrap; }
+.cfp-xs:hover { border-color:var(--accent); color:var(--accent); }
+.cfp-srch { padding:6px 10px; border-bottom:1px solid var(--border); }
+.cfp-srch input { width:100%; padding:5px 8px; background:var(--bg3); border:1px solid var(--border); border-radius:4px; color:var(--text); font-size:12px; outline:none; }
+.cfp-srch input:focus { border-color:var(--accent); }
+.cfp-list { max-height:190px; overflow-y:auto; padding:3px 0; }
+.cfp-opt { display:flex; align-items:center; gap:8px; padding:5px 10px; cursor:pointer; font-size:12px; }
+.cfp-opt:hover { background:var(--bg3); }
+.cfp-opt input { accent-color:var(--accent); width:13px; height:13px; cursor:pointer; flex-shrink:0; }
+.cfp-foot { padding:7px 10px; border-top:1px solid var(--border); background:var(--bg3); display:flex; gap:6px; justify-content:flex-end; }
+.cfp-ok { padding:5px 14px; background:var(--accent); border:none; border-radius:4px; color:#fff; font-size:12px; font-weight:600; cursor:pointer; }
+.cfp-ok:hover { opacity:.85; }
+
+.show-more-row { text-align:center; padding:10px; }
+.btn-more { background:transparent; border:1px solid var(--border); border-radius:4px; padding:5px 18px; color:var(--text2); font-size:12px; cursor:pointer; }
+.btn-more:hover { border-color:var(--accent); color:var(--accent); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+/* Mobile */
+@media (max-width:800px) {
+  .top-row { grid-template-columns:1fr; }
+  .agents-section { border-left:none; border-top:1px solid var(--border); }
+  .cv-table th:nth-child(4), .cv-table td:nth-child(4),
+  .cv-table th:nth-child(9), .cv-table td:nth-child(9) { display:none; }
+  .panel-logo span { display:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOKEN MODAL -->
+<div id="token-modal">
+  <div class="modal-box">
+    <h2>Configurar Acesso</h2>
+    <p>Insira seu token de usuário do Chatwoot. Salvo localmente no navegador — cada pessoa usa o seu.</p>
+    <label>Token de Acesso (api_access_token)</label>
+    <input type="password" id="inp-token" placeholder="Cole seu token aqui..." />
+    <p class="hint">Chatwoot → Perfil → Configurações da conta → Copiar Token de Acesso</p>
+    <label>ID da Conta</label>
+    <input type="number" id="inp-account" value="1" />
+    <button class="btn-primary" onclick="saveToken()">Conectar</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="panel-header">
+  <div class="panel-logo">GRV SAC <span>— Painel de Atendimento</span></div>
+  <div class="period-badge" id="period-badge">Este mês: —</div>
+  <div class="hdr-sep"></div>
+  <div class="hdr-countdown" id="hdr-countdown">Próx. atualização em —</div>
+  <button class="btn-hdr blue" onclick="fetchAll()">↺ Atualizar</button>
+  <div class="hdr-updated" id="hdr-updated">Atualizado às —</div>
+  <button class="btn-hdr" id="btn-min" onclick="toggleMin()" title="Minimizar">⊟</button>
+  <button class="btn-hdr" onclick="showTokenModal()">⚙ Token</button>
+</div>
+
+<!-- CONTENT -->
+<div class="content" id="content">
+
+  <!-- TOP ROW: KPIs + Agentes -->
+  <div class="top-row">
+
+    <!-- KPIs -->
+    <div class="kpi-section">
+      <div class="block-hdr">
+        <span class="block-hdr-title">Principais indicadores do chat</span>
+        <div class="filter-pills" id="kpi-filter">
+          <button class="pill" data-p="day"   onclick="setKpiPeriod('day')">Dia</button>
+          <button class="pill" data-p="week"  onclick="setKpiPeriod('week')">Semana</button>
+          <button class="pill active" data-p="month" onclick="setKpiPeriod('month')">Mês</button>
+        </div>
+      </div>
+      <table class="kpi-table">
+        <tbody id="kpi-tbody">
+          <tr><td colspan="4" style="padding:24px;text-align:center;color:var(--text3)">Carregando…</td></tr>
+        </tbody>
+      </table>
+      <div class="kpi-nd-note">▲ Indicadores marcados como N/D não estão disponíveis na API do Chatwoot</div>
+    </div>
+
+    <!-- Agentes -->
+    <div class="agents-section">
+      <div class="block-hdr">
+        <span class="block-hdr-title">Acompanhamento de agentes</span>
+        <span class="block-hdr-sub" id="agents-label">— online de —</span>
+      </div>
+      <div class="agents-scroll">
+        <table class="ag-table">
+          <thead>
+            <tr>
+              <th>Agente</th>
+              <th>Status Movidesk</th>
+              <th>Status no Chat</th>
+              <th>Qtd. Atend.</th>
+            </tr>
+          </thead>
+          <tbody id="agents-tbody">
+            <tr><td colspan="4" style="padding:20px;text-align:center;color:var(--text3)">Carregando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- AGUARDANDO -->
+  <div class="conv-block">
+    <div class="conv-hdr">
+      <span class="conv-hdr-title">Conversas aguardando atendimento</span>
+      <span class="badge badge-orange" id="badge-waiting">0</span>
+    </div>
+    <table class="cv-table">
+      <thead>
+        <tr>
+          <th>Ticket</th>
+          <th>Cód. Ref.</th>
+          <th>Cliente</th>
+          <th class="th-f">Tipo<button class="th-fb" id="thw-tipo" onclick="openCfp(event,'waiting','tipo','Tipo')">▾</button></th>
+          <th class="th-f">Serviço<button class="th-fb" id="thw-svc" onclick="openCfp(event,'waiting','svc','Serviço')">▾</button></th>
+          <th class="th-f">Atendente<button class="th-fb" id="thw-agent" onclick="openCfp(event,'waiting','agent','Atendente')">▾</button></th>
+          <th>Data</th>
+          <th>Duração</th>
+          <th class="th-f">Origem<button class="th-fb" id="thw-origin" onclick="openCfp(event,'waiting','origin','Origem')">▾</button></th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody id="waiting-tbody">
+        <tr><td colspan="10" style="padding:20px;text-align:center;color:var(--text3)">Carregando…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- EM ATENDIMENTO -->
+  <div class="conv-block">
+    <div class="conv-hdr">
+      <span class="conv-hdr-title">Conversas em atendimento</span>
+      <span class="badge badge-subtle" id="badge-inprog">—</span>
+    </div>
+    <table class="cv-table">
+      <thead>
+        <tr>
+          <th>Ticket</th>
+          <th>Cód. Ref.</th>
+          <th>Cliente</th>
+          <th class="th-f">Tipo<button class="th-fb" id="thi-tipo" onclick="openCfp(event,'inprog','tipo','Tipo')">▾</button></th>
+          <th class="th-f">Serviço<button class="th-fb" id="thi-svc" onclick="openCfp(event,'inprog','svc','Serviço')">▾</button></th>
+          <th class="th-f">Atendente<button class="th-fb" id="thi-agent" onclick="openCfp(event,'inprog','agent','Atendente')">▾</button></th>
+          <th>Data</th>
+          <th>Duração</th>
+          <th class="th-f">Origem<button class="th-fb" id="thi-origin" onclick="openCfp(event,'inprog','origin','Origem')">▾</button></th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody id="inprog-tbody">
+        <tr><td colspan="10" style="padding:20px;text-align:center;color:var(--text3)">Carregando…</td></tr>
+      </tbody>
+    </table>
+    <div id="show-more-wrap" style="display:none" class="show-more-row">
+      <button class="btn-more" onclick="showMore()">Ver mais conversas</button>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<script>
+const REFRESH_SEC = 60;
+const PAGE_SIZE   = 20;
+
+let cfg = {
+  token:   localStorage.getItem('grv_token')   || '',
+  account: localStorage.getItem('grv_account') || '1'
+};
+let timer = null, countdown = REFRESH_SEC;
+let _allInProg = [], _allWaiting = [], _inboxMap = {}, _shownCount = PAGE_SIZE, _totalOpen = 0;
+let _kpiPeriod = 'month';
+let _filters = { waiting: {}, inprog: {} };
+let _cfpState = { tbl: null, col: null, vals: [], sel: new Set() };
+
+/* ── TOKEN ── */
+function showTokenModal() {
+  document.getElementById('inp-token').value   = cfg.token;
+  document.getElementById('inp-account').value = cfg.account;
+  document.getElementById('token-modal').classList.remove('hidden');
+}
+function saveToken() {
+  const token   = document.getElementById('inp-token').value.trim();
+  const account = document.getElementById('inp-account').value.trim() || '1';
+  if (!token) { alert('Insira o token.'); return; }
+  localStorage.setItem('grv_token',   token);
+  localStorage.setItem('grv_account', account);
+  cfg = { token, account };
+  document.getElementById('token-modal').classList.add('hidden');
+  startDashboard();
+}
+if (!cfg.token) showTokenModal();
+else { document.getElementById('token-modal').classList.add('hidden'); startDashboard(); }
+
+/* ── MINIMIZE ── */
+function toggleMin() {
+  document.body.classList.toggle('minimized');
+  document.getElementById('btn-min').textContent =
+    document.body.classList.contains('minimized') ? '⊞' : '⊟';
+}
+
+/* ── PERIOD ── */
+function getPeriod(type) {
+  const now = new Date();
+  let s0, ps0, ps1, badgeLabel;
+
+  if (type === 'day') {
+    s0  = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    ps0 = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    ps1 = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 23, 59, 59);
+    badgeLabel = `Hoje: ${now.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' })}`;
+  } else if (type === 'week') {
+    const dow = now.getDay();
+    const diffToMon = (dow === 0 ? -6 : 1 - dow);
+    s0  = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon);
+    ps0 = new Date(s0.getFullYear(), s0.getMonth(), s0.getDate() - 7);
+    ps1 = new Date(s0.getFullYear(), s0.getMonth(), s0.getDate() - 1, 23, 59, 59);
+    badgeLabel = 'Esta semana';
+  } else {
+    s0  = new Date(now.getFullYear(), now.getMonth(), 1);
+    ps0 = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    ps1 = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+    const lbl = now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    badgeLabel = `Este mês: ${lbl.charAt(0).toUpperCase() + lbl.slice(1)}`;
+  }
+
+  return {
+    since:      Math.floor(s0.getTime()  / 1000),
+    until:      Math.floor(now.getTime() / 1000),
+    prevSince:  Math.floor(ps0.getTime() / 1000),
+    prevUntil:  Math.floor(ps1.getTime() / 1000),
+    badgeLabel
+  };
+}
+
+function setKpiPeriod(type) {
+  _kpiPeriod = type;
+  document.querySelectorAll('#kpi-filter .pill').forEach(b =>
+    b.classList.toggle('active', b.dataset.p === type)
+  );
+  fetchKPIs();
+}
+
+async function fetchKPIs() {
+  const p = getPeriod(_kpiPeriod);
+  document.getElementById('period-badge').textContent = p.badgeLabel;
+  try {
+    const [summary, summaryPrev] = await Promise.all([
+      api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.since}&until=${p.until}&type=account`),
+      api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.prevSince}&until=${p.prevUntil}&type=account`)
+    ]);
+    renderKPIs(summary, summaryPrev);
+  } catch (e) {
+    console.error('fetchKPIs:', e);
+  }
+}
+
+/* ── API ── */
+function api(path) {
+  return fetch(`/api${path}`, {
+    headers: { 'Accept': 'application/json', 'api_access_token': cfg.token }
+  }).then(r => {
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.json();
+  });
+}
+
+/* ── DASHBOARD LOOP ── */
+function startDashboard() {
+  clearInterval(timer);
+  countdown = REFRESH_SEC;
+  fetchAll();
+  timer = setInterval(() => {
+    countdown--;
+    document.getElementById('hdr-countdown').textContent =
+      `Próx. atualização em ${countdown}s`;
+    if (countdown <= 0) { countdown = REFRESH_SEC; fetchAll(); }
+  }, 1000);
+}
+
+async function fetchAll() {
+  document.getElementById('hdr-countdown').textContent = 'Atualizando…';
+  try {
+    const [agents, page1, inboxes] = await Promise.all([
+      api(`/v1/accounts/${cfg.account}/agents`),
+      api(`/v1/accounts/${cfg.account}/conversations?status=open&page=1`),
+      api(`/v1/accounts/${cfg.account}/inboxes`)
+    ]);
+
+    let convs = page1.data?.payload || [];
+    const total = page1.data?.meta?.all_count || convs.length;
+    if (total > 25) {
+      const pages = Math.min(Math.ceil(total / 25), 12);
+      const rest  = await Promise.all(
+        Array.from({ length: pages - 1 }, (_, i) =>
+          api(`/v1/accounts/${cfg.account}/conversations?status=open&page=${i + 2}`)
+        )
+      );
+      rest.forEach(r => convs = convs.concat(r.data?.payload || []));
+    }
+
+    _inboxMap  = {};
+    (inboxes.payload || []).forEach(i => { _inboxMap[i.id] = i; });
+    _totalOpen = total;
+
+    await fetchKPIs();
+    renderAgents(agents, convs);
+    renderConvs(convs);
+
+    const now = new Date();
+    document.getElementById('hdr-updated').textContent =
+      `Atualizado às ${now.toLocaleTimeString('pt-BR')}`;
+    countdown = REFRESH_SEC;
+    document.getElementById('hdr-countdown').textContent =
+      `Próx. atualização em ${countdown}s`;
+  } catch (e) {
+    document.getElementById('hdr-countdown').textContent = `Erro: ${e.message}`;
+    console.error(e);
+  }
+}
+
+/* ── KPIs ── */
+function fmtSec(s) {
+  if (s == null) return null;
+  if (s < 60)   return `${Math.round(s)}seg`;
+  if (s < 3600) return `${Math.round(s / 60)}min`;
+  const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
+  return `${h}hr ${String(m).padStart(2, '0')}min`;
+}
+function chg(curr, prev, lowerBetter) {
+  if (curr == null || prev == null || prev === 0)
+    return '<span class="kpi-chg nd">N/D</span>';
+  const pct = ((curr - prev) / prev * 100);
+  const up  = pct >= 0;
+  const good = lowerBetter ? !up : up;
+  const cls  = good ? 'pos' : 'neg';
+  return `<span class="kpi-chg ${cls}">${up ? '▲' : '▼'} ${Math.abs(pct).toFixed(1)}%</span>`;
+}
+function renderKPIs(s, sp) {
+  const rows = [
+    { name: 'Chats atendidos', desc: 'Quantidade de chats atendidos no período', val: s.conversations_count, prev: sp.conversations_count, lb: false },
+    { name: 'Chats resolvidos em primeiro atendimento', desc: 'Quantidade de atendimentos via chat resolvidos durante a conversa', val: s.resolutions_count, prev: sp.resolutions_count, lb: false },
+    { name: 'Chats não resolvidos em primeiro atendimento', desc: 'Quantidade de atendimentos via chat que ficaram pendentes',
+      val:  (s.conversations_count != null && s.resolutions_count != null) ? Math.max(0, s.conversations_count - s.resolutions_count) : null,
+      prev: (sp.conversations_count != null && sp.resolutions_count != null) ? Math.max(0, sp.conversations_count - sp.resolutions_count) : null, lb: true },
+    { name: 'Mensagens offline recebidas', desc: 'Mensagens recebidas fora do horário ou enquanto agentes estavam offline', nd: true },
+    { name: 'Maior duração de atendimento', desc: 'Tempo da conversa mais longa do período', nd: true },
+    { name: 'Tempo médio de duração dos atendimentos', desc: 'Tempo médio de duração das conversas atendidas', val: s.avg_resolution_time, prev: sp.avg_resolution_time, lb: true, fmt: 'time' }
+  ];
+
+  document.getElementById('kpi-tbody').innerHTML = rows.map(r => {
+    const nd  = r.nd || r.val == null;
+    const vd  = nd ? '—' : (r.fmt === 'time' ? fmtSec(r.val) : r.val.toLocaleString('pt-BR'));
+    const pvd = nd ? 'N/D' : (r.prev != null ? (r.fmt === 'time' ? `Ant: ${fmtSec(r.prev)}` : `Ant: ${r.prev.toLocaleString('pt-BR')}`) : 'N/D');
+    return `<tr${nd ? ' class="dim"' : ''}>
+      <td style="min-width:220px"><div class="kpi-name">${esc(r.name)}</div><div class="kpi-desc">${esc(r.desc)}</div></td>
+      <td class="kpi-val${nd ? ' dim' : ''}" style="width:130px">${esc(vd)}</td>
+      <td class="kpi-prev" style="width:110px">${esc(pvd)}</td>
+      <td style="width:80px;text-align:right">${nd ? '<span class="kpi-chg nd">N/D</span>' : chg(r.val, r.prev, r.lb)}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── AGENTS ── */
+function renderAgents(agents, convs) {
+  const cnt = {};
+  convs.forEach(c => { const id = c.meta?.assignee?.id; if (id) cnt[id] = (cnt[id] || 0) + 1; });
+  const online = agents.filter(a => a.availability_status === 'online').length;
+  document.getElementById('agents-label').textContent = `${online} online de ${agents.length}`;
+  const order = { online: 0, busy: 1, offline: 2 };
+  const sorted = [...agents].sort((a, b) => (order[a.availability_status] ?? 3) - (order[b.availability_status] ?? 3));
+  document.getElementById('agents-tbody').innerHTML = sorted.map(a => {
+    const st = a.availability_status || 'offline';
+    const dc = st === 'online' ? 'dot-g' : st === 'busy' ? 'dot-o' : 'dot-x';
+    return `<tr><td class="ag-name">${esc(a.name)}</td><td><span class="dot ${dc}"></span></td><td><span class="dot ${dc}"></span></td><td class="ag-qty">${cnt[a.id] || 0}</td></tr>`;
+  }).join('');
+}
+
+/* ── CONVERSATIONS ── */
+function renderConvs(convs) {
+  _allWaiting = convs.filter(c => !c.meta?.assignee?.id).sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
+  _allInProg  = convs.filter(c =>  c.meta?.assignee?.id).sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
+  _shownCount = PAGE_SIZE;
+  renderWaiting();
+  renderInprog();
+}
+
+function renderWaiting() {
+  const filtered = applyFilters(_allWaiting, 'waiting');
+  const bw = document.getElementById('badge-waiting');
+  bw.textContent = filtered.length;
+  bw.className   = `badge ${filtered.length > 0 ? 'badge-orange' : 'badge-subtle'}`;
+  document.getElementById('waiting-tbody').innerHTML = filtered.length
+    ? filtered.map(c => rowHtml(c)).join('')
+    : emptyRow('Nenhuma conversa aguardando atendimento', 10);
+  syncFilterButtons('waiting');
+}
+
+function renderInprog() {
+  const filtered = applyFilters(_allInProg, 'inprog');
+  const shown    = filtered.slice(0, _shownCount);
+  const groupOrder = [], groups = {};
+  shown.forEach(c => { const k = c.inbox_id; if (!groups[k]) { groups[k] = []; groupOrder.push(k); } groups[k].push(c); });
+  let html = '';
+  groupOrder.forEach(iid => {
+    html += `<tr class="queue-row"><td colspan="10">${esc((_inboxMap[iid] || {}).name || `Fila #${iid}`)}</td></tr>`;
+    html += groups[iid].map(c => rowHtml(c)).join('');
+  });
+  if (!html) html = emptyRow('Nenhuma conversa em atendimento', 10);
+  document.getElementById('inprog-tbody').innerHTML = html;
+  document.getElementById('badge-inprog').textContent = `${Math.min(_shownCount, filtered.length)} de ${_totalOpen} abertas`;
+  document.getElementById('show-more-wrap').style.display = filtered.length > _shownCount ? '' : 'none';
+  syncFilterButtons('inprog');
+}
+
+function showMore() { _shownCount += PAGE_SIZE; renderInprog(); }
+
+function isGroup(c) {
+  if (c.meta?.sender?.type === 'group') return true;
+  const name = (c.meta?.sender?.name || '').toUpperCase();
+  if (name.includes('(GROUP)') || name.includes('(GRUPO)')) return true;
+  if ((c.meta?.sender?.identifier || '').endsWith('@g.us')) return true;
+  return false;
+}
+
+function rowHtml(c) {
+  const inbox  = _inboxMap[c.inbox_id] || {};
+  const url    = `https://nxticket.com.br/app/accounts/${cfg.account}/conversations/${c.id}`;
+  const ref    = c.meta?.sender?.phone_number || '—';
+  const client = c.meta?.sender?.name || `#${c.id}`;
+  const svc    = inbox.name || `#${c.inbox_id}`;
+  const agent  = c.meta?.assignee?.name || null;
+  const dur    = c.created_at ? fmtMs(Date.now() - c.created_at * 1000) : '—';
+  const date   = c.created_at ? fmtDate(c.created_at) : '—';
+  const origin = originOf(inbox.channel_type);
+  const tipoBadge = isGroup(c)
+    ? '<span class="tipo-badge tipo-grupo">Grupo</span>'
+    : '<span class="tipo-badge tipo-ind">Individual</span>';
+  return `<tr class="data-row" onclick="window.open('${esc(url)}','_blank')">
+    <td class="c-ticket">#${c.id}</td>
+    <td class="c-ref">${esc(ref)}</td>
+    <td class="c-client">${esc(client)}</td>
+    <td>${tipoBadge}</td>
+    <td class="c-svc">${esc(svc)}</td>
+    <td class="${agent ? 'c-agent' : 'c-none'}">${agent ? esc(agent) : '—'}</td>
+    <td class="c-date">${date}</td>
+    <td class="c-dur">${dur}</td>
+    <td><a class="c-link" href="${esc(url)}" target="_blank" onclick="event.stopPropagation()">${origin}</a></td>
+    <td><a class="c-link" href="${esc(url)}" target="_blank" onclick="event.stopPropagation()">Abrir →</a></td>
+  </tr>`;
+}
+
+/* ── COLUMN FILTERS ── */
+function colValue(c, col) {
+  const inbox = _inboxMap[c.inbox_id] || {};
+  if (col === 'tipo')   return isGroup(c) ? 'Grupo' : 'Individual';
+  if (col === 'svc')    return inbox.name || `#${c.inbox_id}`;
+  if (col === 'agent')  return c.meta?.assignee?.name || '(Sem atendente)';
+  if (col === 'origin') return originOf(inbox.channel_type);
+  return '';
+}
+function applyFilters(convs, tbl) {
+  const fs = _filters[tbl];
+  return convs.filter(c => Object.entries(fs).every(([col, allowed]) => !allowed || allowed.size === 0 || allowed.has(colValue(c, col))));
+}
+function syncFilterButtons(tbl) {
+  const prefix = tbl === 'waiting' ? 'thw' : 'thi';
+  ['tipo','svc','agent','origin'].forEach(col => {
+    const el = document.getElementById(`${prefix}-${col}`);
+    if (el) el.classList.toggle('on', !!(_filters[tbl][col] && _filters[tbl][col].size > 0));
+  });
+}
+function openCfp(event, tbl, col, label) {
+  event.stopPropagation();
+  const source  = tbl === 'waiting' ? _allWaiting : _allInProg;
+  const allVals = [...new Set(source.map(c => colValue(c, col)))].sort();
+  const active  = _filters[tbl][col];
+  _cfpState = { tbl, col, vals: allVals, sel: active ? new Set(active) : new Set(allVals) };
+  document.getElementById('cfp-title').textContent = label;
+  document.getElementById('cfp-inp').value = '';
+  cfpRender();
+  const popup = document.getElementById('cfp');
+  popup.classList.remove('hidden');
+  const rect = event.currentTarget.getBoundingClientRect();
+  const pw = 220, ph = 340;
+  let left = rect.left, top = rect.bottom + 4;
+  if (left + pw > window.innerWidth  - 8) left = window.innerWidth  - pw - 8;
+  if (top  + ph > window.innerHeight - 8) top  = rect.top - ph - 4;
+  popup.style.left = Math.max(4, left) + 'px';
+  popup.style.top  = Math.max(4, top)  + 'px';
+}
+function cfpRender() {
+  const q   = (document.getElementById('cfp-inp').value || '').toLowerCase();
+  const vis = _cfpState.vals.filter(v => !q || v.toLowerCase().includes(q));
+  document.getElementById('cfp-list').innerHTML = vis.map(v => {
+    const chk = _cfpState.sel.has(v) ? 'checked' : '';
+    return `<label class="cfp-opt"><input type="checkbox" ${chk} data-val="${esc(v)}" onchange="cfpToggle(this)"><span>${esc(v)}</span></label>`;
+  }).join('') || '<div style="padding:10px 12px;color:var(--text3);font-size:12px">Nenhum resultado</div>';
+}
+function cfpToggle(el) { const val = el.dataset.val; if (el.checked) _cfpState.sel.add(val); else _cfpState.sel.delete(val); }
+function cfpAll()  { _cfpState.sel = new Set(_cfpState.vals); cfpRender(); }
+function cfpNone() { _cfpState.sel.clear(); cfpRender(); }
+function cfpClose() { document.getElementById('cfp').classList.add('hidden'); }
+function cfpApply() {
+  const { tbl, col } = _cfpState;
+  if (_cfpState.sel.size === 0 || _cfpState.sel.size === _cfpState.vals.length) delete _filters[tbl][col];
+  else _filters[tbl][col] = new Set(_cfpState.sel);
+  cfpClose();
+  if (tbl === 'waiting') renderWaiting();
+  else { _shownCount = PAGE_SIZE; renderInprog(); }
+}
+document.addEventListener('click', e => {
+  const p = document.getElementById('cfp');
+  if (p && !p.classList.contains('hidden') && !p.contains(e.target)) cfpClose();
+});
+
+/* ── HELPERS ── */
+function fmtMs(ms) {
+  const s = Math.floor(ms / 1000);
+  if (s < 60)   return `${s}seg`;
+  if (s < 3600) return `${Math.floor(s / 60)}min ${s % 60}seg`;
+  const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
+  return `${h}hr ${String(m).padStart(2, '0')}min`;
+}
+function fmtDate(ts) {
+  return new Date(ts * 1000).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+function originOf(ch) {
+  return ({'Channel::Whatsapp':'WhatsApp','Channel::Email':'E-mail','Channel::Api':'Chat','Channel::WebWidget':'Chat','Channel::TwilioSms':'SMS','Channel::Telegram':'Telegram','Channel::Instagram':'Instagram','Channel::Facebook':'Facebook'})[ch] || 'Chat';
+}
+function emptyRow(msg, cols) {
+  return `<tr><td colspan="${cols}" style="padding:16px;text-align:center;color:var(--text3);font-style:italic">${msg}</td></tr>`;
+}
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+
+<!-- COLUMN FILTER POPUP -->
+<div id="cfp" class="hidden">
+  <div class="cfp-head">
+    <span class="cfp-head-title" id="cfp-title">Filtrar</span>
+    <button class="cfp-xs" onclick="cfpAll()">Todos</button>
+    <button class="cfp-xs" onclick="cfpNone()">Limpar</button>
+  </div>
+  <div class="cfp-srch">
+    <input type="text" id="cfp-inp" placeholder="Buscar…" oninput="cfpRender()">
+  </div>
+  <div class="cfp-list" id="cfp-list"></div>
+  <div class="cfp-foot">
+    <button class="cfp-xs" onclick="cfpClose()">Fechar</button>
+    <button class="cfp-ok" onclick="cfpApply()">Aplicar</button>
+  </div>
+</div>
+</body>
+</html>

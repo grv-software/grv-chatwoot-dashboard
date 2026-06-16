@@ -1,0 +1,42 @@
+const http = require('http');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
+const url = require('url');
+
+const PORT = 8765;
+const TARGET = 'nxticket.com.br';
+const DIR = __dirname;
+
+const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css' };
+
+http.createServer((req, res) => {
+  if (req.url.startsWith('/api/')) {
+    // Proxy para nxticket.com.br
+    const fwd = {};
+    if (req.headers['api_access_token']) fwd['api_access_token'] = req.headers['api_access_token'];
+    const opts = {
+      hostname: TARGET,
+      path: req.url,
+      method: req.method,
+      headers: { 'Accept': 'application/json', ...fwd }
+    };
+    const proxy = https.request(opts, r => {
+      res.writeHead(r.statusCode, { 'Content-Type': r.headers['content-type'] || 'application/json', 'Access-Control-Allow-Origin': '*' });
+      r.pipe(res);
+    });
+    proxy.on('error', e => { res.writeHead(502); res.end(e.message); });
+    proxy.end();
+  } else {
+    // Arquivos estáticos
+    const filePath = path.join(DIR, req.url === '/' ? 'index.html' : req.url);
+    fs.readFile(filePath, (err, data) => {
+      if (err) { res.writeHead(404); res.end('Not found'); return; }
+      const ext = path.extname(filePath);
+      res.writeHead(200, { 'Content-Type': (MIME[ext] || 'text/plain') + '; charset=utf-8' });
+      res.end(data);
+    });
+  }
+}).listen(PORT, () => {
+  console.log(`\n  GRV SAC Dashboard → http://localhost:${PORT}\n  Ctrl+C para parar.\n`);
+});
