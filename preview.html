@@ -3,43 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GRV SAC | Painel de Atendimento</title>
+<title>GRV SAC — Painel de Atendimento</title>
 <style>
+/* ── THEMES ── */
 :root {
   --bg: #0f1117; --bg2: #181c27; --bg3: #1e2334; --border: #2a3048;
-  --accent: #3b82f6; --text: #e2e8f0; --text2: #94a3b8; --text3: #64748b;
+  --shadow: rgba(0,0,0,.45); --text: #e2e8f0; --text2: #94a3b8; --text3: #64748b;
+  --accent: #3b82f6; --accent-hover: #2563eb;
   --green: #22c55e; --yellow: #eab308; --orange: #f97316; --red: #ef4444;
   --urg-warn: rgba(234,179,8,.07); --urg-alert: rgba(249,115,22,.09); --urg-crit: rgba(239,68,68,.11);
+  --theme-icon: '☾';
 }
 [data-theme="light"] {
   --bg: #f1f5f9; --bg2: #ffffff; --bg3: #f8fafc; --border: #e2e8f0;
-  --accent: #2563eb; --text: #1e293b; --text2: #475569; --text3: #94a3b8;
+  --shadow: rgba(0,0,0,.1); --text: #1e293b; --text2: #475569; --text3: #94a3b8;
+  --accent: #2563eb; --accent-hover: #1d4ed8;
   --green: #16a34a; --yellow: #ca8a04; --orange: #ea580c; --red: #dc2626;
   --urg-warn: rgba(202,138,4,.09); --urg-alert: rgba(234,88,12,.1); --urg-crit: rgba(220,38,38,.11);
+  --theme-icon: '☀';
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI',sans-serif; font-size: 14px; min-height: 100vh; }
 
-/* MODAL */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI',sans-serif; font-size: 14px; min-height: 100vh; transition: background .2s, color .2s; }
+
+/* ── MODAL ── */
 #token-modal { position:fixed; inset:0; background:rgba(0,0,0,.82); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; z-index:9999; }
 #token-modal.hidden { display:none; }
-.modal-box { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:28px; width:440px; max-width:95vw; }
+.modal-box { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:28px; width:440px; max-width:95vw; box-shadow:0 16px 48px var(--shadow); }
 .modal-box h2 { font-size:16px; font-weight:700; margin-bottom:8px; }
 .modal-box p { color:var(--text2); font-size:12px; margin-bottom:16px; line-height:1.5; }
-.modal-box label { display:block; font-size:11px; color:var(--text2); margin-bottom:5px; }
-.modal-box input { width:100%; padding:9px 11px; background:var(--bg3); border:1px solid var(--border); border-radius:5px; color:var(--text); font-size:13px; outline:none; margin-bottom:12px; }
-.modal-box input:focus { border-color:var(--accent); }
-.hint { font-size:11px; color:var(--text3); margin-top:-8px; margin-bottom:14px; }
-.modal-error { font-size:12px; color:var(--red); background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.2); border-radius:4px; padding:7px 10px; margin-bottom:12px; display:none; }
+.modal-box label { display:block; font-size:11px; color:var(--text2); margin-bottom:5px; font-weight:500; }
+.modal-box input { width:100%; padding:9px 11px; background:var(--bg3); border:1px solid var(--border); border-radius:6px; color:var(--text); font-size:13px; outline:none; margin-bottom:12px; transition:border-color .15s; }
+.modal-box input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(59,130,246,.1); }
+.hint { font-size:11px; color:var(--text3); margin-top:-8px; margin-bottom:14px; line-height:1.4; }
+.modal-error { font-size:12px; color:var(--red); background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.2); border-radius:6px; padding:7px 10px; margin-bottom:12px; display:none; }
 .modal-divider { border:none; border-top:1px solid var(--border); margin:4px 0 16px; }
-.btn-primary { width:100%; padding:10px; background:var(--accent); border:none; border-radius:5px; color:#fff; font-size:14px; font-weight:600; cursor:pointer; margin-top:4px; }
-.btn-primary:hover { opacity:.85; }
+.btn-primary { width:100%; padding:10px; background:var(--accent); border:none; border-radius:6px; color:#fff; font-size:14px; font-weight:600; cursor:pointer; margin-top:4px; transition:opacity .15s; }
+.btn-primary:hover { opacity:.88; }
 
-/* HEADER */
+/* ── HEADER ── */
 .panel-header {
   display:flex; align-items:center; gap:10px;
   background:var(--bg2); border-bottom:1px solid var(--border);
   padding:0 16px; height:46px; position:sticky; top:0; z-index:100;
+  box-shadow:0 1px 4px var(--shadow);
 }
 .panel-logo { font-weight:800; font-size:14px; white-space:nowrap; }
 .panel-logo span { color:var(--text2); font-weight:400; font-size:13px; }
@@ -50,104 +57,112 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 .hdr-updated::before { content:'• '; color:var(--green); }
 .btn-hdr {
   padding:5px 11px; background:var(--bg3); border:1px solid var(--border);
-  border-radius:4px; color:var(--text2); font-size:12px; cursor:pointer;
+  border-radius:6px; color:var(--text2); font-size:12px; cursor:pointer;
   white-space:nowrap; display:inline-flex; align-items:center; gap:5px;
+  transition:border-color .15s, color .15s, background .15s;
 }
 .btn-hdr:hover { border-color:var(--accent); color:var(--accent); }
 .btn-hdr.blue { background:var(--accent); border-color:var(--accent); color:#fff; }
-.btn-hdr.blue:hover { opacity:.85; }
+.btn-hdr.blue:hover { background:var(--accent-hover); border-color:var(--accent-hover); }
+.btn-theme { font-size:15px; padding:4px 9px; }
 
-/* INBOX FILTER BAR */
+/* ── INBOX FILTER BAR ── */
 .inbox-bar {
   background:var(--bg2); border-bottom:1px solid var(--border);
-  padding:5px 16px; position:sticky; top:46px; z-index:90;
+  padding:6px 16px; position:sticky; top:46px; z-index:90;
   display:flex; align-items:center; gap:8px; flex-wrap:wrap;
-  min-height:36px;
+  min-height:38px;
 }
 .inbox-bar-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text3); white-space:nowrap; }
 .inbox-trigger {
   display:inline-flex; align-items:center; gap:5px;
   padding:3px 10px; background:var(--bg3); border:1px solid var(--border);
-  border-radius:4px; color:var(--text2); font-size:12px; cursor:pointer; white-space:nowrap;
+  border-radius:6px; color:var(--text2); font-size:12px; cursor:pointer;
+  white-space:nowrap; transition:border-color .15s, color .15s;
 }
 .inbox-trigger:hover { border-color:var(--accent); color:var(--accent); }
 .inbox-trigger.active { border-color:var(--accent); background:rgba(59,130,246,.08); color:var(--accent); }
 .inbox-chips { display:flex; gap:5px; flex-wrap:wrap; flex:1; }
 .inbox-chip {
-  display:inline-flex; align-items:center; gap:4px;
+  display:inline-flex; align-items:center; gap:5px;
   padding:2px 8px 2px 10px; background:rgba(59,130,246,.12);
   border:1px solid rgba(59,130,246,.3); border-radius:99px;
   font-size:11px; font-weight:500; color:var(--accent); white-space:nowrap;
 }
-.inbox-chip-rm { background:none; border:none; cursor:pointer; padding:0; color:var(--accent); font-size:13px; line-height:1; opacity:.7; display:flex; align-items:center; }
+.inbox-chip-rm {
+  background:none; border:none; cursor:pointer; padding:0; color:var(--accent);
+  font-size:13px; line-height:1; opacity:.7; display:flex; align-items:center;
+}
 .inbox-chip-rm:hover { opacity:1; }
-.inbox-clear { padding:3px 10px; background:transparent; border:1px solid var(--border); border-radius:4px; color:var(--text3); font-size:11px; cursor:pointer; white-space:nowrap; }
+.inbox-clear {
+  padding:3px 10px; background:transparent; border:1px solid var(--border);
+  border-radius:6px; color:var(--text3); font-size:11px; cursor:pointer;
+  white-space:nowrap; transition:border-color .15s, color .15s;
+}
 .inbox-clear:hover { border-color:var(--red); color:var(--red); }
 
-/* INBOX POPUP */
+/* ── INBOX POPUP ── */
 #ibp {
   position:fixed; z-index:2000; background:var(--bg2); border:1px solid var(--border);
-  border-radius:6px; box-shadow:0 8px 28px rgba(0,0,0,.55);
-  width:260px; max-height:380px; display:flex; flex-direction:column; overflow:hidden;
+  border-radius:8px; box-shadow:0 8px 32px var(--shadow);
+  width:260px; max-height:400px; display:flex; flex-direction:column; overflow:hidden;
 }
 #ibp.hidden { display:none; }
-.ibp-head { padding:7px 10px; background:var(--bg3); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:5px; }
+.ibp-head { padding:8px 12px; background:var(--bg3); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:6px; }
 .ibp-head-title { font-size:12px; font-weight:700; flex:1; }
-.ibp-xs { font-size:10px; padding:2px 7px; background:transparent; border:1px solid var(--border); border-radius:3px; color:var(--text3); cursor:pointer; white-space:nowrap; }
+.ibp-xs { font-size:10px; padding:2px 8px; background:transparent; border:1px solid var(--border); border-radius:4px; color:var(--text3); cursor:pointer; white-space:nowrap; }
 .ibp-xs:hover { border-color:var(--accent); color:var(--accent); }
-.ibp-body { overflow-y:auto; padding:3px 0; flex:1; }
-.ibp-group-hdr { padding:5px 10px 2px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--text3); }
-.ibp-opt { display:flex; align-items:center; gap:8px; padding:5px 10px; cursor:pointer; font-size:12px; }
+.ibp-body { overflow-y:auto; padding:4px 0; flex:1; }
+.ibp-group-hdr { padding:6px 12px 2px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--text3); }
+.ibp-opt { display:flex; align-items:center; gap:8px; padding:5px 12px; cursor:pointer; font-size:12px; }
 .ibp-opt:hover { background:var(--bg3); }
 .ibp-opt input[type="checkbox"] { accent-color:var(--accent); width:13px; height:13px; cursor:pointer; flex-shrink:0; }
 .ibp-opt.all-toggle { font-weight:600; border-bottom:1px solid var(--border); margin-bottom:2px; }
-.ibp-foot { padding:6px 10px; border-top:1px solid var(--border); background:var(--bg3); display:flex; gap:6px; justify-content:flex-end; }
-.ibp-ok { padding:5px 14px; background:var(--accent); border:none; border-radius:4px; color:#fff; font-size:12px; font-weight:600; cursor:pointer; }
-.ibp-ok:hover { opacity:.85; }
+.ibp-foot { padding:7px 12px; border-top:1px solid var(--border); background:var(--bg3); display:flex; gap:6px; justify-content:flex-end; }
+.ibp-ok { padding:5px 14px; background:var(--accent); border:none; border-radius:5px; color:#fff; font-size:12px; font-weight:600; cursor:pointer; }
+.ibp-ok:hover { background:var(--accent-hover); }
 
-/* KPI SKELETON */
-@keyframes skel-pulse { 0%,100% { opacity:.18; } 50% { opacity:.38; } }
-.kpi-skel { display:block; background:var(--text3); border-radius:3px; animation:skel-pulse 1.2s ease-in-out infinite; }
-
-/* KPI FILTER NOTE */
-.kpi-filter-note { font-size:10px; color:var(--accent); padding:4px 14px 5px; background:rgba(59,130,246,.06); border-top:1px solid rgba(59,130,246,.15); }
-
-/* CONTENT */
-.content { padding:12px 16px; display:flex; flex-direction:column; gap:10px; }
+/* ── CONTENT ── */
+.content { padding:14px 16px; display:flex; flex-direction:column; gap:12px; max-width:1900px; margin:0 auto; }
 body.minimized .content { display:none; }
 
-/* TOP ROW */
-.top-row { display:grid; grid-template-columns:1fr 380px; border:1px solid var(--border); border-radius:6px; overflow:hidden; }
-.block-hdr { padding:8px 14px; background:var(--bg3); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+/* ── TOP ROW ── */
+.top-row { display:grid; grid-template-columns:1fr 380px; border:1px solid var(--border); border-radius:8px; overflow:hidden; box-shadow:0 1px 4px var(--shadow); }
+.block-hdr { padding:9px 14px; background:var(--bg3); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
 .block-hdr-title { font-size:12px; font-weight:700; }
 .block-hdr-sub { font-size:11px; color:var(--text3); }
 
-/* KPI */
+/* ── KPI ── */
 .kpi-section { background:var(--bg2); border-right:1px solid var(--border); }
 .kpi-table { width:100%; border-collapse:collapse; }
-.kpi-table tr { border-bottom:1px solid rgba(42,48,72,.5); }
+.kpi-table tr { border-bottom:1px solid var(--border); }
 .kpi-table tr:last-child { border-bottom:none; }
 .kpi-table tr.dim { display:none; }
-.kpi-table tr.dim.show-nd { display:table-row; opacity:.4; }
-.kpi-table td { padding:9px 14px; vertical-align:middle; }
+.kpi-table tr.dim.show-nd { display:table-row; }
+.kpi-table tr.dim.show-nd td { opacity:.38; }
+.kpi-table td { padding:10px 14px; vertical-align:middle; }
+.kpi-row-pos { border-left:3px solid var(--green); }
+.kpi-row-neg { border-left:3px solid var(--red); }
+.kpi-row-neu { border-left:3px solid transparent; }
 .kpi-name { font-size:12px; font-weight:600; }
-.kpi-desc { font-size:11px; color:var(--text3); margin-top:1px; }
-.kpi-val { font-size:20px; font-weight:700; color:var(--accent); text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
-.kpi-val.dim { color:var(--text3); font-size:13px; }
+.kpi-desc { font-size:11px; color:var(--text3); margin-top:2px; line-height:1.35; }
+.kpi-val { font-size:22px; font-weight:700; color:var(--accent); text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.kpi-val.dim { color:var(--text3); font-size:14px; }
 .kpi-prev { font-size:11px; color:var(--text3); text-align:right; white-space:nowrap; }
 .kpi-chg { font-size:11px; text-align:right; white-space:nowrap; font-weight:600; }
 .kpi-chg.pos { color:var(--green); }
 .kpi-chg.neg { color:var(--red); }
 .kpi-chg.nd  { color:var(--text3); font-weight:400; }
-.kpi-nd-note { padding:6px 14px; font-size:10px; color:var(--text3); border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.kpi-nd-note { padding:7px 14px; font-size:10px; color:var(--text3); border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:8px; }
 .kpi-nd-toggle { font-size:10px; color:var(--accent); background:none; border:none; cursor:pointer; padding:0; text-decoration:underline; white-space:nowrap; }
 
-/* AGENTS */
+/* ── AGENTS ── */
 .agents-section { background:var(--bg2); display:flex; flex-direction:column; }
 .agents-scroll { flex:1; overflow-y:auto; max-height:310px; }
 .ag-table { width:100%; border-collapse:collapse; }
 .ag-table th { padding:7px 12px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text3); border-bottom:1px solid var(--border); text-align:left; white-space:nowrap; background:var(--bg2); position:sticky; top:0; }
-.ag-table td { padding:7px 12px; border-bottom:1px solid rgba(42,48,72,.35); vertical-align:middle; font-size:12px; }
+.ag-table td { padding:7px 12px; border-bottom:1px solid var(--border); vertical-align:middle; font-size:12px; }
+.ag-table td:last-child { border-bottom:none; }
 .ag-table tr:last-child td { border-bottom:none; }
 .ag-table tbody tr:hover { background:var(--bg3); }
 .ag-name { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:150px; }
@@ -156,26 +171,26 @@ body.minimized .content { display:none; }
 .dot-o { background:var(--orange); }
 .dot-x { background:var(--text3); }
 .ag-status { display:inline-flex; align-items:center; gap:6px; }
-.ag-qty { text-align:center; font-variant-numeric:tabular-nums; }
+.ag-qty { text-align:center; font-variant-numeric:tabular-nums; font-weight:600; }
 
-/* TRIAGE STRIP */
-.triage-strip { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:10px 14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+/* ── TRIAGE STRIP ── */
+.triage-strip { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:10px 14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; box-shadow:0 1px 4px var(--shadow); }
 .triage-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--text3); white-space:nowrap; }
 .triage-cards { display:flex; gap:8px; flex-wrap:wrap; flex:1; }
-.triage-card { display:flex; align-items:center; gap:10px; background:var(--bg3); border:1px solid var(--border); border-radius:5px; padding:7px 12px; min-width:130px; }
-.triage-card.lvl-warn  { border-color:rgba(234,179,8,.4); }
+.triage-card { display:flex; align-items:center; gap:10px; background:var(--bg3); border:1px solid var(--border); border-radius:6px; padding:8px 14px; min-width:130px; }
+.triage-card.lvl-warn  { border-color:rgba(234,179,8,.45); }
 .triage-card.lvl-alert { border-color:rgba(249,115,22,.5); }
 .triage-card.lvl-crit  { border-color:rgba(239,68,68,.55); }
 .triage-origin { font-size:12px; font-weight:600; }
-.triage-max { font-size:10px; color:var(--text3); margin-top:1px; }
-.triage-count { font-size:22px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--text2); margin-left:auto; }
+.triage-max { font-size:10px; color:var(--text3); margin-top:2px; }
+.triage-count { font-size:24px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--text2); margin-left:auto; }
 .triage-card.lvl-warn .triage-count  { color:var(--yellow); }
 .triage-card.lvl-alert .triage-count { color:var(--orange); }
 .triage-card.lvl-crit .triage-count  { color:var(--red); }
 
-/* CONV BLOCKS */
-.conv-block { background:var(--bg2); border:1px solid var(--border); border-radius:6px; overflow:hidden; }
-.conv-hdr { padding:9px 14px; background:var(--bg3); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+/* ── CONV BLOCKS ── */
+.conv-block { background:var(--bg2); border:1px solid var(--border); border-radius:8px; overflow:hidden; box-shadow:0 1px 4px var(--shadow); }
+.conv-hdr { padding:10px 14px; background:var(--bg3); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
 .conv-hdr-title { font-size:13px; font-weight:700; flex:1; }
 .badge { font-size:11px; font-weight:700; padding:2px 9px; border-radius:99px; }
 .badge-blue   { background:var(--accent); color:#fff; }
@@ -187,28 +202,28 @@ body.minimized .content { display:none; }
 }
 .badge-pulse { animation:pulse-badge 1.5s ease-in-out infinite; }
 
-/* FILTER PILLS */
+/* ── FILTER PILLS ── */
 .filter-pills { display:flex; gap:4px; }
 .pill { padding:3px 10px; background:var(--bg); border:1px solid var(--border); border-radius:99px; color:var(--text3); font-size:11px; cursor:pointer; transition:border-color .15s,color .15s,background .15s; }
 .pill:hover { border-color:var(--accent); color:var(--accent); }
 .pill.active { background:var(--accent); border-color:var(--accent); color:#fff; }
 
-/* CONV TABLE */
+/* ── CONV TABLE ── */
 .cv-table { width:100%; border-collapse:collapse; }
-.cv-table th { padding:7px 12px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text3); background:var(--bg2); border-bottom:1px solid var(--border); text-align:left; white-space:nowrap; }
-.cv-table td { padding:7px 12px; border-bottom:1px solid rgba(42,48,72,.3); vertical-align:middle; font-size:12px; }
+.cv-table th { padding:8px 12px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text3); background:var(--bg2); border-bottom:1px solid var(--border); text-align:left; white-space:nowrap; }
+.cv-table td { padding:8px 12px; border-bottom:1px solid var(--border); vertical-align:middle; font-size:12px; }
 .cv-table tr:last-child td { border-bottom:none; }
-.cv-table tbody tr.data-row { cursor:pointer; }
+.cv-table tbody tr.data-row { cursor:pointer; transition:background .1s; }
 .cv-table tbody tr.data-row:hover { background:rgba(59,130,246,.05); }
 .cv-table tbody tr.data-row.urg-warn  { background:var(--urg-warn); }
-.cv-table tbody tr.data-row.urg-warn:hover  { background:rgba(234,179,8,.12); }
+.cv-table tbody tr.data-row.urg-warn:hover  { background:rgba(234,179,8,.13); }
 .cv-table tbody tr.data-row.urg-alert { background:var(--urg-alert); }
-.cv-table tbody tr.data-row.urg-alert:hover { background:rgba(249,115,22,.14); }
+.cv-table tbody tr.data-row.urg-alert:hover { background:rgba(249,115,22,.15); }
 .cv-table tbody tr.data-row.urg-crit  { background:var(--urg-crit); }
-.cv-table tbody tr.data-row.urg-crit:hover  { background:rgba(239,68,68,.17); }
-.queue-row td { background:var(--bg3); padding:4px 12px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--text3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+.cv-table tbody tr.data-row.urg-crit:hover  { background:rgba(239,68,68,.18); }
+.queue-row td { background:var(--bg3); padding:5px 12px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--text3); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
 
-/* Cell styles */
+/* ── CELL STYLES ── */
 .c-ticket { font-size:11px; color:var(--text3); font-variant-numeric:tabular-nums; white-space:nowrap; }
 .c-ref    { font-size:11px; color:var(--text3); white-space:nowrap; }
 .c-client { font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px; }
@@ -226,26 +241,26 @@ body.minimized .content { display:none; }
 .tipo-grupo { background:rgba(139,92,246,.15); color:#a78bfa; }
 .tipo-ind   { background:rgba(100,116,139,.12); color:var(--text3); }
 
-/* URGENCY LEGEND */
-.urg-legend { display:flex; gap:12px; padding:5px 14px; background:var(--bg3); border-bottom:1px solid var(--border); }
+/* ── URGENCY LEGEND ── */
+.urg-legend { display:flex; gap:16px; padding:6px 14px; background:var(--bg3); border-bottom:1px solid var(--border); }
 .urg-legend-item { display:inline-flex; align-items:center; gap:5px; font-size:10px; color:var(--text3); }
 .urg-dot { display:inline-block; width:8px; height:8px; border-radius:2px; }
 .urg-dot-warn  { background:var(--yellow); opacity:.7; }
 .urg-dot-alert { background:var(--orange); opacity:.7; }
 .urg-dot-crit  { background:var(--red);    opacity:.7; }
 
-/* COLUMN FILTER BUTTONS */
+/* ── COLUMN FILTER BUTTONS ── */
 .th-f { white-space:nowrap; }
 .th-fb { background:none; border:none; padding:0 0 0 3px; color:var(--text3); font-size:10px; cursor:pointer; vertical-align:middle; line-height:1; }
 .th-fb:hover { color:var(--text2); }
 .th-fb.on { color:var(--accent); }
 
-/* COLUMN FILTER POPUP */
-#cfp { position:fixed; z-index:2000; background:var(--bg2); border:1px solid var(--border); border-radius:6px; box-shadow:0 8px 28px rgba(0,0,0,.55); width:220px; display:flex; flex-direction:column; overflow:hidden; }
+/* ── COLUMN FILTER POPUP ── */
+#cfp { position:fixed; z-index:2000; background:var(--bg2); border:1px solid var(--border); border-radius:8px; box-shadow:0 8px 32px var(--shadow); width:220px; display:flex; flex-direction:column; overflow:hidden; }
 #cfp.hidden { display:none; }
 .cfp-head { padding:7px 10px; background:var(--bg3); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:5px; }
 .cfp-head-title { font-size:12px; font-weight:700; flex:1; }
-.cfp-xs { font-size:10px; padding:2px 7px; background:transparent; border:1px solid var(--border); border-radius:3px; color:var(--text3); cursor:pointer; white-space:nowrap; }
+.cfp-xs { font-size:10px; padding:2px 7px; background:transparent; border:1px solid var(--border); border-radius:4px; color:var(--text3); cursor:pointer; white-space:nowrap; }
 .cfp-xs:hover { border-color:var(--accent); color:var(--accent); }
 .cfp-srch { padding:6px 10px; border-bottom:1px solid var(--border); }
 .cfp-srch input { width:100%; padding:5px 8px; background:var(--bg3); border:1px solid var(--border); border-radius:4px; color:var(--text); font-size:12px; outline:none; }
@@ -256,30 +271,40 @@ body.minimized .content { display:none; }
 .cfp-opt input { accent-color:var(--accent); width:13px; height:13px; cursor:pointer; flex-shrink:0; }
 .cfp-foot { padding:7px 10px; border-top:1px solid var(--border); background:var(--bg3); display:flex; gap:6px; justify-content:flex-end; }
 .cfp-ok { padding:5px 14px; background:var(--accent); border:none; border-radius:4px; color:#fff; font-size:12px; font-weight:600; cursor:pointer; }
-.cfp-ok:hover { opacity:.85; }
+.cfp-ok:hover { background:var(--accent-hover); }
 
-.show-more-row { text-align:center; padding:10px; }
-.btn-more { background:transparent; border:1px solid var(--border); border-radius:4px; padding:5px 18px; color:var(--text2); font-size:12px; cursor:pointer; }
+/* ── SHOW MORE ── */
+.show-more-row { text-align:center; padding:12px; }
+.btn-more { background:transparent; border:1px solid var(--border); border-radius:6px; padding:6px 20px; color:var(--text2); font-size:12px; cursor:pointer; transition:border-color .15s, color .15s; }
 .btn-more:hover { border-color:var(--accent); color:var(--accent); }
 
-/* TOAST */
-#toast { position:fixed; bottom:20px; right:20px; z-index:8000; background:var(--bg2); border:1px solid rgba(239,68,68,.4); border-radius:6px; padding:10px 16px; font-size:12px; color:var(--red); max-width:340px; box-shadow:0 4px 20px rgba(0,0,0,.5); opacity:0; transform:translateY(8px); transition:opacity .2s,transform .2s; pointer-events:none; }
+/* ── TOAST ── */
+#toast { position:fixed; bottom:20px; right:20px; z-index:8000; background:var(--bg2); border:1px solid rgba(239,68,68,.4); border-radius:8px; padding:10px 16px; font-size:12px; color:var(--red); max-width:340px; box-shadow:0 4px 20px var(--shadow); opacity:0; transform:translateY(8px); transition:opacity .2s,transform .2s; pointer-events:none; }
 #toast.show { opacity:1; transform:translateY(0); pointer-events:auto; }
 
-/* Scrollbar */
+/* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width:5px; height:5px; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
 
-/* Mobile */
+/* ── RESPONSIVE ── */
+@media (max-width:1024px) {
+  .top-row { grid-template-columns:1fr 340px; }
+}
 @media (max-width:800px) {
   .top-row { grid-template-columns:1fr; }
   .agents-section { border-left:none; border-top:1px solid var(--border); }
+  .cv-table th:nth-child(2), .cv-table td:nth-child(2),
   .cv-table th:nth-child(4), .cv-table td:nth-child(4),
   .cv-table th:nth-child(9), .cv-table td:nth-child(9) { display:none; }
   .panel-logo span { display:none; }
   .triage-cards { gap:6px; }
   .triage-card { min-width:110px; }
+  .content { padding:10px 12px; gap:10px; }
+}
+@media (max-width:560px) {
+  .cv-table th:nth-child(7), .cv-table td:nth-child(7) { display:none; }
+  .inbox-bar { top:46px; }
 }
 </style>
 </head>
@@ -306,21 +331,13 @@ body.minimized .content { display:none; }
 
 <!-- HEADER -->
 <div class="panel-header">
-  <div class="panel-logo">
-    <svg width="26" height="26" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" style="flex-shrink:0;vertical-align:middle">
-      <defs><clipPath id="grv-clip"><polygon points="50,1 99,50 50,99 1,50"/></clipPath></defs>
-      <polygon points="50,1 99,50 50,99 1,50" fill="#f97316"/>
-      <path clip-path="url(#grv-clip)" d="M1,50 L50,1 C30,12 14,28 9,52 C6,68 15,82 32,92 L50,99 Z" fill="#111"/>
-      <path clip-path="url(#grv-clip)" d="M50,1 C32,11 17,27 12,51 C9,67 18,81 35,91" stroke="white" stroke-width="5.5" fill="none" stroke-linecap="round"/>
-    </svg>
-    GRV SAC <span>— Painel de Atendimento</span>
-  </div>
+  <div class="panel-logo">GRV SAC <span>— Painel de Atendimento</span></div>
   <div class="period-badge" id="period-badge">Este mês: —</div>
   <div class="hdr-sep"></div>
   <div class="hdr-countdown" id="hdr-countdown">Próx. atualização em —</div>
   <button class="btn-hdr blue" onclick="fetchAll()" aria-label="Atualizar dados agora" title="Atualizar agora">↺ Atualizar</button>
   <div class="hdr-updated" id="hdr-updated">Atualizado às —</div>
-  <button class="btn-hdr" id="btn-theme" onclick="toggleTheme()" aria-label="Alternar tema claro/escuro" title="Mudar para modo claro" style="font-size:15px;padding:4px 9px">☾</button>
+  <button class="btn-hdr btn-theme" id="btn-theme" onclick="toggleTheme()" aria-label="Alternar tema claro/escuro" title="Alternar tema">☾</button>
   <button class="btn-hdr" id="btn-min" onclick="toggleMin()" aria-label="Minimizar painel" title="Minimizar painel">⊟</button>
   <button class="btn-hdr" onclick="showTokenModal()" aria-label="Abrir configurações de acesso" title="Configurações de acesso">⚙ Token</button>
 </div>
@@ -332,7 +349,7 @@ body.minimized .content { display:none; }
     <span id="inbox-trigger-txt">Todas</span> ▾
   </button>
   <div class="inbox-chips" id="inbox-chips"></div>
-  <button class="inbox-clear" id="inbox-clear" onclick="clearInboxFilter()" style="display:none">✕ Limpar filtros</button>
+  <button class="inbox-clear" id="inbox-clear" onclick="clearInboxFilter()" style="display:none" aria-label="Limpar filtro de caixas">✕ Limpar filtros</button>
 </div>
 
 <!-- CONTENT -->
@@ -353,10 +370,9 @@ body.minimized .content { display:none; }
       </div>
       <table class="kpi-table" role="table" aria-label="Indicadores de performance">
         <tbody id="kpi-tbody">
-          <tr><td colspan="4" style="padding:24px;text-align:center;color:var(--text3)">Carregando…</td></tr>
+          <tr><td colspan="4" style="padding:28px;text-align:center;color:var(--text3)">Carregando…</td></tr>
         </tbody>
       </table>
-      <div id="kpi-filter-note" class="kpi-filter-note" style="display:none"></div>
       <div class="kpi-nd-note">
         <span>▲ Métricas N/D não disponíveis na API do Chatwoot</span>
         <button class="kpi-nd-toggle" id="kpi-nd-btn" onclick="toggleNd()">Mostrar N/D</button>
@@ -495,21 +511,11 @@ body.minimized .content { display:none; }
 const REFRESH_SEC = 60;
 const PAGE_SIZE   = 20;
 
-/* ── THEME ── */
-function applyTheme(theme, save) {
-  document.documentElement.setAttribute('data-theme', theme);
-  const btn = document.getElementById('btn-theme');
-  if (btn) {
-    btn.textContent = theme === 'dark' ? '☾' : '☀';
-    btn.title = theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro';
-  }
-  if (save) localStorage.setItem('grv_theme', theme);
-}
-function toggleTheme() {
-  const cur = document.documentElement.getAttribute('data-theme');
-  applyTheme(cur === 'dark' ? 'light' : 'dark', true);
-}
-applyTheme(localStorage.getItem('grv_theme') || 'dark', false);
+/* Inbox grouping — adjust patterns to match your inbox names */
+const INBOX_GROUPS = [
+  { id: 'equipes',     label: 'Equipes',     test: n => /equipe|suporte|atendimento|vendas|financeiro|cobrança|operaç/i.test(n) },
+  { id: 'consultoria', label: 'Consultoria', test: n => /consultor|advisory|jurídico|tributár|fiscal|legal/i.test(n) },
+];
 
 let cfg = {
   token:     localStorage.getItem('grv_token')     || '',
@@ -524,8 +530,25 @@ let _filters = { waiting: {}, inprog: {} };
 let _cfpState = { tbl: null, col: null, vals: [], sel: new Set() };
 let _showNd = false;
 let _toastTimer = null;
-let _inboxFilter = null; /* null = todas; Set<number> = filtro ativo */
+let _inboxFilter = null; /* null = all; Set<id> = filter active */
 let _ibpSel = new Set();
+
+/* ── THEME ── */
+function initTheme() {
+  const saved = localStorage.getItem('grv_theme') || 'dark';
+  applyTheme(saved, false);
+}
+function applyTheme(theme, save = true) {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('btn-theme').textContent = theme === 'dark' ? '☾' : '☀';
+  document.getElementById('btn-theme').title = theme === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro';
+  if (save) localStorage.setItem('grv_theme', theme);
+}
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  applyTheme(cur === 'dark' ? 'light' : 'dark');
+}
+initTheme();
 
 /* ── TOKEN ── */
 function showTokenModal() {
@@ -628,79 +651,16 @@ function setKpiPeriod(type) {
   fetchKPIs();
 }
 
-/* ── KPI SKELETON ── */
-function renderKPISkeleton() {
-  const rowSkel = () => `<tr>
-    <td>
-      <span class="kpi-skel" style="width:55%;height:10px;margin-bottom:5px"></span>
-      <span class="kpi-skel" style="width:75%;height:8px"></span>
-    </td>
-    <td><span class="kpi-skel" style="width:56px;height:18px;float:right"></span></td>
-    <td><span class="kpi-skel" style="width:48px;height:8px;float:right"></span></td>
-    <td></td>
-  </tr>`;
-  document.getElementById('kpi-tbody').innerHTML = Array(6).fill(rowSkel()).join('');
-}
-
-/* ── KPI AGGREGATION ── */
-function aggregateSummaries(list) {
-  const out = { conversations_count: 0, resolutions_count: 0, avg_resolution_time: null };
-  let weightedTime = 0, totalForAvg = 0;
-  list.forEach(s => {
-    out.conversations_count += s.conversations_count || 0;
-    out.resolutions_count   += s.resolutions_count   || 0;
-    if (s.avg_resolution_time != null) {
-      const w = s.resolutions_count || s.conversations_count || 0;
-      weightedTime += s.avg_resolution_time * w;
-      totalForAvg  += w;
-    }
-  });
-  if (totalForAvg > 0) out.avg_resolution_time = weightedTime / totalForAvg;
-  return out;
-}
-
-/* ── fetchKPIs ── */
 async function fetchKPIs() {
   const p = getPeriod(_kpiPeriod);
   document.getElementById('period-badge').textContent = p.badgeLabel;
-  renderKPISkeleton();
-
   try {
-    let summary, summaryPrev;
-
-    if (!_inboxFilter || _inboxFilter.size === 0) {
-      /* Sem filtro: chamada única sem inbox_id */
-      [summary, summaryPrev] = await Promise.all([
-        api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.since}&until=${p.until}&type=account`),
-        api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.prevSince}&until=${p.prevUntil}&type=account`)
-      ]);
-      document.getElementById('kpi-filter-note').style.display = 'none';
-    } else {
-      /* Filtro ativo: uma chamada por inbox, agrega os resultados */
-      const ids = [..._inboxFilter];
-      const [currAll, prevAll] = await Promise.all([
-        Promise.all(ids.map(id =>
-          api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.since}&until=${p.until}&type=inbox&id=${id}`)
-        )),
-        Promise.all(ids.map(id =>
-          api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.prevSince}&until=${p.prevUntil}&type=inbox&id=${id}`)
-        ))
-      ]);
-      summary     = aggregateSummaries(currAll);
-      summaryPrev = aggregateSummaries(prevAll);
-
-      const names = ids.map(id => (_inboxMap[id] || {}).name || `#${id}`).join(', ');
-      const note  = document.getElementById('kpi-filter-note');
-      note.textContent = `Filtrado por: ${names}`;
-      note.style.display = '';
-    }
-
+    const [summary, summaryPrev] = await Promise.all([
+      api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.since}&until=${p.until}&type=account`),
+      api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.prevSince}&until=${p.prevUntil}&type=account`)
+    ]);
     renderKPIs(summary, summaryPrev);
-  } catch (e) {
-    console.error('fetchKPIs:', e);
-    document.getElementById('kpi-tbody').innerHTML =
-      `<tr><td colspan="4" style="padding:16px;text-align:center;color:var(--red);font-size:12px">Falha ao carregar métricas</td></tr>`;
-  }
+  } catch (e) { console.error('fetchKPIs:', e); }
 }
 
 /* ── API ── */
@@ -746,13 +706,13 @@ async function fetchAll() {
       rest.forEach(r => convs = convs.concat(r.data?.payload || []));
     }
 
-    _inboxMap  = {};
+    _inboxMap = {};
     (inboxes.payload || []).forEach(i => { _inboxMap[i.id] = i; });
     _totalOpen = total;
 
-    renderInboxBar(inboxes.payload || []);
     await fetchKPIs();
     renderAgents(agents, convs);
+    renderInboxBar(inboxes.payload || []);
     renderConvs(convs);
 
     const now = new Date();
@@ -766,7 +726,7 @@ async function fetchAll() {
   }
 }
 
-/* ── KPIs RENDER ── */
+/* ── KPIs ── */
 function fmtSec(s) {
   if (s == null) return null;
   if (s < 60)   return `${Math.round(s)}seg`;
@@ -774,76 +734,39 @@ function fmtSec(s) {
   const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
   return `${h}hr ${String(m).padStart(2, '0')}min`;
 }
-
 function chg(curr, prev, lowerBetter) {
-  if (curr == null || prev == null || prev === 0)
-    return '<span class="kpi-chg nd">—</span>';
+  if (curr == null || prev == null || prev === 0) return '<span class="kpi-chg nd">—</span>';
   const pct  = (curr - prev) / prev * 100;
   const up   = pct >= 0;
   const good = lowerBetter ? !up : up;
   return `<span class="kpi-chg ${good ? 'pos' : 'neg'}">${up ? '▲' : '▼'} ${Math.abs(pct).toFixed(1)}%</span>`;
 }
-
 function renderKPIs(s, sp) {
   const rows = [
-    {
-      name: 'Chats atendidos',
-      desc: 'Quantidade de chats atendidos no período',
-      val:  s.conversations_count,
-      prev: sp.conversations_count,
-      lb:   false
-    },
-    {
-      name: 'Resolvidos em primeiro atendimento',
-      desc: 'Atendimentos resolvidos durante a própria conversa',
-      val:  s.resolutions_count,
-      prev: sp.resolutions_count,
-      lb:   false
-    },
-    {
-      name: 'Não resolvidos em primeiro atendimento',
-      desc: 'Atendimentos que ficaram pendentes após a conversa',
-      val:  (s.conversations_count != null && s.resolutions_count != null)
-              ? Math.max(0, s.conversations_count - s.resolutions_count) : null,
-      prev: (sp.conversations_count != null && sp.resolutions_count != null)
-              ? Math.max(0, sp.conversations_count - sp.resolutions_count) : null,
-      lb:   true
-    },
-    {
-      name: 'Mensagens offline recebidas',
-      desc: 'Recebidas fora do horário ou com agentes offline',
-      nd:   true
-    },
-    {
-      name: 'Maior duração de atendimento',
-      desc: 'Tempo da conversa mais longa do período',
-      nd:   true
-    },
-    {
-      name: 'Tempo médio de duração',
-      desc: 'Tempo médio das conversas atendidas no período',
-      val:  s.avg_resolution_time,
-      prev: sp.avg_resolution_time,
-      lb:   true,
-      fmt:  'time'
-    }
+    { name:'Chats atendidos',                       desc:'Quantidade de chats atendidos no período',             val:s.conversations_count, prev:sp.conversations_count, lb:false },
+    { name:'Resolvidos em primeiro atendimento',    desc:'Atendimentos resolvidos durante a própria conversa',   val:s.resolutions_count,   prev:sp.resolutions_count,   lb:false },
+    { name:'Não resolvidos em primeiro atendimento',desc:'Atendimentos que ficaram pendentes após a conversa',
+      val:(s.conversations_count != null && s.resolutions_count != null) ? Math.max(0, s.conversations_count - s.resolutions_count) : null,
+      prev:(sp.conversations_count != null && sp.resolutions_count != null) ? Math.max(0, sp.conversations_count - sp.resolutions_count) : null, lb:true },
+    { name:'Mensagens offline recebidas',           desc:'Recebidas fora do horário ou com agentes offline',     nd:true },
+    { name:'Maior duração de atendimento',          desc:'Tempo da conversa mais longa do período',              nd:true },
+    { name:'Tempo médio de duração',                desc:'Tempo médio das conversas atendidas no período',       val:s.avg_resolution_time, prev:sp.avg_resolution_time, lb:true, fmt:'time' },
   ];
-
   document.getElementById('kpi-tbody').innerHTML = rows.map(r => {
     const nd  = r.nd || r.val == null;
     const vd  = nd ? '—' : (r.fmt === 'time' ? fmtSec(r.val) : r.val.toLocaleString('pt-BR'));
-    const pvd = nd ? '—' : (r.prev != null
-      ? (r.fmt === 'time' ? `Ant: ${fmtSec(r.prev)}` : `Ant: ${r.prev.toLocaleString('pt-BR')}`)
-      : '—');
+    const pvd = nd ? '' : (r.prev != null ? (r.fmt === 'time' ? `Ant: ${fmtSec(r.prev)}` : `Ant: ${r.prev.toLocaleString('pt-BR')}`) : '');
     const showCls = (nd && _showNd) ? ' show-nd' : '';
+    const chgHtml = nd ? '<span class="kpi-chg nd">N/D</span>' : chg(r.val, r.prev, r.lb);
+    const trendCls = nd ? 'kpi-row-neu' : (r.prev == null || r.prev === 0 ? 'kpi-row-neu' : (chgHtml.includes('pos') ? 'kpi-row-pos' : (chgHtml.includes('neg') ? 'kpi-row-neg' : 'kpi-row-neu')));
     return `<tr${nd ? ` class="dim${showCls}"` : ''}>
-      <td style="min-width:220px">
+      <td class="${trendCls}" style="min-width:220px">
         <div class="kpi-name">${esc(r.name)}</div>
         <div class="kpi-desc">${esc(r.desc)}</div>
       </td>
       <td class="kpi-val${nd ? ' dim' : ''}" style="width:130px">${esc(vd)}</td>
-      <td class="kpi-prev" style="width:110px">${nd ? '' : esc(pvd)}</td>
-      <td style="width:80px;text-align:right">${nd ? '<span class="kpi-chg nd">N/D</span>' : chg(r.val, r.prev, r.lb)}</td>
+      <td class="kpi-prev" style="width:110px">${esc(pvd)}</td>
+      <td style="width:80px;text-align:right">${chgHtml}</td>
     </tr>`;
   }).join('');
 }
@@ -852,22 +775,13 @@ function renderKPIs(s, sp) {
 function renderAgents(agents, convs) {
   const cnt = {};
   convs.forEach(c => { const id = c.meta?.assignee?.id; if (id) cnt[id] = (cnt[id] || 0) + 1; });
-
   const online = agents.filter(a => a.availability_status === 'online').length;
   document.getElementById('agents-label').textContent = `${online} online de ${agents.length}`;
-
   const order = { online: 0, busy: 1, offline: 2 };
-  const sorted = [...agents].sort((a, b) =>
-    (order[a.availability_status] ?? 3) - (order[b.availability_status] ?? 3)
-  );
-  const statusMap = {
-    online:  { cls: 'dot-g', label: 'Online' },
-    busy:    { cls: 'dot-o', label: 'Ocupado' },
-    offline: { cls: 'dot-x', label: 'Offline' }
-  };
-
+  const sorted = [...agents].sort((a, b) => (order[a.availability_status] ?? 3) - (order[b.availability_status] ?? 3));
+  const statusMap = { online:{cls:'dot-g',label:'Online'}, busy:{cls:'dot-o',label:'Ocupado'}, offline:{cls:'dot-x',label:'Offline'} };
   document.getElementById('agents-tbody').innerHTML = sorted.map(a => {
-    const sm  = statusMap[a.availability_status || 'offline'] || statusMap.offline;
+    const sm = statusMap[a.availability_status || 'offline'] || statusMap.offline;
     return `<tr>
       <td class="ag-name" title="${esc(a.name)}">${esc(a.name)}</td>
       <td><span class="ag-status"><span class="dot ${sm.cls}"></span>${sm.label}</span></td>
@@ -885,39 +799,9 @@ function urgencyLevel(created_at) {
   if (mins >= 5)  return 1;
   return 0;
 }
-
 const URG_ROW_CLS  = ['', 'urg-warn', 'urg-alert', 'urg-crit'];
 const URG_DUR_CLS  = ['', 'dur-warn', 'dur-alert', 'dur-crit'];
 const URG_CARD_CLS = ['', 'lvl-warn', 'lvl-alert', 'lvl-crit'];
-
-/* ── TRIAGE STRIP ── */
-function renderTriage(waiting) {
-  const strip = document.getElementById('triage-strip');
-  if (!waiting.length) { strip.style.display = 'none'; return; }
-
-  const byOrigin = {};
-  waiting.forEach(c => {
-    const origin = originOf((_inboxMap[c.inbox_id] || {}).channel_type);
-    if (!byOrigin[origin]) byOrigin[origin] = { count: 0, maxLevel: 0, maxMins: 0 };
-    byOrigin[origin].count++;
-    const mins = c.created_at ? (Date.now() - c.created_at * 1000) / 60000 : 0;
-    if (mins > byOrigin[origin].maxMins) byOrigin[origin].maxMins = mins;
-    const lvl = urgencyLevel(c.created_at);
-    if (lvl > byOrigin[origin].maxLevel) byOrigin[origin].maxLevel = lvl;
-  });
-
-  document.getElementById('triage-cards').innerHTML = Object.entries(byOrigin)
-    .sort((a, b) => b[1].count - a[1].count)
-    .map(([origin, d]) => `<div class="triage-card ${URG_CARD_CLS[d.maxLevel]}">
-      <div>
-        <div class="triage-origin">${esc(origin)}</div>
-        <div class="triage-max">${d.maxMins >= 1 ? `Máx: ${Math.round(d.maxMins)}min em espera` : 'Máx: <1min em espera'}</div>
-      </div>
-      <div class="triage-count">${d.count}</div>
-    </div>`).join('');
-
-  strip.style.display = 'flex';
-}
 
 /* ── INBOX FILTER ── */
 function renderInboxBar(inboxes) {
@@ -927,23 +811,19 @@ function renderInboxBar(inboxes) {
   syncInboxBar();
 }
 
-function applyInboxFilter(convs) {
-  if (!_inboxFilter || _inboxFilter.size === 0) return convs;
-  return convs.filter(c => _inboxFilter.has(c.inbox_id));
-}
-
-function applyInboxAndRender() {
-  const convs = applyInboxFilter(_rawConvs);
-  _allWaiting = convs.filter(c => !c.meta?.assignee?.id)
-                     .sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
-  _allInProg  = convs.filter(c =>  c.meta?.assignee?.id)
-                     .sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
-  _shownCount = PAGE_SIZE;
-  renderTriage(_allWaiting);
-  renderWaiting();
-  renderInprog();
-  /* KPIs também seguem o filtro */
-  fetchKPIs();
+function groupInboxes() {
+  const all = Object.values(_inboxMap);
+  const groups = [];
+  const assigned = new Set();
+  INBOX_GROUPS.forEach(g => {
+    const members = all.filter(i => g.test(i.name));
+    members.forEach(i => assigned.add(i.id));
+    if (members.length) groups.push({ label: g.label, inboxes: members });
+  });
+  const outras = all.filter(i => !assigned.has(i.id));
+  if (outras.length) groups.push({ label: grupos => grupos.length ? 'Outras' : 'Todas', inboxes: outras });
+  if (groups.length === 1) groups[0].label = 'Todas';
+  return groups;
 }
 
 function openIbp(event) {
@@ -951,44 +831,44 @@ function openIbp(event) {
   const allIds = Object.keys(_inboxMap).map(Number);
   _ibpSel = _inboxFilter ? new Set(_inboxFilter) : new Set(allIds);
 
-  const allCount = allIds.length;
-  const allChecked = !_inboxFilter || _ibpSel.size === allCount;
-
+  const groups = groupInboxes();
   let html = `<label class="ibp-opt all-toggle">
-    <input type="checkbox" id="ibp-all-chk" onchange="ibpToggleAll(this)" ${allChecked ? 'checked' : ''}>
-    <span>Todas as caixas (${allCount})</span>
+    <input type="checkbox" id="ibp-all-chk" onchange="ibpToggleAll(this)" ${!_inboxFilter || _ibpSel.size === allIds.length ? 'checked' : ''}>
+    <span>Todas as caixas (${allIds.length})</span>
   </label>`;
 
-  /* Agrupa inboxes por nome (todas numa única lista sem sub-categorias fixas) */
-  const sorted = Object.values(_inboxMap).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
-  sorted.forEach(inbox => {
-    html += `<label class="ibp-opt">
-      <input type="checkbox" ${_ibpSel.has(inbox.id) ? 'checked' : ''} data-id="${inbox.id}" onchange="ibpToggle(this)">
-      <span>${esc(inbox.name)}</span>
-    </label>`;
+  groups.forEach(g => {
+    const label = typeof g.label === 'function' ? g.label(groups) : g.label;
+    html += `<div class="ibp-group-hdr">${esc(label)}</div>`;
+    g.inboxes.forEach(inbox => {
+      const chk = _ibpSel.has(inbox.id) ? 'checked' : '';
+      html += `<label class="ibp-opt">
+        <input type="checkbox" ${chk} data-id="${inbox.id}" onchange="ibpToggle(this)">
+        <span>${esc(inbox.name)}</span>
+      </label>`;
+    });
   });
 
   document.getElementById('ibp-body').innerHTML = html;
+
   const popup = document.getElementById('ibp');
   popup.classList.remove('hidden');
-
   const rect = event.currentTarget.getBoundingClientRect();
-  const pw = 260, ph = 380;
+  const pw = 260, ph = 400;
   let left = rect.left;
   let top  = rect.bottom + 4;
   if (left + pw > window.innerWidth  - 8) left = window.innerWidth  - pw - 8;
   if (top  + ph > window.innerHeight - 8) top  = rect.top - ph - 4;
   popup.style.left = Math.max(4, left) + 'px';
   popup.style.top  = Math.max(4, top)  + 'px';
-
   document.getElementById('inbox-trigger').classList.add('active');
 }
 
 function ibpToggle(el) {
   const id = parseInt(el.dataset.id, 10);
   if (el.checked) _ibpSel.add(id); else _ibpSel.delete(id);
-  const allIds  = Object.keys(_inboxMap).map(Number);
-  const allChk  = document.getElementById('ibp-all-chk');
+  const allIds = Object.keys(_inboxMap).map(Number);
+  const allChk = document.getElementById('ibp-all-chk');
   if (allChk) allChk.checked = _ibpSel.size === allIds.length;
 }
 
@@ -998,21 +878,19 @@ function ibpToggleAll(el) {
   document.querySelectorAll('#ibp-body input[data-id]').forEach(cb => { cb.checked = el.checked; });
 }
 
-function ibpAll() {
+function ibpAll()  {
   const allIds = Object.keys(_inboxMap).map(Number);
   _ibpSel = new Set(allIds);
-  const c = document.getElementById('ibp-all-chk');
-  if (c) c.checked = true;
+  const allChk = document.getElementById('ibp-all-chk');
+  if (allChk) allChk.checked = true;
   document.querySelectorAll('#ibp-body input[data-id]').forEach(cb => { cb.checked = true; });
 }
-
 function ibpNone() {
   _ibpSel.clear();
-  const c = document.getElementById('ibp-all-chk');
-  if (c) c.checked = false;
+  const allChk = document.getElementById('ibp-all-chk');
+  if (allChk) allChk.checked = false;
   document.querySelectorAll('#ibp-body input[data-id]').forEach(cb => { cb.checked = false; });
 }
-
 function ibpClose() {
   document.getElementById('ibp').classList.add('hidden');
   document.getElementById('inbox-trigger').classList.remove('active');
@@ -1032,22 +910,13 @@ function clearInboxFilter() {
   applyInboxAndRender();
 }
 
-function removeInboxChip(id) {
-  if (_inboxFilter) {
-    _inboxFilter.delete(id);
-    if (_inboxFilter.size === 0) _inboxFilter = null;
-  }
-  syncInboxBar();
-  applyInboxAndRender();
-}
-
 function syncInboxBar() {
   const chipsEl = document.getElementById('inbox-chips');
   const clearEl = document.getElementById('inbox-clear');
   const trigTxt = document.getElementById('inbox-trigger-txt');
 
   if (!_inboxFilter) {
-    chipsEl.innerHTML  = '';
+    chipsEl.innerHTML = '';
     clearEl.style.display = 'none';
     trigTxt.textContent = 'Todas';
     return;
@@ -1057,22 +926,67 @@ function syncInboxBar() {
   clearEl.style.display = '';
   chipsEl.innerHTML = [..._inboxFilter].map(id => {
     const name = (_inboxMap[id] || {}).name || `#${id}`;
-    return `<span class="inbox-chip">${esc(name)}<button class="inbox-chip-rm" onclick="removeInboxChip(${id})" aria-label="Remover ${esc(name)}">×</button></span>`;
+    return `<span class="inbox-chip">
+      ${esc(name)}
+      <button class="inbox-chip-rm" onclick="removeInboxChip(${id})" aria-label="Remover ${esc(name)}">×</button>
+    </span>`;
   }).join('');
+}
+
+function removeInboxChip(id) {
+  if (_inboxFilter) {
+    _inboxFilter.delete(id);
+    if (_inboxFilter.size === 0) _inboxFilter = null;
+  }
+  syncInboxBar();
+  applyInboxAndRender();
+}
+
+function applyInboxFilter(convs) {
+  if (!_inboxFilter || _inboxFilter.size === 0) return convs;
+  return convs.filter(c => _inboxFilter.has(c.inbox_id));
+}
+
+function applyInboxAndRender() {
+  const convs = applyInboxFilter(_rawConvs);
+  _allWaiting = convs.filter(c => !c.meta?.assignee?.id).sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
+  _allInProg  = convs.filter(c =>  c.meta?.assignee?.id).sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
+  _shownCount = PAGE_SIZE;
+  renderTriage(_allWaiting);
+  renderWaiting();
+  renderInprog();
+}
+
+/* ── TRIAGE STRIP ── */
+function renderTriage(waiting) {
+  const strip = document.getElementById('triage-strip');
+  if (!waiting.length) { strip.style.display = 'none'; return; }
+  const byOrigin = {};
+  waiting.forEach(c => {
+    const origin = originOf((_inboxMap[c.inbox_id] || {}).channel_type);
+    if (!byOrigin[origin]) byOrigin[origin] = { count: 0, maxLevel: 0, maxMins: 0 };
+    byOrigin[origin].count++;
+    const mins = c.created_at ? (Date.now() - c.created_at * 1000) / 60000 : 0;
+    if (mins > byOrigin[origin].maxMins) byOrigin[origin].maxMins = mins;
+    const lvl = urgencyLevel(c.created_at);
+    if (lvl > byOrigin[origin].maxLevel) byOrigin[origin].maxLevel = lvl;
+  });
+  document.getElementById('triage-cards').innerHTML = Object.entries(byOrigin)
+    .sort((a, b) => b[1].count - a[1].count)
+    .map(([origin, d]) => `<div class="triage-card ${URG_CARD_CLS[d.maxLevel]}">
+      <div>
+        <div class="triage-origin">${esc(origin)}</div>
+        <div class="triage-max">${d.maxMins >= 1 ? `Máx: ${Math.round(d.maxMins)}min em espera` : 'Máx: <1min em espera'}</div>
+      </div>
+      <div class="triage-count">${d.count}</div>
+    </div>`).join('');
+  strip.style.display = 'flex';
 }
 
 /* ── CONVERSATIONS ── */
 function renderConvs(convs) {
   _rawConvs = convs;
-  const filtered = applyInboxFilter(convs);
-  _allWaiting = filtered.filter(c => !c.meta?.assignee?.id)
-                        .sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
-  _allInProg  = filtered.filter(c =>  c.meta?.assignee?.id)
-                        .sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
-  _shownCount = PAGE_SIZE;
-  renderTriage(_allWaiting);
-  renderWaiting();
-  renderInprog();
+  applyInboxAndRender();
 }
 
 function renderWaiting() {
@@ -1090,34 +1004,26 @@ function renderWaiting() {
 function renderInprog() {
   const filtered = applyFilters(_allInProg, 'inprog');
   const shown    = filtered.slice(0, _shownCount);
-
   const groupOrder = [], groups = {};
   shown.forEach(c => {
     const k = c.inbox_id;
     if (!groups[k]) { groups[k] = []; groupOrder.push(k); }
     groups[k].push(c);
   });
-
   let html = '';
   groupOrder.forEach(iid => {
     const name = (_inboxMap[iid] || {}).name || `Fila #${iid}`;
     html += `<tr class="queue-row"><td colspan="10">${esc(name)}</td></tr>`;
     html += groups[iid].map(c => rowHtml(c, false)).join('');
   });
-
   if (!html) html = emptyRow('Nenhuma conversa em atendimento', 10);
   document.getElementById('inprog-tbody').innerHTML = html;
-  document.getElementById('badge-inprog').textContent =
-    `${Math.min(_shownCount, filtered.length)} de ${_totalOpen} abertas`;
-  document.getElementById('show-more-wrap').style.display =
-    filtered.length > _shownCount ? '' : 'none';
+  document.getElementById('badge-inprog').textContent = `${Math.min(_shownCount, filtered.length)} de ${_totalOpen} abertas`;
+  document.getElementById('show-more-wrap').style.display = filtered.length > _shownCount ? '' : 'none';
   syncFilterButtons('inprog');
 }
 
-function showMore() {
-  _shownCount += PAGE_SIZE;
-  renderInprog();
-}
+function showMore() { _shownCount += PAGE_SIZE; renderInprog(); }
 
 function isGroup(c) {
   if (c.meta?.sender?.type === 'group') return true;
@@ -1131,25 +1037,22 @@ function rowHtml(c, applyUrgency) {
   const url    = `https://nxticket.com.br/app/accounts/${cfg.account}/conversations/${c.id}`;
   const ref    = c.meta?.sender?.phone_number || '—';
   const client = c.meta?.sender?.name || `#${c.id}`;
-  const svc    = inbox.name || `#${c.inbox_id}`;
   const agent  = c.meta?.assignee?.name || null;
   const dur    = c.created_at ? fmtMs(Date.now() - c.created_at * 1000) : '—';
   const date   = c.created_at ? fmtDate(c.created_at) : '—';
   const origin = originOf(inbox.channel_type);
-  const grupo  = isGroup(c);
   const lvl    = applyUrgency ? urgencyLevel(c.created_at) : 0;
   const rowCls = URG_ROW_CLS[lvl] ? ` ${URG_ROW_CLS[lvl]}` : '';
   const durCls = URG_DUR_CLS[lvl] ? ` ${URG_DUR_CLS[lvl]}` : '';
-  const tipoBadge = grupo
+  const tipoBadge = isGroup(c)
     ? '<span class="tipo-badge tipo-grupo">Grupo</span>'
     : '<span class="tipo-badge tipo-ind">Individual</span>';
-
   return `<tr class="data-row${rowCls}" onclick="window.open('${esc(url)}','_blank')">
     <td class="c-ticket">#${c.id}</td>
     <td class="c-ref">${esc(ref)}</td>
     <td class="c-client">${esc(client)}</td>
     <td>${tipoBadge}</td>
-    <td class="c-svc">${esc(svc)}</td>
+    <td class="c-svc">${esc(inbox.name || `#${c.inbox_id}`)}</td>
     <td class="${agent ? 'c-agent' : 'c-none'}">${agent ? esc(agent) : '—'}</td>
     <td class="c-date">${date}</td>
     <td class="c-dur${durCls}">${dur}</td>
@@ -1167,16 +1070,12 @@ function colValue(c, col) {
   if (col === 'origin') return originOf(inbox.channel_type);
   return '';
 }
-
 function applyFilters(convs, tbl) {
   const fs = _filters[tbl];
-  return convs.filter(c =>
-    Object.entries(fs).every(([col, allowed]) =>
-      !allowed || allowed.size === 0 || allowed.has(colValue(c, col))
-    )
-  );
+  return convs.filter(c => Object.entries(fs).every(([col, allowed]) =>
+    !allowed || allowed.size === 0 || allowed.has(colValue(c, col))
+  ));
 }
-
 function syncFilterButtons(tbl) {
   const prefix = tbl === 'waiting' ? 'thw' : 'thi';
   ['tipo','svc','agent','origin'].forEach(col => {
@@ -1184,64 +1083,47 @@ function syncFilterButtons(tbl) {
     if (el) el.classList.toggle('on', !!(_filters[tbl][col] && _filters[tbl][col].size > 0));
   });
 }
-
 function openCfp(event, tbl, col, label) {
   event.stopPropagation();
-  const source  = tbl === 'waiting' ? _allWaiting : _allInProg;
+  const source = tbl === 'waiting' ? _allWaiting : _allInProg;
   const allVals = [...new Set(source.map(c => colValue(c, col)))].sort();
   const active  = _filters[tbl][col];
   _cfpState = { tbl, col, vals: allVals, sel: active ? new Set(active) : new Set(allVals) };
-
   document.getElementById('cfp-title').textContent = label;
   document.getElementById('cfp-inp').value = '';
   cfpRender();
-
   const popup = document.getElementById('cfp');
   popup.classList.remove('hidden');
   const rect = event.currentTarget.getBoundingClientRect();
   const pw = 220, ph = 340;
-  let left = rect.left;
-  let top  = rect.bottom + 4;
+  let left = rect.left, top = rect.bottom + 4;
   if (left + pw > window.innerWidth  - 8) left = window.innerWidth  - pw - 8;
   if (top  + ph > window.innerHeight - 8) top  = rect.top - ph - 4;
   popup.style.left = Math.max(4, left) + 'px';
   popup.style.top  = Math.max(4, top)  + 'px';
 }
-
 function cfpRender() {
   const q   = (document.getElementById('cfp-inp').value || '').toLowerCase();
   const vis = _cfpState.vals.filter(v => !q || v.toLowerCase().includes(q));
   document.getElementById('cfp-list').innerHTML = vis.map(v => {
     const chk = _cfpState.sel.has(v) ? 'checked' : '';
-    return `<label class="cfp-opt">
-      <input type="checkbox" ${chk} data-val="${esc(v)}" onchange="cfpToggle(this)">
-      <span>${esc(v)}</span>
-    </label>`;
+    return `<label class="cfp-opt"><input type="checkbox" ${chk} data-val="${esc(v)}" onchange="cfpToggle(this)"><span>${esc(v)}</span></label>`;
   }).join('') || '<div style="padding:10px 12px;color:var(--text3);font-size:12px">Nenhum resultado</div>';
 }
-
-function cfpToggle(el) {
-  if (el.checked) _cfpState.sel.add(el.dataset.val);
-  else            _cfpState.sel.delete(el.dataset.val);
-}
-
+function cfpToggle(el) { if (el.checked) _cfpState.sel.add(el.dataset.val); else _cfpState.sel.delete(el.dataset.val); }
 function cfpAll()   { _cfpState.sel = new Set(_cfpState.vals); cfpRender(); }
 function cfpNone()  { _cfpState.sel.clear(); cfpRender(); }
 function cfpClose() { document.getElementById('cfp').classList.add('hidden'); }
-
 function cfpApply() {
   const { tbl, col } = _cfpState;
-  if (_cfpState.sel.size === 0 || _cfpState.sel.size === _cfpState.vals.length) {
-    delete _filters[tbl][col];
-  } else {
-    _filters[tbl][col] = new Set(_cfpState.sel);
-  }
+  if (_cfpState.sel.size === 0 || _cfpState.sel.size === _cfpState.vals.length) delete _filters[tbl][col];
+  else _filters[tbl][col] = new Set(_cfpState.sel);
   cfpClose();
   if (tbl === 'waiting') renderWaiting();
   else { _shownCount = PAGE_SIZE; renderInprog(); }
 }
 
-/* ── GLOBAL CLICK + KEYBOARD ── */
+/* ── GLOBAL CLICK / KEY ── */
 document.addEventListener('click', e => {
   const cfp = document.getElementById('cfp');
   if (cfp && !cfp.classList.contains('hidden') && !cfp.contains(e.target)) cfpClose();
@@ -1267,29 +1149,16 @@ function fmtMs(ms) {
   return `${h}hr ${String(m).padStart(2, '0')}min`;
 }
 function fmtDate(ts) {
-  return new Date(ts * 1000).toLocaleString('pt-BR', {
-    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-  });
+  return new Date(ts * 1000).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
 }
 function originOf(ch) {
-  return ({
-    'Channel::Whatsapp':  'WhatsApp',
-    'Channel::Email':     'E-mail',
-    'Channel::Api':       'Chat',
-    'Channel::WebWidget': 'Chat',
-    'Channel::TwilioSms': 'SMS',
-    'Channel::Telegram':  'Telegram',
-    'Channel::Instagram': 'Instagram',
-    'Channel::Facebook':  'Facebook'
-  })[ch] || 'Chat';
+  return ({ 'Channel::Whatsapp':'WhatsApp','Channel::Email':'E-mail','Channel::Api':'Chat','Channel::WebWidget':'Chat','Channel::TwilioSms':'SMS','Channel::Telegram':'Telegram','Channel::Instagram':'Instagram','Channel::Facebook':'Facebook' })[ch] || 'Chat';
 }
 function emptyRow(msg, cols) {
-  return `<tr><td colspan="${cols}" style="padding:16px;text-align:center;color:var(--text3);font-style:italic">${msg}</td></tr>`;
+  return `<tr><td colspan="${cols}" style="padding:18px;text-align:center;color:var(--text3);font-style:italic">${msg}</td></tr>`;
 }
 function esc(s) {
-  return String(s || '')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 </script>
 </body>
