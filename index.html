@@ -662,47 +662,87 @@ function aggregateSummaries(list) {
 
 /* ── fetchKPIs ── */
 async function fetchKPIs() {
-  const p = getPeriod(_kpiPeriod);
+  const p    = getPeriod(_kpiPeriod);
+  const note = document.getElementById('kpi-filter-note');
   document.getElementById('period-badge').textContent = p.badgeLabel;
   renderKPISkeleton();
+
+  /* busca summary por lista de inboxes, silencia erros individuais */
+  const summaryByIds = (ids, since, until) =>
+    Promise.all(ids.map(id =>
+      api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
+        .catch(() => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null }))
+    ));
 
   try {
     let summary, summaryPrev;
 
     if (_agentFilter) {
-      /* Filtro por agente: prioridade sobre inbox para KPIs */
-      [summary, summaryPrev] = await Promise.all([
-        api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.since}&until=${p.until}&type=agent&id=${_agentFilter.id}`),
-        api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.prevSince}&until=${p.prevUntil}&type=agent&id=${_agentFilter.id}`)
-      ]);
-      const note = document.getElementById('kpi-filter-note');
+      /* Filtro por agente — tenta type=agent; se 401/403, calcula local a partir de _rawConvs */
+      try {
+        [summary, summaryPrev] = await Promise.all([
+          api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.since}&until=${p.until}&type=agent&id=${_agentFilter.id}`),
+          api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.prevSince}&until=${p.prevUntil}&type=agent&id=${_agentFilter.id}`)
+        ]);
+      } catch (e) {
+        if (!isAuthError(e)) throw e;
+        const agentConvs = _rawConvs.filter(c => c.meta?.assignee?.id === _agentFilter.id);
+        const resolved   = agentConvs.filter(c => c.status === 'resolved').length;
+        summary     = { conversations_count: agentConvs.length, resolutions_count: resolved, avg_resolution_time: null };
+        summaryPrev = { conversations_count: null, resolutions_count: null, avg_resolution_time: null };
+      }
       note.textContent = `Filtrado por agente: ${_agentFilter.name}`;
       note.style.display = '';
+
     } else if (!_inboxFilter || _inboxFilter.size === 0) {
-      /* Sem filtro: chamada única sem inbox_id */
-      [summary, summaryPrev] = await Promise.all([
-        api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.since}&until=${p.until}&type=account`),
-        api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.prevSince}&until=${p.prevUntil}&type=account`)
-      ]);
-      document.getElementById('kpi-filter-note').style.display = 'none';
+      /* Sem filtro — tenta type=account; se 401/403, fallback por inboxes acessíveis */
+      try {
+        [summary, summaryPrev] = await Promise.all([
+          api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.since}&until=${p.until}&type=account`),
+          api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.prevSince}&until=${p.prevUntil}&type=account`)
+        ]);
+        note.style.display = 'none';
+      } catch (e) {
+        if (!isAuthError(e)) throw e;
+        const ids = Object.keys(_inboxMap).map(Number);
+        const [currAll, prevAll] = await Promise.all([
+          summaryByIds(ids, p.since, p.until),
+          summaryByIds(ids, p.prevSince, p.prevUntil)
+        ]);
+        summary     = aggregateSummaries(currAll);
+        summaryPrev = aggregateSummaries(prevAll);
+        note.textContent = 'Exibindo dados das caixas acessíveis ao seu usuário';
+        note.style.display = '';
+      }
+
     } else {
-      /* Filtro por inbox: uma chamada por inbox, agrega os resultados */
+      /* Filtro por inbox ativo — comportamento original */
       const ids = [..._inboxFilter];
       const [currAll, prevAll] = await Promise.all([
-        Promise.all(ids.map(id =>
-          api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.since}&until=${p.until}&type=inbox&id=${id}`)
-        )),
-        Promise.all(ids.map(id =>
-          api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.prevSince}&until=${p.prevUntil}&type=inbox&id=${id}`)
-        ))
+        summaryByIds(ids, p.since, p.until),
+        summaryByIds(ids, p.prevSince, p.prevUntil)
       ]);
       summary     = aggregateSummaries(currAll);
       summaryPrev = aggregateSummaries(prevAll);
-
       const names = ids.map(id => (_inboxMap[id] || {}).name || `#${id}`).join(', ');
-      const note  = document.getElementById('kpi-filter-note');
       note.textContent = `Filtrado por: ${names}`;
       note.style.display = '';
+    }
+
+    /* Level 3: API retornou zeros mas há conversas visíveis — calcular local */
+    if (summary.conversations_count === 0 && _rawConvs.length > 0) {
+      const localConvs = _agentFilter
+        ? applyAgentFilter(applyInboxFilter(_rawConvs))
+        : applyInboxFilter(_rawConvs);
+      if (localConvs.length > 0) {
+        const resolved  = localConvs.filter(c => c.status === 'resolved').length;
+        summary     = { conversations_count: localConvs.length, resolutions_count: resolved, avg_resolution_time: null };
+        summaryPrev = { conversations_count: 0, resolutions_count: 0, avg_resolution_time: null };
+        if (!_agentFilter) {
+          note.textContent = 'Indicadores calculados a partir das conversas visíveis ao seu usuário';
+          note.style.display = '';
+        }
+      }
     }
 
     renderKPIs(summary, summaryPrev);
@@ -718,9 +758,13 @@ function api(path) {
   return fetch(`/api${path}`, {
     headers: { 'Accept': 'application/json', 'api_access_token': cfg.token }
   }).then(r => {
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    if (!r.ok) { const e = new Error(`HTTP ${r.status}`); e.status = r.status; throw e; }
     return r.json();
   });
+}
+
+function isAuthError(e) {
+  return e.status === 401 || e.status === 403;
 }
 
 /* ── DASHBOARD LOOP ── */
