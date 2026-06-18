@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <clipPath id="c"><polygon points="50,5 95,50 50,95 5,50"/></clipPath>
+  </defs>
+  <!-- Diamond base orange -->
+  <polygon points="50,5 95,50 50,95 5,50" fill="#f04e23"/>
+  <!-- Gray left section -->
+  <path clip-path="url(#c)"
+    d="M44,6 C30,20 15,40 9,58 C4,73 10,86 23,93 L50,95 L5,50 L50,5 Z"
+    fill="#9b9b9b"/>
+  <!-- White outer curve -->
+  <path clip-path="url(#c)"
+    d="M44,6 C30,20 15,40 9,58 C4,73 10,86 23,93"
+    stroke="white" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+  <!-- White inner curve -->
+  <path clip-path="url(#c)"
+    d="M54,6 C40,19 26,38 20,56 C15,71 21,84 34,92"
+    stroke="white" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+</svg>
