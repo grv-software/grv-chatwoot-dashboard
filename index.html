@@ -150,7 +150,10 @@ body.minimized .content { display:none; }
 .ag-table th { padding:7px 12px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text3); border-bottom:1px solid var(--border); text-align:left; white-space:nowrap; background:var(--bg2); position:sticky; top:0; }
 .ag-table td { padding:7px 12px; border-bottom:1px solid rgba(42,48,72,.35); vertical-align:middle; font-size:12px; }
 .ag-table tr:last-child td { border-bottom:none; }
+.ag-table tbody tr { cursor:pointer; }
 .ag-table tbody tr:hover { background:var(--bg3); }
+.ag-table tbody tr.ag-active { background:rgba(59,130,246,.12); }
+.ag-table tbody tr.ag-active td:first-child { border-left:3px solid var(--accent); padding-left:9px; }
 .ag-name { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:150px; }
 .dot { display:inline-block; width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 .dot-g { background:var(--green); }
@@ -328,6 +331,7 @@ body.minimized .content { display:none; }
     <span id="inbox-trigger-txt">Todas</span> ▾
   </button>
   <div class="inbox-chips" id="inbox-chips"></div>
+  <div id="agent-chip" style="display:none"></div>
   <button class="inbox-clear" id="inbox-clear" onclick="clearInboxFilter()" style="display:none">✕ Limpar filtros</button>
 </div>
 
@@ -522,6 +526,7 @@ let _showNd = false;
 let _toastTimer = null;
 let _inboxFilter = null; /* null = todas; Set<number> = filtro ativo */
 let _ibpSel = new Set();
+let _agentFilter = null; /* null = sem filtro; {id, name} = agente ativo */
 
 /* ── TOKEN ── */
 function showTokenModal() {
@@ -664,7 +669,16 @@ async function fetchKPIs() {
   try {
     let summary, summaryPrev;
 
-    if (!_inboxFilter || _inboxFilter.size === 0) {
+    if (_agentFilter) {
+      /* Filtro por agente: prioridade sobre inbox para KPIs */
+      [summary, summaryPrev] = await Promise.all([
+        api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.since}&until=${p.until}&type=agent&id=${_agentFilter.id}`),
+        api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.prevSince}&until=${p.prevUntil}&type=agent&id=${_agentFilter.id}`)
+      ]);
+      const note = document.getElementById('kpi-filter-note');
+      note.textContent = `Filtrado por agente: ${_agentFilter.name}`;
+      note.style.display = '';
+    } else if (!_inboxFilter || _inboxFilter.size === 0) {
       /* Sem filtro: chamada única sem inbox_id */
       [summary, summaryPrev] = await Promise.all([
         api(`/v2/accounts/${cfg.account}/reports/summary?since=${p.since}&until=${p.until}&type=account`),
@@ -672,7 +686,7 @@ async function fetchKPIs() {
       ]);
       document.getElementById('kpi-filter-note').style.display = 'none';
     } else {
-      /* Filtro ativo: uma chamada por inbox, agrega os resultados */
+      /* Filtro por inbox: uma chamada por inbox, agrega os resultados */
       const ids = [..._inboxFilter];
       const [currAll, prevAll] = await Promise.all([
         Promise.all(ids.map(id =>
@@ -863,8 +877,9 @@ function renderAgents(agents, convs) {
   };
 
   document.getElementById('agents-tbody').innerHTML = sorted.map(a => {
-    const sm  = statusMap[a.availability_status || 'offline'] || statusMap.offline;
-    return `<tr>
+    const sm       = statusMap[a.availability_status || 'offline'] || statusMap.offline;
+    const isActive = _agentFilter && _agentFilter.id === a.id;
+    return `<tr class="${isActive ? 'ag-active' : ''}" data-agent-id="${a.id}" data-agent-name="${esc(a.name)}" onclick="toggleAgentFilter(this)" title="Clique para filtrar por este agente">
       <td class="ag-name" title="${esc(a.name)}">${esc(a.name)}</td>
       <td><span class="ag-status"><span class="dot ${sm.cls}"></span>${sm.label}</span></td>
       <td class="ag-qty">${cnt[a.id] || 0}</td>
@@ -928,8 +943,49 @@ function applyInboxFilter(convs) {
   return convs.filter(c => _inboxFilter.has(c.inbox_id));
 }
 
+function applyAgentFilter(convs) {
+  if (!_agentFilter) return convs;
+  return convs.filter(c => c.meta?.assignee?.id === _agentFilter.id);
+}
+
+function toggleAgentFilter(row) {
+  const id   = parseInt(row.dataset.agentId, 10);
+  const name = row.dataset.agentName;
+  _agentFilter = (_agentFilter && _agentFilter.id === id) ? null : { id, name };
+  syncAgentTableHighlight();
+  syncAgentChip();
+  applyInboxAndRender();
+}
+
+function removeAgentFilter() {
+  _agentFilter = null;
+  syncAgentTableHighlight();
+  syncAgentChip();
+  applyInboxAndRender();
+}
+
+function syncAgentTableHighlight() {
+  document.querySelectorAll('#agents-tbody tr').forEach(tr => {
+    const id = parseInt(tr.dataset.agentId, 10);
+    tr.classList.toggle('ag-active', !!(_agentFilter && _agentFilter.id === id));
+  });
+}
+
+function syncAgentChip() {
+  const el = document.getElementById('agent-chip');
+  if (!el) return;
+  if (!_agentFilter) {
+    el.style.display = 'none';
+    el.innerHTML = '';
+  } else {
+    el.style.display = '';
+    el.innerHTML = `<span class="inbox-chip"><span style="color:var(--text3);margin-right:3px;font-size:10px">Agente:</span>${esc(_agentFilter.name)}<button class="inbox-chip-rm" onclick="removeAgentFilter()" aria-label="Remover filtro de agente">×</button></span>`;
+  }
+}
+
 function applyInboxAndRender() {
-  const convs = applyInboxFilter(_rawConvs);
+  let convs = applyInboxFilter(_rawConvs);
+  convs = applyAgentFilter(convs);
   _allWaiting = convs.filter(c => !c.meta?.assignee?.id)
                      .sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
   _allInProg  = convs.filter(c =>  c.meta?.assignee?.id)
@@ -938,7 +994,6 @@ function applyInboxAndRender() {
   renderTriage(_allWaiting);
   renderWaiting();
   renderInprog();
-  /* KPIs também seguem o filtro */
   fetchKPIs();
 }
 
@@ -1060,7 +1115,8 @@ function syncInboxBar() {
 /* ── CONVERSATIONS ── */
 function renderConvs(convs) {
   _rawConvs = convs;
-  const filtered = applyInboxFilter(convs);
+  let filtered = applyInboxFilter(convs);
+  filtered = applyAgentFilter(filtered);
   _allWaiting = filtered.filter(c => !c.meta?.assignee?.id)
                         .sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
   _allInProg  = filtered.filter(c =>  c.meta?.assignee?.id)
@@ -1104,7 +1160,7 @@ function renderInprog() {
   if (!html) html = emptyRow('Nenhuma conversa em atendimento', 10);
   document.getElementById('inprog-tbody').innerHTML = html;
   document.getElementById('badge-inprog').textContent =
-    `${Math.min(_shownCount, filtered.length)} de ${_totalOpen} abertas`;
+    `${shown.length} de ${filtered.length} abertas`;
   document.getElementById('show-more-wrap').style.display =
     filtered.length > _shownCount ? '' : 'none';
   syncFilterButtons('inprog');
