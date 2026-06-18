@@ -37,12 +37,13 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 
 /* HEADER */
 .panel-header {
-  display:flex; align-items:center; gap:10px;
+  display:flex; align-items:center; gap:16px;
   background:var(--bg2); border-bottom:1px solid var(--border);
-  padding:0 16px; height:46px; position:sticky; top:0; z-index:100;
+  padding:0 24px; height:56px; position:sticky; top:0; z-index:100;
 }
-.panel-logo { font-weight:800; font-size:14px; white-space:nowrap; }
-.panel-logo span { color:var(--text2); font-weight:400; font-size:13px; }
+.panel-logo { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.panel-logo-text { font-weight:800; font-size:15px; white-space:nowrap; line-height:1; }
+.panel-logo-text em { font-style:normal; font-weight:400; font-size:13px; color:var(--text2); margin-left:4px; }
 .period-badge { background:var(--bg3); border:1px solid var(--border); border-radius:4px; padding:3px 10px; font-size:12px; color:var(--text2); white-space:nowrap; }
 .hdr-sep { flex:1; }
 .hdr-countdown { font-size:12px; color:var(--text3); white-space:nowrap; }
@@ -60,7 +61,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 /* INBOX FILTER BAR */
 .inbox-bar {
   background:var(--bg2); border-bottom:1px solid var(--border);
-  padding:5px 16px; position:sticky; top:46px; z-index:90;
+  padding:5px 24px; position:sticky; top:56px; z-index:90;
   display:flex; align-items:center; gap:8px; flex-wrap:wrap;
   min-height:36px;
 }
@@ -307,13 +308,8 @@ body.minimized .content { display:none; }
 <!-- HEADER -->
 <div class="panel-header">
   <div class="panel-logo">
-    <svg width="26" height="26" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" style="flex-shrink:0;vertical-align:middle">
-      <defs><clipPath id="grv-clip"><polygon points="50,1 99,50 50,99 1,50"/></clipPath></defs>
-      <polygon points="50,1 99,50 50,99 1,50" fill="#f97316"/>
-      <path clip-path="url(#grv-clip)" d="M1,50 L50,1 C30,12 14,28 9,52 C6,68 15,82 32,92 L50,99 Z" fill="#111"/>
-      <path clip-path="url(#grv-clip)" d="M50,1 C32,11 17,27 12,51 C9,67 18,81 35,91" stroke="white" stroke-width="5.5" fill="none" stroke-linecap="round"/>
-    </svg>
-    GRV SAC <span>— Painel de Atendimento</span>
+    <img src="icone-grvlaranja.png" width="38" height="38" alt="GRV" aria-hidden="true"/>
+    <div class="panel-logo-text">GRV SAC<em>— Painel de Atendimento</em></div>
   </div>
   <div class="period-badge" id="period-badge">Este mês: —</div>
   <div class="hdr-sep"></div>

@@ -2,13 +2,13 @@ const http = require('http');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-const url = require('url');
+const url = require('url'); 
 
 const PORT = 8765;
 const TARGET = 'nxticket.com.br';
 const DIR = __dirname;
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css' };
+const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.ico': 'image/x-icon' };
 
 http.createServer((req, res) => {
   if (req.url.startsWith('/api/')) {
