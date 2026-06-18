@@ -9,20 +9,23 @@
   --bg: #0f1117; --bg2: #181c27; --bg3: #1e2334; --border: #2a3048;
   --accent: #3b82f6; --text: #e2e8f0; --text2: #94a3b8; --text3: #64748b;
   --green: #22c55e; --yellow: #eab308; --orange: #f97316; --red: #ef4444;
+  --urg-warn: rgba(234,179,8,.07); --urg-alert: rgba(249,115,22,.09); --urg-crit: rgba(239,68,68,.11);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI',sans-serif; font-size: 13px; min-height: 100vh; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI',sans-serif; font-size: 14px; min-height: 100vh; }
 
 /* MODAL */
 #token-modal { position:fixed; inset:0; background:rgba(0,0,0,.82); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; z-index:9999; }
 #token-modal.hidden { display:none; }
-.modal-box { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:28px; width:420px; max-width:95vw; }
+.modal-box { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:28px; width:440px; max-width:95vw; }
 .modal-box h2 { font-size:16px; font-weight:700; margin-bottom:8px; }
 .modal-box p { color:var(--text2); font-size:12px; margin-bottom:16px; line-height:1.5; }
 .modal-box label { display:block; font-size:11px; color:var(--text2); margin-bottom:5px; }
 .modal-box input { width:100%; padding:9px 11px; background:var(--bg3); border:1px solid var(--border); border-radius:5px; color:var(--text); font-size:13px; outline:none; margin-bottom:12px; }
 .modal-box input:focus { border-color:var(--accent); }
-.hint { font-size:11px; color:var(--text3); margin-top:-8px; margin-bottom:12px; }
+.hint { font-size:11px; color:var(--text3); margin-top:-8px; margin-bottom:14px; }
+.modal-error { font-size:12px; color:var(--red); background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.2); border-radius:4px; padding:7px 10px; margin-bottom:12px; display:none; }
+.modal-divider { border:none; border-top:1px solid var(--border); margin:4px 0 16px; }
 .btn-primary { width:100%; padding:10px; background:var(--accent); border:none; border-radius:5px; color:#fff; font-size:14px; font-weight:600; cursor:pointer; margin-top:4px; }
 .btn-primary:hover { opacity:.85; }
 
@@ -57,7 +60,7 @@ body.minimized .content { display:none; }
 
 /* TOP ROW */
 .top-row {
-  display:grid; grid-template-columns:1fr 420px;
+  display:grid; grid-template-columns:1fr 380px;
   border:1px solid var(--border); border-radius:6px; overflow:hidden;
 }
 .block-hdr {
@@ -72,7 +75,8 @@ body.minimized .content { display:none; }
 .kpi-table { width:100%; border-collapse:collapse; }
 .kpi-table tr { border-bottom:1px solid rgba(42,48,72,.5); }
 .kpi-table tr:last-child { border-bottom:none; }
-.kpi-table tr.dim td { opacity:.45; }
+.kpi-table tr.dim { display:none; }
+.kpi-table tr.dim.show-nd { display:table-row; opacity:.4; }
 .kpi-table td { padding:9px 14px; vertical-align:middle; }
 .kpi-name { font-size:12px; font-weight:600; }
 .kpi-desc { font-size:11px; color:var(--text3); margin-top:1px; }
@@ -83,7 +87,15 @@ body.minimized .content { display:none; }
 .kpi-chg.pos { color:var(--green); }
 .kpi-chg.neg { color:var(--red); }
 .kpi-chg.nd  { color:var(--text3); font-weight:400; }
-.kpi-nd-note { padding:6px 14px; font-size:10px; color:var(--text3); border-top:1px solid var(--border); }
+.kpi-nd-note {
+  padding:6px 14px; font-size:10px; color:var(--text3);
+  border-top:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+}
+.kpi-nd-toggle {
+  font-size:10px; color:var(--accent); background:none; border:none;
+  cursor:pointer; padding:0; text-decoration:underline; white-space:nowrap;
+}
 
 /* AGENTS */
 .agents-section { background:var(--bg2); display:flex; flex-direction:column; }
@@ -92,19 +104,43 @@ body.minimized .content { display:none; }
 .ag-table th {
   padding:7px 12px; font-size:10px; font-weight:700; text-transform:uppercase;
   letter-spacing:.5px; color:var(--text3); border-bottom:1px solid var(--border);
-  text-align:left; white-space:nowrap; background:var(--bg2);
-  position:sticky; top:0;
+  text-align:left; white-space:nowrap; background:var(--bg2); position:sticky; top:0;
 }
-.ag-table td { padding:6px 12px; border-bottom:1px solid rgba(42,48,72,.35); vertical-align:middle; font-size:12px; }
+.ag-table td { padding:7px 12px; border-bottom:1px solid rgba(42,48,72,.35); vertical-align:middle; font-size:12px; }
 .ag-table tr:last-child td { border-bottom:none; }
 .ag-table tbody tr:hover { background:var(--bg3); }
-.ag-name { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:130px; }
-.dot { display:inline-block; width:10px; height:10px; border-radius:50%; }
+.ag-name { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:150px; }
+.dot { display:inline-block; width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 .dot-g { background:var(--green); }
 .dot-o { background:var(--orange); }
-.dot-r { background:var(--red); }
 .dot-x { background:var(--text3); }
+.ag-status { display:inline-flex; align-items:center; gap:6px; }
 .ag-qty { text-align:center; font-variant-numeric:tabular-nums; }
+
+/* TRIAGE STRIP */
+.triage-strip {
+  background:var(--bg2); border:1px solid var(--border); border-radius:6px;
+  padding:10px 14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+}
+.triage-label {
+  font-size:10px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.6px; color:var(--text3); white-space:nowrap;
+}
+.triage-cards { display:flex; gap:8px; flex-wrap:wrap; flex:1; }
+.triage-card {
+  display:flex; align-items:center; gap:10px;
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:5px; padding:7px 12px; min-width:130px;
+}
+.triage-card.lvl-warn { border-color:rgba(234,179,8,.4); }
+.triage-card.lvl-alert { border-color:rgba(249,115,22,.5); }
+.triage-card.lvl-crit { border-color:rgba(239,68,68,.55); }
+.triage-origin { font-size:12px; font-weight:600; }
+.triage-max { font-size:10px; color:var(--text3); margin-top:1px; }
+.triage-count { font-size:22px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--text2); margin-left:auto; }
+.triage-card.lvl-warn .triage-count { color:var(--yellow); }
+.triage-card.lvl-alert .triage-count { color:var(--orange); }
+.triage-card.lvl-crit .triage-count { color:var(--red); }
 
 /* CONV BLOCKS */
 .conv-block { background:var(--bg2); border:1px solid var(--border); border-radius:6px; overflow:hidden; }
@@ -117,6 +153,12 @@ body.minimized .content { display:none; }
 .badge-blue   { background:var(--accent); color:#fff; }
 .badge-orange { background:var(--orange); color:#fff; }
 .badge-subtle { background:var(--bg); color:var(--text3); border:1px solid var(--border); }
+
+@keyframes pulse-badge {
+  0%,100% { opacity:1; box-shadow:0 0 0 0 rgba(249,115,22,.5); }
+  50%      { opacity:.85; box-shadow:0 0 0 5px rgba(249,115,22,0); }
+}
+.badge-pulse { animation:pulse-badge 1.5s ease-in-out infinite; }
 
 /* FILTER PILLS */
 .filter-pills { display:flex; gap:4px; }
@@ -133,7 +175,15 @@ body.minimized .content { display:none; }
 }
 .cv-table td { padding:7px 12px; border-bottom:1px solid rgba(42,48,72,.3); vertical-align:middle; font-size:12px; }
 .cv-table tr:last-child td { border-bottom:none; }
-.cv-table tbody tr.data-row:hover { background:rgba(59,130,246,.05); cursor:pointer; }
+.cv-table tbody tr.data-row { cursor:pointer; }
+.cv-table tbody tr.data-row:hover { background:rgba(59,130,246,.05); }
+.cv-table tbody tr.data-row.urg-warn { background:var(--urg-warn); }
+.cv-table tbody tr.data-row.urg-warn:hover { background:rgba(234,179,8,.12); }
+.cv-table tbody tr.data-row.urg-alert { background:var(--urg-alert); }
+.cv-table tbody tr.data-row.urg-alert:hover { background:rgba(249,115,22,.14); }
+.cv-table tbody tr.data-row.urg-crit { background:var(--urg-crit); }
+.cv-table tbody tr.data-row.urg-crit:hover { background:rgba(239,68,68,.17); }
+
 .queue-row td {
   background:var(--bg3); padding:4px 12px;
   font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.8px;
@@ -149,12 +199,22 @@ body.minimized .content { display:none; }
 .c-none   { color:var(--orange); font-style:italic; }
 .c-date   { font-size:11px; color:var(--text3); white-space:nowrap; }
 .c-dur    { font-size:11px; color:var(--text3); white-space:nowrap; font-variant-numeric:tabular-nums; }
+.c-dur.dur-warn  { color:var(--yellow); font-weight:600; }
+.c-dur.dur-alert { color:var(--orange); font-weight:600; }
+.c-dur.dur-crit  { color:var(--red);    font-weight:700; }
 .c-link   { color:var(--accent); text-decoration:none; font-size:11px; font-weight:500; }
 .c-link:hover { text-decoration:underline; }
-.em       { color:var(--text3); }
 .tipo-badge { display:inline-block; font-size:10px; font-weight:700; padding:2px 7px; border-radius:3px; white-space:nowrap; }
 .tipo-grupo { background:rgba(139,92,246,.15); color:#a78bfa; }
 .tipo-ind   { background:rgba(100,116,139,.12); color:var(--text3); }
+
+/* URGENCY LEGEND */
+.urg-legend { display:flex; gap:12px; padding:5px 14px; background:var(--bg3); border-bottom:1px solid var(--border); }
+.urg-legend-item { display:inline-flex; align-items:center; gap:5px; font-size:10px; color:var(--text3); }
+.urg-dot { display:inline-block; width:8px; height:8px; border-radius:2px; }
+.urg-dot-warn  { background:var(--yellow); opacity:.7; }
+.urg-dot-alert { background:var(--orange); opacity:.7; }
+.urg-dot-crit  { background:var(--red);    opacity:.7; }
 
 /* COLUMN FILTER BUTTONS IN TH */
 .th-f { white-space:nowrap; }
@@ -184,6 +244,18 @@ body.minimized .content { display:none; }
 .btn-more { background:transparent; border:1px solid var(--border); border-radius:4px; padding:5px 18px; color:var(--text2); font-size:12px; cursor:pointer; }
 .btn-more:hover { border-color:var(--accent); color:var(--accent); }
 
+/* TOAST */
+#toast {
+  position:fixed; bottom:20px; right:20px; z-index:8000;
+  background:var(--bg2); border:1px solid rgba(239,68,68,.4);
+  border-radius:6px; padding:10px 16px; font-size:12px; color:var(--red);
+  max-width:340px; box-shadow:0 4px 20px rgba(0,0,0,.5);
+  opacity:0; transform:translateY(8px);
+  transition:opacity .2s,transform .2s;
+  pointer-events:none;
+}
+#toast.show { opacity:1; transform:translateY(0); pointer-events:auto; }
+
 /* Scrollbar */
 ::-webkit-scrollbar { width:5px; height:5px; }
 ::-webkit-scrollbar-track { background:transparent; }
@@ -196,6 +268,8 @@ body.minimized .content { display:none; }
   .cv-table th:nth-child(4), .cv-table td:nth-child(4),
   .cv-table th:nth-child(9), .cv-table td:nth-child(9) { display:none; }
   .panel-logo span { display:none; }
+  .triage-cards { gap:6px; }
+  .triage-card { min-width:110px; }
 }
 </style>
 </head>
@@ -206,11 +280,16 @@ body.minimized .content { display:none; }
   <div class="modal-box">
     <h2>Configurar Acesso</h2>
     <p>Insira seu token de usuário do Chatwoot. Salvo localmente no navegador — cada pessoa usa o seu.</p>
-    <label>Token de Acesso (api_access_token)</label>
-    <input type="password" id="inp-token" placeholder="Cole seu token aqui..." />
+    <div class="modal-error" id="modal-error"></div>
+    <label for="inp-token">Token de Acesso (api_access_token)</label>
+    <input type="password" id="inp-token" placeholder="Cole seu token aqui..." autocomplete="off" />
     <p class="hint">Chatwoot → Perfil → Configurações da conta → Copiar Token de Acesso</p>
-    <label>ID da Conta</label>
+    <label for="inp-account">ID da Conta</label>
     <input type="number" id="inp-account" value="1" />
+    <hr class="modal-divider">
+    <label for="inp-threshold">Alerta de fila — avisar quando aguardando ≥</label>
+    <input type="number" id="inp-threshold" placeholder="Ex: 5  (0 = desativado)" min="0" />
+    <p class="hint">Badge fica pulsante quando a fila de espera atingir esse número</p>
     <button class="btn-primary" onclick="saveToken()">Conectar</button>
   </div>
 </div>
@@ -221,10 +300,10 @@ body.minimized .content { display:none; }
   <div class="period-badge" id="period-badge">Este mês: —</div>
   <div class="hdr-sep"></div>
   <div class="hdr-countdown" id="hdr-countdown">Próx. atualização em —</div>
-  <button class="btn-hdr blue" onclick="fetchAll()">↺ Atualizar</button>
+  <button class="btn-hdr blue" onclick="fetchAll()" aria-label="Atualizar dados agora" title="Atualizar agora">↺ Atualizar</button>
   <div class="hdr-updated" id="hdr-updated">Atualizado às —</div>
-  <button class="btn-hdr" id="btn-min" onclick="toggleMin()" title="Minimizar">⊟</button>
-  <button class="btn-hdr" onclick="showTokenModal()">⚙ Token</button>
+  <button class="btn-hdr" id="btn-min" onclick="toggleMin()" aria-label="Minimizar painel" title="Minimizar painel">⊟</button>
+  <button class="btn-hdr" onclick="showTokenModal()" aria-label="Abrir configurações de acesso" title="Configurações de acesso">⚙ Token</button>
 </div>
 
 <!-- CONTENT -->
@@ -243,32 +322,34 @@ body.minimized .content { display:none; }
           <button class="pill active" data-p="month" onclick="setKpiPeriod('month')">Mês</button>
         </div>
       </div>
-      <table class="kpi-table">
+      <table class="kpi-table" role="table" aria-label="Indicadores de performance">
         <tbody id="kpi-tbody">
           <tr><td colspan="4" style="padding:24px;text-align:center;color:var(--text3)">Carregando…</td></tr>
         </tbody>
       </table>
-      <div class="kpi-nd-note">▲ Indicadores marcados como N/D não estão disponíveis na API do Chatwoot</div>
+      <div class="kpi-nd-note">
+        <span>▲ Métricas N/D não disponíveis na API do Chatwoot</span>
+        <button class="kpi-nd-toggle" id="kpi-nd-btn" onclick="toggleNd()">Mostrar N/D</button>
+      </div>
     </div>
 
     <!-- Agentes -->
     <div class="agents-section">
       <div class="block-hdr">
-        <span class="block-hdr-title">Acompanhamento de agentes</span>
+        <span class="block-hdr-title">Agentes</span>
         <span class="block-hdr-sub" id="agents-label">— online de —</span>
       </div>
       <div class="agents-scroll">
-        <table class="ag-table">
+        <table class="ag-table" role="table" aria-label="Status dos agentes">
           <thead>
             <tr>
               <th>Agente</th>
-              <th>Status Movidesk</th>
-              <th>Status no Chat</th>
-              <th>Qtd. Atend.</th>
+              <th>Status</th>
+              <th>Atend.</th>
             </tr>
           </thead>
           <tbody id="agents-tbody">
-            <tr><td colspan="4" style="padding:20px;text-align:center;color:var(--text3)">Carregando…</td></tr>
+            <tr><td colspan="3" style="padding:20px;text-align:center;color:var(--text3)">Carregando…</td></tr>
           </tbody>
         </table>
       </div>
@@ -276,24 +357,35 @@ body.minimized .content { display:none; }
 
   </div>
 
+  <!-- TRIAGE STRIP -->
+  <div class="triage-strip" id="triage-strip" style="display:none" aria-label="Resumo da fila por canal">
+    <span class="triage-label">Fila por canal</span>
+    <div class="triage-cards" id="triage-cards"></div>
+  </div>
+
   <!-- AGUARDANDO -->
   <div class="conv-block">
     <div class="conv-hdr">
       <span class="conv-hdr-title">Conversas aguardando atendimento</span>
-      <span class="badge badge-orange" id="badge-waiting">0</span>
+      <span class="badge badge-orange" id="badge-waiting" aria-live="polite">0</span>
     </div>
-    <table class="cv-table">
+    <div class="urg-legend" aria-label="Legenda de urgência">
+      <span class="urg-legend-item"><span class="urg-dot urg-dot-warn"></span>5–15min</span>
+      <span class="urg-legend-item"><span class="urg-dot urg-dot-alert"></span>15–30min</span>
+      <span class="urg-legend-item"><span class="urg-dot urg-dot-crit"></span>&gt;30min</span>
+    </div>
+    <table class="cv-table" role="table" aria-label="Conversas aguardando atendimento">
       <thead>
         <tr>
           <th>Ticket</th>
           <th>Cód. Ref.</th>
           <th>Cliente</th>
-          <th class="th-f">Tipo<button class="th-fb" id="thw-tipo" onclick="openCfp(event,'waiting','tipo','Tipo')">▾</button></th>
-          <th class="th-f">Serviço<button class="th-fb" id="thw-svc" onclick="openCfp(event,'waiting','svc','Serviço')">▾</button></th>
-          <th class="th-f">Atendente<button class="th-fb" id="thw-agent" onclick="openCfp(event,'waiting','agent','Atendente')">▾</button></th>
+          <th class="th-f">Tipo<button class="th-fb" id="thw-tipo" onclick="openCfp(event,'waiting','tipo','Tipo')" aria-label="Filtrar por Tipo">▾</button></th>
+          <th class="th-f">Serviço<button class="th-fb" id="thw-svc" onclick="openCfp(event,'waiting','svc','Serviço')" aria-label="Filtrar por Serviço">▾</button></th>
+          <th class="th-f">Atendente<button class="th-fb" id="thw-agent" onclick="openCfp(event,'waiting','agent','Atendente')" aria-label="Filtrar por Atendente">▾</button></th>
           <th>Data</th>
           <th>Duração</th>
-          <th class="th-f">Origem<button class="th-fb" id="thw-origin" onclick="openCfp(event,'waiting','origin','Origem')">▾</button></th>
+          <th class="th-f">Origem<button class="th-fb" id="thw-origin" onclick="openCfp(event,'waiting','origin','Origem')" aria-label="Filtrar por Origem">▾</button></th>
           <th>Ação</th>
         </tr>
       </thead>
@@ -309,18 +401,18 @@ body.minimized .content { display:none; }
       <span class="conv-hdr-title">Conversas em atendimento</span>
       <span class="badge badge-subtle" id="badge-inprog">—</span>
     </div>
-    <table class="cv-table">
+    <table class="cv-table" role="table" aria-label="Conversas em atendimento">
       <thead>
         <tr>
           <th>Ticket</th>
           <th>Cód. Ref.</th>
           <th>Cliente</th>
-          <th class="th-f">Tipo<button class="th-fb" id="thi-tipo" onclick="openCfp(event,'inprog','tipo','Tipo')">▾</button></th>
-          <th class="th-f">Serviço<button class="th-fb" id="thi-svc" onclick="openCfp(event,'inprog','svc','Serviço')">▾</button></th>
-          <th class="th-f">Atendente<button class="th-fb" id="thi-agent" onclick="openCfp(event,'inprog','agent','Atendente')">▾</button></th>
+          <th class="th-f">Tipo<button class="th-fb" id="thi-tipo" onclick="openCfp(event,'inprog','tipo','Tipo')" aria-label="Filtrar por Tipo">▾</button></th>
+          <th class="th-f">Serviço<button class="th-fb" id="thi-svc" onclick="openCfp(event,'inprog','svc','Serviço')" aria-label="Filtrar por Serviço">▾</button></th>
+          <th class="th-f">Atendente<button class="th-fb" id="thi-agent" onclick="openCfp(event,'inprog','agent','Atendente')" aria-label="Filtrar por Atendente">▾</button></th>
           <th>Data</th>
           <th>Duração</th>
-          <th class="th-f">Origem<button class="th-fb" id="thi-origin" onclick="openCfp(event,'inprog','origin','Origem')">▾</button></th>
+          <th class="th-f">Origem<button class="th-fb" id="thi-origin" onclick="openCfp(event,'inprog','origin','Origem')" aria-label="Filtrar por Origem">▾</button></th>
           <th>Ação</th>
         </tr>
       </thead>
@@ -335,44 +427,104 @@ body.minimized .content { display:none; }
 
 </div><!-- /content -->
 
+<!-- TOAST -->
+<div id="toast" role="alert" aria-live="assertive"></div>
+
+<!-- COLUMN FILTER POPUP -->
+<div id="cfp" class="hidden" role="dialog" aria-modal="true">
+  <div class="cfp-head">
+    <span class="cfp-head-title" id="cfp-title">Filtrar</span>
+    <button class="cfp-xs" onclick="cfpAll()">Todos</button>
+    <button class="cfp-xs" onclick="cfpNone()">Limpar</button>
+  </div>
+  <div class="cfp-srch">
+    <input type="text" id="cfp-inp" placeholder="Buscar…" oninput="cfpRender()" aria-label="Buscar opção de filtro">
+  </div>
+  <div class="cfp-list" id="cfp-list"></div>
+  <div class="cfp-foot">
+    <button class="cfp-xs" onclick="cfpClose()">Fechar</button>
+    <button class="cfp-ok" onclick="cfpApply()">Aplicar</button>
+  </div>
+</div>
+
 <script>
 const REFRESH_SEC = 60;
 const PAGE_SIZE   = 20;
 
 let cfg = {
-  token:   localStorage.getItem('grv_token')   || '',
-  account: localStorage.getItem('grv_account') || '1'
+  token:     localStorage.getItem('grv_token')     || '',
+  account:   localStorage.getItem('grv_account')   || '1',
+  threshold: parseInt(localStorage.getItem('grv_threshold') || '0', 10) || 0
 };
 let timer = null, countdown = REFRESH_SEC;
 let _allInProg = [], _allWaiting = [], _inboxMap = {}, _shownCount = PAGE_SIZE, _totalOpen = 0;
 let _kpiPeriod = 'month';
 let _filters = { waiting: {}, inprog: {} };
 let _cfpState = { tbl: null, col: null, vals: [], sel: new Set() };
+let _showNd = false;
+let _toastTimer = null;
 
 /* ── TOKEN ── */
 function showTokenModal() {
-  document.getElementById('inp-token').value   = cfg.token;
-  document.getElementById('inp-account').value = cfg.account;
+  document.getElementById('inp-token').value     = cfg.token;
+  document.getElementById('inp-account').value   = cfg.account;
+  document.getElementById('inp-threshold').value = cfg.threshold || '';
+  const errEl = document.getElementById('modal-error');
+  errEl.style.display = 'none';
+  errEl.textContent   = '';
   document.getElementById('token-modal').classList.remove('hidden');
 }
 function saveToken() {
-  const token   = document.getElementById('inp-token').value.trim();
-  const account = document.getElementById('inp-account').value.trim() || '1';
-  if (!token) { alert('Insira o token.'); return; }
-  localStorage.setItem('grv_token',   token);
-  localStorage.setItem('grv_account', account);
-  cfg = { token, account };
+  const token     = document.getElementById('inp-token').value.trim();
+  const account   = document.getElementById('inp-account').value.trim() || '1';
+  const threshold = parseInt(document.getElementById('inp-threshold').value, 10) || 0;
+  const errEl     = document.getElementById('modal-error');
+
+  if (!token) {
+    errEl.textContent   = 'Insira o token de acesso antes de conectar.';
+    errEl.style.display = 'block';
+    document.getElementById('inp-token').focus();
+    return;
+  }
+
+  errEl.style.display = 'none';
+  localStorage.setItem('grv_token',     token);
+  localStorage.setItem('grv_account',   account);
+  localStorage.setItem('grv_threshold', threshold);
+  cfg = { token, account, threshold };
   document.getElementById('token-modal').classList.add('hidden');
   startDashboard();
 }
+
 if (!cfg.token) showTokenModal();
 else { document.getElementById('token-modal').classList.add('hidden'); startDashboard(); }
 
 /* ── MINIMIZE ── */
 function toggleMin() {
   document.body.classList.toggle('minimized');
-  document.getElementById('btn-min').textContent =
-    document.body.classList.contains('minimized') ? '⊞' : '⊟';
+  const min = document.body.classList.contains('minimized');
+  const btn = document.getElementById('btn-min');
+  btn.textContent = min ? '⊞' : '⊟';
+  btn.title       = min ? 'Expandir painel' : 'Minimizar painel';
+  btn.ariaLabel   = min ? 'Expandir painel' : 'Minimizar painel';
+}
+
+/* ── N/D TOGGLE ── */
+function toggleNd() {
+  _showNd = !_showNd;
+  document.getElementById('kpi-nd-btn').textContent = _showNd ? 'Ocultar N/D' : 'Mostrar N/D';
+  document.querySelectorAll('#kpi-tbody tr.dim').forEach(tr =>
+    tr.classList.toggle('show-nd', _showNd)
+  );
+}
+
+/* ── TOAST ── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 6000);
 }
 
 /* ── PERIOD ── */
@@ -401,10 +553,10 @@ function getPeriod(type) {
   }
 
   return {
-    since:      Math.floor(s0.getTime()  / 1000),
-    until:      Math.floor(now.getTime() / 1000),
-    prevSince:  Math.floor(ps0.getTime() / 1000),
-    prevUntil:  Math.floor(ps1.getTime() / 1000),
+    since:     Math.floor(s0.getTime()  / 1000),
+    until:     Math.floor(now.getTime() / 1000),
+    prevSince: Math.floor(ps0.getTime() / 1000),
+    prevUntil: Math.floor(ps1.getTime() / 1000),
     badgeLabel
   };
 }
@@ -490,7 +642,8 @@ async function fetchAll() {
     document.getElementById('hdr-countdown').textContent =
       `Próx. atualização em ${countdown}s`;
   } catch (e) {
-    document.getElementById('hdr-countdown').textContent = `Erro: ${e.message}`;
+    document.getElementById('hdr-countdown').textContent = `Erro ao atualizar`;
+    showToast(`Falha ao carregar dados: ${e.message}. Verifique sua conexão ou token de acesso.`);
     console.error(e);
   }
 }
@@ -503,35 +656,76 @@ function fmtSec(s) {
   const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
   return `${h}hr ${String(m).padStart(2, '0')}min`;
 }
+
 function chg(curr, prev, lowerBetter) {
   if (curr == null || prev == null || prev === 0)
-    return '<span class="kpi-chg nd">N/D</span>';
-  const pct = ((curr - prev) / prev * 100);
-  const up  = pct >= 0;
+    return '<span class="kpi-chg nd">—</span>';
+  const pct  = (curr - prev) / prev * 100;
+  const up   = pct >= 0;
   const good = lowerBetter ? !up : up;
   const cls  = good ? 'pos' : 'neg';
   return `<span class="kpi-chg ${cls}">${up ? '▲' : '▼'} ${Math.abs(pct).toFixed(1)}%</span>`;
 }
+
 function renderKPIs(s, sp) {
   const rows = [
-    { name: 'Chats atendidos', desc: 'Quantidade de chats atendidos no período', val: s.conversations_count, prev: sp.conversations_count, lb: false },
-    { name: 'Chats resolvidos em primeiro atendimento', desc: 'Quantidade de atendimentos via chat resolvidos durante a conversa', val: s.resolutions_count, prev: sp.resolutions_count, lb: false },
-    { name: 'Chats não resolvidos em primeiro atendimento', desc: 'Quantidade de atendimentos via chat que ficaram pendentes',
-      val:  (s.conversations_count != null && s.resolutions_count != null) ? Math.max(0, s.conversations_count - s.resolutions_count) : null,
-      prev: (sp.conversations_count != null && sp.resolutions_count != null) ? Math.max(0, sp.conversations_count - sp.resolutions_count) : null, lb: true },
-    { name: 'Mensagens offline recebidas', desc: 'Mensagens recebidas fora do horário ou enquanto agentes estavam offline', nd: true },
-    { name: 'Maior duração de atendimento', desc: 'Tempo da conversa mais longa do período', nd: true },
-    { name: 'Tempo médio de duração dos atendimentos', desc: 'Tempo médio de duração das conversas atendidas', val: s.avg_resolution_time, prev: sp.avg_resolution_time, lb: true, fmt: 'time' }
+    {
+      name: 'Chats atendidos',
+      desc: 'Quantidade de chats atendidos no período',
+      val:  s.conversations_count,
+      prev: sp.conversations_count,
+      lb:   false
+    },
+    {
+      name: 'Resolvidos em primeiro atendimento',
+      desc: 'Atendimentos resolvidos durante a própria conversa',
+      val:  s.resolutions_count,
+      prev: sp.resolutions_count,
+      lb:   false
+    },
+    {
+      name: 'Não resolvidos em primeiro atendimento',
+      desc: 'Atendimentos que ficaram pendentes após a conversa',
+      val:  (s.conversations_count != null && s.resolutions_count != null)
+              ? Math.max(0, s.conversations_count - s.resolutions_count) : null,
+      prev: (sp.conversations_count != null && sp.resolutions_count != null)
+              ? Math.max(0, sp.conversations_count - sp.resolutions_count) : null,
+      lb:   true
+    },
+    {
+      name: 'Mensagens offline recebidas',
+      desc: 'Recebidas fora do horário ou com agentes offline',
+      nd:   true
+    },
+    {
+      name: 'Maior duração de atendimento',
+      desc: 'Tempo da conversa mais longa do período',
+      nd:   true
+    },
+    {
+      name: 'Tempo médio de duração',
+      desc: 'Tempo médio das conversas atendidas no período',
+      val:  s.avg_resolution_time,
+      prev: sp.avg_resolution_time,
+      lb:   true,
+      fmt:  'time'
+    }
   ];
 
   document.getElementById('kpi-tbody').innerHTML = rows.map(r => {
     const nd  = r.nd || r.val == null;
     const vd  = nd ? '—' : (r.fmt === 'time' ? fmtSec(r.val) : r.val.toLocaleString('pt-BR'));
-    const pvd = nd ? 'N/D' : (r.prev != null ? (r.fmt === 'time' ? `Ant: ${fmtSec(r.prev)}` : `Ant: ${r.prev.toLocaleString('pt-BR')}`) : 'N/D');
-    return `<tr${nd ? ' class="dim"' : ''}>
-      <td style="min-width:220px"><div class="kpi-name">${esc(r.name)}</div><div class="kpi-desc">${esc(r.desc)}</div></td>
+    const pvd = nd ? '—' : (r.prev != null
+      ? (r.fmt === 'time' ? `Ant: ${fmtSec(r.prev)}` : `Ant: ${r.prev.toLocaleString('pt-BR')}`)
+      : '—');
+    const showCls = (nd && _showNd) ? ' show-nd' : '';
+    return `<tr${nd ? ` class="dim${showCls}"` : ''}>
+      <td style="min-width:220px">
+        <div class="kpi-name">${esc(r.name)}</div>
+        <div class="kpi-desc">${esc(r.desc)}</div>
+      </td>
       <td class="kpi-val${nd ? ' dim' : ''}" style="width:130px">${esc(vd)}</td>
-      <td class="kpi-prev" style="width:110px">${esc(pvd)}</td>
+      <td class="kpi-prev" style="width:110px">${nd ? '' : esc(pvd)}</td>
       <td style="width:80px;text-align:right">${nd ? '<span class="kpi-chg nd">N/D</span>' : chg(r.val, r.prev, r.lb)}</td>
     </tr>`;
   }).join('');
@@ -540,23 +734,95 @@ function renderKPIs(s, sp) {
 /* ── AGENTS ── */
 function renderAgents(agents, convs) {
   const cnt = {};
-  convs.forEach(c => { const id = c.meta?.assignee?.id; if (id) cnt[id] = (cnt[id] || 0) + 1; });
+  convs.forEach(c => {
+    const id = c.meta?.assignee?.id;
+    if (id) cnt[id] = (cnt[id] || 0) + 1;
+  });
+
   const online = agents.filter(a => a.availability_status === 'online').length;
-  document.getElementById('agents-label').textContent = `${online} online de ${agents.length}`;
+  document.getElementById('agents-label').textContent =
+    `${online} online de ${agents.length}`;
+
   const order = { online: 0, busy: 1, offline: 2 };
-  const sorted = [...agents].sort((a, b) => (order[a.availability_status] ?? 3) - (order[b.availability_status] ?? 3));
+  const sorted = [...agents].sort((a, b) =>
+    (order[a.availability_status] ?? 3) - (order[b.availability_status] ?? 3)
+  );
+
+  const statusMap = {
+    online:  { cls: 'dot-g', label: 'Online' },
+    busy:    { cls: 'dot-o', label: 'Ocupado' },
+    offline: { cls: 'dot-x', label: 'Offline' }
+  };
+
   document.getElementById('agents-tbody').innerHTML = sorted.map(a => {
-    const st = a.availability_status || 'offline';
-    const dc = st === 'online' ? 'dot-g' : st === 'busy' ? 'dot-o' : 'dot-x';
-    return `<tr><td class="ag-name">${esc(a.name)}</td><td><span class="dot ${dc}"></span></td><td><span class="dot ${dc}"></span></td><td class="ag-qty">${cnt[a.id] || 0}</td></tr>`;
+    const st  = a.availability_status || 'offline';
+    const sm  = statusMap[st] || statusMap.offline;
+    const qty = cnt[a.id] || 0;
+    return `<tr>
+      <td class="ag-name" title="${esc(a.name)}">${esc(a.name)}</td>
+      <td><span class="ag-status"><span class="dot ${sm.cls}"></span>${sm.label}</span></td>
+      <td class="ag-qty">${qty}</td>
+    </tr>`;
   }).join('');
+}
+
+/* ── URGENCY ── */
+function urgencyLevel(created_at) {
+  if (!created_at) return 0;
+  const mins = (Date.now() - created_at * 1000) / 60000;
+  if (mins >= 30) return 3;
+  if (mins >= 15) return 2;
+  if (mins >= 5)  return 1;
+  return 0;
+}
+
+const URG_ROW_CLS = ['', 'urg-warn', 'urg-alert', 'urg-crit'];
+const URG_DUR_CLS = ['', 'dur-warn', 'dur-alert', 'dur-crit'];
+const URG_CARD_CLS = ['', 'lvl-warn', 'lvl-alert', 'lvl-crit'];
+
+/* ── TRIAGE STRIP ── */
+function renderTriage(waiting) {
+  const strip = document.getElementById('triage-strip');
+  if (!waiting.length) { strip.style.display = 'none'; return; }
+
+  const byOrigin = {};
+  waiting.forEach(c => {
+    const origin = originOf((_inboxMap[c.inbox_id] || {}).channel_type);
+    if (!byOrigin[origin]) byOrigin[origin] = { count: 0, maxLevel: 0, maxMins: 0 };
+    byOrigin[origin].count++;
+    const mins = c.created_at ? (Date.now() - c.created_at * 1000) / 60000 : 0;
+    if (mins > byOrigin[origin].maxMins) byOrigin[origin].maxMins = mins;
+    const lvl = urgencyLevel(c.created_at);
+    if (lvl > byOrigin[origin].maxLevel) byOrigin[origin].maxLevel = lvl;
+  });
+
+  document.getElementById('triage-cards').innerHTML = Object.entries(byOrigin)
+    .sort((a, b) => b[1].count - a[1].count)
+    .map(([origin, d]) => {
+      const cardCls = URG_CARD_CLS[d.maxLevel];
+      const maxLabel = d.maxMins >= 1
+        ? `Máx: ${Math.round(d.maxMins)}min em espera`
+        : `Máx: <1min em espera`;
+      return `<div class="triage-card ${cardCls}">
+        <div>
+          <div class="triage-origin">${esc(origin)}</div>
+          <div class="triage-max">${maxLabel}</div>
+        </div>
+        <div class="triage-count">${d.count}</div>
+      </div>`;
+    }).join('');
+
+  strip.style.display = 'flex';
 }
 
 /* ── CONVERSATIONS ── */
 function renderConvs(convs) {
-  _allWaiting = convs.filter(c => !c.meta?.assignee?.id).sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
-  _allInProg  = convs.filter(c =>  c.meta?.assignee?.id).sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
+  _allWaiting = convs.filter(c => !c.meta?.assignee?.id)
+                     .sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
+  _allInProg  = convs.filter(c =>  c.meta?.assignee?.id)
+                     .sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
   _shownCount = PAGE_SIZE;
+  renderTriage(_allWaiting);
   renderWaiting();
   renderInprog();
 }
@@ -565,9 +831,12 @@ function renderWaiting() {
   const filtered = applyFilters(_allWaiting, 'waiting');
   const bw = document.getElementById('badge-waiting');
   bw.textContent = filtered.length;
-  bw.className   = `badge ${filtered.length > 0 ? 'badge-orange' : 'badge-subtle'}`;
+
+  const exceeded = cfg.threshold > 0 && filtered.length >= cfg.threshold;
+  bw.className = `badge ${filtered.length > 0 ? 'badge-orange' : 'badge-subtle'}${exceeded ? ' badge-pulse' : ''}`;
+
   document.getElementById('waiting-tbody').innerHTML = filtered.length
-    ? filtered.map(c => rowHtml(c)).join('')
+    ? filtered.map(c => rowHtml(c, true)).join('')
     : emptyRow('Nenhuma conversa aguardando atendimento', 10);
   syncFilterButtons('waiting');
 }
@@ -575,31 +844,47 @@ function renderWaiting() {
 function renderInprog() {
   const filtered = applyFilters(_allInProg, 'inprog');
   const shown    = filtered.slice(0, _shownCount);
-  const groupOrder = [], groups = {};
-  shown.forEach(c => { const k = c.inbox_id; if (!groups[k]) { groups[k] = []; groupOrder.push(k); } groups[k].push(c); });
+
+  const groupOrder = [];
+  const groups     = {};
+  shown.forEach(c => {
+    const k = c.inbox_id;
+    if (!groups[k]) { groups[k] = []; groupOrder.push(k); }
+    groups[k].push(c);
+  });
+
   let html = '';
   groupOrder.forEach(iid => {
-    html += `<tr class="queue-row"><td colspan="10">${esc((_inboxMap[iid] || {}).name || `Fila #${iid}`)}</td></tr>`;
-    html += groups[iid].map(c => rowHtml(c)).join('');
+    const name = (_inboxMap[iid] || {}).name || `Fila #${iid}`;
+    html += `<tr class="queue-row"><td colspan="10">${esc(name)}</td></tr>`;
+    html += groups[iid].map(c => rowHtml(c, false)).join('');
   });
+
   if (!html) html = emptyRow('Nenhuma conversa em atendimento', 10);
   document.getElementById('inprog-tbody').innerHTML = html;
-  document.getElementById('badge-inprog').textContent = `${Math.min(_shownCount, filtered.length)} de ${_totalOpen} abertas`;
-  document.getElementById('show-more-wrap').style.display = filtered.length > _shownCount ? '' : 'none';
+
+  document.getElementById('badge-inprog').textContent =
+    `${Math.min(_shownCount, filtered.length)} de ${_totalOpen} abertas`;
+
+  document.getElementById('show-more-wrap').style.display =
+    filtered.length > _shownCount ? '' : 'none';
+
   syncFilterButtons('inprog');
 }
 
-function showMore() { _shownCount += PAGE_SIZE; renderInprog(); }
+function showMore() {
+  _shownCount += PAGE_SIZE;
+  renderInprog();
+}
 
 function isGroup(c) {
   if (c.meta?.sender?.type === 'group') return true;
   const name = (c.meta?.sender?.name || '').toUpperCase();
   if (name.includes('(GROUP)') || name.includes('(GRUPO)')) return true;
-  if ((c.meta?.sender?.identifier || '').endsWith('@g.us')) return true;
-  return false;
+  return (c.meta?.sender?.identifier || '').endsWith('@g.us');
 }
 
-function rowHtml(c) {
+function rowHtml(c, applyUrgency) {
   const inbox  = _inboxMap[c.inbox_id] || {};
   const url    = `https://nxticket.com.br/app/accounts/${cfg.account}/conversations/${c.id}`;
   const ref    = c.meta?.sender?.phone_number || '—';
@@ -609,10 +894,15 @@ function rowHtml(c) {
   const dur    = c.created_at ? fmtMs(Date.now() - c.created_at * 1000) : '—';
   const date   = c.created_at ? fmtDate(c.created_at) : '—';
   const origin = originOf(inbox.channel_type);
-  const tipoBadge = isGroup(c)
+  const grupo  = isGroup(c);
+  const lvl    = applyUrgency ? urgencyLevel(c.created_at) : 0;
+  const rowCls = URG_ROW_CLS[lvl] ? ` ${URG_ROW_CLS[lvl]}` : '';
+  const durCls = URG_DUR_CLS[lvl] ? ` ${URG_DUR_CLS[lvl]}` : '';
+  const tipoBadge = grupo
     ? '<span class="tipo-badge tipo-grupo">Grupo</span>'
     : '<span class="tipo-badge tipo-ind">Individual</span>';
-  return `<tr class="data-row" onclick="window.open('${esc(url)}','_blank')">
+
+  return `<tr class="data-row${rowCls}" onclick="window.open('${esc(url)}','_blank')">
     <td class="c-ticket">#${c.id}</td>
     <td class="c-ref">${esc(ref)}</td>
     <td class="c-client">${esc(client)}</td>
@@ -620,7 +910,7 @@ function rowHtml(c) {
     <td class="c-svc">${esc(svc)}</td>
     <td class="${agent ? 'c-agent' : 'c-none'}">${agent ? esc(agent) : '—'}</td>
     <td class="c-date">${date}</td>
-    <td class="c-dur">${dur}</td>
+    <td class="c-dur${durCls}">${dur}</td>
     <td><a class="c-link" href="${esc(url)}" target="_blank" onclick="event.stopPropagation()">${origin}</a></td>
     <td><a class="c-link" href="${esc(url)}" target="_blank" onclick="event.stopPropagation()">Abrir →</a></td>
   </tr>`;
@@ -635,10 +925,16 @@ function colValue(c, col) {
   if (col === 'origin') return originOf(inbox.channel_type);
   return '';
 }
+
 function applyFilters(convs, tbl) {
   const fs = _filters[tbl];
-  return convs.filter(c => Object.entries(fs).every(([col, allowed]) => !allowed || allowed.size === 0 || allowed.has(colValue(c, col))));
+  return convs.filter(c =>
+    Object.entries(fs).every(([col, allowed]) =>
+      !allowed || allowed.size === 0 || allowed.has(colValue(c, col))
+    )
+  );
 }
+
 function syncFilterButtons(tbl) {
   const prefix = tbl === 'waiting' ? 'thw' : 'thi';
   ['tipo','svc','agent','origin'].forEach(col => {
@@ -646,48 +942,75 @@ function syncFilterButtons(tbl) {
     if (el) el.classList.toggle('on', !!(_filters[tbl][col] && _filters[tbl][col].size > 0));
   });
 }
+
 function openCfp(event, tbl, col, label) {
   event.stopPropagation();
-  const source  = tbl === 'waiting' ? _allWaiting : _allInProg;
+  const source = tbl === 'waiting' ? _allWaiting : _allInProg;
   const allVals = [...new Set(source.map(c => colValue(c, col)))].sort();
   const active  = _filters[tbl][col];
   _cfpState = { tbl, col, vals: allVals, sel: active ? new Set(active) : new Set(allVals) };
+
   document.getElementById('cfp-title').textContent = label;
   document.getElementById('cfp-inp').value = '';
   cfpRender();
+
   const popup = document.getElementById('cfp');
   popup.classList.remove('hidden');
   const rect = event.currentTarget.getBoundingClientRect();
   const pw = 220, ph = 340;
-  let left = rect.left, top = rect.bottom + 4;
+  let left = rect.left;
+  let top  = rect.bottom + 4;
   if (left + pw > window.innerWidth  - 8) left = window.innerWidth  - pw - 8;
   if (top  + ph > window.innerHeight - 8) top  = rect.top - ph - 4;
   popup.style.left = Math.max(4, left) + 'px';
   popup.style.top  = Math.max(4, top)  + 'px';
 }
+
 function cfpRender() {
   const q   = (document.getElementById('cfp-inp').value || '').toLowerCase();
   const vis = _cfpState.vals.filter(v => !q || v.toLowerCase().includes(q));
   document.getElementById('cfp-list').innerHTML = vis.map(v => {
     const chk = _cfpState.sel.has(v) ? 'checked' : '';
-    return `<label class="cfp-opt"><input type="checkbox" ${chk} data-val="${esc(v)}" onchange="cfpToggle(this)"><span>${esc(v)}</span></label>`;
+    return `<label class="cfp-opt">
+      <input type="checkbox" ${chk} data-val="${esc(v)}" onchange="cfpToggle(this)">
+      <span>${esc(v)}</span>
+    </label>`;
   }).join('') || '<div style="padding:10px 12px;color:var(--text3);font-size:12px">Nenhum resultado</div>';
 }
-function cfpToggle(el) { const val = el.dataset.val; if (el.checked) _cfpState.sel.add(val); else _cfpState.sel.delete(val); }
-function cfpAll()  { _cfpState.sel = new Set(_cfpState.vals); cfpRender(); }
-function cfpNone() { _cfpState.sel.clear(); cfpRender(); }
+
+function cfpToggle(el) {
+  if (el.checked) _cfpState.sel.add(el.dataset.val);
+  else            _cfpState.sel.delete(el.dataset.val);
+}
+
+function cfpAll()   { _cfpState.sel = new Set(_cfpState.vals); cfpRender(); }
+function cfpNone()  { _cfpState.sel.clear(); cfpRender(); }
 function cfpClose() { document.getElementById('cfp').classList.add('hidden'); }
+
 function cfpApply() {
   const { tbl, col } = _cfpState;
-  if (_cfpState.sel.size === 0 || _cfpState.sel.size === _cfpState.vals.length) delete _filters[tbl][col];
-  else _filters[tbl][col] = new Set(_cfpState.sel);
+  if (_cfpState.sel.size === 0 || _cfpState.sel.size === _cfpState.vals.length) {
+    delete _filters[tbl][col];
+  } else {
+    _filters[tbl][col] = new Set(_cfpState.sel);
+  }
   cfpClose();
   if (tbl === 'waiting') renderWaiting();
   else { _shownCount = PAGE_SIZE; renderInprog(); }
 }
+
 document.addEventListener('click', e => {
   const p = document.getElementById('cfp');
   if (p && !p.classList.contains('hidden') && !p.contains(e.target)) cfpClose();
+
+/* ── KEYBOARD SHORTCUTS ── */
+document.addEventListener('keydown', e => {
+  const tag = document.activeElement?.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+  if (e.key === 'r' || e.key === 'R') { e.preventDefault(); fetchAll(); }
+  if (e.key === 'm' || e.key === 'M') { e.preventDefault(); toggleMin(); }
+  if (e.key === 'Escape') cfpClose();
+});
 });
 
 /* ── HELPERS ── */
@@ -699,34 +1022,31 @@ function fmtMs(ms) {
   return `${h}hr ${String(m).padStart(2, '0')}min`;
 }
 function fmtDate(ts) {
-  return new Date(ts * 1000).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  return new Date(ts * 1000).toLocaleString('pt-BR', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
 }
 function originOf(ch) {
-  return ({'Channel::Whatsapp':'WhatsApp','Channel::Email':'E-mail','Channel::Api':'Chat','Channel::WebWidget':'Chat','Channel::TwilioSms':'SMS','Channel::Telegram':'Telegram','Channel::Instagram':'Instagram','Channel::Facebook':'Facebook'})[ch] || 'Chat';
+  return ({
+    'Channel::Whatsapp':  'WhatsApp',
+    'Channel::Email':     'E-mail',
+    'Channel::Api':       'Chat',
+    'Channel::WebWidget': 'Chat',
+    'Channel::TwilioSms': 'SMS',
+    'Channel::Telegram':  'Telegram',
+    'Channel::Instagram': 'Instagram',
+    'Channel::Facebook':  'Facebook'
+  })[ch] || 'Chat';
 }
 function emptyRow(msg, cols) {
   return `<tr><td colspan="${cols}" style="padding:16px;text-align:center;color:var(--text3);font-style:italic">${msg}</td></tr>`;
 }
 function esc(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 </script>
-
-<!-- COLUMN FILTER POPUP -->
-<div id="cfp" class="hidden">
-  <div class="cfp-head">
-    <span class="cfp-head-title" id="cfp-title">Filtrar</span>
-    <button class="cfp-xs" onclick="cfpAll()">Todos</button>
-    <button class="cfp-xs" onclick="cfpNone()">Limpar</button>
-  </div>
-  <div class="cfp-srch">
-    <input type="text" id="cfp-inp" placeholder="Buscar…" oninput="cfpRender()">
-  </div>
-  <div class="cfp-list" id="cfp-list"></div>
-  <div class="cfp-foot">
-    <button class="cfp-xs" onclick="cfpClose()">Fechar</button>
-    <button class="cfp-ok" onclick="cfpApply()">Aplicar</button>
-  </div>
-</div>
 </body>
 </html>
