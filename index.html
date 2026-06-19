@@ -1593,64 +1593,117 @@ function renderCharts() {
   if (!window.Chart || !_chartData.length) return;
   const c      = chartColors();
   const labels = _chartData.map(d => d.label);
+  const n      = _chartData.length;
 
-  /* TMA */
-  destroyChart('tma');
-  const tmaOpts = makeChartOpts(false, v => { const h = Math.floor(v), m = Math.round((v - h) * 60); return `${h}hr ${String(m).padStart(2, '0')}min`; });
-  tmaOpts.animation = false;
-  _charts.tma = new Chart(document.getElementById('chart-tma'), {
-    type: 'line',
-    data: { labels, datasets: [{ data: _chartData.map(d => d.avg_resolution_time != null ? +(d.avg_resolution_time / 3600).toFixed(2) : null), borderColor: c.line, backgroundColor: 'rgba(59,130,246,0.08)', pointBackgroundColor: c.line, tension: 0.3, fill: true, spanGaps: true }] },
-    options: tmaOpts
-  });
-
-  /* TMR */
-  destroyChart('tmr');
-  const tmrData = _chartData.map(d => d.avg_first_response_time != null ? +(d.avg_first_response_time / 60).toFixed(1) : null);
-  const hasTmr  = tmrData.some(v => v != null && v > 0);
-  document.getElementById('chart-tmr-wrap').style.display = hasTmr ? '' : 'none';
-  document.getElementById('chart-tmr-na').style.display   = hasTmr ? 'none' : '';
-  if (hasTmr) {
-    const tmrOpts = makeChartOpts(false, v => `${v}min`);
-    tmrOpts.animation = false;
-    _charts.tmr = new Chart(document.getElementById('chart-tmr'), {
-      type: 'line',
-      data: { labels, datasets: [{ data: tmrData, borderColor: c.line, backgroundColor: 'rgba(59,130,246,0.08)', pointBackgroundColor: c.line, tension: 0.3, fill: true, spanGaps: true }] },
-      options: tmrOpts
-    });
+  function trendEl(elId, current, previous, invertSign) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    if (!previous || previous === 0 || current == null) { el.innerHTML = ''; return; }
+    const pct      = Math.round(((current - previous) / previous) * 100);
+    if (pct === 0) { el.innerHTML = ''; return; }
+    const up       = pct > 0;
+    const positive = invertSign ? !up : up;
+    const cls      = positive ? 'chart-trend-pos' : 'chart-trend-neg';
+    el.className   = cls;
+    el.textContent = `${up ? '↑' : '↓'} ${Math.abs(pct)}% vs ant.`;
   }
 
-  /* FCR */
-  destroyChart('fcr');
-  const fcrOpts = makeChartOpts(false, v => `${v}%`);
-  fcrOpts.scales.y.min = 0; fcrOpts.scales.y.max = 100; fcrOpts.animation = false;
-  _charts.fcr = new Chart(document.getElementById('chart-fcr'), {
-    type: 'bar',
-    data: { labels, datasets: [{ data: _chartData.map(d => d.conversations_count > 0 ? +((d.resolutions_count / d.conversations_count) * 100).toFixed(1) : 0), backgroundColor: c.bar, borderRadius: 3 }] },
-    options: fcrOpts
-  });
-
-  /* Volume */
+  /* ── Volume de Atendimentos ── */
   destroyChart('vol');
+  trendEl('trend-vol',
+    _chartData[n - 1]?.conversations_count,
+    _chartData[n - 2]?.conversations_count,
+    false
+  );
   const volOpts = makeChartOpts(false);
   volOpts.animation = false;
   _charts.vol = new Chart(document.getElementById('chart-vol'), {
     type: 'bar',
-    data: { labels, datasets: [{ data: _chartData.map(d => d.conversations_count || 0), backgroundColor: c.bar, borderRadius: 3 }] },
+    data: { labels, datasets: [{ data: _chartData.map(d => d.conversations_count || 0), backgroundColor: '#3b82f6', borderRadius: 3 }] },
     options: volOpts
   });
 
-  /* Carga por agente (de _rawConvs) */
+  /* ── Pico de Horário ── */
+  destroyChart('peak');
+  const hourBuckets = new Array(24).fill(0);
+  _rawConvs.forEach(cv => {
+    if (!cv.created_at) return;
+    const h = new Date(cv.created_at * 1000).getHours();
+    hourBuckets[h]++;
+  });
+  const peakIdx  = hourBuckets.indexOf(Math.max(...hourBuckets));
+  const peakOpts = makeChartOpts(false);
+  peakOpts.animation = false;
+  peakOpts.plugins.tooltip.callbacks = {
+    title: items => `${items[0].label}`,
+    label: item  => `${item.raw} atendimento${item.raw !== 1 ? 's' : ''}`
+  };
+  _charts.peak = new Chart(document.getElementById('chart-peak'), {
+    type: 'bar',
+    data: {
+      labels: Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, '0')}h`),
+      datasets: [{
+        data: hourBuckets,
+        backgroundColor: hourBuckets.map((_, i) => i === peakIdx ? '#f97316' : 'rgba(249,115,22,0.4)'),
+        borderRadius: 3
+      }]
+    },
+    options: peakOpts
+  });
+
+  /* ── Status das Conversas ── */
+  destroyChart('status');
+  const sc = { open: 0, resolved: 0, pending: 0 };
+  _rawConvs.forEach(cv => { if (cv.status in sc) sc[cv.status]++; });
+  _charts.status = new Chart(document.getElementById('chart-status'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Abertas', 'Resolvidas', 'Pendentes'],
+      datasets: [{
+        data: [sc.open, sc.resolved, sc.pending],
+        backgroundColor: ['#ef4444', '#22c55e', '#eab308'],
+        borderWidth: 2,
+        borderColor: c.tooltipBg
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '65%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: c.tooltipBg, titleColor: c.labels, bodyColor: c.labels, borderColor: c.grid, borderWidth: 1 }
+      }
+    }
+  });
+
+  /* ── Tempo Médio de Atendimento ── */
+  destroyChart('tma');
+  trendEl('trend-tma',
+    _chartData[n - 1]?.avg_resolution_time,
+    _chartData[n - 2]?.avg_resolution_time,
+    true
+  );
+  const tmaOpts = makeChartOpts(false, v => {
+    const h = Math.floor(v), m = Math.round((v - h) * 60);
+    return `${h}hr ${String(m).padStart(2, '0')}min`;
+  });
+  tmaOpts.animation = false;
+  _charts.tma = new Chart(document.getElementById('chart-tma'), {
+    type: 'line',
+    data: { labels, datasets: [{ data: _chartData.map(d => d.avg_resolution_time != null ? +(d.avg_resolution_time / 3600).toFixed(2) : null), borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.08)', pointBackgroundColor: '#8b5cf6', tension: 0.3, fill: true, spanGaps: true }] },
+    options: tmaOpts
+  });
+
+  /* ── Atendimentos por Agente ── */
   destroyChart('agents');
   const agCounts = {};
-  _rawConvs.forEach(cv => { const n = cv.meta?.assignee?.name; if (n) agCounts[n] = (agCounts[n] || 0) + 1; });
+  _rawConvs.forEach(cv => { const nm = cv.meta?.assignee?.name; if (nm) agCounts[nm] = (agCounts[nm] || 0) + 1; });
   const agSorted = Object.entries(agCounts).sort((a, b) => b[1] - a[1]).slice(0, 15);
-  const agOpts = makeChartOpts(true);
+  const agOpts   = makeChartOpts(true);
   agOpts.animation = false;
   agOpts.scales.y.ticks.font = { size: 11 };
   _charts.agents = new Chart(document.getElementById('chart-agents'), {
     type: 'bar',
-    data: { labels: agSorted.map(([n]) => n.length > 22 ? n.slice(0, 20) + '…' : n), datasets: [{ data: agSorted.map(([, v]) => v), backgroundColor: c.bar, borderRadius: 3 }] },
+    data: { labels: agSorted.map(([nm]) => nm.length > 22 ? nm.slice(0, 20) + '…' : nm), datasets: [{ data: agSorted.map(([, v]) => v), backgroundColor: '#14b8a6', borderRadius: 3 }] },
     options: agOpts
   });
 }
