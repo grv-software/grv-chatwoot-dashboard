@@ -1161,6 +1161,8 @@ async function fetchAll() {
 
     _inboxMap  = {};
     (inboxes.payload || []).forEach(i => { _inboxMap[i.id] = i; });
+    if (Array.isArray(agents)) _agentList = agents;
+    _agentTabDirty = true;
     _totalOpen = total;
 
     renderInboxBar(inboxes.payload || []);
@@ -1955,6 +1957,123 @@ async function fetchTeamComparison(periods) {
   return { items, total: ids.length, withData: items.length };
 }
 
+/* Retorna {since, until} para o período selecionado */
+function getAgentTabRange() {
+  const now   = new Date();
+  const until = Math.floor(now.getTime() / 1000);
+  let start;
+  if (_agentTabPeriod === '1') {
+    start = new Date(now.getFullYear(), now.getMonth(), 1);
+  } else {
+    const m = parseInt(_agentTabPeriod);
+    start = new Date(now.getFullYear(), now.getMonth() - m, 1);
+  }
+  return { since: Math.floor(start.getTime() / 1000), until };
+}
+
+/* Retorna array de {since, until, label} — um por mês — para o gráfico de detalhe */
+function getAgentMonths() {
+  const now    = new Date();
+  const months = _agentTabPeriod === '1' ? 1 : parseInt(_agentTabPeriod);
+  const result = [];
+  for (let i = months - 1; i >= 0; i--) {
+    const y  = now.getFullYear();
+    const m  = now.getMonth() - i;
+    const s  = new Date(y, m, 1);
+    const e  = new Date(y, m + 1, 0, 23, 59, 59);
+    const lbl = s.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
+    result.push({
+      since: Math.floor(s.getTime() / 1000),
+      until: Math.floor(Math.min(e.getTime(), now.getTime()) / 1000),
+      label: lbl.charAt(0).toUpperCase() + lbl.slice(1)
+    });
+  }
+  return result;
+}
+
+function isAuthError(e) {
+  if (!e) return false;
+  const s = String(e.status || e.message || e);
+  return s.includes('401') || s.includes('403') || s.includes('Unauthorized') || s.includes('Forbidden');
+}
+
+async function fetchAgentTab() {
+  const liveEl = document.getElementById('agent-live-section');
+  const perfEl = document.getElementById('agent-perf-section');
+  const csatEl = document.getElementById('agent-csat-section');
+  if (liveEl) liveEl.innerHTML = '<div class="agent-no-data">Carregando…</div>';
+  if (perfEl) perfEl.innerHTML = '<div class="agent-no-data">Carregando…</div>';
+  if (csatEl) csatEl.innerHTML = '<div class="agent-no-data">Carregando…</div>';
+
+  const { since, until } = getAgentTabRange();
+  const months           = getAgentMonths();
+
+  /* 1. Lista de agentes (já buscada em fetchAll — reusar _agentList) */
+  if (!_agentList.length) {
+    const agents = await api(`/v1/accounts/${cfg.account}/agents`).catch(() => []);
+    if (Array.isArray(agents)) _agentList = agents;
+  }
+
+  const visibleAgents = (_agentTabFilter && _agentTabFilter.size > 0)
+    ? _agentList.filter(a => _agentTabFilter.has(a.id))
+    : _agentList;
+
+  /* 2. Overview ao vivo */
+  _agentOverview = await api(`/v2/accounts/${cfg.account}/reports/overview`)
+    .catch(() => null);
+
+  /* 3. Summary por agente (período agregado) + detalhe mensal */
+  try {
+    const summaries = await Promise.all(visibleAgents.map(a =>
+      api(`/v2/accounts/${cfg.account}/reports/summary?type=agent&id=${a.id}&since=${since}&until=${until}`)
+        .catch(() => null)
+    ));
+
+    const monthDetails = await Promise.all(visibleAgents.map(a =>
+      Promise.all(months.map(mo =>
+        api(`/v2/accounts/${cfg.account}/reports/summary?type=agent&id=${a.id}&since=${mo.since}&until=${mo.until}`)
+          .catch(() => null)
+      ))
+    ));
+
+    _agentPerfData = {};
+    visibleAgents.forEach((a, i) => {
+      _agentPerfData[a.id] = {
+        agent:   a,
+        summary: summaries[i],
+        months:  monthDetails[i].map((r, j) => ({ ...months[j], data: r }))
+      };
+    });
+  } catch (e) {
+    if (isAuthError(e)) {
+      _agentPerfData = { _authError: true };
+    } else {
+      _agentPerfData = {};
+    }
+  }
+
+  /* 4. CSAT */
+  _agentCsat = await api(`/v1/accounts/${cfg.account}/reports/agents/satisfaction?since=${since}&until=${until}`)
+    .then(data => {
+      if (!Array.isArray(data) || !data.length) return null;
+      const byAgent = {};
+      data.forEach(r => {
+        const id   = r.assigned_agent?.id;
+        const name = r.assigned_agent?.name || 'Desconhecido';
+        if (!id) return;
+        if (!byAgent[id]) byAgent[id] = { id, name, total: 0, positive: 0 };
+        byAgent[id].total++;
+        if (r.rating === 'Satisfied') byAgent[id].positive++;
+      });
+      return Object.values(byAgent);
+    })
+    .catch(() => null);
+
+  const updEl = document.getElementById('agent-tab-updated');
+  if (updEl) updEl.textContent = `Atualizado às ${new Date().toLocaleTimeString('pt-BR')}`;
+
+  renderAgentTab();
+}
 
 function renderCharts() {
   if (!window.Chart || !_chartData.length) return;
