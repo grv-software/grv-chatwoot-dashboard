@@ -6,6 +6,7 @@
 <link rel="icon" type="image/png" href="icone-grvlaranja.png">
 <link rel="apple-touch-icon" href="icone-grvlaranja.png">
 <title>GRV SAC | Painel de Atendimento</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root {
   --bg: #0f1117; --bg2: #181c27; --bg3: #1e2334; --border: #2a3048;
@@ -63,7 +64,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 /* INBOX FILTER BAR */
 .inbox-bar {
   background:var(--bg2); border-bottom:1px solid var(--border);
-  padding:5px 24px; position:sticky; top:56px; z-index:90;
+  padding:5px 24px; position:sticky; top:56px; z-index:90; margin-left:52px;
   display:flex; align-items:center; gap:8px; flex-wrap:wrap;
   min-height:36px;
 }
@@ -115,9 +116,57 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 /* KPI FILTER NOTE */
 .kpi-filter-note { font-size:10px; color:var(--accent); padding:4px 14px 5px; background:rgba(59,130,246,.06); border-top:1px solid rgba(59,130,246,.15); }
 
+/* SIDEBAR */
+.sidebar {
+  position:fixed; left:0; top:56px; bottom:0; width:52px;
+  background:var(--bg2); border-right:1px solid var(--border);
+  z-index:90; overflow:hidden; transition:width .2s ease;
+  display:flex; flex-direction:column; gap:2px; padding:8px 4px;
+}
+.sidebar:hover { width:180px; }
+.sidebar-item {
+  display:flex; align-items:center; gap:10px; padding:9px 10px;
+  border-radius:6px; cursor:pointer; color:var(--text3);
+  font-size:13px; font-weight:500; white-space:nowrap; user-select:none;
+  transition:background .15s, color .15s;
+}
+.sidebar-item:hover { background:var(--bg3); color:var(--text); }
+.sidebar-item.active { background:rgba(59,130,246,.12); color:var(--accent); }
+.sidebar-icon { font-size:17px; flex-shrink:0; width:32px; text-align:center; line-height:1; }
+
 /* CONTENT */
-.content { padding:12px 16px; display:flex; flex-direction:column; gap:10px; }
-body.minimized .content { display:none; }
+.content { padding:12px 16px; display:flex; flex-direction:column; gap:10px; margin-left:52px; }
+
+/* CHARTS PAGE */
+.chart-grid-op { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+.chart-grid-2  { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media (max-width:900px) { .chart-grid-op, .chart-grid-2 { grid-template-columns:1fr; } }
+.chart-card { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,.2); }
+.chart-full { grid-column:1/-1; }
+.chart-card-hdr { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:4px; }
+.chart-card-title { font-size:13px; font-weight:700; color:var(--text); }
+.chart-card-sub { font-size:11px; color:var(--text3); margin-top:3px; line-height:1.4; max-width:300px; }
+.chart-trend-pos { font-size:12px; font-weight:600; color:var(--green); white-space:nowrap; padding-top:2px; }
+.chart-trend-neg { font-size:12px; font-weight:600; color:var(--red); white-space:nowrap; padding-top:2px; }
+.chart-wrap { position:relative; height:240px; margin-top:10px; }
+.chart-na { display:flex; align-items:center; justify-content:center; height:160px; color:var(--text3); font-size:12px; font-style:italic; text-align:center; }
+.chart-hdr { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px; padding:4px 0; }
+.chart-hdr h2 { font-size:15px; font-weight:700; flex:1; }
+.chart-sel { padding:5px 10px; background:var(--bg3); border:1px solid var(--border); border-radius:4px; color:var(--text); font-size:12px; cursor:pointer; outline:none; }
+.metric-card { display:flex; align-items:center; justify-content:space-between; padding-bottom:12px; border-bottom:1px solid var(--border); gap:12px; }
+.metric-value { font-size:28px; font-weight:800; line-height:1; }
+.metric-label { font-size:11px; color:var(--text3); margin-top:3px; }
+.metric-trend-up { font-size:13px; font-weight:700; color:var(--green); }
+.metric-trend-dn { font-size:13px; font-weight:700; color:var(--red); }
+.section-divider { display:flex; align-items:center; gap:10px; margin:8px 0 10px; }
+.section-divider::before,.section-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+.section-divider-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--text3); white-space:nowrap; }
+@keyframes live-pulse { 0%,100% { opacity:1; } 50% { opacity:.35; } }
+.badge-live { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:700; color:var(--green); animation:live-pulse 2s ease-in-out infinite; padding-top:2px; }
+.badge-live::before { content:'●'; }
+.chart-legend { display:flex; justify-content:center; gap:16px; margin-top:10px; flex-wrap:wrap; }
+.chart-legend-item { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text2); }
+.chart-legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 
 /* TOP ROW */
 .top-row { display:grid; grid-template-columns:1fr 380px; border:1px solid var(--border); border-radius:6px; overflow:hidden; }
@@ -310,6 +359,18 @@ body.minimized .content { display:none; }
   </div>
 </div>
 
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar" aria-label="Navegação principal">
+  <div class="sidebar-item active" id="nav-painel" onclick="showPage('painel')" title="Painel">
+    <span class="sidebar-icon">📊</span>
+    <span class="sidebar-label">Painel</span>
+  </div>
+  <div class="sidebar-item" id="nav-graficos" onclick="showPage('graficos')" title="Análise">
+    <span class="sidebar-icon">📈</span>
+    <span class="sidebar-label">Análise</span>
+  </div>
+</nav>
+
 <!-- HEADER -->
 <div class="panel-header">
   <div class="panel-logo">
@@ -322,7 +383,6 @@ body.minimized .content { display:none; }
   <button class="btn-hdr blue" onclick="fetchAll()" aria-label="Atualizar dados agora" title="Atualizar agora">↺ Atualizar</button>
   <div class="hdr-updated" id="hdr-updated">Atualizado às —</div>
   <button class="btn-hdr" id="btn-theme" onclick="toggleTheme()" aria-label="Alternar tema claro/escuro" title="Mudar para modo claro" style="font-size:15px;padding:4px 9px">☾</button>
-  <button class="btn-hdr" id="btn-min" onclick="toggleMin()" aria-label="Minimizar painel" title="Minimizar painel">⊟</button>
   <button class="btn-hdr" onclick="showTokenModal()" aria-label="Abrir configurações de acesso" title="Configurações de acesso">⚙ Token</button>
 </div>
 
@@ -459,6 +519,144 @@ body.minimized .content { display:none; }
 
 </div><!-- /content -->
 
+<!-- GRAFICOS PAGE (Análise) -->
+<div id="graficos-page" style="display:none;padding:12px 24px 32px;background:var(--bg);min-height:calc(100vh - 56px);margin-left:52px">
+  <!-- Header -->
+  <div class="chart-hdr">
+    <h2>Análise</h2>
+    <button class="inbox-trigger" id="chart-inbox-trigger" onclick="openChartIbp(event)" aria-label="Filtrar por caixa de entrada">
+      <span id="chart-inbox-trigger-txt">Todas</span> ▾
+    </button>
+    <div class="inbox-chips" id="chart-inbox-chips"></div>
+    <button class="inbox-clear" id="chart-inbox-clear" onclick="clearChartInboxFilter()" style="display:none">✕ Limpar</button>
+    <select id="chart-period-sel" class="chart-sel" onchange="fetchChartData()">
+      <option value="3">Últimos 3 meses</option>
+      <option value="6" selected>Últimos 6 meses</option>
+      <option value="12">Últimos 12 meses</option>
+    </select>
+    <button id="chart-update-btn" class="btn-hdr blue" onclick="fetchChartData()">↺ Atualizar</button>
+  </div>
+
+  <!-- ── VOLUME ── -->
+  <div class="section-divider"><span class="section-divider-label">Volume</span></div>
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="metric-card">
+        <div><div class="metric-value" id="mv-vol">—</div><div class="metric-label">atendimentos este mês</div></div>
+        <span class="metric-trend-up" id="mt-vol"></span>
+      </div>
+      <div class="chart-card-hdr" style="margin-top:10px">
+        <div><div class="chart-card-title">Volume de Atendimentos</div><div class="chart-card-sub">Total mensal no período selecionado</div></div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-vol"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="metric-card">
+        <div><div class="metric-value" id="mv-channel" style="font-size:17px;word-break:break-word">—</div><div class="metric-label">canal com maior volume agora</div></div>
+        <span class="badge-live">Ao vivo</span>
+      </div>
+      <div class="chart-card-hdr" style="margin-top:10px">
+        <div><div class="chart-card-title">De onde vêm os atendimentos?</div><div class="chart-card-sub">Volume por canal de comunicação</div></div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-channel"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ── VELOCIDADE ── -->
+  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">Velocidade</span></div>
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="metric-card">
+        <div><div class="metric-value" id="mv-tma">—</div><div class="metric-label">tempo médio de resolução este mês</div></div>
+        <span class="metric-trend-up" id="mt-tma"></span>
+      </div>
+      <div class="chart-card-hdr" style="margin-top:10px">
+        <div><div class="chart-card-title">Quanto tempo leva pra resolver? (TMA)</div><div class="chart-card-sub">Quanto menor, melhor · Meta SLA: <span id="sla-tma-label">8hr</span></div></div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-tma"></canvas></div>
+    </div>
+    <div class="chart-card" id="chart-tmr-card">
+      <div class="metric-card">
+        <div><div class="metric-value" id="mv-tmr">—</div><div class="metric-label">tempo médio de 1ª resposta este mês</div></div>
+        <span class="metric-trend-up" id="mt-tmr"></span>
+      </div>
+      <div class="chart-card-hdr" style="margin-top:10px">
+        <div><div class="chart-card-title">Velocidade de resposta (TMR)</div><div class="chart-card-sub">Quanto menor, melhor · Meta SLA: <span id="sla-tmr-label">30min</span></div></div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-tmr"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="metric-card">
+        <div><div class="metric-value" id="mv-fcr">—</div><div class="metric-label">resolvidos no 1º contato este mês</div></div>
+        <span class="metric-trend-up" id="mt-fcr"></span>
+      </div>
+      <div class="chart-card-hdr" style="margin-top:10px">
+        <div><div class="chart-card-title">Taxa de resolução no 1º contato (FCR)</div><div class="chart-card-sub">≥90% ótimo · 70–90% ok · &lt;70% crítico · Meta: <span id="sla-fcr-label">85%</span></div></div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-fcr"></canvas></div>
+    </div>
+  </div>
+  <!-- Distribuição 1ª resposta (full) -->
+  <div class="chart-card chart-full" style="margin-top:12px">
+    <div class="metric-card">
+      <div><div class="metric-value" id="mv-dist">—</div><div class="metric-label">dos dias respondidos em menos de 1 hora</div></div>
+      <span class="badge-live" id="dist-badge">período selecionado</span>
+    </div>
+    <div class="chart-card-hdr" style="margin-top:10px">
+      <div><div class="chart-card-title">Em quanto tempo o cliente recebeu a 1ª resposta?</div><div class="chart-card-sub">Distribuição dos dias com dados no período</div></div>
+    </div>
+    <div class="chart-wrap" style="height:180px"><canvas id="chart-dist"></canvas></div>
+    <div id="chart-dist-na" class="chart-na" style="display:none">Dados de distribuição não disponíveis via API com este token</div>
+  </div>
+
+  <!-- ── EQUIPES ── -->
+  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">Equipes</span></div>
+  <div class="chart-card chart-full">
+    <div class="metric-card">
+      <div><div class="metric-value" id="mv-teams" style="font-size:17px;word-break:break-word">—</div><div class="metric-label">equipe com menor TMA no último mês</div></div>
+    </div>
+    <div class="chart-card-hdr" style="margin-top:10px">
+      <div><div class="chart-card-title">Qual equipe resolve mais rápido?</div><div class="chart-card-sub">TMA e TMR por equipe/inbox no último mês do período</div></div>
+    </div>
+    <div class="chart-wrap" style="height:240px"><canvas id="chart-teams"></canvas></div>
+    <div id="chart-teams-na" class="chart-na" style="display:none">Dados por equipe não disponíveis com este token</div>
+  </div>
+
+  <!-- ── AGENTES ── -->
+  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">Agentes</span></div>
+  <div class="chart-card chart-full">
+    <div class="chart-card-hdr">
+      <div><div class="chart-card-title">Carga por agente agora</div><div class="chart-card-sub">Conversas abertas por atendente</div></div>
+      <span class="badge-live">Ao vivo</span>
+    </div>
+    <div class="chart-wrap" style="height:280px"><canvas id="chart-agents"></canvas></div>
+  </div>
+
+  <!-- ── OPERACIONAL ── -->
+  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">Operacional</span></div>
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="chart-card-hdr">
+        <div><div class="chart-card-title">Pico de Horário</div><div class="chart-card-sub">Horários com mais atendimentos agora</div></div>
+        <span class="badge-live">Ao vivo</span>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-peak"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-hdr">
+        <div><div class="chart-card-title">Status das Conversas</div><div class="chart-card-sub">Distribuição atual das conversas</div></div>
+        <span class="badge-live">Ao vivo</span>
+      </div>
+      <div class="chart-wrap" style="height:200px"><canvas id="chart-status"></canvas></div>
+      <div class="chart-legend">
+        <span class="chart-legend-item"><span class="chart-legend-dot" style="background:#ef4444"></span>Abertas</span>
+        <span class="chart-legend-item"><span class="chart-legend-dot" style="background:#22c55e"></span>Resolvidas</span>
+        <span class="chart-legend-item"><span class="chart-legend-dot" style="background:#eab308"></span>Pendentes</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div id="toast" role="alert" aria-live="assertive"></div>
 
@@ -526,9 +724,16 @@ let _filters = { waiting: {}, inprog: {} };
 let _cfpState = { tbl: null, col: null, vals: [], sel: new Set() };
 let _showNd = false;
 let _toastTimer = null;
-let _inboxFilter = null; /* null = todas; Set<number> = filtro ativo */
+let _inboxFilter = null;      /* null = todas; Set<number> = filtro ativo */
 let _ibpSel = new Set();
-let _agentFilter = null; /* null = sem filtro; {id, name} = agente ativo */
+let _ibpMode = 'panel';       /* 'panel' | 'chart' — qual filtro o popup está editando */
+let _agentFilter = null;      /* null = sem filtro; {id, name} = agente ativo */
+let _chartInboxFilter = null; /* filtro de inbox independente da aba Análise */
+let _SLA_TMA = 8;      /* horas — meta de TMA */
+let _SLA_TMR = 30;     /* minutos — meta de TMR */
+let _SLA_FCR = 85;     /* % — meta de FCR */
+let _teamCompData = null; /* dados de comparação por equipe/inbox */
+let _distData = null;     /* distribuição 1ª resposta (faixas de tempo) */
 
 /* ── TOKEN ── */
 function showTokenModal() {
@@ -562,16 +767,6 @@ function saveToken() {
 
 if (!cfg.token) showTokenModal();
 else { document.getElementById('token-modal').classList.add('hidden'); startDashboard(); }
-
-/* ── MINIMIZE ── */
-function toggleMin() {
-  document.body.classList.toggle('minimized');
-  const min = document.body.classList.contains('minimized');
-  const btn = document.getElementById('btn-min');
-  btn.textContent = min ? '⊞' : '⊟';
-  btn.title       = min ? 'Expandir painel' : 'Minimizar painel';
-  btn.ariaLabel   = min ? 'Expandir painel' : 'Minimizar painel';
-}
 
 /* ── N/D TOGGLE ── */
 function toggleNd() {
@@ -979,7 +1174,8 @@ function renderTriage(waiting) {
 /* ── INBOX FILTER ── */
 function renderInboxBar(inboxes) {
   const bar = document.getElementById('inbox-bar');
-  if (!inboxes.length) { bar.style.display = 'none'; return; }
+  if (!inboxes.length) { bar.style.display = 'none'; _ibVisible = false; return; }
+  _ibVisible = true;
   bar.style.display = 'flex';
   syncInboxBar();
 }
@@ -1044,6 +1240,7 @@ function applyInboxAndRender() {
 }
 
 function openIbp(event) {
+  _ibpMode = 'panel';
   event.stopPropagation();
   const allIds = Object.keys(_inboxMap).map(Number);
   _ibpSel = _inboxFilter ? new Set(_inboxFilter) : new Set(allIds);
@@ -1113,14 +1310,24 @@ function ibpNone() {
 function ibpClose() {
   document.getElementById('ibp').classList.add('hidden');
   document.getElementById('inbox-trigger').classList.remove('active');
+  const cit = document.getElementById('chart-inbox-trigger');
+  if (cit) cit.classList.remove('active');
 }
 
 function ibpApply() {
   const allIds = Object.keys(_inboxMap).map(Number);
-  _inboxFilter = (_ibpSel.size === 0 || _ibpSel.size === allIds.length) ? null : new Set(_ibpSel);
-  ibpClose();
-  syncInboxBar();
-  applyInboxAndRender();
+  const filter = (_ibpSel.size === 0 || _ibpSel.size === allIds.length) ? null : new Set(_ibpSel);
+  if (_ibpMode === 'chart') {
+    _chartInboxFilter = filter;
+    ibpClose();
+    syncChartInboxBar();
+    fetchChartData();
+  } else {
+    _inboxFilter = filter;
+    ibpClose();
+    syncInboxBar();
+    applyInboxAndRender();
+  }
 }
 
 function clearInboxFilter() {
@@ -1136,6 +1343,81 @@ function removeInboxChip(id) {
   }
   syncInboxBar();
   applyInboxAndRender();
+}
+
+/* ── CHART INBOX FILTER ── */
+function openChartIbp(event) {
+  _ibpMode = 'chart';
+  event.stopPropagation();
+  const allIds = Object.keys(_inboxMap).map(Number);
+  _ibpSel = _chartInboxFilter ? new Set(_chartInboxFilter) : new Set(allIds);
+
+  const allCount   = allIds.length;
+  const allChecked = !_chartInboxFilter || _ibpSel.size === allCount;
+
+  let html = `<label class="ibp-opt all-toggle">
+    <input type="checkbox" id="ibp-all-chk" onchange="ibpToggleAll(this)" ${allChecked ? 'checked' : ''}>
+    <span>Todas as caixas (${allCount})</span>
+  </label>`;
+  const sorted = Object.values(_inboxMap).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  sorted.forEach(inbox => {
+    html += `<label class="ibp-opt">
+      <input type="checkbox" ${_ibpSel.has(inbox.id) ? 'checked' : ''} data-id="${inbox.id}" onchange="ibpToggle(this)">
+      <span>${esc(inbox.name)}</span>
+    </label>`;
+  });
+
+  document.getElementById('ibp-body').innerHTML = html;
+  const popup = document.getElementById('ibp');
+  popup.classList.remove('hidden');
+
+  const rect = event.currentTarget.getBoundingClientRect();
+  const pw = 260, ph = 380;
+  let left = rect.left;
+  let top  = rect.bottom + 4;
+  if (left + pw > window.innerWidth  - 8) left = window.innerWidth  - pw - 8;
+  if (top  + ph > window.innerHeight - 8) top  = rect.top - ph - 4;
+  popup.style.left = Math.max(4, left) + 'px';
+  popup.style.top  = Math.max(4, top)  + 'px';
+
+  const cit = document.getElementById('chart-inbox-trigger');
+  if (cit) cit.classList.add('active');
+}
+
+function syncChartInboxBar() {
+  const chipsEl  = document.getElementById('chart-inbox-chips');
+  const clearEl  = document.getElementById('chart-inbox-clear');
+  const trigTxt  = document.getElementById('chart-inbox-trigger-txt');
+  if (!chipsEl) return;
+
+  if (!_chartInboxFilter) {
+    chipsEl.innerHTML     = '';
+    if (clearEl) clearEl.style.display = 'none';
+    if (trigTxt) trigTxt.textContent   = 'Todas';
+    return;
+  }
+
+  if (trigTxt) trigTxt.textContent = `${_chartInboxFilter.size} selecionada${_chartInboxFilter.size > 1 ? 's' : ''}`;
+  if (clearEl) clearEl.style.display = '';
+  chipsEl.innerHTML = [..._chartInboxFilter].map(id => {
+    const name = (_inboxMap[id] || {}).name || `#${id}`;
+    return `<span class="inbox-chip">${esc(name)}<button class="inbox-chip-rm" onclick="removeChartInboxChip(${id})" aria-label="Remover ${esc(name)}">×</button></span>`;
+  }).join('');
+}
+
+function clearChartInboxFilter() {
+  _chartInboxFilter = null;
+  syncChartInboxBar();
+  fetchChartData();
+}
+
+function removeChartInboxChip(id) {
+  if (_chartInboxFilter) {
+    _chartInboxFilter.delete(id);
+    if (_chartInboxFilter.size === 0) _chartInboxFilter = null;
+  }
+  syncChartInboxBar();
+  fetchChartData();
 }
 
 function syncInboxBar() {
@@ -1344,14 +1626,14 @@ document.addEventListener('click', e => {
   const cfp = document.getElementById('cfp');
   if (cfp && !cfp.classList.contains('hidden') && !cfp.contains(e.target)) cfpClose();
   const ibp = document.getElementById('ibp');
-  if (ibp && !ibp.classList.contains('hidden') && !ibp.contains(e.target) && !e.target.closest('#inbox-trigger')) ibpClose();
+  if (ibp && !ibp.classList.contains('hidden') && !ibp.contains(e.target) && !e.target.closest('#inbox-trigger') && !e.target.closest('#chart-inbox-trigger')) ibpClose();
 });
 
 document.addEventListener('keydown', e => {
   const tag = document.activeElement?.tagName;
   if (tag === 'INPUT' || tag === 'TEXTAREA') return;
   if (e.key === 'r' || e.key === 'R') { e.preventDefault(); fetchAll(); }
-  if (e.key === 'm' || e.key === 'M') { e.preventDefault(); toggleMin(); }
+
   if (e.key === 't' || e.key === 'T') { e.preventDefault(); toggleTheme(); }
   if (e.key === 'Escape') { cfpClose(); ibpClose(); }
 });
@@ -1389,6 +1671,460 @@ function esc(s) {
     .replace(/&/g,'&amp;').replace(/</g,'&lt;')
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+/* ── CHARTS ── */
+let _chartData = [];
+let _charts    = {};
+let _ibVisible = false;
+
+function chartColors() {
+  const light = document.documentElement.getAttribute('data-theme') === 'light';
+  return {
+    line:      '#3b82f6',
+    bar:       'rgba(59,130,246,0.7)',
+    grid:      light ? 'rgba(226,232,240,0.8)' : 'rgba(42,48,72,0.5)',
+    labels:    light ? '#475569' : '#94a3b8',
+    tooltipBg: light ? '#ffffff' : '#181c27',
+  };
+}
+
+function destroyChart(id) {
+  if (_charts[id]) { _charts[id].destroy(); _charts[id] = null; }
+}
+
+function makeChartOpts(isHoriz, yFmt) {
+  const c = chartColors();
+  return {
+    responsive: true, maintainAspectRatio: false,
+    indexAxis: isHoriz ? 'y' : 'x',
+    plugins: {
+      legend: { display: false },
+      tooltip: { backgroundColor: c.tooltipBg, titleColor: c.labels, bodyColor: c.labels, borderColor: c.grid, borderWidth: 1 }
+    },
+    scales: {
+      x: { grid: { color: c.grid }, ticks: { color: c.labels, font: { size: 11 }, callback: (isHoriz && yFmt) ? yFmt : undefined } },
+      y: { grid: { color: c.grid }, ticks: { color: c.labels, font: { size: 11 }, callback: (!isHoriz && yFmt) ? yFmt : undefined } }
+    }
+  };
+}
+
+async function fetchChartData() {
+  const btn = document.getElementById('chart-update-btn');
+  if (btn) { btn.textContent = '⏳ Carregando…'; btn.disabled = true; }
+  const months = parseInt(document.getElementById('chart-period-sel').value, 10) || 6;
+  const now = new Date();
+  const periods = [];
+  for (let i = months - 1; i >= 0; i--) {
+    const d    = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const last = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+    const lbl  = d.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }).replace('.', '');
+    const full = d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    periods.push({ since: Math.floor(d.getTime() / 1000), until: Math.floor(last.getTime() / 1000), monthLabel: lbl, fullLabel: full });
+  }
+  const fetchMonth = async ({ since, until }) => {
+    /* Se filtro de inbox de gráficos ativo, busca por inbox e agrega */
+    if (_chartInboxFilter && _chartInboxFilter.size > 0) {
+      const ids = [..._chartInboxFilter];
+      const res = await Promise.all(ids.map(id =>
+        api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
+          .catch(() => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null }))
+      ));
+      return aggregateSummaries(res);
+    }
+    try { return await api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=account`); }
+    catch (e) { if (!isAuthError(e)) return { conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null }; }
+    const ids = Object.keys(_inboxMap).map(Number);
+    if (!ids.length) return { conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null };
+    const res = await Promise.all(ids.map(id =>
+      api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
+        .catch(() => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null }))
+    ));
+    return aggregateSummaries(res);
+  };
+  try {
+    const results = await Promise.all(periods.map(fetchMonth));
+    _chartData = periods.map((p, i) => ({ ...p, ...results[i] }));
+    [_teamCompData, _distData] = await Promise.all([
+      fetchTeamComparison(periods).catch(() => null),
+      fetchResponseDistribution(periods).catch(() => null)
+    ]);
+    renderCharts();
+  } catch (err) { console.error('fetchChartData:', err); }
+  finally { if (btn) { btn.textContent = '↺ Atualizar'; btn.disabled = false; } }
+}
+
+async function fetchTeamComparison(periods) {
+  const last = periods[periods.length - 1];
+  const { since, until } = last;
+  const ids = Object.keys(_inboxMap).map(Number);
+  if (!ids.length) return null;
+  const results = await Promise.all(ids.map(id =>
+    api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
+      .then(r => ({
+        name: _inboxMap[id] || `Inbox ${id}`,
+        tma_h:   r.avg_resolution_time    != null ? +(r.avg_resolution_time    / 3600).toFixed(2) : null,
+        tmr_min: r.avg_first_response_time != null ? +(r.avg_first_response_time / 60).toFixed(1)  : null
+      }))
+      .catch(() => null)
+  ));
+  return results.filter(Boolean).filter(r => r.tma_h != null || r.tmr_min != null);
+}
+
+async function fetchResponseDistribution(periods) {
+  const since = periods[0].since;
+  const until = periods[periods.length - 1].until;
+  try {
+    const data = await api(`/v1/accounts/${cfg.account}/reports?metric=avg_first_response_time&type=account&since=${since}&until=${until}`);
+    if (!Array.isArray(data) || !data.length) return null;
+    const buckets = [0, 0, 0, 0, 0];
+    data.forEach(pt => {
+      const secs = pt.value;
+      if (secs == null || secs <= 0) return;
+      if      (secs < 300)   buckets[0]++;
+      else if (secs < 1800)  buckets[1]++;
+      else if (secs < 3600)  buckets[2]++;
+      else if (secs < 14400) buckets[3]++;
+      else                   buckets[4]++;
+    });
+    const total = buckets.reduce((s, v) => s + v, 0);
+    return { buckets, total, labels: ['< 5min', '5–30min', '30–60min', '1–4h', '> 4h'] };
+  } catch (e) { return null; }
+}
+
+function renderCharts() {
+  if (!window.Chart || !_chartData.length) return;
+  const c          = chartColors();
+  const labels     = _chartData.map(d => d.monthLabel);
+  const fullLabels = _chartData.map(d => d.fullLabel || d.monthLabel);
+  const n          = _chartData.length;
+  const chartConvs = (_chartInboxFilter && _chartInboxFilter.size > 0)
+    ? _rawConvs.filter(cv => _chartInboxFilter.has(cv.inbox_id))
+    : _rawConvs;
+
+  function setMetric(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val ?? '—';
+  }
+
+  function metricTrend(elId, current, previous, invertGood) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.className = '';
+    if (current == null || previous == null || previous === 0) { el.textContent = ''; return; }
+    const pct = Math.round(((current - previous) / previous) * 100);
+    if (pct === 0) { el.textContent = ''; return; }
+    const up   = pct > 0;
+    const good = invertGood ? !up : up;
+    el.className   = good ? 'metric-trend-up' : 'metric-trend-dn';
+    el.textContent = `${up ? '▲' : '▼'} ${Math.abs(pct)}% vs ant.`;
+  }
+
+  function fmtSec(secs) {
+    if (secs == null) return '—';
+    if (secs >= 3600) {
+      const h = Math.floor(secs / 3600), m = Math.round((secs % 3600) / 60);
+      return `${h}hr ${String(m).padStart(2, '0')}min`;
+    }
+    const m = Math.floor(secs / 60), s = Math.round(secs % 60);
+    return `${m}min ${String(s).padStart(2, '0')}seg`;
+  }
+
+  function slaLine(value, label, color) {
+    return { type: 'line', label, data: new Array(n).fill(value),
+      borderColor: color || 'rgba(239,68,68,0.75)', borderDash: [6, 4],
+      borderWidth: 1.5, pointRadius: 0, fill: false };
+  }
+
+  function barGrad(canvas, colorStop0, colorStop1) {
+    const ctx = canvas.getContext('2d');
+    const g   = ctx.createLinearGradient(0, 0, 0, canvas.offsetHeight || 240);
+    g.addColorStop(0, colorStop0); g.addColorStop(1, colorStop1);
+    return g;
+  }
+
+  /* ── 1. VOLUME DE ATENDIMENTOS ── */
+  destroyChart('vol');
+  {
+    const last = _chartData[n - 1]?.conversations_count;
+    const prev = _chartData[n - 2]?.conversations_count;
+    setMetric('mv-vol', last != null ? last.toLocaleString('pt-BR') : '—');
+    metricTrend('mt-vol', last, prev, false);
+    const canvas = document.getElementById('chart-vol');
+    const grad   = barGrad(canvas, 'rgba(59,130,246,0.65)', 'rgba(59,130,246,0.12)');
+    const opts   = makeChartOpts(false);
+    opts.animation = false;
+    opts.plugins.tooltip.callbacks = {
+      title: items => fullLabels[items[0].dataIndex] || items[0].label,
+      label: item  => `${(item.raw || 0).toLocaleString('pt-BR')} atendimentos`
+    };
+    _charts.vol = new Chart(canvas, {
+      type: 'bar',
+      data: { labels, datasets: [{ data: _chartData.map(d => d.conversations_count || 0), backgroundColor: grad, borderRadius: 4 }] },
+      options: opts
+    });
+  }
+
+  /* ── 2. VOLUME POR CANAL ── */
+  destroyChart('channel');
+  {
+    const chanMap = {};
+    chartConvs.forEach(cv => {
+      const ch = originOf(cv.channel) || cv.channel || 'Outro';
+      chanMap[ch] = (chanMap[ch] || 0) + 1;
+    });
+    const entries = Object.entries(chanMap).sort((a, b) => b[1] - a[1]);
+    setMetric('mv-channel', entries[0]?.[0] || '—');
+    const COLORS = ['#3b82f6','#8b5cf6','#14b8a6','#f97316','#ef4444','#eab308','#22c55e','#ec4899'];
+    const total  = chartConvs.length || 1;
+    _charts.channel = new Chart(document.getElementById('chart-channel'), {
+      type: 'doughnut',
+      data: {
+        labels: entries.map(([k]) => k),
+        datasets: [{ data: entries.map(([, v]) => v), backgroundColor: COLORS.slice(0, entries.length), borderWidth: 2, borderColor: c.tooltipBg }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '60%',
+        plugins: {
+          legend: { display: true, position: 'right', labels: { color: c.labels, font: { size: 11 }, boxWidth: 12, padding: 8 } },
+          tooltip: { backgroundColor: c.tooltipBg, titleColor: c.labels, bodyColor: c.labels, borderColor: c.grid, borderWidth: 1,
+            callbacks: { label: item => `${item.label}: ${item.raw} (${Math.round(item.raw / total * 100)}%)` }
+          }
+        }
+      }
+    });
+  }
+
+  /* ── 3. TMA ── */
+  destroyChart('tma');
+  {
+    const last = _chartData[n - 1]?.avg_resolution_time;
+    const prev = _chartData[n - 2]?.avg_resolution_time;
+    setMetric('mv-tma', fmtSec(last));
+    metricTrend('mt-tma', last, prev, true);
+    const slaEl = document.getElementById('sla-tma-label');
+    if (slaEl) slaEl.textContent = `${_SLA_TMA}hr`;
+    const canvas = document.getElementById('chart-tma');
+    const grad   = barGrad(canvas, 'rgba(139,92,246,0.4)', 'rgba(139,92,246,0.02)');
+    const vals   = _chartData.map(d => d.avg_resolution_time != null ? +(d.avg_resolution_time / 3600).toFixed(2) : null);
+    const opts   = makeChartOpts(false, v => { const h = Math.floor(v), m = Math.round((v - h) * 60); return `${h}hr ${String(m).padStart(2,'0')}min`; });
+    opts.animation = false;
+    opts.plugins.tooltip.callbacks = {
+      title: items => fullLabels[items[0].dataIndex] || items[0].label,
+      label: item  => item.datasetIndex === 0 ? `TMA: ${fmtSec(_chartData[item.dataIndex]?.avg_resolution_time)}` : `Meta SLA: ${_SLA_TMA}hr`
+    };
+    _charts.tma = new Chart(canvas, {
+      type: 'line',
+      data: { labels, datasets: [
+        { data: vals, borderColor: '#8b5cf6', backgroundColor: grad, pointBackgroundColor: '#8b5cf6', tension: 0.3, fill: true, spanGaps: true },
+        slaLine(_SLA_TMA, `Meta SLA (${_SLA_TMA}hr)`)
+      ]},
+      options: opts
+    });
+  }
+
+  /* ── 4. TMR ── */
+  destroyChart('tmr');
+  {
+    const last   = _chartData[n - 1]?.avg_first_response_time;
+    const prev   = _chartData[n - 2]?.avg_first_response_time;
+    const hasTmr = _chartData.some(d => d.avg_first_response_time != null && d.avg_first_response_time > 0);
+    const card   = document.getElementById('chart-tmr-card');
+    if (card) card.style.display = hasTmr ? '' : 'none';
+    if (hasTmr) {
+      setMetric('mv-tmr', fmtSec(last));
+      metricTrend('mt-tmr', last, prev, true);
+      const slaEl = document.getElementById('sla-tmr-label');
+      if (slaEl) slaEl.textContent = `${_SLA_TMR}min`;
+      const canvas = document.getElementById('chart-tmr');
+      const grad   = barGrad(canvas, 'rgba(20,184,166,0.4)', 'rgba(20,184,166,0.02)');
+      const vals   = _chartData.map(d => d.avg_first_response_time != null ? +(d.avg_first_response_time / 60).toFixed(1) : null);
+      const opts   = makeChartOpts(false, v => `${v?.toFixed(0)}min`);
+      opts.animation = false;
+      opts.plugins.tooltip.callbacks = {
+        title: items => fullLabels[items[0].dataIndex] || items[0].label,
+        label: item  => item.datasetIndex === 0 ? `TMR: ${fmtSec(_chartData[item.dataIndex]?.avg_first_response_time)}` : `Meta SLA: ${_SLA_TMR}min`
+      };
+      _charts.tmr = new Chart(canvas, {
+        type: 'line',
+        data: { labels, datasets: [
+          { data: vals, borderColor: '#14b8a6', backgroundColor: grad, pointBackgroundColor: '#14b8a6', tension: 0.3, fill: true, spanGaps: true },
+          slaLine(_SLA_TMR, `Meta SLA (${_SLA_TMR}min)`)
+        ]},
+        options: opts
+      });
+    }
+  }
+
+  /* ── 5. FCR ── */
+  destroyChart('fcr');
+  {
+    const fcrVals = _chartData.map(d => {
+      const conv = d.conversations_count || 0, res = d.resolutions_count || 0;
+      return conv > 0 ? Math.round((res / conv) * 100) : null;
+    });
+    const last = fcrVals[n - 1], prev = fcrVals[n - 2];
+    setMetric('mv-fcr', last != null ? `${last}%` : '—');
+    metricTrend('mt-fcr', last, prev, false);
+    const slaEl = document.getElementById('sla-fcr-label');
+    if (slaEl) slaEl.textContent = `${_SLA_FCR}%`;
+    const fcrColors = fcrVals.map(v => v == null ? '#374151' : v >= 90 ? '#22c55e' : v >= 70 ? '#eab308' : '#ef4444');
+    const opts = makeChartOpts(false, v => `${v}%`);
+    opts.animation = false;
+    opts.plugins.tooltip.callbacks = {
+      title: items => fullLabels[items[0].dataIndex] || items[0].label,
+      label: item  => item.datasetIndex === 0 ? `FCR: ${item.raw ?? '—'}%` : `Meta: ${_SLA_FCR}%`
+    };
+    _charts.fcr = new Chart(document.getElementById('chart-fcr'), {
+      type: 'bar',
+      data: { labels, datasets: [
+        { data: fcrVals, backgroundColor: fcrColors, borderRadius: 4 },
+        slaLine(_SLA_FCR, `Meta (${_SLA_FCR}%)`, 'rgba(59,130,246,0.6)')
+      ]},
+      options: opts
+    });
+  }
+
+  /* ── 6. DISTRIBUIÇÃO 1ª RESPOSTA ── */
+  destroyChart('dist');
+  {
+    const naEl = document.getElementById('chart-dist-na');
+    if (_distData && _distData.total > 0) {
+      if (naEl) naEl.style.display = 'none';
+      const under1h = (_distData.buckets[0] + _distData.buckets[1] + _distData.buckets[2]);
+      setMetric('mv-dist', `${Math.round(under1h / _distData.total * 100)}%`);
+      const DCOLS = ['#22c55e','#14b8a6','#3b82f6','#eab308','#ef4444'];
+      const opts  = makeChartOpts(true, v => `${v} dias`);
+      opts.animation = false;
+      opts.plugins.legend = { display: false };
+      opts.plugins.tooltip.callbacks = {
+        title: items => items[0].label,
+        label: item  => `${item.raw} dias (${Math.round(item.raw / _distData.total * 100)}%)`
+      };
+      _charts.dist = new Chart(document.getElementById('chart-dist'), {
+        type: 'bar',
+        data: { labels: _distData.labels, datasets: [{ data: _distData.buckets, backgroundColor: DCOLS, borderRadius: 4 }] },
+        options: opts
+      });
+    } else {
+      if (naEl) naEl.style.display = '';
+      setMetric('mv-dist', '—');
+    }
+  }
+
+  /* ── 7. COMPARATIVO EQUIPES ── */
+  destroyChart('teams');
+  {
+    const naEl = document.getElementById('chart-teams-na');
+    if (_teamCompData && _teamCompData.length > 0) {
+      if (naEl) naEl.style.display = 'none';
+      const best = [..._teamCompData].filter(t => t.tma_h != null).sort((a, b) => a.tma_h - b.tma_h)[0];
+      setMetric('mv-teams', best?.name || '—');
+      const teamLabels = _teamCompData.map(t => t.name.length > 20 ? t.name.slice(0, 18) + '…' : t.name);
+      const opts = {
+        responsive: true, maintainAspectRatio: false, animation: false, indexAxis: 'y',
+        plugins: {
+          legend: { display: true, position: 'top', labels: { color: c.labels, font: { size: 11 }, boxWidth: 12 } },
+          tooltip: { backgroundColor: c.tooltipBg, titleColor: c.labels, bodyColor: c.labels, borderColor: c.grid, borderWidth: 1,
+            callbacks: { label: item => item.datasetIndex === 0 ? `TMA: ${item.raw?.toFixed(1)}hr` : `TMR: ${item.raw?.toFixed(1)}min` }
+          }
+        },
+        scales: {
+          x: { grid: { color: c.grid }, ticks: { color: c.labels, font: { size: 11 } } },
+          y: { grid: { display: false }, ticks: { color: c.labels, font: { size: 11 } } }
+        }
+      };
+      _charts.teams = new Chart(document.getElementById('chart-teams'), {
+        type: 'bar',
+        data: { labels: teamLabels, datasets: [
+          { label: 'TMA (horas)',   data: _teamCompData.map(t => t.tma_h),   backgroundColor: 'rgba(139,92,246,0.7)',  borderRadius: 3 },
+          { label: 'TMR (minutos)', data: _teamCompData.map(t => t.tmr_min), backgroundColor: 'rgba(20,184,166,0.7)',  borderRadius: 3 }
+        ]},
+        options: opts
+      });
+    } else {
+      if (naEl) naEl.style.display = '';
+      setMetric('mv-teams', '—');
+    }
+  }
+
+  /* ── 8. CARGA POR AGENTE ── */
+  destroyChart('agents');
+  {
+    const agCounts = {};
+    chartConvs.forEach(cv => { const nm = cv.meta?.assignee?.name; if (nm) agCounts[nm] = (agCounts[nm] || 0) + 1; });
+    const sorted = Object.entries(agCounts).sort((a, b) => b[1] - a[1]).slice(0, 15);
+    const opts   = makeChartOpts(true);
+    opts.animation = false;
+    opts.scales.y.ticks.font = { size: 11 };
+    _charts.agents = new Chart(document.getElementById('chart-agents'), {
+      type: 'bar',
+      data: { labels: sorted.map(([nm]) => nm.length > 22 ? nm.slice(0, 20) + '…' : nm), datasets: [{ data: sorted.map(([, v]) => v), backgroundColor: '#14b8a6', borderRadius: 3 }] },
+      options: opts
+    });
+  }
+
+  /* ── 9. PICO DE HORÁRIO ── */
+  destroyChart('peak');
+  {
+    const buckets = new Array(24).fill(0);
+    chartConvs.forEach(cv => { if (!cv.created_at) return; buckets[new Date(cv.created_at * 1000).getHours()]++; });
+    const peakIdx = buckets.indexOf(Math.max(...buckets));
+    const opts    = makeChartOpts(false);
+    opts.animation = false;
+    opts.plugins.tooltip.callbacks = {
+      title: items => items[0].label,
+      label: item  => `${item.raw} atendimento${item.raw !== 1 ? 's' : ''}`
+    };
+    _charts.peak = new Chart(document.getElementById('chart-peak'), {
+      type: 'bar',
+      data: {
+        labels: Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, '0')}h`),
+        datasets: [{ data: buckets, backgroundColor: buckets.map((_, i) => i === peakIdx ? '#f97316' : 'rgba(249,115,22,0.4)'), borderRadius: 3 }]
+      },
+      options: opts
+    });
+  }
+
+  /* ── 10. STATUS DAS CONVERSAS ── */
+  destroyChart('status');
+  {
+    const sc = { open: 0, resolved: 0, pending: 0 };
+    chartConvs.forEach(cv => { if (cv.status in sc) sc[cv.status]++; });
+    _charts.status = new Chart(document.getElementById('chart-status'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Abertas', 'Resolvidas', 'Pendentes'],
+        datasets: [{ data: [sc.open, sc.resolved, sc.pending], backgroundColor: ['#ef4444','#22c55e','#eab308'], borderWidth: 2, borderColor: c.tooltipBg }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '65%',
+        plugins: {
+          legend: { display: false },
+          tooltip: { backgroundColor: c.tooltipBg, titleColor: c.labels, bodyColor: c.labels, borderColor: c.grid, borderWidth: 1 }
+        }
+      }
+    });
+  }
+}
+
+/* ── PAGE NAVIGATION ── */
+function showPage(page) {
+  const isPainel = page === 'painel';
+  document.getElementById('content').style.display        = isPainel ? '' : 'none';
+  document.getElementById('graficos-page').style.display  = isPainel ? 'none' : '';
+  const ib = document.getElementById('inbox-bar');
+  if (ib) ib.style.display = isPainel ? (_ibVisible ? 'flex' : 'none') : 'none';
+  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+  document.getElementById(`nav-${page}`).classList.add('active');
+  if (!isPainel && !_chartData.length) fetchChartData();
+}
+
+/* Atualiza gráficos ao mudar tema */
+new MutationObserver(() => {
+  if (document.getElementById('graficos-page').style.display !== 'none' && _chartData.length) {
+    renderCharts();
+  }
+}).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 </script>
 </body>
 </html>
