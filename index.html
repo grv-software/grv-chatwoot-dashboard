@@ -2297,6 +2297,66 @@ function renderAgentExpandChart(id) {
   });
 }
 
+function renderAgentCsat() {
+  const el = document.getElementById('agent-csat-section');
+  if (!el) return;
+
+  if (_agentCsat === null) {
+    el.innerHTML = `
+      <div class="csat-placeholder">
+        <strong>Aguardando ativação do CSAT</strong>
+        Para ativar o CSAT no Chatwoot:<br>
+        Configurações → Caixa de entrada → editar → Configurações de colaboração → ativar pesquisa de satisfação.
+      </div>`;
+    return;
+  }
+
+  const visibleIds = (_agentTabFilter && _agentTabFilter.size > 0) ? _agentTabFilter : null;
+  const rows = _agentCsat
+    .filter(r => !visibleIds || visibleIds.has(r.id))
+    .sort((a, b) => b.total - a.total);
+
+  if (!rows.length) {
+    el.innerHTML = '<div class="agent-no-data">Nenhuma avaliação no período para os agentes selecionados</div>';
+    return;
+  }
+
+  const starRating = pct => {
+    const filled = Math.round(pct / 100 * 5);
+    return '★'.repeat(filled) + '☆'.repeat(5 - filled);
+  };
+
+  el.innerHTML = `
+    <div class="chart-card" style="overflow-x:auto">
+      <table class="agent-table">
+        <thead><tr>
+          <th style="min-width:180px">Agente</th>
+          <th>Total de Avaliações</th>
+          <th>% Positivas</th>
+          <th>Nota</th>
+        </tr></thead>
+        <tbody>
+          ${rows.map(r => {
+            const pct   = r.total > 0 ? Math.round(r.positive / r.total * 100) : 0;
+            const color = pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--yellow)' : 'var(--red)';
+            return `<tr>
+              <td>${esc(r.name)}</td>
+              <td>${r.total}</td>
+              <td style="color:${color};font-weight:600">${pct}%</td>
+              <td style="color:var(--yellow)">${starRating(pct)}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function renderAgentTab() {
+  renderAgentLive();
+  renderAgentPerf();
+  renderAgentCsat();
+}
+
 function renderCharts() {
   if (!window.Chart || !_chartData.length) return;
   if (document.getElementById('graficos-page')?.style.display === 'none') {
