@@ -30,6 +30,9 @@ http.createServer((req, res) => {
   } else {
     // Arquivos estáticos
     const filePath = path.join(DIR, req.url === '/' ? 'index.html' : req.url);
+    if (!filePath.startsWith(DIR + path.sep) && filePath !== path.join(DIR, 'index.html')) {
+      res.writeHead(403); res.end('Forbidden'); return;
+    }
     fs.readFile(filePath, (err, data) => {
       if (err) { res.writeHead(404); res.end('Not found'); return; }
       const ext = path.extname(filePath);
