@@ -2148,6 +2148,155 @@ function renderAgentLive() {
     }`;
 }
 
+function renderAgentPerf() {
+  const el = document.getElementById('agent-perf-section');
+  if (!el) return;
+
+  if (!_agentPerfData) { el.innerHTML = '<div class="agent-no-data">Carregando…</div>'; return; }
+  if (_agentPerfData._authError) {
+    el.innerHTML = '<div class="agent-no-data">🔒 Dados por agente requerem permissão de Administrador no Chatwoot</div>';
+    return;
+  }
+
+  const entries = Object.values(_agentPerfData).filter(e => e.agent);
+  if (!entries.length) { el.innerHTML = '<div class="agent-no-data">Nenhum dado de agente disponível</div>'; return; }
+
+  const { col, dir } = _agentPerfSort;
+  const getVal = e => {
+    const s = e.summary;
+    if (!s) return null;
+    if (col === 'conversations_count')    return s.conversations_count || 0;
+    if (col === 'avg_resolution_time')    return s.avg_resolution_time ?? Infinity;
+    if (col === 'avg_first_response_time')return s.avg_first_response_time ?? Infinity;
+    if (col === 'fcr')                    return s.conversations_count > 0 ? s.resolutions_count / s.conversations_count : null;
+    if (col === 'msgs_conv')              return s.conversations_count > 0 ? ((s.incoming_messages_count || 0) + (s.outgoing_messages_count || 0)) / s.conversations_count : null;
+    if (col === 'total_msgs')             return (s.incoming_messages_count || 0) + (s.outgoing_messages_count || 0);
+    return null;
+  };
+
+  const sorted = [...entries].sort((a, b) => {
+    const noDataA = !a.summary || (a.summary.conversations_count || 0) === 0;
+    const noDataB = !b.summary || (b.summary.conversations_count || 0) === 0;
+    if (noDataA && noDataB) return 0;
+    if (noDataA) return 1;
+    if (noDataB) return -1;
+    const va = getVal(a) ?? (dir === 'asc' ? Infinity : -Infinity);
+    const vb = getVal(b) ?? (dir === 'asc' ? Infinity : -Infinity);
+    return dir === 'asc' ? va - vb : vb - va;
+  });
+
+  const th = (label, colId) => {
+    const cls = _agentPerfSort.col === colId
+      ? (_agentPerfSort.dir === 'asc' ? 'sort-asc' : 'sort-desc') : '';
+    return `<th class="${cls}" onclick="sortAgentPerf('${colId}')">${label}</th>`;
+  };
+
+  const fmtPct = (num, denom) => (denom > 0) ? `${Math.round(num / denom * 100)}%` : '—';
+  const fmtMsgsConv = s => {
+    if (!s || (s.conversations_count || 0) === 0) return '—';
+    const total = (s.incoming_messages_count || 0) + (s.outgoing_messages_count || 0);
+    return (total / s.conversations_count).toFixed(1);
+  };
+
+  el.innerHTML = `
+    <div class="chart-card" style="overflow-x:auto">
+      <table class="agent-table" id="agent-perf-table">
+        <thead><tr>
+          ${th('Agente', 'name')}
+          ${th('Volume', 'conversations_count')}
+          ${th('TMA', 'avg_resolution_time')}
+          ${th('TMR', 'avg_first_response_time')}
+          ${th('% Resolução', 'fcr')}
+          ${th('Msgs/Conv', 'msgs_conv')}
+          ${th('Total Msgs', 'total_msgs')}
+        </tr></thead>
+        <tbody>
+          ${sorted.map(e => {
+            const s   = e.summary;
+            const nd  = !s || (s.conversations_count || 0) === 0;
+            const exp = _agentExpanded === e.agent.id;
+            const totalMsgs = s ? (s.incoming_messages_count || 0) + (s.outgoing_messages_count || 0) : 0;
+            return `
+              <tr class="agent-row${exp ? ' expanded' : ''}" onclick="toggleAgentExpand(${e.agent.id})">
+                <td>${esc(e.agent.name)}</td>
+                <td>${nd ? '—' : (s.conversations_count || 0).toLocaleString('pt-BR')}</td>
+                <td>${nd ? '—' : fmtSec(s.avg_resolution_time)}</td>
+                <td>${nd ? '—' : fmtSec(s.avg_first_response_time)}</td>
+                <td>${nd ? '—' : fmtPct(s.resolutions_count || 0, s.conversations_count || 0)}</td>
+                <td>${nd ? '—' : fmtMsgsConv(s)}</td>
+                <td>${nd ? '—' : totalMsgs.toLocaleString('pt-BR')}</td>
+              </tr>
+              <tr class="agent-expand-row" id="exp-row-${e.agent.id}" style="${exp ? '' : 'display:none'}">
+                <td colspan="7">
+                  <div class="agent-expand-inner">
+                    <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Evolução de <strong>${esc(e.agent.name)}</strong></div>
+                    <div style="height:180px;position:relative"><canvas id="agent-chart-${e.agent.id}"></canvas></div>
+                  </div>
+                </td>
+              </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+
+  if (_agentExpanded !== null) renderAgentExpandChart(_agentExpanded);
+}
+
+function sortAgentPerf(col) {
+  if (_agentPerfSort.col === col) {
+    _agentPerfSort.dir = _agentPerfSort.dir === 'asc' ? 'desc' : 'asc';
+  } else {
+    _agentPerfSort = { col, dir: (col === 'avg_resolution_time' || col === 'avg_first_response_time') ? 'asc' : 'desc' };
+  }
+  renderAgentPerf();
+}
+
+function toggleAgentExpand(id) {
+  if (_agentExpanded === id) {
+    _agentExpanded = null;
+    destroyChart(`agent-${id}`);
+  } else {
+    if (_agentExpanded !== null) destroyChart(`agent-${_agentExpanded}`);
+    _agentExpanded = id;
+  }
+  renderAgentPerf();
+}
+
+function renderAgentExpandChart(id) {
+  const entry = _agentPerfData?.[id];
+  if (!entry || !entry.months) return;
+  const canvas = document.getElementById(`agent-chart-${id}`);
+  if (!canvas) return;
+
+  destroyChart(`agent-${id}`);
+  const c      = chartColors();
+  const labels = entry.months.map(m => m.label);
+  const vol    = entry.months.map(m => m.data?.conversations_count || 0);
+  const tma    = entry.months.map(m => m.data?.avg_resolution_time != null ? +(m.data.avg_resolution_time / 3600).toFixed(2) : null);
+  const tmr    = entry.months.map(m => m.data?.avg_first_response_time != null ? +(m.data.avg_first_response_time / 60).toFixed(1) : null);
+
+  _charts[`agent-${id}`] = new Chart(canvas, {
+    type: 'line',
+    data: { labels, datasets: [
+      { label: 'Volume', data: vol, borderColor: 'rgba(59,130,246,0.8)', backgroundColor: 'rgba(59,130,246,0.08)', fill: true, tension: 0.3, yAxisID: 'y2', pointRadius: 3 },
+      { label: 'TMA (hr)', data: tma, borderColor: 'rgba(139,92,246,0.8)', backgroundColor: 'transparent', tension: 0.3, yAxisID: 'y1', pointRadius: 3, spanGaps: true },
+      { label: 'TMR (min)', data: tmr, borderColor: 'rgba(20,184,166,0.8)', backgroundColor: 'transparent', tension: 0.3, yAxisID: 'y1', pointRadius: 3, spanGaps: true }
+    ]},
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      plugins: {
+        legend: { display: true, position: 'top', labels: { color: c.labels, font: { size: 11 }, boxWidth: 12 } },
+        tooltip: { backgroundColor: c.tooltipBg, titleColor: c.labels, bodyColor: c.labels, borderColor: c.grid, borderWidth: 1 }
+      },
+      scales: {
+        x:  { grid: { color: c.grid }, ticks: { color: c.labels, font: { size: 11 } } },
+        y1: { position: 'left',  grid: { color: c.grid }, ticks: { color: c.labels, font: { size: 11 } } },
+        y2: { position: 'right', grid: { display: false }, ticks: { color: c.labels, font: { size: 11 } } }
+      }
+    }
+  });
+}
+
 function renderCharts() {
   if (!window.Chart || !_chartData.length) return;
   if (document.getElementById('graficos-page')?.style.display === 'none') {
