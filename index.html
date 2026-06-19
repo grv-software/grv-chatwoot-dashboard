@@ -552,6 +552,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     </select>
     <button id="chart-update-btn" class="btn-hdr blue" onclick="fetchChartData()">↺ Atualizar</button>
     <span id="chart-updated-at" style="font-size:11px;color:var(--text3);margin-left:4px"></span>
+    <span style="font-size:10px;color:var(--text3);margin-left:auto">Período e filtros independentes do painel principal</span>
   </div>
 
   <!-- Loading skeleton — visible only while fetching -->
@@ -634,15 +635,17 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 
   <!-- ── EQUIPES ── -->
   <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">Equipes</span></div>
-  <div class="chart-card chart-full">
+  <div class="chart-card chart-full" id="teams-card">
     <div class="metric-card">
       <div><div class="metric-value" id="mv-teams" style="font-size:17px;word-break:break-word">—</div><div class="metric-label">equipe com menor TMA no último mês</div></div>
+      <span id="teams-coverage" style="font-size:10px;color:var(--text3)"></span>
     </div>
     <div class="chart-card-hdr" style="margin-top:10px">
       <div><div class="chart-card-title">Qual equipe resolve mais rápido?</div><div class="chart-card-sub">TMA e TMR por equipe/inbox no último mês do período</div></div>
     </div>
     <div class="chart-wrap" style="height:240px"><canvas id="chart-teams"></canvas></div>
     <div id="chart-teams-na" class="chart-na" style="display:none">Dados por equipe não disponíveis com este token</div>
+    <div id="chart-teams-partial" style="display:none;font-size:11px;color:var(--yellow);margin-top:6px;padding:4px 0">⚠ Dados parciais — algumas equipes podem não ter retornado resultados completos</div>
   </div>
 
   <!-- ── AGENTES ── -->
@@ -755,8 +758,9 @@ let _chartInboxFilter = null; /* filtro de inbox independente da aba Análise */
 let _SLA_TMA = 8;      /* horas — meta de TMA */
 let _SLA_TMR = 30;     /* minutos — meta de TMR */
 let _SLA_FCR = 85;     /* % — meta de FCR */
-let _teamCompData = null; /* dados de comparação por equipe/inbox */
-let _distData = null;     /* distribuição 1ª resposta (faixas de tempo) */
+let _teamCompData    = null; /* dados de comparação por equipe/inbox */
+let _distData        = null; /* distribuição 1ª resposta (faixas de tempo) */
+let _chartTeamCache  = {};   /* {`${id}:${since}:${until}`: {data, ts}} — TTL 5min */
 
 /* ── TOKEN ── */
 function showTokenModal() {
@@ -903,7 +907,7 @@ async function fetchKPIs() {
   const summaryByIds = (ids, since, until) =>
     Promise.all(ids.map(id =>
       api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
-        .catch(() => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null }))
+        .catch(() => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null }))
     ));
 
   try {
@@ -1770,7 +1774,7 @@ async function fetchChartData() {
       const ids = [..._chartInboxFilter];
       const res = await Promise.all(ids.map(id =>
         api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
-          .catch(() => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null }))
+          .catch(() => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null }))
       ));
       return aggregateSummaries(res);
     }
@@ -1780,7 +1784,7 @@ async function fetchChartData() {
     if (!ids.length) return { conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null };
     const res = await Promise.all(ids.map(id =>
       api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
-        .catch(() => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null }))
+        .catch(() => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null }))
     ));
     return aggregateSummaries(res);
   };
@@ -1804,18 +1808,30 @@ async function fetchChartData() {
 async function fetchTeamComparison(periods) {
   const last = periods[periods.length - 1];
   const { since, until } = last;
-  const ids = Object.keys(_inboxMap).map(Number);
+  const ids = (_chartInboxFilter && _chartInboxFilter.size > 0)
+    ? [..._chartInboxFilter]
+    : Object.keys(_inboxMap).map(Number);
   if (!ids.length) return null;
-  const results = await Promise.all(ids.map(id =>
-    api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
-      .then(r => ({
-        name: (_inboxMap[id] || {}).name || `Inbox ${id}`,
-        tma_h:   r.avg_resolution_time    != null ? +(r.avg_resolution_time    / 3600).toFixed(2) : null,
-        tmr_min: r.avg_first_response_time != null ? +(r.avg_first_response_time / 60).toFixed(1)  : null
-      }))
-      .catch(() => null)
-  ));
-  return results.filter(Boolean).filter(r => r.tma_h != null || r.tmr_min != null);
+  const now = Date.now(), TTL = 5 * 60 * 1000;
+  const results = await Promise.all(ids.map(id => {
+    const key = `${id}:${since}:${until}`;
+    if (_chartTeamCache[key] && now - _chartTeamCache[key].ts < TTL) return _chartTeamCache[key].data;
+    return api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
+      .then(r => {
+        const entry = {
+          name: (_inboxMap[id] || {}).name || `Inbox ${id}`,
+          conversations_count: r.conversations_count || 0,
+          tma_h:   r.avg_resolution_time    != null ? +(r.avg_resolution_time    / 3600).toFixed(2) : null,
+          tmr_min: r.avg_first_response_time != null ? +(r.avg_first_response_time / 60).toFixed(1)  : null
+        };
+        _chartTeamCache[key] = { data: entry, ts: now };
+        return entry;
+      })
+      .catch(() => null);
+  }));
+  const all   = results.filter(Boolean);
+  const items = all.filter(r => r.conversations_count > 0 && (r.tma_h != null || r.tmr_min != null));
+  return { items, total: ids.length, withData: items.length };
 }
 
 async function fetchResponseDistribution(periods) {
@@ -2032,7 +2048,10 @@ function renderCharts() {
   destroyChart('dist');
   {
     const naEl = document.getElementById('chart-dist-na');
-    if (_distData && _distData.total > 0) {
+    if (_chartInboxFilter && _chartInboxFilter.size > 0) {
+      if (naEl) { naEl.textContent = 'Distribuição não disponível com filtro de inbox ativo'; naEl.style.display = ''; }
+      setMetric('mv-dist', '—');
+    } else if (_distData && _distData.total > 0) {
       if (naEl) naEl.style.display = 'none';
       const slaEl2 = document.getElementById('sla-tmr-dist');
       if (slaEl2) slaEl2.textContent = _SLA_TMR;
@@ -2060,12 +2079,39 @@ function renderCharts() {
   /* ── 7. COMPARATIVO EQUIPES ── */
   destroyChart('teams');
   {
-    const naEl = document.getElementById('chart-teams-na');
-    if (_teamCompData && _teamCompData.length > 0) {
+    const naEl      = document.getElementById('chart-teams-na');
+    const partialEl = document.getElementById('chart-teams-partial');
+    const coverEl   = document.getElementById('teams-coverage');
+    const cardEl    = document.getElementById('teams-card');
+    const td        = _teamCompData;
+    const items     = td?.items || [];
+
+    if (td && items.length > 0) {
       if (naEl) naEl.style.display = 'none';
-      const best = [..._teamCompData].filter(t => t.tma_h != null).sort((a, b) => a.tma_h - b.tma_h)[0];
+
+      /* Indicador de completude */
+      const pct = td.total > 0 ? td.withData / td.total : 1;
+      if (coverEl) coverEl.textContent = `${td.withData} de ${td.total} equipes com dados`;
+      if (cardEl) cardEl.style.borderColor = pct < 0.8 ? 'var(--yellow)' : '';
+
+      /* Validação cruzada: TMA agregado vs account-level do mesmo mês */
+      if (partialEl) {
+        const acctTma = _chartData[n - 1]?.avg_resolution_time;
+        if (acctTma != null && acctTma > 0) {
+          const wSum = items.reduce((s, t) => s + (t.tma_h != null ? t.tma_h * (t.conversations_count || 1) : 0), 0);
+          const wCnt = items.reduce((s, t) => s + (t.tma_h != null ? (t.conversations_count || 1) : 0), 0);
+          const aggTma = wCnt > 0 ? wSum / wCnt : null;
+          const acctTmaH = acctTma / 3600;
+          const diverge = aggTma != null && acctTmaH > 0 ? Math.abs(aggTma - acctTmaH) / acctTmaH : 0;
+          partialEl.style.display = (diverge > 0.10 || pct < 0.8) ? '' : 'none';
+        } else {
+          partialEl.style.display = pct < 0.8 ? '' : 'none';
+        }
+      }
+
+      const best = [...items].filter(t => t.tma_h != null).sort((a, b) => a.tma_h - b.tma_h)[0];
       setMetric('mv-teams', best?.name || '—');
-      const teamLabels = _teamCompData.map(t => t.name.length > 20 ? t.name.slice(0, 18) + '…' : t.name);
+      const teamLabels = items.map(t => t.name.length > 20 ? t.name.slice(0, 18) + '…' : t.name);
       const opts = {
         responsive: true, maintainAspectRatio: false, animation: false, indexAxis: 'y',
         plugins: {
@@ -2082,13 +2128,16 @@ function renderCharts() {
       _charts.teams = new Chart(document.getElementById('chart-teams'), {
         type: 'bar',
         data: { labels: teamLabels, datasets: [
-          { label: 'TMA (horas)',   data: _teamCompData.map(t => t.tma_h),   backgroundColor: 'rgba(139,92,246,0.7)',  borderRadius: 3 },
-          { label: 'TMR (minutos)', data: _teamCompData.map(t => t.tmr_min), backgroundColor: 'rgba(20,184,166,0.7)',  borderRadius: 3 }
+          { label: 'TMA (horas)',   data: items.map(t => t.tma_h),   backgroundColor: 'rgba(139,92,246,0.7)', borderRadius: 3 },
+          { label: 'TMR (minutos)', data: items.map(t => t.tmr_min), backgroundColor: 'rgba(20,184,166,0.7)', borderRadius: 3 }
         ]},
         options: opts
       });
     } else {
       if (naEl) naEl.style.display = '';
+      if (partialEl) partialEl.style.display = 'none';
+      if (coverEl)  coverEl.textContent = '';
+      if (cardEl)   cardEl.style.borderColor = '';
       setMetric('mv-teams', '—');
     }
   }
