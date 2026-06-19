@@ -361,9 +361,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     <span class="sidebar-icon">📊</span>
     <span class="sidebar-label">Painel</span>
   </div>
-  <div class="sidebar-item" id="nav-graficos" onclick="showPage('graficos')" title="Gráficos">
+  <div class="sidebar-item" id="nav-graficos" onclick="showPage('graficos')" title="Análise">
     <span class="sidebar-icon">📈</span>
-    <span class="sidebar-label">Gráficos</span>
+    <span class="sidebar-label">Análise</span>
   </div>
 </nav>
 
@@ -515,10 +515,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 
 </div><!-- /content -->
 
-<!-- GRAFICOS PAGE -->
+<!-- GRAFICOS PAGE (Análise) -->
 <div id="graficos-page" style="display:none;padding:12px 24px;background:var(--bg);min-height:calc(100vh - 56px);margin-left:52px">
   <div class="chart-hdr">
-    <h2>Dashboard de Gráficos</h2>
+    <h2>Análise</h2>
     <select id="chart-period-sel" class="chart-sel" onchange="fetchChartData()">
       <option value="3">Últimos 3 meses</option>
       <option value="6" selected>Últimos 6 meses</option>
@@ -526,28 +526,77 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     </select>
     <button id="chart-update-btn" class="btn-hdr blue" onclick="fetchChartData()">↺ Atualizar</button>
   </div>
-  <div class="chart-grid">
+
+  <!-- OPERACIONAL -->
+  <div class="section-divider"><span class="section-divider-label">Operacional</span></div>
+  <div class="chart-grid-op">
+
     <div class="chart-card">
-      <div class="chart-card-title">TMA — Tempo Médio de Atendimento</div>
-      <div class="chart-wrap"><canvas id="chart-tma"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-card-title">TMR — Tempo Médio de Resposta</div>
-      <div id="chart-tmr-wrap" class="chart-wrap"><canvas id="chart-tmr"></canvas></div>
-      <div id="chart-tmr-na" class="chart-na" style="display:none">Não disponível na API do Chatwoot</div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-card-title">FCR — Taxa de Resolução no 1º Atendimento</div>
-      <div class="chart-wrap"><canvas id="chart-fcr"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-card-title">Volume de Conversas por Mês</div>
+      <div class="chart-card-hdr">
+        <div>
+          <div class="chart-card-title">Volume de Atendimentos</div>
+          <div class="chart-card-sub">Total de atendimentos iniciados no período</div>
+        </div>
+        <span id="trend-vol"></span>
+      </div>
       <div class="chart-wrap"><canvas id="chart-vol"></canvas></div>
     </div>
-    <div class="chart-card" style="grid-column:1/-1">
-      <div class="chart-card-title">Carga por Agente — Conversas em Atendimento</div>
-      <div class="chart-wrap" style="height:300px"><canvas id="chart-agents"></canvas></div>
+
+    <div class="chart-card">
+      <div class="chart-card-hdr">
+        <div>
+          <div class="chart-card-title">Pico de Horário</div>
+          <div class="chart-card-sub">Horários com mais atendimentos em aberto agora</div>
+        </div>
+        <span class="badge-live">Ao vivo</span>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-peak"></canvas></div>
     </div>
+
+    <div class="chart-card">
+      <div class="chart-card-hdr">
+        <div>
+          <div class="chart-card-title">Status das Conversas</div>
+          <div class="chart-card-sub">Distribuição atual das conversas</div>
+        </div>
+        <span class="badge-live">Ao vivo</span>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-status"></canvas></div>
+      <div class="chart-legend">
+        <span class="chart-legend-item"><span class="chart-legend-dot" style="background:#ef4444"></span>Abertas</span>
+        <span class="chart-legend-item"><span class="chart-legend-dot" style="background:#22c55e"></span>Resolvidas</span>
+        <span class="chart-legend-item"><span class="chart-legend-dot" style="background:#eab308"></span>Pendentes</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DESEMPENHO -->
+  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">Desempenho</span></div>
+  <div class="chart-grid-perf">
+
+    <div class="chart-card">
+      <div class="chart-card-hdr">
+        <div>
+          <div class="chart-card-title">Tempo Médio de Atendimento</div>
+          <div class="chart-card-sub">Quanto tempo em média para resolver um atendimento. Quanto menor, melhor.</div>
+        </div>
+        <span id="trend-tma"></span>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-tma"></canvas></div>
+    </div>
+
+    <div class="chart-card" style="grid-column:1/-1">
+      <div class="chart-card-hdr">
+        <div>
+          <div class="chart-card-title">Atendimentos por Agente</div>
+          <div class="chart-card-sub">Conversas abertas por atendente agora</div>
+        </div>
+        <span class="badge-live">Ao vivo</span>
+      </div>
+      <div class="chart-wrap" style="height:280px"><canvas id="chart-agents"></canvas></div>
+    </div>
+
   </div>
 </div>
 
