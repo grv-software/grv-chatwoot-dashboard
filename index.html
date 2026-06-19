@@ -165,6 +165,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 .chart-trend-neg { font-size:12px; font-weight:600; color:var(--red); white-space:nowrap; padding-top:2px; }
 .chart-wrap { position:relative; height:240px; margin-top:10px; }
 .chart-na { display:flex; align-items:center; justify-content:center; height:160px; color:var(--text3); font-size:12px; font-style:italic; text-align:center; }
+.chart-auth-overlay { display:none; position:absolute; inset:0; background:rgba(15,17,23,0.72); border-radius:8px; align-items:center; justify-content:center; flex-direction:column; gap:6px; text-align:center; padding:16px; z-index:2; }
+.chart-card { position:relative; }
+.auth-limited .chart-auth-overlay { display:flex; }
+#kpi-filter-note.auth-warn { color:var(--yellow); background:rgba(234,179,8,.07); border-color:rgba(234,179,8,.25); }
 .chart-hdr { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px; padding:4px 0; }
 .chart-hdr h2 { font-size:15px; font-weight:700; flex:1; }
 .chart-sel { padding:5px 10px; background:var(--bg3); border:1px solid var(--border); border-radius:4px; color:var(--text); font-size:12px; cursor:pointer; outline:none; }
@@ -598,6 +602,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
         <div><div class="chart-card-title">Quanto tempo leva pra resolver? (TMA)</div><div class="chart-card-sub">Quanto menor, melhor · Meta SLA: <span id="sla-tma-label">8hr</span></div></div>
       </div>
       <div class="chart-wrap"><canvas id="chart-tma"></canvas></div>
+      <div class="chart-auth-overlay"><span style="font-size:18px">🔒</span><span style="font-size:12px;color:var(--text3)">Dados históricos requerem permissão de Administrador no Chatwoot<br>(Perfil → Função → Administrador).<br>Os dados ao vivo continuam disponíveis.</span></div>
     </div>
     <div class="chart-card" id="chart-tmr-card">
       <div class="metric-card">
@@ -608,29 +613,42 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
         <div><div class="chart-card-title">Velocidade de resposta (TMR)</div><div class="chart-card-sub">Quanto menor, melhor · Meta SLA: <span id="sla-tmr-label">30min</span></div></div>
       </div>
       <div class="chart-wrap"><canvas id="chart-tmr"></canvas></div>
+      <div class="chart-auth-overlay"><span style="font-size:18px">🔒</span><span style="font-size:12px;color:var(--text3)">Dados históricos requerem permissão de Administrador no Chatwoot<br>(Perfil → Função → Administrador).<br>Os dados ao vivo continuam disponíveis.</span></div>
     </div>
     <div class="chart-card">
       <div class="metric-card">
-        <div><div class="metric-value" id="mv-fcr">—</div><div class="metric-label">resolvidos no 1º contato este mês</div></div>
+        <div><div class="metric-value" id="mv-fcr">—</div><div class="metric-label">resolvidas este mês</div></div>
         <span class="metric-trend-up" id="mt-fcr"></span>
       </div>
       <div class="chart-card-hdr" style="margin-top:10px">
-        <div><div class="chart-card-title">Taxa de Resolução</div><div class="chart-card-sub">≥90% ótimo · 70–90% ok · &lt;70% crítico · Meta: <span id="sla-fcr-label">85%</span></div></div>
+        <div><div class="chart-card-title">Taxa de Resolução</div><div class="chart-card-sub">% de conversas encerradas no período · Quanto maior, melhor · Meta: <span id="sla-fcr-label">85%</span></div></div>
       </div>
       <div class="chart-wrap"><canvas id="chart-fcr"></canvas></div>
+      <div class="chart-auth-overlay"><span style="font-size:18px">🔒</span><span style="font-size:12px;color:var(--text3)">Dados históricos requerem permissão de Administrador no Chatwoot<br>(Perfil → Função → Administrador).<br>Os dados ao vivo continuam disponíveis.</span></div>
+    </div>
+    <div class="chart-card">
+      <div class="metric-card">
+        <div><div class="metric-value" id="mv-msg">—</div><div class="metric-label">mensagens por conversa este mês</div></div>
+        <span class="metric-trend-up" id="mt-msg"></span>
+      </div>
+      <div class="chart-card-hdr" style="margin-top:10px">
+        <div><div class="chart-card-title">Eficiência do Atendimento</div><div class="chart-card-sub">Média de mensagens trocadas por atendimento · Quanto menor, melhor · Meta: <span id="sla-msg-label">10</span> mensagens</div></div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-msg"></canvas></div>
+      <div class="chart-auth-overlay"><span style="font-size:18px">🔒</span><span style="font-size:12px;color:var(--text3)">Dados históricos requerem permissão de Administrador no Chatwoot<br>(Perfil → Função → Administrador).<br>Os dados ao vivo continuam disponíveis.</span></div>
     </div>
   </div>
-  <!-- Distribuição 1ª resposta (full) -->
-  <div class="chart-card chart-full" style="margin-top:12px">
+  <!-- TMR por equipe (full) -->
+  <div class="chart-card chart-full" style="margin-top:12px" id="tmr-team-card">
     <div class="metric-card">
-      <div><div class="metric-value" id="mv-dist">—</div><div class="metric-label" id="ml-dist">dos dias com 1ª resposta dentro do SLA (≤<span id="sla-tmr-dist">30</span>min)</div></div>
-      <span class="badge-live" id="dist-badge">período selecionado</span>
+      <div><div class="metric-value" id="mv-tmr-team" style="font-size:17px;word-break:break-word">—</div><div class="metric-label">equipe com menor tempo de 1ª resposta</div></div>
+      <span class="badge-live" id="tmr-team-badge">período selecionado</span>
     </div>
     <div class="chart-card-hdr" style="margin-top:10px">
-      <div><div class="chart-card-title">Em quanto tempo o cliente recebeu a 1ª resposta?</div><div class="chart-card-sub">Distribuição dos dias com dados no período</div></div>
+      <div><div class="chart-card-title">Velocidade de resposta por equipe</div><div class="chart-card-sub">Tempo médio até a 1ª resposta por caixa de entrada · Quanto menor, melhor</div></div>
     </div>
-    <div class="chart-wrap" style="height:180px"><canvas id="chart-dist"></canvas></div>
-    <div id="chart-dist-na" class="chart-na" style="display:none">Dados de distribuição não disponíveis via API com este token</div>
+    <div class="chart-wrap" style="height:220px"><canvas id="chart-tmr-team"></canvas></div>
+    <div id="chart-tmr-team-na" class="chart-na" style="display:none">Dados de TMR por equipe não disponíveis</div>
   </div>
 
   <!-- ── EQUIPES ── -->
@@ -757,10 +775,11 @@ let _agentFilter = null;      /* null = sem filtro; {id, name} = agente ativo */
 let _chartInboxFilter = null; /* filtro de inbox independente da aba Análise */
 let _SLA_TMA = 8;      /* horas — meta de TMA */
 let _SLA_TMR = 30;     /* minutos — meta de TMR */
-let _SLA_FCR = 85;     /* % — meta de FCR */
+let _SLA_FCR = 85;     /* % — meta de taxa de resolução */
+let _SLA_MSG = 10;     /* mensagens — meta de eficiência por conversa */
 let _teamCompData    = null; /* dados de comparação por equipe/inbox */
-let _distData        = null; /* distribuição 1ª resposta (faixas de tempo) */
 let _chartTeamCache  = {};   /* {`${id}:${since}:${until}`: {data, ts}} — TTL 5min */
+let _authLimited     = false; /* true quando API de relatórios retornou 401/403 */
 
 /* ── TOKEN ── */
 function showTokenModal() {
@@ -877,11 +896,13 @@ function renderKPISkeleton() {
 
 /* ── KPI AGGREGATION ── */
 function aggregateSummaries(list) {
-  const out = { conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null };
+  const out = { conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null, incoming_messages_count: 0, outgoing_messages_count: 0 };
   let wTMA = 0, totTMA = 0, wTMR = 0, totTMR = 0;
   list.forEach(s => {
-    out.conversations_count += s.conversations_count || 0;
-    out.resolutions_count   += s.resolutions_count   || 0;
+    out.conversations_count      += s.conversations_count      || 0;
+    out.resolutions_count        += s.resolutions_count        || 0;
+    out.incoming_messages_count  += s.incoming_messages_count  || 0;
+    out.outgoing_messages_count  += s.outgoing_messages_count  || 0;
     if (s.avg_resolution_time != null && (s.resolutions_count || 0) > 0) {
       wTMA  += s.avg_resolution_time * s.resolutions_count;
       totTMA += s.resolutions_count;
@@ -900,6 +921,8 @@ function aggregateSummaries(list) {
 async function fetchKPIs() {
   const p    = getPeriod(_kpiPeriod);
   const note = document.getElementById('kpi-filter-note');
+  _authLimited = false;
+  note.classList.remove('auth-warn');
   document.getElementById('period-badge').textContent = p.badgeLabel;
   renderKPISkeleton();
 
@@ -940,6 +963,7 @@ async function fetchKPIs() {
         note.style.display = 'none';
       } catch (e) {
         if (!isAuthError(e)) throw e;
+        _authLimited = true;
         const ids = Object.keys(_inboxMap).map(Number);
         const [currAll, prevAll] = await Promise.all([
           summaryByIds(ids, p.since, p.until),
@@ -947,7 +971,8 @@ async function fetchKPIs() {
         ]);
         summary     = aggregateSummaries(currAll);
         summaryPrev = aggregateSummaries(prevAll);
-        note.textContent = 'Exibindo dados das caixas acessíveis ao seu usuário';
+        note.textContent = '⚠ Indicadores históricos disponíveis apenas para Administradores. Contate o responsável pelo dashboard para solicitar acesso de administrador no Chatwoot.';
+        note.classList.add('auth-warn');
         note.style.display = '';
       }
 
@@ -971,11 +996,11 @@ async function fetchKPIs() {
         ? applyAgentFilter(applyInboxFilter(_rawConvs))
         : applyInboxFilter(_rawConvs);
       if (localConvs.length > 0) {
-        const resolved  = localConvs.filter(c => c.status === 'resolved').length;
-        summary     = { conversations_count: localConvs.length, resolutions_count: resolved, avg_resolution_time: null };
-        summaryPrev = { conversations_count: 0, resolutions_count: 0, avg_resolution_time: null };
+        summary     = { conversations_count: localConvs.length, resolutions_count: null, avg_resolution_time: null };
+        summaryPrev = { conversations_count: 0,                  resolutions_count: null, avg_resolution_time: null };
         if (!_agentFilter) {
-          note.textContent = 'Indicadores calculados a partir das conversas visíveis ao seu usuário';
+          note.textContent = '⚠ Indicadores históricos disponíveis apenas para Administradores. Contate o responsável pelo dashboard para solicitar acesso de administrador no Chatwoot.';
+          note.classList.add('auth-warn');
           note.style.display = '';
         }
       }
@@ -1085,15 +1110,15 @@ function renderKPIs(s, sp) {
       lb:   false
     },
     {
-      name: 'Resolvidos em primeiro atendimento',
-      desc: 'Atendimentos resolvidos durante a própria conversa',
+      name: 'Resolvidos no período',
+      desc: 'Atendimentos finalizados como resolvidos no período',
       val:  s.resolutions_count,
       prev: sp.resolutions_count,
       lb:   false
     },
     {
-      name: 'Não resolvidos em primeiro atendimento',
-      desc: 'Atendimentos que ficaram pendentes após a conversa',
+      name: 'Não resolvidos no período',
+      desc: 'Atendimentos que não foram marcados como resolvidos',
       val:  (s.conversations_count != null && s.resolutions_count != null)
               ? Math.max(0, s.conversations_count - s.resolutions_count) : null,
       prev: (sp.conversations_count != null && sp.resolutions_count != null)
@@ -1768,33 +1793,31 @@ async function fetchChartData() {
     const full = d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
     periods.push({ since: Math.floor(d.getTime() / 1000), until: Math.floor(last.getTime() / 1000), monthLabel: lbl, fullLabel: full });
   }
+  const EMPTY_MONTH = () => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null, incoming_messages_count: 0, outgoing_messages_count: 0 });
   const fetchMonth = async ({ since, until }) => {
     /* Se filtro de inbox de gráficos ativo, busca por inbox e agrega */
     if (_chartInboxFilter && _chartInboxFilter.size > 0) {
       const ids = [..._chartInboxFilter];
       const res = await Promise.all(ids.map(id =>
         api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
-          .catch(() => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null }))
+          .catch(EMPTY_MONTH)
       ));
       return aggregateSummaries(res);
     }
     try { return await api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=account`); }
-    catch (e) { if (!isAuthError(e)) return { conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null }; }
+    catch (e) { if (!isAuthError(e)) return EMPTY_MONTH(); }
     const ids = Object.keys(_inboxMap).map(Number);
-    if (!ids.length) return { conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null };
+    if (!ids.length) return EMPTY_MONTH();
     const res = await Promise.all(ids.map(id =>
       api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
-        .catch(() => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null }))
+        .catch(EMPTY_MONTH)
     ));
     return aggregateSummaries(res);
   };
   try {
     const results = await Promise.all(periods.map(fetchMonth));
     _chartData = periods.map((p, i) => ({ ...p, ...results[i] }));
-    [_teamCompData, _distData] = await Promise.all([
-      fetchTeamComparison(periods).catch(() => null),
-      fetchResponseDistribution(periods).catch(() => null)
-    ]);
+    _teamCompData = await fetchTeamComparison(periods).catch(() => null);
     renderCharts();
   } catch (err) { console.error('fetchChartData:', err); }
   finally {
@@ -1834,26 +1857,6 @@ async function fetchTeamComparison(periods) {
   return { items, total: ids.length, withData: items.length };
 }
 
-async function fetchResponseDistribution(periods) {
-  const since = periods[0].since;
-  const until = periods[periods.length - 1].until;
-  try {
-    const data = await api(`/v1/accounts/${cfg.account}/reports?metric=avg_first_response_time&type=account&since=${since}&until=${until}`);
-    if (!Array.isArray(data) || !data.length) return null;
-    const buckets = [0, 0, 0, 0, 0];
-    data.forEach(pt => {
-      const secs = pt.value;
-      if (secs == null || secs <= 0) return;
-      if      (secs < 300)   buckets[0]++;
-      else if (secs < 1800)  buckets[1]++;
-      else if (secs < 3600)  buckets[2]++;
-      else if (secs < 14400) buckets[3]++;
-      else                   buckets[4]++;
-    });
-    const total = buckets.reduce((s, v) => s + v, 0);
-    return { buckets, total, labels: ['< 5min', '5–30min', '30–60min', '1–4h', '> 4h'] };
-  } catch (e) { return null; }
-}
 
 function renderCharts() {
   if (!window.Chart || !_chartData.length) return;
@@ -1862,6 +1865,8 @@ function renderCharts() {
     return;
   }
   _chartsDirty = false;
+  const grafPage = document.getElementById('graficos-page');
+  if (grafPage) { if (_authLimited) grafPage.classList.add('auth-limited'); else grafPage.classList.remove('auth-limited'); }
   const c          = chartColors();
   const labels     = _chartData.map(d => d.monthLabel);
   const fullLabels = _chartData.map(d => d.fullLabel || d.monthLabel);
@@ -2044,39 +2049,89 @@ function renderCharts() {
     });
   }
 
-  /* ── 6. DISTRIBUIÇÃO 1ª RESPOSTA ── */
-  destroyChart('dist');
+  /* ── 6. EFICIÊNCIA — MENSAGENS POR CONVERSA ── */
+  destroyChart('msg');
   {
-    const naEl = document.getElementById('chart-dist-na');
-    if (_chartInboxFilter && _chartInboxFilter.size > 0) {
-      if (naEl) { naEl.textContent = 'Distribuição não disponível com filtro de inbox ativo'; naEl.style.display = ''; }
-      setMetric('mv-dist', '—');
-    } else if (_distData && _distData.total > 0) {
-      if (naEl) naEl.style.display = 'none';
-      const slaEl2 = document.getElementById('sla-tmr-dist');
-      if (slaEl2) slaEl2.textContent = _SLA_TMR;
-      const withinSla = _distData.buckets[0] + _distData.buckets[1]; /* <5min + 5–30min */
-      setMetric('mv-dist', `${Math.round(withinSla / _distData.total * 100)}%`);
-      const DCOLS = ['#22c55e','#14b8a6','#3b82f6','#eab308','#ef4444'];
-      const opts  = makeChartOpts(true, v => `${v} dias`);
+    const msgVals = _chartData.map(d => {
+      const conv = d.conversations_count || 0;
+      const msgs = (d.incoming_messages_count || 0) + (d.outgoing_messages_count || 0);
+      return conv > 0 ? +(msgs / conv).toFixed(1) : null;
+    });
+    const last = msgVals[n - 1], prev = msgVals[n - 2];
+    setMetric('mv-msg', last != null ? last.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '—');
+    metricTrend('mt-msg', last, prev, true);
+    const slaEl = document.getElementById('sla-msg-label');
+    if (slaEl) slaEl.textContent = _SLA_MSG;
+    if (msgVals.some(v => v != null)) {
+      const opts = makeChartOpts(false, v => `${v}`);
       opts.animation = false;
-      opts.plugins.legend = { display: false };
       opts.plugins.tooltip.callbacks = {
-        title: items => items[0].label,
-        label: item  => `${item.raw} dias (${Math.round(item.raw / _distData.total * 100)}%)`
+        title: items => fullLabels[items[0].dataIndex] || items[0].label,
+        label: item  => item.datasetIndex === 0 ? `${item.raw?.toLocaleString('pt-BR')} mensagens por conversa` : `Meta: ${_SLA_MSG} mensagens`
       };
-      _charts.dist = new Chart(document.getElementById('chart-dist'), {
+      const grad = (ctx => {
+        const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, ctx.chart.height);
+        g.addColorStop(0, 'rgba(249,115,22,0.5)');
+        g.addColorStop(1, 'rgba(249,115,22,0.02)');
+        return g;
+      });
+      _charts.msg = new Chart(document.getElementById('chart-msg'), {
+        type: 'line',
+        data: { labels, datasets: [
+          { data: msgVals, borderColor: 'rgba(249,115,22,0.9)', backgroundColor: grad, fill: true, tension: 0.3, pointRadius: 3, pointBackgroundColor: 'rgba(249,115,22,0.9)', borderWidth: 2 },
+          slaLine(_SLA_MSG, `Meta (${_SLA_MSG} msg)`, 'rgba(239,68,68,0.6)')
+        ]},
+        options: opts
+      });
+    }
+  }
+
+  /* ── 7. TMR POR EQUIPE ── */
+  destroyChart('tmr-team');
+  {
+    const naEl  = document.getElementById('chart-tmr-team-na');
+    const items = (_teamCompData?.items || []).filter(t => t.tmr_min != null).sort((a, b) => a.tmr_min - b.tmr_min);
+    if (items.length > 0) {
+      if (naEl) naEl.style.display = 'none';
+      const best = items[0];
+      const bestLabel = `${best.name} — ${best.tmr_min < 60 ? best.tmr_min.toFixed(1) + 'min' : (best.tmr_min / 60).toFixed(1) + 'hr'}`;
+      setMetric('mv-tmr-team', bestLabel);
+      const barColors = items.map(t => t.tmr_min < 30 ? '#22c55e' : t.tmr_min < 60 ? '#eab308' : '#ef4444');
+      const teamNames = items.map(t => t.name.length > 22 ? t.name.slice(0, 20) + '…' : t.name);
+      const opts = {
+        responsive: true, maintainAspectRatio: false, animation: false, indexAxis: 'y',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: c.tooltipBg, titleColor: c.labels, bodyColor: c.labels, borderColor: c.grid, borderWidth: 1,
+            callbacks: {
+              title: items => items[0].label,
+              label: item => {
+                const mins = item.raw;
+                const h = Math.floor(mins / 60), m = Math.round(mins % 60);
+                return h > 0 ? `${h}hr ${String(m).padStart(2,'0')}min de tempo médio de 1ª resposta` : `${mins.toFixed(1)}min de tempo médio de 1ª resposta`;
+              }
+            }
+          },
+          annotation: { annotations: { sla30: { type: 'line', xMin: _SLA_TMR, xMax: _SLA_TMR, borderColor: 'rgba(239,68,68,0.7)', borderWidth: 1.5, borderDash: [6,4], label: { content: `Meta ${_SLA_TMR}min`, display: true, position: 'end', font: { size: 10 }, color: '#ef4444', backgroundColor: 'transparent' } } } }
+        },
+        scales: {
+          x: { grid: { color: c.grid }, ticks: { color: c.labels, font: { size: 11 }, callback: v => `${v}min` } },
+          y: { grid: { display: false }, ticks: { color: c.labels, font: { size: 11 } } }
+        }
+      };
+      _charts['tmr-team'] = new Chart(document.getElementById('chart-tmr-team'), {
         type: 'bar',
-        data: { labels: _distData.labels, datasets: [{ data: _distData.buckets, backgroundColor: DCOLS, borderRadius: 4 }] },
+        data: { labels: teamNames, datasets: [{ data: items.map(t => t.tmr_min), backgroundColor: barColors, borderRadius: 3 }] },
         options: opts
       });
     } else {
       if (naEl) naEl.style.display = '';
-      setMetric('mv-dist', '—');
+      setMetric('mv-tmr-team', '—');
     }
   }
 
-  /* ── 7. COMPARATIVO EQUIPES ── */
+  /* ── 8. COMPARATIVO EQUIPES ── */
   destroyChart('teams');
   {
     const naEl      = document.getElementById('chart-teams-na');
