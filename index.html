@@ -1997,7 +1997,7 @@ function getAgentTabRange() {
     start = new Date(now.getFullYear(), now.getMonth(), 1);
   } else {
     const m = parseInt(_agentTabPeriod);
-    start = new Date(now.getFullYear(), now.getMonth() - m, 1);
+    start = new Date(now.getFullYear(), now.getMonth() - m + 1, 1);
   }
   return { since: Math.floor(start.getTime() / 1000), until };
 }
@@ -2050,12 +2050,12 @@ function calcAgentScore(summary) {
   return pts;
 }
 
-function agentBadge(value, label, meta, unit, lowerIsBetter) {
+function agentBadge(value, label, meta, unit, lowerIsBetter, tipOverride) {
   if (value == null || label == null) return '<span class="agent-badge badge-na">—</span>';
   const ratio = lowerIsBetter ? value / meta : meta / value;
   const cls   = ratio <= 1 ? 'badge-green' : ratio <= 1.5 ? 'badge-yellow' : 'badge-red';
   const icon  = ratio <= 1 ? '✓' : ratio <= 1.5 ? '~' : '✗';
-  return `<span class="agent-badge ${cls}" title="meta: ${meta}${unit}">${label} ${icon}</span>`;
+  return `<span class="agent-badge ${cls}" title="${tipOverride ?? ('meta: ' + meta + unit)}">${label} ${icon}</span>`;
 }
 
 function isAuthError(e) {
@@ -2081,19 +2081,24 @@ async function fetchAgentTab() {
 
   const { since, until } = getAgentTabRange();
 
-  const [summaries, csatRaw] = await Promise.all([
+  const [summaryResults, csatRaw] = await Promise.all([
     Promise.all(visibleAgents.map(a =>
       api(`/v2/accounts/${cfg.account}/reports/summary?type=agent&id=${a.id}&since=${since}&until=${until}`)
-        .catch(() => null)
+        .catch(e => ({ _err: e }))
     )),
     api(`/v1/accounts/${cfg.account}/reports/agents/satisfaction?since=${since}&until=${until}`)
       .catch(() => null)
   ]);
 
-  _agentPerfData = {};
-  visibleAgents.forEach((a, i) => {
-    _agentPerfData[a.id] = { agent: a, summary: summaries[i] };
-  });
+  const firstErr = summaryResults.find(r => r?._err);
+  if (visibleAgents.length > 0 && firstErr && isAuthError(firstErr._err)) {
+    _agentPerfData = { _authError: true };
+  } else {
+    _agentPerfData = {};
+    visibleAgents.forEach((a, i) => {
+      _agentPerfData[a.id] = { agent: a, summary: summaryResults[i]?._err ? null : summaryResults[i] };
+    });
+  }
 
   if (Array.isArray(csatRaw) && csatRaw.length) {
     const byAgent = {};
@@ -2182,14 +2187,19 @@ function renderAgentPerf() {
               ? (s.resolutions_count || 0) / s.conversations_count * 100 : null;
             const fcrBadge = fcr == null
               ? '<span class="agent-badge badge-na">—</span>'
-              : agentBadge(100 - fcr, Math.round(fcr) + '%', 100 - _SLA_FCR, '%', true);
+              : agentBadge(100 - fcr, Math.round(fcr) + '%', 100 - _SLA_FCR, '%', true,
+                  fcr >= _SLA_FCR ? `${Math.round(fcr - _SLA_FCR)}pp acima da meta (${_SLA_FCR}%) ✓` : `${Math.round(_SLA_FCR - fcr)}pp abaixo da meta (${_SLA_FCR}%) ✗`);
+            const missing = (tmaH == null ? 1 : 0) + (tmrM == null ? 1 : 0);
+            const scoreTip = sc == null ? '' : missing > 0
+              ? `${sc}/100 · ${4 - missing}/4 métricas${tmaH == null ? ' · sem TMA' : ''}${tmrM == null ? ' · sem TMR' : ''}`
+              : `Pontuação: ${sc}/100`;
             return `<tr class="agent-row" onclick="openAgentModal(${e.agent.id})">
               <td style="font-weight:600">${esc(e.agent.name)}</td>
               <td>${nd ? '—' : s.conversations_count.toLocaleString('pt-BR')}</td>
               <td>${nd ? '<span class="agent-badge badge-na">—</span>' : agentBadge(tmaH, fmtSec(s.avg_resolution_time), _SLA_TMA, 'h', true)}</td>
               <td>${nd ? '<span class="agent-badge badge-na">—</span>' : agentBadge(tmrM, fmtSec(s.avg_first_response_time), _SLA_TMR, 'min', true)}</td>
               <td>${fcrBadge}</td>
-              <td>${sc == null ? '<span class="agent-badge badge-na">—</span>' : `<span class="score-badge ${scoreCls(sc)}">${sc}</span>`}</td>
+              <td>${sc == null ? '<span class="agent-badge badge-na">—</span>' : `<span class="score-badge ${scoreCls(sc)}" title="${scoreTip}">${sc}${missing > 0 ? `<sup style="font-size:9px;opacity:.7">${4-missing}/4</sup>` : ''}</span>`}</td>
               <td><button class="ver-perfil-btn" onclick="event.stopPropagation();openAgentModal(${e.agent.id})">Ver perfil →</button></td>
             </tr>`;
           }).join('')}
@@ -2311,6 +2321,7 @@ async function fetchAgentMonths(id) {
   ));
   if (!_agentMonthCache[id]) _agentMonthCache[id] = {};
   _agentMonthCache[id][key] = months.map((mo, i) => ({ ...mo, data: results[i] }));
+  _agentMonthCache[id][`${key}_ts`] = Date.now();
   if (loadEl) loadEl.style.display = 'none';
 }
 
@@ -2340,17 +2351,21 @@ function renderAgentModalHeader(id) {
   const next   = _agentModalOrder[idx + 1] != null;
   const period = { '1': 'Mês atual', '3': '3 meses', '6': '6 meses', '12': '12 meses' }[_agentTabPeriod];
 
+  const missing = (tmaH == null ? 1 : 0) + (tmrM == null ? 1 : 0);
+  const headerScoreTip = sc == null ? '' : missing > 0
+    ? `${sc}/100 · ${4 - missing}/4 métricas${tmaH == null ? ' · sem TMA' : ''}${tmrM == null ? ' · sem TMR' : ''}`
+    : `Pontuação: ${sc}/100`;
   el.innerHTML = `
     <div class="am-avatar">${ini}</div>
     <div>
       <div class="am-name">${esc(entry.agent.name)}</div>
       <div style="font-size:11px;color:var(--text2)">${period}</div>
     </div>
-    <span class="score-badge ${scCls}" style="font-size:18px;padding:4px 14px">${sc ?? '—'}</span>
+    <span class="score-badge ${scCls}" style="font-size:18px;padding:4px 14px" title="${headerScoreTip}">${sc ?? '—'}${missing > 0 ? `<sup style="font-size:10px;opacity:.7">${4-missing}/4</sup>` : ''}</span>
     <div class="am-semaphores">
       ${dot(tmaH, _SLA_TMA, true)} <span style="font-size:11px;color:var(--text2)">Atend.</span>
       ${dot(tmrM, _SLA_TMR, true)} <span style="font-size:11px;color:var(--text2)">Resposta</span>
-      ${dot(fcr,  _SLA_FCR, false)}<span style="font-size:11px;color:var(--text2)">Resolução</span>
+      ${dot(fcr == null ? null : 100 - fcr, 100 - _SLA_FCR, true)}<span style="font-size:11px;color:var(--text2)">Resolução</span>
     </div>
     <div class="am-nav">
       <button onclick="navigateAgentModal(-1)" ${prev ? '' : 'disabled'} title="Agente anterior (←)">‹</button>
@@ -2385,9 +2400,13 @@ function renderAgentModalHighlights(id, months) {
   if (last && prev) {
     const sc1 = calcAgentScore(last.data), sc2 = calcAgentScore(prev.data);
     if (sc1 != null && sc2 != null) {
-      if (sc1 > sc2)      trend = `<div class="am-highlight"><strong>↑ Melhorando</strong>Pontuação subiu de ${sc2} para ${sc1} no último mês</div>`;
-      else if (sc1 < sc2) trend = `<div class="am-highlight"><strong>↓ Queda recente</strong>Pontuação caiu de ${sc2} para ${sc1} no último mês</div>`;
-      else                trend = `<div class="am-highlight"><strong>→ Estável</strong>Pontuação mantida no último mês</div>`;
+      const now = new Date();
+      const curMonthSince = new Date(now.getFullYear(), now.getMonth(), 1).getTime() / 1000;
+      const isPartial = last.since >= curMonthSince;
+      const monthRef = isPartial ? 'mês atual (parcial)' : 'último mês';
+      if (sc1 > sc2)      trend = `<div class="am-highlight"><strong>↑ Melhorando</strong>Pontuação subiu de ${sc2} para ${sc1} — ${monthRef}</div>`;
+      else if (sc1 < sc2) trend = `<div class="am-highlight"><strong>↓ Queda recente</strong>Pontuação caiu de ${sc2} para ${sc1} — ${monthRef}</div>`;
+      else                trend = `<div class="am-highlight"><strong>→ Estável</strong>Pontuação mantida — ${monthRef}</div>`;
     }
   }
 
@@ -2457,16 +2476,19 @@ function renderAgentModalMonthTable(id) {
   const months = _agentMonthCache[id]?.[_agentTabPeriod];
   if (!months) { el.innerHTML = ''; return; }
 
-  const fmtCell = (value, label, meta, lowerIsBetter) => {
+  const fmtCell = (value, label, meta, lowerIsBetter, tipOverride) => {
     if (value == null || label == null) return '<span class="agent-badge badge-na">—</span>';
     const ratio = lowerIsBetter ? value / meta : meta / value;
     const cls   = ratio <= 1 ? 'badge-green' : ratio <= 1.5 ? 'badge-yellow' : 'badge-red';
     const pct   = Math.round(Math.abs(ratio - 1) * 100);
-    const dir   = lowerIsBetter
+    const dir   = tipOverride ?? (lowerIsBetter
       ? (ratio <= 1 ? `${pct}% abaixo da meta ✓` : `${pct}% acima da meta ✗`)
-      : (ratio <= 1 ? `${pct}% abaixo da meta ✗` : `${pct}% acima da meta ✓`);
+      : (ratio <= 1 ? `${pct}% abaixo da meta ✗` : `${pct}% acima da meta ✓`));
     return `<span class="agent-badge ${cls}" title="${dir}">${label}</span>`;
   };
+
+  const ts = _agentMonthCache[id]?.[`${_agentTabPeriod}_ts`];
+  const tsNote = ts ? `<div style="font-size:10px;color:var(--text3);text-align:right;margin-top:6px">Histórico atualizado às ${new Date(ts).toLocaleTimeString('pt-BR')}</div>` : '';
 
   el.innerHTML = `
     <table class="am-month-table">
@@ -2488,6 +2510,10 @@ function renderAgentModalMonthTable(id) {
             ? (d.resolutions_count || 0) / d.conversations_count * 100 : null;
           const sc   = nd ? null : calcAgentScore(d);
           const scCls = sc == null ? 'badge-na' : sc >= 75 ? 'score-hi' : sc >= 50 ? 'score-mid' : 'score-lo';
+          const fcrTip = fcr == null ? null
+            : fcr >= _SLA_FCR
+              ? `${Math.round(fcr - _SLA_FCR)}pp acima da meta (${_SLA_FCR}%) ✓`
+              : `${Math.round(_SLA_FCR - fcr)}pp abaixo da meta (${_SLA_FCR}%) ✗`;
           return `<tr>
             <td style="font-weight:600;white-space:nowrap">${m.label}</td>
             <td>${nd ? '—' : d.conversations_count.toLocaleString('pt-BR')}</td>
@@ -2496,13 +2522,13 @@ function renderAgentModalMonthTable(id) {
             <td>${nd ? '<span class="agent-badge badge-na">—</span>'
               : fmtCell(tmrM, fmtSec(d.avg_first_response_time), _SLA_TMR, true)}</td>
             <td>${fcr == null ? '<span class="agent-badge badge-na">—</span>'
-              : fmtCell(100 - fcr, Math.round(fcr) + '%', 100 - _SLA_FCR, true)}</td>
+              : fmtCell(100 - fcr, Math.round(fcr) + '%', 100 - _SLA_FCR, true, fcrTip)}</td>
             <td>${sc == null ? '<span class="agent-badge badge-na">—</span>'
               : `<span class="score-badge ${scCls}">${sc}</span>`}</td>
           </tr>`;
         }).join('')}
       </tbody>
-    </table>`;
+    </table>${tsNote}`;
 }
 
 function renderAgentTab() {
