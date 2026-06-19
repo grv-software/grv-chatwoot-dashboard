@@ -24,7 +24,7 @@
 ## Seções da Aba
 
 ### Controles do topo
-- **Seletor de período:** 4 botões tipo pill — `Mês atual` · `3 meses` · `6 meses` · `12 meses`. Estado em `_agentTabPeriod` ('1'|'3'|'6'|'12'). Default: `Mês atual`.
+- **Seletor de período:** 4 botões tipo pill — `Mês atual` · `3 meses` · `6 meses` · `12 meses`. Estado em `_agentTabPeriod` ('1'|'3'|'6'|'12'). Default: `3 meses`.
 - **Filtro de agentes:** botão "Todos os agentes" que abre popup de seleção múltipla (igual ao filtro de inbox existente). Estado em `_agentTabFilter: Set<number>|null`. Quando ativo exibe chips com nome do agente e botão de remover. Aplica em todas as 3 seções.
 
 ---
@@ -77,7 +77,8 @@ Para o gráfico de detalhe (histórico), buscar mês a mês individualmente e mo
 | Msgs/Conversa | (incoming+outgoing)/conversations_count | 1 decimal |
 | Total de Mensagens | incoming_messages_count + outgoing_messages_count | número |
 
-- Linhas com `conversations_count === 0` ficam ao final (sem dados no período)
+- Ordenação padrão: Volume decrescente (quem atendeu mais aparece primeiro). Colunas clicáveis para re-ordenar.
+- Linhas com `conversations_count === 0` ficam sempre ao final, independente da ordenação
 - Clicar em qualquer linha expande o **gráfico de detalhe** abaixo da tabela
 - Apenas um agente expandido por vez; clicar no mesmo fecha
 
@@ -113,7 +114,7 @@ Título: "Evolução de {nome do agente}" · Subtítulo: período selecionado.
 ## Variáveis de Estado (novas)
 
 ```javascript
-let _agentTabPeriod  = '1';        // '1'|'3'|'6'|'12' — meses
+let _agentTabPeriod  = '3';        // '1'|'3'|'6'|'12' — meses; default 3
 let _agentTabFilter  = null;       // Set<number>|null — ids de agentes selecionados
 let _agentList       = [];         // [{id, name, availability_status}] da API /agents
 let _agentPerfData   = null;       // {agentId: {summary, months[]}} — cache de desempenho
