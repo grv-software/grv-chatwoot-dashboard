@@ -2075,6 +2075,79 @@ async function fetchAgentTab() {
   renderAgentTab();
 }
 
+function renderAgentLive() {
+  const el = document.getElementById('agent-live-section');
+  if (!el) return;
+
+  const ov = _agentOverview;
+  if (!ov) {
+    el.innerHTML = '<div class="agent-no-data">Status ao vivo não disponível com este token</div>';
+    return;
+  }
+
+  /* Normaliza estrutura — Chatwoot pode retornar {data:{...}} ou diretamente {...} */
+  const raw      = ov.data || ov;
+  const ovAgents = Array.isArray(raw.agents) ? raw.agents : (Array.isArray(raw.data?.agents) ? raw.data.agents : []);
+  const openTotal = raw.open_conversations_count ?? raw.open ?? 0;
+
+  const online  = ovAgents.filter(a => a.availability_status === 'online').length;
+  const busy    = ovAgents.filter(a => a.availability_status === 'busy').length;
+  const offline = ovAgents.filter(a => a.availability_status === 'offline').length;
+
+  const visibleIds = (_agentTabFilter && _agentTabFilter.size > 0) ? _agentTabFilter : null;
+
+  const statusOrder = { online: 0, busy: 1, offline: 2 };
+  const sorted = [...ovAgents]
+    .filter(a => !visibleIds || visibleIds.has(a.id))
+    .sort((a, b) => {
+      const sd = (statusOrder[a.availability_status] ?? 3) - (statusOrder[b.availability_status] ?? 3);
+      if (sd !== 0) return sd;
+      return (b.open_conversations_count || 0) - (a.open_conversations_count || 0);
+    });
+
+  const dotCls = s => s === 'online' ? 'dot-online' : s === 'busy' ? 'dot-busy' : 'dot-offline';
+  const statusLabel = s => s === 'online' ? 'Online' : s === 'busy' ? 'Ocupado' : 'Offline';
+
+  const now = Date.now();
+  function oldestConvAge(agentOvData) {
+    const convs = agentOvData.open_conversations;
+    if (!Array.isArray(convs) || !convs.length) return '—';
+    const oldest = convs.slice().sort((a, b) => (a.created_at || 0) - (b.created_at || 0))[0];
+    if (!oldest?.created_at) return '—';
+    const secs = Math.floor((now / 1000) - oldest.created_at);
+    return fmtSec(secs);
+  }
+
+  el.innerHTML = `
+    <div class="agent-stat-cards">
+      <div class="agent-stat-card"><div class="asv" style="color:var(--green)">${online}</div><div class="asl">Online</div></div>
+      <div class="agent-stat-card"><div class="asv" style="color:var(--yellow)">${busy}</div><div class="asl">Ocupado</div></div>
+      <div class="agent-stat-card"><div class="asv" style="color:var(--text3)">${offline}</div><div class="asl">Offline</div></div>
+      <div class="agent-stat-card"><div class="asv" style="color:var(--accent)">${openTotal}</div><div class="asl">Conversas abertas agora</div></div>
+    </div>
+    ${sorted.length === 0
+      ? '<div class="agent-no-data">Nenhum agente encontrado</div>'
+      : `<div class="chart-card" style="overflow-x:auto">
+          <table class="agent-table">
+            <thead><tr>
+              <th style="min-width:180px">Agente</th>
+              <th>Status</th>
+              <th>Conversas abertas</th>
+              <th>Mensagem mais antiga</th>
+            </tr></thead>
+            <tbody>
+              ${sorted.map(a => `<tr>
+                <td>${esc(a.name)}</td>
+                <td><span class="agent-status-dot ${dotCls(a.availability_status)}"></span>${statusLabel(a.availability_status)}</td>
+                <td>${a.open_conversations_count ?? 0}</td>
+                <td>${oldestConvAge(a)}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`
+    }`;
+}
+
 function renderCharts() {
   if (!window.Chart || !_chartData.length) return;
   if (document.getElementById('graficos-page')?.style.display === 'none') {
