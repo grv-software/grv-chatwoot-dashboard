@@ -113,6 +113,21 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 @keyframes skel-pulse { 0%,100% { opacity:.18; } 50% { opacity:.38; } }
 .kpi-skel { display:block; background:var(--text3); border-radius:3px; animation:skel-pulse 1.2s ease-in-out infinite; }
 
+/* CHART LOADING SKELETON */
+#chart-loading { display:none; gap:12px; flex-wrap:wrap; padding:4px 0 8px; }
+.graficos-loading #chart-loading { display:flex; }
+.graficos-loading .chart-card { opacity:.35; pointer-events:none; transition:opacity .2s; }
+.chart-skel-card { flex:1 1 340px; min-height:200px; background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:16px; display:flex; flex-direction:column; gap:12px; }
+.chart-skel-title { height:14px; width:55%; background:var(--text3); border-radius:3px; animation:skel-pulse 1.2s ease-in-out infinite; }
+.chart-skel-bar { background:var(--text3); border-radius:3px; animation:skel-pulse 1.2s ease-in-out infinite; }
+.chart-skel-body { flex:1; display:flex; align-items:flex-end; gap:6px; padding-top:8px; }
+.chart-skel-body .chart-skel-bar:nth-child(1) { flex:1; height:55%; animation-delay:.0s; }
+.chart-skel-body .chart-skel-bar:nth-child(2) { flex:1; height:80%; animation-delay:.1s; }
+.chart-skel-body .chart-skel-bar:nth-child(3) { flex:1; height:65%; animation-delay:.2s; }
+.chart-skel-body .chart-skel-bar:nth-child(4) { flex:1; height:90%; animation-delay:.3s; }
+.chart-skel-body .chart-skel-bar:nth-child(5) { flex:1; height:45%; animation-delay:.4s; }
+.chart-skel-body .chart-skel-bar:nth-child(6) { flex:1; height:70%; animation-delay:.5s; }
+
 /* KPI FILTER NOTE */
 .kpi-filter-note { font-size:10px; color:var(--accent); padding:4px 14px 5px; background:rgba(59,130,246,.06); border-top:1px solid rgba(59,130,246,.15); }
 
@@ -529,12 +544,20 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     </button>
     <div class="inbox-chips" id="chart-inbox-chips"></div>
     <button class="inbox-clear" id="chart-inbox-clear" onclick="clearChartInboxFilter()" style="display:none">✕ Limpar</button>
+    <span id="chart-filter-note" style="display:none;font-size:10px;color:var(--accent);background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:4px;padding:2px 7px">Filtro independente do painel</span>
     <select id="chart-period-sel" class="chart-sel" onchange="fetchChartData()">
       <option value="3">Últimos 3 meses</option>
       <option value="6" selected>Últimos 6 meses</option>
       <option value="12">Últimos 12 meses</option>
     </select>
     <button id="chart-update-btn" class="btn-hdr blue" onclick="fetchChartData()">↺ Atualizar</button>
+    <span id="chart-updated-at" style="font-size:11px;color:var(--text3);margin-left:4px"></span>
+  </div>
+
+  <!-- Loading skeleton — visible only while fetching -->
+  <div id="chart-loading">
+    <div class="chart-skel-card"><div class="chart-skel-title"></div><div class="chart-skel-body"><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div></div></div>
+    <div class="chart-skel-card"><div class="chart-skel-title"></div><div class="chart-skel-body"><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div></div></div>
   </div>
 
   <!-- ── VOLUME ── -->
@@ -591,7 +614,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
         <span class="metric-trend-up" id="mt-fcr"></span>
       </div>
       <div class="chart-card-hdr" style="margin-top:10px">
-        <div><div class="chart-card-title">Taxa de resolução no 1º contato (FCR)</div><div class="chart-card-sub">≥90% ótimo · 70–90% ok · &lt;70% crítico · Meta: <span id="sla-fcr-label">85%</span></div></div>
+        <div><div class="chart-card-title">Taxa de Resolução</div><div class="chart-card-sub">≥90% ótimo · 70–90% ok · &lt;70% crítico · Meta: <span id="sla-fcr-label">85%</span></div></div>
       </div>
       <div class="chart-wrap"><canvas id="chart-fcr"></canvas></div>
     </div>
@@ -599,7 +622,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
   <!-- Distribuição 1ª resposta (full) -->
   <div class="chart-card chart-full" style="margin-top:12px">
     <div class="metric-card">
-      <div><div class="metric-value" id="mv-dist">—</div><div class="metric-label">dos dias respondidos em menos de 1 hora</div></div>
+      <div><div class="metric-value" id="mv-dist">—</div><div class="metric-label" id="ml-dist">dos dias com 1ª resposta dentro do SLA (≤<span id="sla-tmr-dist">30</span>min)</div></div>
       <span class="badge-live" id="dist-badge">período selecionado</span>
     </div>
     <div class="chart-card-hdr" style="margin-top:10px">
@@ -768,6 +791,14 @@ function saveToken() {
 if (!cfg.token) showTokenModal();
 else { document.getElementById('token-modal').classList.add('hidden'); startDashboard(); }
 
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearInterval(timer);
+  } else {
+    startDashboard();
+  }
+});
+
 /* ── N/D TOGGLE ── */
 function toggleNd() {
   _showNd = !_showNd;
@@ -842,18 +873,22 @@ function renderKPISkeleton() {
 
 /* ── KPI AGGREGATION ── */
 function aggregateSummaries(list) {
-  const out = { conversations_count: 0, resolutions_count: 0, avg_resolution_time: null };
-  let weightedTime = 0, totalForAvg = 0;
+  const out = { conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null };
+  let wTMA = 0, totTMA = 0, wTMR = 0, totTMR = 0;
   list.forEach(s => {
     out.conversations_count += s.conversations_count || 0;
     out.resolutions_count   += s.resolutions_count   || 0;
-    if (s.avg_resolution_time != null) {
-      const w = s.resolutions_count || s.conversations_count || 0;
-      weightedTime += s.avg_resolution_time * w;
-      totalForAvg  += w;
+    if (s.avg_resolution_time != null && (s.resolutions_count || 0) > 0) {
+      wTMA  += s.avg_resolution_time * s.resolutions_count;
+      totTMA += s.resolutions_count;
+    }
+    if (s.avg_first_response_time != null && (s.conversations_count || 0) > 0) {
+      wTMR  += s.avg_first_response_time * s.conversations_count;
+      totTMR += s.conversations_count;
     }
   });
-  if (totalForAvg > 0) out.avg_resolution_time = weightedTime / totalForAvg;
+  if (totTMA > 0) out.avg_resolution_time    = wTMA / totTMA;
+  if (totTMR > 0) out.avg_first_response_time = wTMR / totTMR;
   return out;
 }
 
@@ -1010,6 +1045,7 @@ async function fetchAll() {
     document.getElementById('hdr-updated').textContent = `Atualizado às ${now.toLocaleTimeString('pt-BR')}`;
     countdown = REFRESH_SEC;
     document.getElementById('hdr-countdown').textContent = `Próx. atualização em ${countdown}s`;
+    _chartDataStale = true;
   } catch (e) {
     document.getElementById('hdr-countdown').textContent = 'Erro ao atualizar';
     showToast(`Falha ao carregar dados: ${e.message}. Verifique sua conexão ou token de acesso.`);
@@ -1019,7 +1055,7 @@ async function fetchAll() {
 
 /* ── KPIs RENDER ── */
 function fmtSec(s) {
-  if (s == null) return null;
+  if (s == null) return '—';
   if (s < 60)   return `${Math.round(s)}seg`;
   if (s < 3600) return `${Math.round(s / 60)}min`;
   const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
@@ -1390,15 +1426,18 @@ function syncChartInboxBar() {
   const trigTxt  = document.getElementById('chart-inbox-trigger-txt');
   if (!chipsEl) return;
 
+  const noteEl = document.getElementById('chart-filter-note');
   if (!_chartInboxFilter) {
     chipsEl.innerHTML     = '';
     if (clearEl) clearEl.style.display = 'none';
     if (trigTxt) trigTxt.textContent   = 'Todas';
+    if (noteEl)  noteEl.style.display  = 'none';
     return;
   }
 
   if (trigTxt) trigTxt.textContent = `${_chartInboxFilter.size} selecionada${_chartInboxFilter.size > 1 ? 's' : ''}`;
   if (clearEl) clearEl.style.display = '';
+  if (noteEl)  noteEl.style.display  = '';
   chipsEl.innerHTML = [..._chartInboxFilter].map(id => {
     const name = (_inboxMap[id] || {}).name || `#${id}`;
     return `<span class="inbox-chip">${esc(name)}<button class="inbox-chip-rm" onclick="removeChartInboxChip(${id})" aria-label="Remover ${esc(name)}">×</button></span>`;
@@ -1673,9 +1712,11 @@ function esc(s) {
 }
 
 /* ── CHARTS ── */
-let _chartData = [];
-let _charts    = {};
-let _ibVisible = false;
+let _chartData      = [];
+let _charts         = {};
+let _ibVisible      = false;
+let _chartsDirty    = false;  /* true → renderCharts precisa rodar quando a aba ficar visível */
+let _chartDataStale = false;  /* true → fetchChartData deve rodar ao entrar na aba */
 
 function chartColors() {
   const light = document.documentElement.getAttribute('data-theme') === 'light';
@@ -1711,6 +1752,8 @@ function makeChartOpts(isHoriz, yFmt) {
 async function fetchChartData() {
   const btn = document.getElementById('chart-update-btn');
   if (btn) { btn.textContent = '⏳ Carregando…'; btn.disabled = true; }
+  const graficosPage = document.getElementById('graficos-page');
+  if (graficosPage) graficosPage.classList.add('graficos-loading');
   const months = parseInt(document.getElementById('chart-period-sel').value, 10) || 6;
   const now = new Date();
   const periods = [];
@@ -1750,7 +1793,12 @@ async function fetchChartData() {
     ]);
     renderCharts();
   } catch (err) { console.error('fetchChartData:', err); }
-  finally { if (btn) { btn.textContent = '↺ Atualizar'; btn.disabled = false; } }
+  finally {
+    if (btn) { btn.textContent = '↺ Atualizar'; btn.disabled = false; }
+    if (graficosPage) graficosPage.classList.remove('graficos-loading');
+    const updEl = document.getElementById('chart-updated-at');
+    if (updEl) updEl.textContent = `Atualizado às ${new Date().toLocaleTimeString('pt-BR')}`;
+  }
 }
 
 async function fetchTeamComparison(periods) {
@@ -1761,7 +1809,7 @@ async function fetchTeamComparison(periods) {
   const results = await Promise.all(ids.map(id =>
     api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
       .then(r => ({
-        name: _inboxMap[id] || `Inbox ${id}`,
+        name: (_inboxMap[id] || {}).name || `Inbox ${id}`,
         tma_h:   r.avg_resolution_time    != null ? +(r.avg_resolution_time    / 3600).toFixed(2) : null,
         tmr_min: r.avg_first_response_time != null ? +(r.avg_first_response_time / 60).toFixed(1)  : null
       }))
@@ -1793,6 +1841,11 @@ async function fetchResponseDistribution(periods) {
 
 function renderCharts() {
   if (!window.Chart || !_chartData.length) return;
+  if (document.getElementById('graficos-page')?.style.display === 'none') {
+    _chartsDirty = true;
+    return;
+  }
+  _chartsDirty = false;
   const c          = chartColors();
   const labels     = _chartData.map(d => d.monthLabel);
   const fullLabels = _chartData.map(d => d.fullLabel || d.monthLabel);
@@ -1819,16 +1872,6 @@ function renderCharts() {
     el.textContent = `${up ? '▲' : '▼'} ${Math.abs(pct)}% vs ant.`;
   }
 
-  function fmtSec(secs) {
-    if (secs == null) return '—';
-    if (secs >= 3600) {
-      const h = Math.floor(secs / 3600), m = Math.round((secs % 3600) / 60);
-      return `${h}hr ${String(m).padStart(2, '0')}min`;
-    }
-    const m = Math.floor(secs / 60), s = Math.round(secs % 60);
-    return `${m}min ${String(s).padStart(2, '0')}seg`;
-  }
-
   function slaLine(value, label, color) {
     return { type: 'line', label, data: new Array(n).fill(value),
       borderColor: color || 'rgba(239,68,68,0.75)', borderDash: [6, 4],
@@ -1837,7 +1880,8 @@ function renderCharts() {
 
   function barGrad(canvas, colorStop0, colorStop1) {
     const ctx = canvas.getContext('2d');
-    const g   = ctx.createLinearGradient(0, 0, 0, canvas.offsetHeight || 240);
+    const h   = canvas.offsetHeight || canvas.parentElement?.clientHeight || 220;
+    const g   = ctx.createLinearGradient(0, 0, 0, h);
     g.addColorStop(0, colorStop0); g.addColorStop(1, colorStop1);
     return g;
   }
@@ -1910,7 +1954,7 @@ function renderCharts() {
     opts.animation = false;
     opts.plugins.tooltip.callbacks = {
       title: items => fullLabels[items[0].dataIndex] || items[0].label,
-      label: item  => item.datasetIndex === 0 ? `TMA: ${fmtSec(_chartData[item.dataIndex]?.avg_resolution_time)}` : `Meta SLA: ${_SLA_TMA}hr`
+      label: item  => item.datasetIndex === 0 ? `Tempo médio de resolução: ${fmtSec(_chartData[item.dataIndex]?.avg_resolution_time)}` : `Meta SLA: ${_SLA_TMA}hr`
     };
     _charts.tma = new Chart(canvas, {
       type: 'line',
@@ -1942,7 +1986,7 @@ function renderCharts() {
       opts.animation = false;
       opts.plugins.tooltip.callbacks = {
         title: items => fullLabels[items[0].dataIndex] || items[0].label,
-        label: item  => item.datasetIndex === 0 ? `TMR: ${fmtSec(_chartData[item.dataIndex]?.avg_first_response_time)}` : `Meta SLA: ${_SLA_TMR}min`
+        label: item  => item.datasetIndex === 0 ? `Tempo médio de 1ª resposta: ${fmtSec(_chartData[item.dataIndex]?.avg_first_response_time)}` : `Meta SLA: ${_SLA_TMR}min`
       };
       _charts.tmr = new Chart(canvas, {
         type: 'line',
@@ -1972,7 +2016,7 @@ function renderCharts() {
     opts.animation = false;
     opts.plugins.tooltip.callbacks = {
       title: items => fullLabels[items[0].dataIndex] || items[0].label,
-      label: item  => item.datasetIndex === 0 ? `FCR: ${item.raw ?? '—'}%` : `Meta: ${_SLA_FCR}%`
+      label: item  => item.datasetIndex === 0 ? `Taxa de Resolução: ${item.raw ?? '—'}%` : `Meta: ${_SLA_FCR}%`
     };
     _charts.fcr = new Chart(document.getElementById('chart-fcr'), {
       type: 'bar',
@@ -1990,8 +2034,10 @@ function renderCharts() {
     const naEl = document.getElementById('chart-dist-na');
     if (_distData && _distData.total > 0) {
       if (naEl) naEl.style.display = 'none';
-      const under1h = (_distData.buckets[0] + _distData.buckets[1] + _distData.buckets[2]);
-      setMetric('mv-dist', `${Math.round(under1h / _distData.total * 100)}%`);
+      const slaEl2 = document.getElementById('sla-tmr-dist');
+      if (slaEl2) slaEl2.textContent = _SLA_TMR;
+      const withinSla = _distData.buckets[0] + _distData.buckets[1]; /* <5min + 5–30min */
+      setMetric('mv-dist', `${Math.round(withinSla / _distData.total * 100)}%`);
       const DCOLS = ['#22c55e','#14b8a6','#3b82f6','#eab308','#ef4444'];
       const opts  = makeChartOpts(true, v => `${v} dias`);
       opts.animation = false;
@@ -2025,7 +2071,7 @@ function renderCharts() {
         plugins: {
           legend: { display: true, position: 'top', labels: { color: c.labels, font: { size: 11 }, boxWidth: 12 } },
           tooltip: { backgroundColor: c.tooltipBg, titleColor: c.labels, bodyColor: c.labels, borderColor: c.grid, borderWidth: 1,
-            callbacks: { label: item => item.datasetIndex === 0 ? `TMA: ${item.raw?.toFixed(1)}hr` : `TMR: ${item.raw?.toFixed(1)}min` }
+            callbacks: { label: item => item.datasetIndex === 0 ? `Tempo médio de resolução: ${item.raw?.toFixed(1)}hr` : `Tempo médio de 1ª resposta: ${item.raw?.toFixed(1)}min` }
           }
         },
         scales: {
@@ -2116,7 +2162,10 @@ function showPage(page) {
   if (ib) ib.style.display = isPainel ? (_ibVisible ? 'flex' : 'none') : 'none';
   document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
   document.getElementById(`nav-${page}`).classList.add('active');
-  if (!isPainel && !_chartData.length) fetchChartData();
+  if (!isPainel) {
+    if (!_chartData.length || _chartDataStale) { _chartDataStale = false; fetchChartData(); }
+    else if (_chartsDirty) renderCharts();
+  }
 }
 
 /* Atualiza gráficos ao mudar tema */
