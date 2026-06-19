@@ -121,7 +121,7 @@ Mantido no topo da página. Afeta apenas os gráficos baseados em período (Volu
 - **Título:** `font-size:14px; font-weight:600; var(--text)`
 - **Subtítulo:** `font-size:11px; var(--text3); margin-top:2px`
 - **Tendência:** `font-size:12px; font-weight:600` — verde `#22c55e` / vermelho `#ef4444`
-- **`Ao vivo`:** badge pequeno verde pulsante (reutiliza `.badge-pulse` existente)
+- **`Ao vivo`:** badge pequeno verde pulsante — criar classe `.badge-live` nova (verde `#22c55e`), pois `.badge-pulse` existente é laranja/urgência
 - **Altura do canvas:** 220px para todos (exceto Agente: 280px pois tem mais labels)
 
 ---
