@@ -552,6 +552,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     </select>
     <button id="chart-update-btn" class="btn-hdr blue" onclick="fetchChartData()">↺ Atualizar</button>
     <span id="chart-updated-at" style="font-size:11px;color:var(--text3);margin-left:4px"></span>
+    <span style="font-size:10px;color:var(--text3);margin-left:auto">Período e filtros independentes do painel principal</span>
   </div>
 
   <!-- Loading skeleton — visible only while fetching -->
@@ -903,7 +904,7 @@ async function fetchKPIs() {
   const summaryByIds = (ids, since, until) =>
     Promise.all(ids.map(id =>
       api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
-        .catch(() => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null }))
+        .catch(() => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null }))
     ));
 
   try {
@@ -1770,7 +1771,7 @@ async function fetchChartData() {
       const ids = [..._chartInboxFilter];
       const res = await Promise.all(ids.map(id =>
         api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
-          .catch(() => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null }))
+          .catch(() => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null }))
       ));
       return aggregateSummaries(res);
     }
@@ -1780,7 +1781,7 @@ async function fetchChartData() {
     if (!ids.length) return { conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null };
     const res = await Promise.all(ids.map(id =>
       api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
-        .catch(() => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null }))
+        .catch(() => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null }))
     ));
     return aggregateSummaries(res);
   };
@@ -1804,7 +1805,9 @@ async function fetchChartData() {
 async function fetchTeamComparison(periods) {
   const last = periods[periods.length - 1];
   const { since, until } = last;
-  const ids = Object.keys(_inboxMap).map(Number);
+  const ids = (_chartInboxFilter && _chartInboxFilter.size > 0)
+    ? [..._chartInboxFilter]
+    : Object.keys(_inboxMap).map(Number);
   if (!ids.length) return null;
   const results = await Promise.all(ids.map(id =>
     api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
@@ -2032,7 +2035,10 @@ function renderCharts() {
   destroyChart('dist');
   {
     const naEl = document.getElementById('chart-dist-na');
-    if (_distData && _distData.total > 0) {
+    if (_chartInboxFilter && _chartInboxFilter.size > 0) {
+      if (naEl) { naEl.textContent = 'Distribuição não disponível com filtro de inbox ativo'; naEl.style.display = ''; }
+      setMetric('mv-dist', '—');
+    } else if (_distData && _distData.total > 0) {
       if (naEl) naEl.style.display = 'none';
       const slaEl2 = document.getElementById('sla-tmr-dist');
       if (slaEl2) slaEl2.textContent = _SLA_TMR;
