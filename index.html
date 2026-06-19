@@ -786,14 +786,21 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     <span id="agent-tab-updated" style="font-size:11px;color:var(--text3);margin-left:auto"></span>
   </div>
 
-  <div class="section-divider"><span class="section-divider-label">Status ao vivo</span></div>
-  <div id="agent-live-section"><div class="agent-no-data">Carregando…</div></div>
-
-  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">Desempenho no período</span></div>
   <div id="agent-perf-section"><div class="agent-no-data">Carregando…</div></div>
+  <div id="agent-csat-section" style="margin-top:16px"></div>
+</div>
 
-  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">Satisfação do Cliente (CSAT)</span></div>
-  <div id="agent-csat-section"><div class="agent-no-data">Carregando…</div></div>
+<!-- AGENT MODAL -->
+<div id="agent-modal-backdrop" onclick="closeAgentModal(event)">
+  <div id="agent-modal" role="dialog" aria-modal="true" aria-label="Perfil do agente">
+    <div class="am-header" id="am-header"></div>
+    <div class="am-body">
+      <div class="am-highlights" id="am-highlights"></div>
+      <div class="am-chart-wrap"><canvas id="am-chart"></canvas></div>
+      <div id="am-month-loading" class="agent-no-data" style="display:none">Carregando histórico…</div>
+      <div id="am-month-table-wrap"></div>
+    </div>
+  </div>
 </div>
 
 <!-- AGENT FILTER POPUP -->
