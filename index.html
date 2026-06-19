@@ -169,6 +169,46 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 .chart-card { position:relative; }
 .auth-limited .chart-auth-overlay { display:flex; }
 #kpi-filter-note.auth-warn { color:var(--yellow); background:rgba(234,179,8,.07); border-color:rgba(234,179,8,.25); }
+/* AGENTES TAB */
+.agent-stat-cards { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.agent-stat-card { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:14px 18px; flex:1; min-width:140px; }
+.agent-stat-card .asv { font-size:26px; font-weight:800; line-height:1.1; }
+.agent-stat-card .asl { font-size:11px; color:var(--text2); margin-top:3px; }
+.agent-period-pills { display:flex; gap:4px; }
+.agent-pill { padding:4px 14px; border-radius:20px; border:1px solid var(--border); background:transparent; color:var(--text2); font-size:12px; cursor:pointer; transition:background .15s,color .15s,border-color .15s; }
+.agent-pill:hover { border-color:var(--accent); color:var(--accent); }
+.agent-pill.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+.agent-table { width:100%; border-collapse:collapse; font-size:13px; }
+.agent-table th { background:var(--bg2); color:var(--text2); font-size:11px; font-weight:600; text-align:left; padding:8px 10px; border-bottom:2px solid var(--border); cursor:pointer; user-select:none; white-space:nowrap; }
+.agent-table th:hover { color:var(--text); }
+.agent-table th.sort-asc::after  { content:' ▲'; color:var(--accent); }
+.agent-table th.sort-desc::after { content:' ▼'; color:var(--accent); }
+.agent-table td { padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:middle; }
+.agent-table tr:last-child td { border:none; }
+.agent-table tr.agent-row:hover { background:var(--bg3); cursor:pointer; }
+.agent-table tr.agent-row.expanded { background:rgba(59,130,246,.06); }
+.agent-table tr.agent-expand-row td { padding:0; }
+.agent-expand-inner { padding:16px 12px; background:var(--bg2); border-bottom:1px solid var(--border); }
+.agent-status-dot { width:8px; height:8px; border-radius:50%; display:inline-block; flex-shrink:0; margin-right:6px; }
+.dot-online { background:var(--green); }
+.dot-busy   { background:var(--yellow); }
+.dot-offline{ background:var(--text3); }
+.agent-no-data { color:var(--text3); font-size:12px; font-style:italic; padding:24px; text-align:center; }
+#agp { position:fixed; z-index:300; background:var(--bg2); border:1px solid var(--border); border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.4); width:260px; display:none; flex-direction:column; max-height:360px; }
+#agp.open { display:flex; }
+.agp-head { display:flex; align-items:center; gap:6px; padding:10px 12px; border-bottom:1px solid var(--border); }
+.agp-head-title { flex:1; font-size:13px; font-weight:600; }
+.agp-xs { padding:2px 8px; border-radius:4px; border:1px solid var(--border); background:transparent; color:var(--text2); font-size:11px; cursor:pointer; }
+.agp-xs:hover { border-color:var(--accent); color:var(--accent); }
+.agp-body { overflow-y:auto; flex:1; padding:6px 0; }
+.agp-item { display:flex; align-items:center; gap:8px; padding:7px 12px; cursor:pointer; font-size:13px; }
+.agp-item:hover { background:var(--bg3); }
+.agp-item input[type=checkbox] { accent-color:var(--accent); width:14px; height:14px; flex-shrink:0; cursor:pointer; }
+.agp-foot { display:flex; justify-content:flex-end; gap:8px; padding:10px 12px; border-top:1px solid var(--border); }
+.agp-ok { padding:5px 16px; background:var(--accent); border:none; border-radius:5px; color:#fff; font-size:12px; font-weight:600; cursor:pointer; }
+.agp-ok:hover { opacity:.85; }
+.csat-placeholder { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:24px; text-align:center; color:var(--text2); font-size:13px; line-height:1.7; }
+.csat-placeholder strong { color:var(--text); display:block; margin-bottom:6px; }
 .chart-hdr { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px; padding:4px 0; }
 .chart-hdr h2 { font-size:15px; font-weight:700; flex:1; }
 .chart-sel { padding:5px 10px; background:var(--bg3); border:1px solid var(--border); border-radius:4px; color:var(--text); font-size:12px; cursor:pointer; outline:none; }
@@ -383,6 +423,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
   <div class="sidebar-item active" id="nav-painel" onclick="showPage('painel')" title="Painel">
     <span class="sidebar-icon">📊</span>
     <span class="sidebar-label">Painel</span>
+  </div>
+  <div class="sidebar-item" id="nav-agentes" onclick="showPage('agentes')" title="Agentes">
+    <span class="sidebar-icon">👥</span>
+    <span class="sidebar-label">Agentes</span>
   </div>
   <div class="sidebar-item" id="nav-graficos" onclick="showPage('graficos')" title="Análise">
     <span class="sidebar-icon">📈</span>
@@ -701,6 +745,48 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
   </div>
 </div>
 
+<!-- AGENTES PAGE -->
+<div id="agentes-page" style="display:none;padding:12px 24px 32px;background:var(--bg);min-height:calc(100vh - 56px);margin-left:52px">
+  <div class="chart-hdr">
+    <h2>Agentes</h2>
+    <div class="agent-period-pills" id="agent-period-pills">
+      <button class="agent-pill" onclick="setAgentTabPeriod('1')">Mês atual</button>
+      <button class="agent-pill active" onclick="setAgentTabPeriod('3')">3 meses</button>
+      <button class="agent-pill" onclick="setAgentTabPeriod('6')">6 meses</button>
+      <button class="agent-pill" onclick="setAgentTabPeriod('12')">12 meses</button>
+    </div>
+    <button class="inbox-trigger" id="agent-filter-trigger" onclick="openAgentFilter(event)">
+      <span id="agent-filter-trigger-txt">Todos os agentes</span> ▾
+    </button>
+    <div class="inbox-chips" id="agent-filter-chips"></div>
+    <button class="inbox-clear" id="agent-filter-clear" onclick="clearAgentFilter()" style="display:none">✕ Limpar</button>
+    <span id="agent-tab-updated" style="font-size:11px;color:var(--text3);margin-left:auto"></span>
+  </div>
+
+  <div class="section-divider"><span class="section-divider-label">Status ao vivo</span></div>
+  <div id="agent-live-section"><div class="agent-no-data">Carregando…</div></div>
+
+  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">Desempenho no período</span></div>
+  <div id="agent-perf-section"><div class="agent-no-data">Carregando…</div></div>
+
+  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">Satisfação do Cliente (CSAT)</span></div>
+  <div id="agent-csat-section"><div class="agent-no-data">Carregando…</div></div>
+</div>
+
+<!-- AGENT FILTER POPUP -->
+<div id="agp" role="dialog" aria-modal="true" aria-label="Filtrar agentes">
+  <div class="agp-head">
+    <span class="agp-head-title">Agentes</span>
+    <button class="agp-xs" onclick="agpAll()">Todos</button>
+    <button class="agp-xs" onclick="agpNone()">Limpar</button>
+  </div>
+  <div class="agp-body" id="agp-body"></div>
+  <div class="agp-foot">
+    <button class="agp-xs" onclick="agpClose()">Fechar</button>
+    <button class="agp-ok" onclick="agpApply()">Aplicar</button>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div id="toast" role="alert" aria-live="assertive"></div>
 
@@ -780,6 +866,18 @@ let _SLA_MSG = 10;     /* mensagens — meta de eficiência por conversa */
 let _teamCompData    = null; /* dados de comparação por equipe/inbox */
 let _chartTeamCache  = {};   /* {`${id}:${since}:${until}`: {data, ts}} — TTL 5min */
 let _authLimited     = false; /* true quando API de relatórios retornou 401/403 */
+
+/* ── AGENTES TAB STATE ── */
+let _agentTabPeriod  = '3';    /* '1'|'3'|'6'|'12' */
+let _agentTabFilter  = null;   /* Set<number>|null — ids de agentes */
+let _agentList       = [];     /* [{id, name, availability_status, ...}] */
+let _agentPerfData   = null;   /* {id: {summary, months[]}} */
+let _agentOverview   = null;   /* dados brutos do overview */
+let _agentCsat       = null;   /* [{agent_id, agent_name, total, positive}] | null */
+let _agentExpanded   = null;   /* id do agente expandido */
+let _agentTabDirty   = false;  /* true → re-fetch ao entrar na aba */
+let _agentPerfSort   = { col: 'conversations_count', dir: 'desc' };
+let _agp             = { sel: new Set() }; /* estado interno do popup */
 
 /* ── TOKEN ── */
 function showTokenModal() {
