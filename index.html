@@ -519,6 +519,11 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 <div id="graficos-page" style="display:none;padding:12px 24px;background:var(--bg);min-height:calc(100vh - 56px);margin-left:52px">
   <div class="chart-hdr">
     <h2>Análise</h2>
+    <button class="inbox-trigger" id="chart-inbox-trigger" onclick="openChartIbp(event)" aria-label="Filtrar por caixa de entrada">
+      <span id="chart-inbox-trigger-txt">Todas</span> ▾
+    </button>
+    <div class="inbox-chips" id="chart-inbox-chips"></div>
+    <button class="inbox-clear" id="chart-inbox-clear" onclick="clearChartInboxFilter()" style="display:none">✕ Limpar</button>
     <select id="chart-period-sel" class="chart-sel" onchange="fetchChartData()">
       <option value="3">Últimos 3 meses</option>
       <option value="6" selected>Últimos 6 meses</option>
@@ -667,9 +672,11 @@ let _filters = { waiting: {}, inprog: {} };
 let _cfpState = { tbl: null, col: null, vals: [], sel: new Set() };
 let _showNd = false;
 let _toastTimer = null;
-let _inboxFilter = null; /* null = todas; Set<number> = filtro ativo */
+let _inboxFilter = null;      /* null = todas; Set<number> = filtro ativo */
 let _ibpSel = new Set();
-let _agentFilter = null; /* null = sem filtro; {id, name} = agente ativo */
+let _ibpMode = 'panel';       /* 'panel' | 'chart' — qual filtro o popup está editando */
+let _agentFilter = null;      /* null = sem filtro; {id, name} = agente ativo */
+let _chartInboxFilter = null; /* filtro de inbox independente da aba Análise */
 
 /* ── TOKEN ── */
 function showTokenModal() {
@@ -1176,6 +1183,7 @@ function applyInboxAndRender() {
 }
 
 function openIbp(event) {
+  _ibpMode = 'panel';
   event.stopPropagation();
   const allIds = Object.keys(_inboxMap).map(Number);
   _ibpSel = _inboxFilter ? new Set(_inboxFilter) : new Set(allIds);
@@ -1245,14 +1253,24 @@ function ibpNone() {
 function ibpClose() {
   document.getElementById('ibp').classList.add('hidden');
   document.getElementById('inbox-trigger').classList.remove('active');
+  const cit = document.getElementById('chart-inbox-trigger');
+  if (cit) cit.classList.remove('active');
 }
 
 function ibpApply() {
   const allIds = Object.keys(_inboxMap).map(Number);
-  _inboxFilter = (_ibpSel.size === 0 || _ibpSel.size === allIds.length) ? null : new Set(_ibpSel);
-  ibpClose();
-  syncInboxBar();
-  applyInboxAndRender();
+  const filter = (_ibpSel.size === 0 || _ibpSel.size === allIds.length) ? null : new Set(_ibpSel);
+  if (_ibpMode === 'chart') {
+    _chartInboxFilter = filter;
+    ibpClose();
+    syncChartInboxBar();
+    fetchChartData();
+  } else {
+    _inboxFilter = filter;
+    ibpClose();
+    syncInboxBar();
+    applyInboxAndRender();
+  }
 }
 
 function clearInboxFilter() {
@@ -1268,6 +1286,81 @@ function removeInboxChip(id) {
   }
   syncInboxBar();
   applyInboxAndRender();
+}
+
+/* ── CHART INBOX FILTER ── */
+function openChartIbp(event) {
+  _ibpMode = 'chart';
+  event.stopPropagation();
+  const allIds = Object.keys(_inboxMap).map(Number);
+  _ibpSel = _chartInboxFilter ? new Set(_chartInboxFilter) : new Set(allIds);
+
+  const allCount   = allIds.length;
+  const allChecked = !_chartInboxFilter || _ibpSel.size === allCount;
+
+  let html = `<label class="ibp-opt all-toggle">
+    <input type="checkbox" id="ibp-all-chk" onchange="ibpToggleAll(this)" ${allChecked ? 'checked' : ''}>
+    <span>Todas as caixas (${allCount})</span>
+  </label>`;
+  const sorted = Object.values(_inboxMap).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  sorted.forEach(inbox => {
+    html += `<label class="ibp-opt">
+      <input type="checkbox" ${_ibpSel.has(inbox.id) ? 'checked' : ''} data-id="${inbox.id}" onchange="ibpToggle(this)">
+      <span>${esc(inbox.name)}</span>
+    </label>`;
+  });
+
+  document.getElementById('ibp-body').innerHTML = html;
+  const popup = document.getElementById('ibp');
+  popup.classList.remove('hidden');
+
+  const rect = event.currentTarget.getBoundingClientRect();
+  const pw = 260, ph = 380;
+  let left = rect.left;
+  let top  = rect.bottom + 4;
+  if (left + pw > window.innerWidth  - 8) left = window.innerWidth  - pw - 8;
+  if (top  + ph > window.innerHeight - 8) top  = rect.top - ph - 4;
+  popup.style.left = Math.max(4, left) + 'px';
+  popup.style.top  = Math.max(4, top)  + 'px';
+
+  const cit = document.getElementById('chart-inbox-trigger');
+  if (cit) cit.classList.add('active');
+}
+
+function syncChartInboxBar() {
+  const chipsEl  = document.getElementById('chart-inbox-chips');
+  const clearEl  = document.getElementById('chart-inbox-clear');
+  const trigTxt  = document.getElementById('chart-inbox-trigger-txt');
+  if (!chipsEl) return;
+
+  if (!_chartInboxFilter) {
+    chipsEl.innerHTML     = '';
+    if (clearEl) clearEl.style.display = 'none';
+    if (trigTxt) trigTxt.textContent   = 'Todas';
+    return;
+  }
+
+  if (trigTxt) trigTxt.textContent = `${_chartInboxFilter.size} selecionada${_chartInboxFilter.size > 1 ? 's' : ''}`;
+  if (clearEl) clearEl.style.display = '';
+  chipsEl.innerHTML = [..._chartInboxFilter].map(id => {
+    const name = (_inboxMap[id] || {}).name || `#${id}`;
+    return `<span class="inbox-chip">${esc(name)}<button class="inbox-chip-rm" onclick="removeChartInboxChip(${id})" aria-label="Remover ${esc(name)}">×</button></span>`;
+  }).join('');
+}
+
+function clearChartInboxFilter() {
+  _chartInboxFilter = null;
+  syncChartInboxBar();
+  fetchChartData();
+}
+
+function removeChartInboxChip(id) {
+  if (_chartInboxFilter) {
+    _chartInboxFilter.delete(id);
+    if (_chartInboxFilter.size === 0) _chartInboxFilter = null;
+  }
+  syncChartInboxBar();
+  fetchChartData();
 }
 
 function syncInboxBar() {
@@ -1476,7 +1569,7 @@ document.addEventListener('click', e => {
   const cfp = document.getElementById('cfp');
   if (cfp && !cfp.classList.contains('hidden') && !cfp.contains(e.target)) cfpClose();
   const ibp = document.getElementById('ibp');
-  if (ibp && !ibp.classList.contains('hidden') && !ibp.contains(e.target) && !e.target.closest('#inbox-trigger')) ibpClose();
+  if (ibp && !ibp.classList.contains('hidden') && !ibp.contains(e.target) && !e.target.closest('#inbox-trigger') && !e.target.closest('#chart-inbox-trigger')) ibpClose();
 });
 
 document.addEventListener('keydown', e => {
@@ -1568,9 +1661,18 @@ async function fetchChartData() {
     const d    = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const last = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
     const lbl  = d.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }).replace('.', '');
-    periods.push({ since: Math.floor(d.getTime() / 1000), until: Math.floor(last.getTime() / 1000), label: lbl });
+    periods.push({ since: Math.floor(d.getTime() / 1000), until: Math.floor(last.getTime() / 1000), monthLabel: lbl });
   }
   const fetchMonth = async ({ since, until }) => {
+    /* Se filtro de inbox de gráficos ativo, busca por inbox e agrega */
+    if (_chartInboxFilter && _chartInboxFilter.size > 0) {
+      const ids = [..._chartInboxFilter];
+      const res = await Promise.all(ids.map(id =>
+        api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
+          .catch(() => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null }))
+      ));
+      return aggregateSummaries(res);
+    }
     try { return await api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=account`); }
     catch (e) { if (!isAuthError(e)) return { conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null }; }
     const ids = Object.keys(_inboxMap).map(Number);
@@ -1591,9 +1693,12 @@ async function fetchChartData() {
 
 function renderCharts() {
   if (!window.Chart || !_chartData.length) return;
-  const c      = chartColors();
-  const labels = _chartData.map(d => d.label);
-  const n      = _chartData.length;
+  const c         = chartColors();
+  const labels    = _chartData.map(d => d.monthLabel);
+  const n         = _chartData.length;
+  const chartConvs = (_chartInboxFilter && _chartInboxFilter.size > 0)
+    ? _rawConvs.filter(cv => _chartInboxFilter.has(cv.inbox_id))
+    : _rawConvs;
 
   function trendEl(elId, current, previous, invertSign) {
     const el = document.getElementById(elId);
@@ -1626,7 +1731,7 @@ function renderCharts() {
   /* ── Pico de Horário ── */
   destroyChart('peak');
   const hourBuckets = new Array(24).fill(0);
-  _rawConvs.forEach(cv => {
+  chartConvs.forEach(cv => {
     if (!cv.created_at) return;
     const h = new Date(cv.created_at * 1000).getHours();
     hourBuckets[h]++;
@@ -1654,7 +1759,7 @@ function renderCharts() {
   /* ── Status das Conversas ── */
   destroyChart('status');
   const sc = { open: 0, resolved: 0, pending: 0 };
-  _rawConvs.forEach(cv => { if (cv.status in sc) sc[cv.status]++; });
+  chartConvs.forEach(cv => { if (cv.status in sc) sc[cv.status]++; });
   _charts.status = new Chart(document.getElementById('chart-status'), {
     type: 'doughnut',
     data: {
@@ -1696,7 +1801,7 @@ function renderCharts() {
   /* ── Atendimentos por Agente ── */
   destroyChart('agents');
   const agCounts = {};
-  _rawConvs.forEach(cv => { const nm = cv.meta?.assignee?.name; if (nm) agCounts[nm] = (agCounts[nm] || 0) + 1; });
+  chartConvs.forEach(cv => { const nm = cv.meta?.assignee?.name; if (nm) agCounts[nm] = (agCounts[nm] || 0) + 1; });
   const agSorted = Object.entries(agCounts).sort((a, b) => b[1] - a[1]).slice(0, 15);
   const agOpts   = makeChartOpts(true);
   agOpts.animation = false;
