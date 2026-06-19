@@ -2758,24 +2758,127 @@ function renderCharts() {
 
 /* ── PAGE NAVIGATION ── */
 function showPage(page) {
-  const isPainel = page === 'painel';
-  document.getElementById('content').style.display        = isPainel ? '' : 'none';
-  document.getElementById('graficos-page').style.display  = isPainel ? 'none' : '';
+  document.getElementById('content').style.display       = page === 'painel'   ? '' : 'none';
+  document.getElementById('graficos-page').style.display = page === 'graficos' ? '' : 'none';
+  document.getElementById('agentes-page').style.display  = page === 'agentes'  ? '' : 'none';
   const ib = document.getElementById('inbox-bar');
-  if (ib) ib.style.display = isPainel ? (_ibVisible ? 'flex' : 'none') : 'none';
+  if (ib) ib.style.display = page === 'painel' ? (_ibVisible ? 'flex' : 'none') : 'none';
   document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
   document.getElementById(`nav-${page}`).classList.add('active');
-  if (!isPainel) {
+  if (page === 'graficos') {
     if (!_chartData.length || _chartDataStale) { _chartDataStale = false; fetchChartData(); }
     else if (_chartsDirty) renderCharts();
   }
+  if (page === 'agentes') {
+    if (!_agentPerfData || _agentTabDirty) { _agentTabDirty = false; fetchAgentTab(); }
+    else renderAgentTab();
+  }
+}
+
+function setAgentTabPeriod(p) {
+  _agentTabPeriod = p;
+  _agentPerfData  = null;
+  _agentExpanded  = null;
+  const labels = { '1': 'Mês atual', '3': '3 meses', '6': '6 meses', '12': '12 meses' };
+  document.querySelectorAll('.agent-pill').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.trim() === labels[p]);
+  });
+  fetchAgentTab();
+}
+
+function openAgentFilter(event) {
+  event.stopPropagation();
+  const popup = document.getElementById('agp');
+  if (!popup) return;
+  const rect = event.currentTarget.getBoundingClientRect();
+  popup.style.top  = (rect.bottom + 6) + 'px';
+  popup.style.left = rect.left + 'px';
+  _agp.sel = _agentTabFilter ? new Set(_agentTabFilter) : new Set(_agentList.map(a => a.id));
+  agpRender();
+  popup.classList.add('open');
+  setTimeout(() => document.addEventListener('click', agpOutside, { once: true }), 0);
+}
+
+function agpRender() {
+  const body = document.getElementById('agp-body');
+  if (!body) return;
+  body.innerHTML = _agentList.map(a => `
+    <label class="agp-item">
+      <input type="checkbox" value="${a.id}" ${_agp.sel.has(a.id) ? 'checked' : ''} onchange="agpToggle(${a.id}, this.checked)">
+      ${esc(a.name)}
+    </label>`).join('');
+}
+
+function agpToggle(id, checked) {
+  if (checked) _agp.sel.add(id); else _agp.sel.delete(id);
+}
+
+function agpAll()  { _agp.sel = new Set(_agentList.map(a => a.id)); agpRender(); }
+function agpNone() { _agp.sel = new Set(); agpRender(); }
+
+function agpClose() {
+  document.getElementById('agp')?.classList.remove('open');
+  document.removeEventListener('click', agpOutside);
+}
+
+function agpOutside(e) {
+  if (!document.getElementById('agp')?.contains(e.target)) agpClose();
+}
+
+function agpApply() {
+  const allSelected = _agp.sel.size === _agentList.length;
+  _agentTabFilter = allSelected ? null : (_agp.sel.size > 0 ? new Set(_agp.sel) : null);
+  agpClose();
+  updateAgentFilterUI();
+  _agentPerfData  = null;
+  _agentExpanded  = null;
+  fetchAgentTab();
+}
+
+function clearAgentFilter() {
+  _agentTabFilter = null;
+  updateAgentFilterUI();
+  _agentPerfData  = null;
+  _agentExpanded  = null;
+  fetchAgentTab();
+}
+
+function updateAgentFilterUI() {
+  const trig  = document.getElementById('agent-filter-trigger');
+  const txt   = document.getElementById('agent-filter-trigger-txt');
+  const chips = document.getElementById('agent-filter-chips');
+  const clear = document.getElementById('agent-filter-clear');
+  if (!_agentTabFilter) {
+    if (txt)   txt.textContent = 'Todos os agentes';
+    if (trig)  trig.classList.remove('active');
+    if (chips) chips.innerHTML = '';
+    if (clear) clear.style.display = 'none';
+    return;
+  }
+  if (txt)   txt.textContent = `${_agentTabFilter.size} selecionado${_agentTabFilter.size > 1 ? 's' : ''}`;
+  if (trig)  trig.classList.add('active');
+  if (clear) clear.style.display = '';
+  if (chips) chips.innerHTML = [..._agentTabFilter].map(id => {
+    const a    = _agentList.find(a => a.id === id);
+    const name = a?.name || `#${id}`;
+    return `<span class="inbox-chip">${esc(name)}<button class="inbox-chip-rm" onclick="removeAgentChip(${id})" aria-label="Remover ${esc(name)}">×</button></span>`;
+  }).join('');
+}
+
+function removeAgentChip(id) {
+  if (!_agentTabFilter) return;
+  _agentTabFilter.delete(id);
+  if (_agentTabFilter.size === 0) _agentTabFilter = null;
+  updateAgentFilterUI();
+  _agentPerfData  = null;
+  _agentExpanded  = null;
+  fetchAgentTab();
 }
 
 /* Atualiza gráficos ao mudar tema */
 new MutationObserver(() => {
-  if (document.getElementById('graficos-page').style.display !== 'none' && _chartData.length) {
-    renderCharts();
-  }
+  if (document.getElementById('graficos-page').style.display !== 'none' && _chartData.length) renderCharts();
+  if (document.getElementById('agentes-page').style.display !== 'none' && _agentPerfData) renderAgentTab();
 }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 </script>
 </body>
