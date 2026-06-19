@@ -2065,17 +2065,11 @@ function isAuthError(e) {
 }
 
 async function fetchAgentTab() {
-  const liveEl = document.getElementById('agent-live-section');
   const perfEl = document.getElementById('agent-perf-section');
   const csatEl = document.getElementById('agent-csat-section');
-  if (liveEl) liveEl.innerHTML = '<div class="agent-no-data">Carregando…</div>';
   if (perfEl) perfEl.innerHTML = '<div class="agent-no-data">Carregando…</div>';
-  if (csatEl) csatEl.innerHTML = '<div class="agent-no-data">Carregando…</div>';
+  if (csatEl) csatEl.innerHTML = '';
 
-  const { since, until } = getAgentTabRange();
-  const months           = getAgentMonths();
-
-  /* 1. Lista de agentes (já buscada em fetchAll — reusar _agentList) */
   if (!_agentList.length) {
     const agents = await api(`/v1/accounts/${cfg.account}/agents`).catch(() => []);
     if (Array.isArray(agents)) _agentList = agents;
@@ -2085,56 +2079,35 @@ async function fetchAgentTab() {
     ? _agentList.filter(a => _agentTabFilter.has(a.id))
     : _agentList;
 
-  /* 2. Overview ao vivo */
-  _agentOverview = await api(`/v2/accounts/${cfg.account}/reports/overview`)
-    .catch(() => null);
+  const { since, until } = getAgentTabRange();
 
-  /* 3. Summary por agente (período agregado) + detalhe mensal */
-  try {
-    const summaries = await Promise.all(visibleAgents.map(a =>
+  const [summaries, csatRaw] = await Promise.all([
+    Promise.all(visibleAgents.map(a =>
       api(`/v2/accounts/${cfg.account}/reports/summary?type=agent&id=${a.id}&since=${since}&until=${until}`)
         .catch(() => null)
-    ));
+    )),
+    api(`/v1/accounts/${cfg.account}/reports/agents/satisfaction?since=${since}&until=${until}`)
+      .catch(() => null)
+  ]);
 
-    const monthDetails = await Promise.all(visibleAgents.map(a =>
-      Promise.all(months.map(mo =>
-        api(`/v2/accounts/${cfg.account}/reports/summary?type=agent&id=${a.id}&since=${mo.since}&until=${mo.until}`)
-          .catch(() => null)
-      ))
-    ));
+  _agentPerfData = {};
+  visibleAgents.forEach((a, i) => {
+    _agentPerfData[a.id] = { agent: a, summary: summaries[i] };
+  });
 
-    _agentPerfData = {};
-    visibleAgents.forEach((a, i) => {
-      _agentPerfData[a.id] = {
-        agent:   a,
-        summary: summaries[i],
-        months:  monthDetails[i].map((r, j) => ({ ...months[j], data: r }))
-      };
+  if (Array.isArray(csatRaw) && csatRaw.length) {
+    const byAgent = {};
+    csatRaw.forEach(r => {
+      const id = r.assigned_agent?.id;
+      if (!id) return;
+      if (!byAgent[id]) byAgent[id] = { id, name: r.assigned_agent?.name || '—', total: 0, positive: 0 };
+      byAgent[id].total++;
+      if (r.rating === 'Satisfied') byAgent[id].positive++;
     });
-  } catch (e) {
-    if (isAuthError(e)) {
-      _agentPerfData = { _authError: true };
-    } else {
-      _agentPerfData = {};
-    }
+    _agentCsat = Object.values(byAgent);
+  } else {
+    _agentCsat = null;
   }
-
-  /* 4. CSAT */
-  _agentCsat = await api(`/v1/accounts/${cfg.account}/reports/agents/satisfaction?since=${since}&until=${until}`)
-    .then(data => {
-      if (!Array.isArray(data) || !data.length) return null;
-      const byAgent = {};
-      data.forEach(r => {
-        const id   = r.assigned_agent?.id;
-        const name = r.assigned_agent?.name || 'Desconhecido';
-        if (!id) return;
-        if (!byAgent[id]) byAgent[id] = { id, name, total: 0, positive: 0 };
-        byAgent[id].total++;
-        if (r.rating === 'Satisfied') byAgent[id].positive++;
-      });
-      return Object.values(byAgent);
-    })
-    .catch(() => null);
 
   const updEl = document.getElementById('agent-tab-updated');
   if (updEl) updEl.textContent = `Atualizado às ${new Date().toLocaleTimeString('pt-BR')}`;
