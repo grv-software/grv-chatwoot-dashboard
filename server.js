@@ -14,6 +14,11 @@ const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css
 
 http.createServer((req, res) => {
   // Autenticação de configurações
+  if (req.url === '/api/auth-settings' && req.method !== 'POST') {
+    res.writeHead(405, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Method not allowed' }));
+    return;
+  }
   if (req.method === 'POST' && req.url === '/api/auth-settings') {
     let body = '';
     req.on('data', chunk => { body += chunk; });
