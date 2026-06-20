@@ -2185,24 +2185,24 @@ function calcAgentScore(summary) {
   let pts = 0;
   const tmaH = s.avg_resolution_time != null ? s.avg_resolution_time / 3600 : null;
   if (tmaH != null) {
-    if (tmaH <= _SLA_TMA)            pts += 25;
-    else if (tmaH <= _SLA_TMA * 1.5) pts += 12;
+    if (tmaH <= _SLA_TMA)            pts += _WEIGHT_TMA;
+    else if (tmaH <= _SLA_TMA * 1.5) pts += Math.round(_WEIGHT_TMA / 2);
   }
   const tmrM = s.avg_first_response_time != null ? s.avg_first_response_time / 60 : null;
   if (tmrM != null) {
-    if (tmrM <= _SLA_TMR)            pts += 25;
-    else if (tmrM <= _SLA_TMR * 1.5) pts += 12;
+    if (tmrM <= _SLA_TMR)            pts += _WEIGHT_TMR;
+    else if (tmrM <= _SLA_TMR * 1.5) pts += Math.round(_WEIGHT_TMR / 2);
   }
   const fcr = s.conversations_count > 0 ? (s.resolutions_count || 0) / s.conversations_count * 100 : null;
   if (fcr != null) {
-    if (fcr >= _SLA_FCR)             pts += 25;
-    else if (fcr >= _SLA_FCR - 15)   pts += 12;
+    if (fcr >= _SLA_FCR)             pts += _WEIGHT_FCR;
+    else if (fcr >= _SLA_FCR - 15)   pts += Math.round(_WEIGHT_FCR / 2);
   }
   const totalMsgs = (s.incoming_messages_count || 0) + (s.outgoing_messages_count || 0);
   const msgsConv  = s.conversations_count > 0 ? totalMsgs / s.conversations_count : null;
   if (msgsConv != null) {
-    if (msgsConv <= _SLA_MSG)           pts += 25;
-    else if (msgsConv <= _SLA_MSG * 1.5) pts += 12;
+    if (msgsConv <= _SLA_MSG)           pts += _WEIGHT_MSG;
+    else if (msgsConv <= _SLA_MSG * 1.5) pts += Math.round(_WEIGHT_MSG / 2);
   }
   return pts;
 }
