@@ -848,7 +848,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 </div>
 
 <script>
-const REFRESH_SEC = 60;
+let REFRESH_SEC = parseInt(localStorage.getItem('grv_refresh_sec') || '60', 10);
 const PAGE_SIZE   = 20;
 
 /* ── THEME ── */
@@ -884,10 +884,14 @@ let _ibpSel = new Set();
 let _ibpMode = 'panel';       /* 'panel' | 'chart' — qual filtro o popup está editando */
 let _agentFilter = null;      /* null = sem filtro; {id, name} = agente ativo */
 let _chartInboxFilter = null; /* filtro de inbox independente da aba Análise */
-let _SLA_TMA = 8;      /* horas — meta de TMA */
-let _SLA_TMR = 30;     /* minutos — meta de TMR */
-let _SLA_FCR = 85;     /* % — meta de taxa de resolução */
-let _SLA_MSG = 10;     /* mensagens — meta de eficiência por conversa */
+let _SLA_TMA = parseInt(localStorage.getItem('grv_sla_tma') || '8',  10);
+let _SLA_TMR = parseInt(localStorage.getItem('grv_sla_tmr') || '30', 10);
+let _SLA_FCR = parseInt(localStorage.getItem('grv_sla_fcr') || '85', 10);
+let _SLA_MSG = parseInt(localStorage.getItem('grv_sla_msg') || '10', 10);
+let _WEIGHT_TMA = parseInt(localStorage.getItem('grv_weight_tma') || '25', 10);
+let _WEIGHT_TMR = parseInt(localStorage.getItem('grv_weight_tmr') || '25', 10);
+let _WEIGHT_FCR = parseInt(localStorage.getItem('grv_weight_fcr') || '25', 10);
+let _WEIGHT_MSG = parseInt(localStorage.getItem('grv_weight_msg') || '25', 10);
 let _teamCompData    = null; /* dados de comparação por equipe/inbox */
 let _chartTeamCache  = {};   /* {`${id}:${since}:${until}`: {data, ts}} — TTL 5min */
 let _authLimited     = false; /* true quando API de relatórios retornou 401/403 */
