@@ -26,6 +26,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 /* MODAL */
 #token-modal { position:fixed; inset:0; background:rgba(0,0,0,.82); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; z-index:9999; }
 #token-modal.hidden { display:none; }
+#settings-auth-modal { display:flex; }
+#settings-auth-modal.hidden { display:none; }
 .modal-box { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:28px; width:440px; max-width:95vw; }
 .modal-box h2 { font-size:16px; font-weight:700; margin-bottom:8px; }
 .modal-box p { color:var(--text2); font-size:12px; margin-bottom:16px; line-height:1.5; }
@@ -441,7 +443,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 <body>
 
 <!-- SETTINGS AUTH MODAL -->
-<div id="settings-auth-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center">
+<div id="settings-auth-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center">
   <div class="modal-box" style="width:340px">
     <h2>Acesso Restrito</h2>
     <p style="font-size:13px;color:var(--text3);margin:0 0 14px">Digite a senha de administrador para acessar as configurações.</p>
