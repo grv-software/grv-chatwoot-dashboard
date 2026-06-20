@@ -147,6 +147,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 }
 .sidebar-item:hover { background:var(--bg3); color:var(--text); }
 .sidebar-item.active { background:rgba(59,130,246,.12); color:var(--accent); }
+.sidebar-footer { margin-top:auto; border-top:1px solid var(--border); padding-top:4px; }
 .sidebar-icon { font-size:17px; flex-shrink:0; width:32px; text-align:center; line-height:1; }
 
 /* CONTENT */
@@ -422,6 +423,21 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 </head>
 <body>
 
+<!-- SETTINGS AUTH MODAL -->
+<div id="settings-auth-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center">
+  <div class="modal-box" style="width:340px">
+    <h2>Acesso Restrito</h2>
+    <p style="font-size:13px;color:var(--text3);margin:0 0 14px">Digite a senha de administrador para acessar as configurações.</p>
+    <div class="modal-error" id="settings-auth-error" style="display:none"></div>
+    <input type="password" id="inp-settings-password" placeholder="Senha de administrador"
+      autocomplete="off" style="width:100%;box-sizing:border-box"
+      onkeydown="if(event.key==='Enter') checkSettingsPassword()" />
+    <button class="btn-primary" style="margin-top:12px;width:100%" onclick="checkSettingsPassword()">Entrar</button>
+    <button onclick="document.getElementById('settings-auth-modal').classList.add('hidden')"
+      style="margin-top:8px;width:100%;padding:7px;border:none;background:none;color:var(--text3);cursor:pointer;font-size:13px">Cancelar</button>
+  </div>
+</div>
+
 <!-- SETTINGS MODAL -->
 <div id="token-modal">
   <div class="modal-box">
@@ -450,6 +466,12 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
   <div class="sidebar-item" id="nav-graficos" onclick="showPage('graficos')" title="Análise">
     <span class="sidebar-icon">📈</span>
     <span class="sidebar-label">Análise</span>
+  </div>
+  <div class="sidebar-footer">
+    <div class="sidebar-item" onclick="openSettings()" title="Configurações">
+      <span class="sidebar-icon">⚙</span>
+      <span class="sidebar-label">Config.</span>
+    </div>
   </div>
 </nav>
 
@@ -910,6 +932,44 @@ let _agentModalOrder = [];     /* ids na ordem da tabela — para navegar ‹ �
 let _agp             = { sel: new Set() }; /* estado interno do popup */
 
 /* ── TOKEN ── */
+function openSettings() {
+  if (localStorage.getItem('grv_settings_auth') === '1') {
+    showPage('configuracoes');
+  } else {
+    const errEl = document.getElementById('settings-auth-error');
+    errEl.style.display = 'none';
+    document.getElementById('inp-settings-password').value = '';
+    document.getElementById('settings-auth-modal').classList.remove('hidden');
+    setTimeout(() => document.getElementById('inp-settings-password').focus(), 50);
+  }
+}
+
+async function checkSettingsPassword() {
+  const password = document.getElementById('inp-settings-password').value;
+  const errEl    = document.getElementById('settings-auth-error');
+  errEl.style.display = 'none';
+  try {
+    const res  = await fetch('/api/auth-settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      localStorage.setItem('grv_settings_auth', '1');
+      document.getElementById('settings-auth-modal').classList.add('hidden');
+      showPage('configuracoes');
+    } else {
+      errEl.textContent   = 'Senha incorreta.';
+      errEl.style.display = 'block';
+      document.getElementById('inp-settings-password').select();
+    }
+  } catch {
+    errEl.textContent   = 'Erro ao verificar senha. Tente novamente.';
+    errEl.style.display = 'block';
+  }
+}
+
 function showTokenModal() {
   document.getElementById('inp-account').value   = cfg.account;
   document.getElementById('inp-threshold').value = cfg.threshold || '';
