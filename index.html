@@ -409,6 +409,23 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
 
+/* CONFIG PAGE */
+.config-page { padding:24px 32px; max-width:640px; display:flex; flex-direction:column; gap:20px; }
+.config-card { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:20px 24px; }
+.config-card h3 { margin:0 0 16px; font-size:14px; font-weight:600; color:var(--text); }
+.config-row { display:grid; grid-template-columns:1fr 180px; align-items:center; gap:8px; margin-bottom:12px; }
+.config-row:last-child { margin-bottom:0; }
+.config-label { font-size:13px; color:var(--text); }
+.config-unit { font-size:11px; color:var(--text3); margin-top:2px; }
+.config-input { width:100%; padding:7px 10px; border:1px solid var(--border); border-radius:6px;
+  background:var(--bg3); color:var(--text); font-size:14px; box-sizing:border-box; text-align:right; }
+.config-input:focus { outline:none; border-color:var(--accent); }
+.config-actions { display:flex; gap:10px; }
+.config-weight-sum { font-size:12px; margin-top:12px; padding:8px 12px; border-radius:6px;
+  background:var(--bg3); text-align:center; }
+.config-weight-sum.ok  { color:#22c55e; }
+.config-weight-sum.err { color:#ef4444; }
+
 /* Mobile */
 @media (max-width:800px) {
   .top-row { grid-template-columns:1fr; }
@@ -866,6 +883,98 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
   <div class="ibp-foot">
     <button class="ibp-xs" onclick="ibpClose()">Fechar</button>
     <button class="ibp-ok" onclick="ibpApply()">Aplicar</button>
+  </div>
+</div>
+
+<!-- CONFIG PAGE -->
+<div id="config-page" style="display:none;background:var(--bg);min-height:calc(100vh - 56px);margin-left:52px">
+  <div class="config-page">
+    <h2 style="margin:0;font-size:18px;font-weight:700;color:var(--text)">Configurações</h2>
+
+    <!-- SLAs -->
+    <div class="config-card">
+      <h3>SLAs de Desempenho</h3>
+      <div class="config-row">
+        <div>
+          <div class="config-label">Tempo Médio de Atendimento (TMA)</div>
+          <div class="config-unit">horas — quanto menor, melhor</div>
+        </div>
+        <input type="number" class="config-input" id="cfg-sla-tma" min="1" max="72" step="1" />
+      </div>
+      <div class="config-row">
+        <div>
+          <div class="config-label">Tempo Médio de Resposta (TMR)</div>
+          <div class="config-unit">minutos — quanto menor, melhor</div>
+        </div>
+        <input type="number" class="config-input" id="cfg-sla-tmr" min="1" max="480" step="1" />
+      </div>
+      <div class="config-row">
+        <div>
+          <div class="config-label">Taxa de Resolução</div>
+          <div class="config-unit">% — quanto maior, melhor</div>
+        </div>
+        <input type="number" class="config-input" id="cfg-sla-fcr" min="1" max="100" step="1" />
+      </div>
+      <div class="config-row">
+        <div>
+          <div class="config-label">Mensagens por Conversa</div>
+          <div class="config-unit">mensagens — quanto menor, melhor</div>
+        </div>
+        <input type="number" class="config-input" id="cfg-sla-msg" min="1" max="100" step="1" />
+      </div>
+    </div>
+
+    <!-- Fila -->
+    <div class="config-card">
+      <h3>Alerta de Fila</h3>
+      <div class="config-row">
+        <div>
+          <div class="config-label">Avisar quando aguardando ≥</div>
+          <div class="config-unit">conversas · 0 = desativado</div>
+        </div>
+        <input type="number" class="config-input" id="cfg-threshold" min="0" max="999" step="1" />
+      </div>
+    </div>
+
+    <!-- Atualização -->
+    <div class="config-card">
+      <h3>Atualização Automática</h3>
+      <div class="config-row">
+        <div>
+          <div class="config-label">Intervalo de atualização</div>
+          <div class="config-unit">segundos · mínimo 15</div>
+        </div>
+        <input type="number" class="config-input" id="cfg-refresh" min="15" max="3600" step="1" />
+      </div>
+    </div>
+
+    <!-- Pesos -->
+    <div class="config-card">
+      <h3>Pesos da Pontuação de Agentes</h3>
+      <div class="config-row">
+        <div class="config-label">Peso TMA</div>
+        <input type="number" class="config-input" id="cfg-weight-tma" min="0" max="100" step="1" oninput="updateWeightSum()" />
+      </div>
+      <div class="config-row">
+        <div class="config-label">Peso TMR</div>
+        <input type="number" class="config-input" id="cfg-weight-tmr" min="0" max="100" step="1" oninput="updateWeightSum()" />
+      </div>
+      <div class="config-row">
+        <div class="config-label">Peso Resolução</div>
+        <input type="number" class="config-input" id="cfg-weight-fcr" min="0" max="100" step="1" oninput="updateWeightSum()" />
+      </div>
+      <div class="config-row">
+        <div class="config-label">Peso Msgs/Conversa</div>
+        <input type="number" class="config-input" id="cfg-weight-msg" min="0" max="100" step="1" oninput="updateWeightSum()" />
+      </div>
+      <div class="config-weight-sum ok" id="cfg-weight-sum">Soma: 100 / 100 pts ✓</div>
+    </div>
+
+    <!-- Ações -->
+    <div class="config-actions">
+      <button class="btn-primary" id="cfg-save-btn" onclick="saveConfig()">Salvar configurações</button>
+      <button onclick="resetConfigDefaults()" style="padding:8px 16px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text3);cursor:pointer;font-size:13px">Restaurar padrões</button>
+    </div>
   </div>
 </div>
 
