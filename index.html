@@ -422,22 +422,18 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 </head>
 <body>
 
-<!-- TOKEN MODAL -->
+<!-- SETTINGS MODAL -->
 <div id="token-modal">
   <div class="modal-box">
-    <h2>Configurar Acesso</h2>
-    <p>Insira seu token de usuário do Chatwoot. Salvo localmente no navegador — cada pessoa usa o seu.</p>
+    <h2>Configurações</h2>
     <div class="modal-error" id="modal-error"></div>
-    <label for="inp-token">Token de Acesso (api_access_token)</label>
-    <input type="password" id="inp-token" placeholder="Cole seu token aqui..." autocomplete="off" />
-    <p class="hint">Chatwoot → Perfil → Configurações da conta → Copiar Token de Acesso</p>
-    <label for="inp-account">ID da Conta</label>
+    <label for="inp-account">ID da Conta Chatwoot</label>
     <input type="number" id="inp-account" value="1" />
     <hr class="modal-divider">
     <label for="inp-threshold">Alerta de fila — avisar quando aguardando ≥</label>
     <input type="number" id="inp-threshold" placeholder="Ex: 5  (0 = desativado)" min="0" />
     <p class="hint">Badge fica pulsante quando a fila de espera atingir esse número</p>
-    <button class="btn-primary" onclick="saveToken()">Conectar</button>
+    <button class="btn-primary" onclick="saveToken()">Salvar</button>
   </div>
 </div>
 
@@ -469,7 +465,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
   <button class="btn-hdr blue" onclick="fetchAll()" aria-label="Atualizar dados agora" title="Atualizar agora">↺ Atualizar</button>
   <div class="hdr-updated" id="hdr-updated">Atualizado às —</div>
   <button class="btn-hdr" id="btn-theme" onclick="toggleTheme()" aria-label="Alternar tema claro/escuro" title="Mudar para modo claro" style="font-size:15px;padding:4px 9px">☾</button>
-  <button class="btn-hdr" onclick="showTokenModal()" aria-label="Abrir configurações de acesso" title="Configurações de acesso">⚙ Token</button>
+  <button class="btn-hdr" onclick="showTokenModal()" aria-label="Abrir configurações" title="Configurações">⚙</button>
 </div>
 
 <!-- INBOX FILTER BAR -->
@@ -872,7 +868,6 @@ function toggleTheme() {
 applyTheme(localStorage.getItem('grv_theme') || 'dark', false);
 
 let cfg = {
-  token:     localStorage.getItem('grv_token')     || '',
   account:   localStorage.getItem('grv_account')   || '1',
   threshold: parseInt(localStorage.getItem('grv_threshold') || '0', 10) || 0
 };
@@ -912,7 +907,6 @@ let _agp             = { sel: new Set() }; /* estado interno do popup */
 
 /* ── TOKEN ── */
 function showTokenModal() {
-  document.getElementById('inp-token').value     = cfg.token;
   document.getElementById('inp-account').value   = cfg.account;
   document.getElementById('inp-threshold').value = cfg.threshold || '';
   const errEl = document.getElementById('modal-error');
@@ -921,27 +915,17 @@ function showTokenModal() {
   document.getElementById('token-modal').classList.remove('hidden');
 }
 function saveToken() {
-  const token     = document.getElementById('inp-token').value.trim();
   const account   = document.getElementById('inp-account').value.trim() || '1';
   const threshold = parseInt(document.getElementById('inp-threshold').value, 10) || 0;
-  const errEl     = document.getElementById('modal-error');
-  if (!token) {
-    errEl.textContent   = 'Insira o token de acesso antes de conectar.';
-    errEl.style.display = 'block';
-    document.getElementById('inp-token').focus();
-    return;
-  }
-  errEl.style.display = 'none';
-  localStorage.setItem('grv_token',     token);
   localStorage.setItem('grv_account',   account);
   localStorage.setItem('grv_threshold', threshold);
-  cfg = { token, account, threshold };
+  cfg = { account, threshold };
   document.getElementById('token-modal').classList.add('hidden');
   startDashboard();
 }
 
-if (!cfg.token) showTokenModal();
-else { document.getElementById('token-modal').classList.add('hidden'); startDashboard(); }
+document.getElementById('token-modal').classList.add('hidden');
+startDashboard();
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
@@ -1146,7 +1130,7 @@ async function fetchKPIs() {
 /* ── API ── */
 function api(path) {
   return fetch(`/api${path}`, {
-    headers: { 'Accept': 'application/json', 'api_access_token': cfg.token }
+    headers: { 'Accept': 'application/json' }
   }).then(r => {
     if (!r.ok) { const e = new Error(`HTTP ${r.status}`); e.status = r.status; throw e; }
     return r.json();

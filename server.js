@@ -7,14 +7,14 @@ const url = require('url');
 const PORT = 8765;
 const TARGET = 'nxticket.com.br';
 const DIR = __dirname;
+const TOKEN = 'rzpghGjyG4cDVYg4tNjSpJBD';
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.ico': 'image/x-icon' };
 
 http.createServer((req, res) => {
   if (req.url.startsWith('/api/')) {
     // Proxy para nxticket.com.br
-    const fwd = {};
-    if (req.headers['api_access_token']) fwd['api_access_token'] = req.headers['api_access_token'];
+    const fwd = { 'api_access_token': TOKEN };
     const opts = {
       hostname: TARGET,
       path: req.url,
