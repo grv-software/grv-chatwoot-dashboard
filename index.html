@@ -26,6 +26,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 /* MODAL */
 #token-modal { position:fixed; inset:0; background:rgba(0,0,0,.82); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; z-index:9999; }
 #token-modal.hidden { display:none; }
+#settings-auth-modal { display:flex; }
+#settings-auth-modal.hidden { display:none; }
 .modal-box { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:28px; width:440px; max-width:95vw; }
 .modal-box h2 { font-size:16px; font-weight:700; margin-bottom:8px; }
 .modal-box p { color:var(--text2); font-size:12px; margin-bottom:16px; line-height:1.5; }
@@ -135,7 +137,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 .sidebar {
   position:fixed; left:0; top:56px; bottom:0; width:52px;
   background:var(--bg2); border-right:1px solid var(--border);
-  z-index:90; overflow:hidden; transition:width .2s ease;
+  z-index:95; overflow:hidden; transition:width .2s ease;
   display:flex; flex-direction:column; gap:2px; padding:8px 4px;
 }
 .sidebar:hover { width:180px; }
@@ -147,6 +149,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 }
 .sidebar-item:hover { background:var(--bg3); color:var(--text); }
 .sidebar-item.active { background:rgba(59,130,246,.12); color:var(--accent); }
+.sidebar-footer { margin-top:auto; border-top:1px solid var(--border); padding-top:4px; }
 .sidebar-icon { font-size:17px; flex-shrink:0; width:32px; text-align:center; line-height:1; }
 
 /* CONTENT */
@@ -408,6 +411,23 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
 
+/* CONFIG PAGE */
+.config-page { padding:24px 32px; max-width:640px; display:flex; flex-direction:column; gap:20px; }
+.config-card { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:20px 24px; }
+.config-card h3 { margin:0 0 16px; font-size:14px; font-weight:600; color:var(--text); }
+.config-row { display:grid; grid-template-columns:1fr 180px; align-items:center; gap:8px; margin-bottom:12px; }
+.config-row:last-child { margin-bottom:0; }
+.config-label { font-size:13px; color:var(--text); }
+.config-unit { font-size:11px; color:var(--text3); margin-top:2px; }
+.config-input { width:100%; padding:7px 10px; border:1px solid var(--border); border-radius:6px;
+  background:var(--bg3); color:var(--text); font-size:14px; box-sizing:border-box; text-align:right; }
+.config-input:focus { outline:none; border-color:var(--accent); }
+.config-actions { display:flex; gap:10px; }
+.config-weight-sum { font-size:12px; margin-top:12px; padding:8px 12px; border-radius:6px;
+  background:var(--bg3); text-align:center; }
+.config-weight-sum.ok  { color:#22c55e; }
+.config-weight-sum.err { color:#ef4444; }
+
 /* Mobile */
 @media (max-width:800px) {
   .top-row { grid-template-columns:1fr; }
@@ -422,22 +442,33 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 </head>
 <body>
 
-<!-- TOKEN MODAL -->
+<!-- SETTINGS AUTH MODAL -->
+<div id="settings-auth-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center">
+  <div class="modal-box" style="width:340px">
+    <h2>Acesso Restrito</h2>
+    <p style="font-size:13px;color:var(--text3);margin:0 0 14px">Digite a senha de administrador para acessar as configurações.</p>
+    <div class="modal-error" id="settings-auth-error" style="display:none"></div>
+    <input type="password" id="inp-settings-password" placeholder="Senha de administrador"
+      autocomplete="off" style="width:100%;box-sizing:border-box"
+      onkeydown="if(event.key==='Enter') checkSettingsPassword()" />
+    <button class="btn-primary" style="margin-top:12px;width:100%" onclick="checkSettingsPassword()">Entrar</button>
+    <button onclick="document.getElementById('settings-auth-modal').classList.add('hidden')"
+      style="margin-top:8px;width:100%;padding:7px;border:none;background:none;color:var(--text3);cursor:pointer;font-size:13px">Cancelar</button>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
 <div id="token-modal">
   <div class="modal-box">
-    <h2>Configurar Acesso</h2>
-    <p>Insira seu token de usuário do Chatwoot. Salvo localmente no navegador — cada pessoa usa o seu.</p>
+    <h2>Configurações</h2>
     <div class="modal-error" id="modal-error"></div>
-    <label for="inp-token">Token de Acesso (api_access_token)</label>
-    <input type="password" id="inp-token" placeholder="Cole seu token aqui..." autocomplete="off" />
-    <p class="hint">Chatwoot → Perfil → Configurações da conta → Copiar Token de Acesso</p>
-    <label for="inp-account">ID da Conta</label>
+    <label for="inp-account">ID da Conta Chatwoot</label>
     <input type="number" id="inp-account" value="1" />
     <hr class="modal-divider">
     <label for="inp-threshold">Alerta de fila — avisar quando aguardando ≥</label>
     <input type="number" id="inp-threshold" placeholder="Ex: 5  (0 = desativado)" min="0" />
     <p class="hint">Badge fica pulsante quando a fila de espera atingir esse número</p>
-    <button class="btn-primary" onclick="saveToken()">Conectar</button>
+    <button class="btn-primary" onclick="saveToken()">Salvar</button>
   </div>
 </div>
 
@@ -455,6 +486,12 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     <span class="sidebar-icon">📈</span>
     <span class="sidebar-label">Análise</span>
   </div>
+  <div class="sidebar-footer">
+    <div class="sidebar-item" onclick="openSettings()" title="Configurações">
+      <span class="sidebar-icon">⚙</span>
+      <span class="sidebar-label">Config.</span>
+    </div>
+  </div>
 </nav>
 
 <!-- HEADER -->
@@ -469,7 +506,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
   <button class="btn-hdr blue" onclick="fetchAll()" aria-label="Atualizar dados agora" title="Atualizar agora">↺ Atualizar</button>
   <div class="hdr-updated" id="hdr-updated">Atualizado às —</div>
   <button class="btn-hdr" id="btn-theme" onclick="toggleTheme()" aria-label="Alternar tema claro/escuro" title="Mudar para modo claro" style="font-size:15px;padding:4px 9px">☾</button>
-  <button class="btn-hdr" onclick="showTokenModal()" aria-label="Abrir configurações de acesso" title="Configurações de acesso">⚙ Token</button>
 </div>
 
 <!-- INBOX FILTER BAR -->
@@ -851,8 +887,100 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
   </div>
 </div>
 
+<!-- CONFIG PAGE -->
+<div id="config-page" style="display:none;background:var(--bg);min-height:calc(100vh - 56px);margin-left:52px">
+  <div class="config-page">
+    <h2 style="margin:0;font-size:18px;font-weight:700;color:var(--text)">Configurações</h2>
+
+    <!-- SLAs -->
+    <div class="config-card">
+      <h3>SLAs de Desempenho</h3>
+      <div class="config-row">
+        <div>
+          <div class="config-label">Tempo Médio de Atendimento (TMA)</div>
+          <div class="config-unit">horas — quanto menor, melhor</div>
+        </div>
+        <input type="number" class="config-input" id="cfg-sla-tma" min="1" max="72" step="1" />
+      </div>
+      <div class="config-row">
+        <div>
+          <div class="config-label">Tempo Médio de Resposta (TMR)</div>
+          <div class="config-unit">minutos — quanto menor, melhor</div>
+        </div>
+        <input type="number" class="config-input" id="cfg-sla-tmr" min="1" max="480" step="1" />
+      </div>
+      <div class="config-row">
+        <div>
+          <div class="config-label">Taxa de Resolução</div>
+          <div class="config-unit">% — quanto maior, melhor</div>
+        </div>
+        <input type="number" class="config-input" id="cfg-sla-fcr" min="1" max="100" step="1" />
+      </div>
+      <div class="config-row">
+        <div>
+          <div class="config-label">Mensagens por Conversa</div>
+          <div class="config-unit">mensagens — quanto menor, melhor</div>
+        </div>
+        <input type="number" class="config-input" id="cfg-sla-msg" min="1" max="100" step="1" />
+      </div>
+    </div>
+
+    <!-- Fila -->
+    <div class="config-card">
+      <h3>Alerta de Fila</h3>
+      <div class="config-row">
+        <div>
+          <div class="config-label">Avisar quando aguardando ≥</div>
+          <div class="config-unit">conversas · 0 = desativado</div>
+        </div>
+        <input type="number" class="config-input" id="cfg-threshold" min="0" max="999" step="1" />
+      </div>
+    </div>
+
+    <!-- Atualização -->
+    <div class="config-card">
+      <h3>Atualização Automática</h3>
+      <div class="config-row">
+        <div>
+          <div class="config-label">Intervalo de atualização</div>
+          <div class="config-unit">segundos · mínimo 15</div>
+        </div>
+        <input type="number" class="config-input" id="cfg-refresh" min="15" max="3600" step="1" />
+      </div>
+    </div>
+
+    <!-- Pesos -->
+    <div class="config-card">
+      <h3>Pesos da Pontuação de Agentes</h3>
+      <div class="config-row">
+        <div class="config-label">Peso TMA</div>
+        <input type="number" class="config-input" id="cfg-weight-tma" min="0" max="100" step="1" oninput="updateWeightSum()" />
+      </div>
+      <div class="config-row">
+        <div class="config-label">Peso TMR</div>
+        <input type="number" class="config-input" id="cfg-weight-tmr" min="0" max="100" step="1" oninput="updateWeightSum()" />
+      </div>
+      <div class="config-row">
+        <div class="config-label">Peso Resolução</div>
+        <input type="number" class="config-input" id="cfg-weight-fcr" min="0" max="100" step="1" oninput="updateWeightSum()" />
+      </div>
+      <div class="config-row">
+        <div class="config-label">Peso Msgs/Conversa</div>
+        <input type="number" class="config-input" id="cfg-weight-msg" min="0" max="100" step="1" oninput="updateWeightSum()" />
+      </div>
+      <div class="config-weight-sum ok" id="cfg-weight-sum">Soma: 100 / 100 pts ✓</div>
+    </div>
+
+    <!-- Ações -->
+    <div class="config-actions">
+      <button class="btn-primary" id="cfg-save-btn" onclick="saveConfig()">Salvar configurações</button>
+      <button onclick="resetConfigDefaults()" style="padding:8px 16px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text3);cursor:pointer;font-size:13px">Restaurar padrões</button>
+    </div>
+  </div>
+</div>
+
 <script>
-const REFRESH_SEC = 60;
+let REFRESH_SEC = parseInt(localStorage.getItem('grv_refresh_sec') || '60', 10);
 const PAGE_SIZE   = 20;
 
 /* ── THEME ── */
@@ -872,13 +1000,13 @@ function toggleTheme() {
 applyTheme(localStorage.getItem('grv_theme') || 'dark', false);
 
 let cfg = {
-  token:     localStorage.getItem('grv_token')     || '',
   account:   localStorage.getItem('grv_account')   || '1',
   threshold: parseInt(localStorage.getItem('grv_threshold') || '0', 10) || 0
 };
 let timer = null, countdown = REFRESH_SEC;
 let _rawConvs = [];
 let _allInProg = [], _allWaiting = [], _inboxMap = {}, _shownCount = PAGE_SIZE, _totalOpen = 0;
+let _pendingConvs = [];
 let _kpiPeriod = 'month';
 let _filters = { waiting: {}, inprog: {} };
 let _cfpState = { tbl: null, col: null, vals: [], sel: new Set() };
@@ -889,10 +1017,18 @@ let _ibpSel = new Set();
 let _ibpMode = 'panel';       /* 'panel' | 'chart' — qual filtro o popup está editando */
 let _agentFilter = null;      /* null = sem filtro; {id, name} = agente ativo */
 let _chartInboxFilter = null; /* filtro de inbox independente da aba Análise */
-let _SLA_TMA = 8;      /* horas — meta de TMA */
-let _SLA_TMR = 30;     /* minutos — meta de TMR */
-let _SLA_FCR = 85;     /* % — meta de taxa de resolução */
-let _SLA_MSG = 10;     /* mensagens — meta de eficiência por conversa */
+let _SLA_TMA = parseInt(localStorage.getItem('grv_sla_tma') || '8',  10);
+let _SLA_TMR = parseInt(localStorage.getItem('grv_sla_tmr') || '30', 10);
+let _SLA_FCR = parseInt(localStorage.getItem('grv_sla_fcr') || '85', 10);
+let _SLA_MSG = parseInt(localStorage.getItem('grv_sla_msg') || '10', 10);
+let _WEIGHT_TMA = parseInt(localStorage.getItem('grv_weight_tma') || '25', 10);
+let _WEIGHT_TMR = parseInt(localStorage.getItem('grv_weight_tmr') || '25', 10);
+let _WEIGHT_FCR = parseInt(localStorage.getItem('grv_weight_fcr') || '25', 10);
+let _WEIGHT_MSG = parseInt(localStorage.getItem('grv_weight_msg') || '25', 10);
+if (_WEIGHT_TMA + _WEIGHT_TMR + _WEIGHT_FCR + _WEIGHT_MSG !== 100) {
+  _WEIGHT_TMA = _WEIGHT_TMR = _WEIGHT_FCR = _WEIGHT_MSG = 25;
+  ['grv_weight_tma','grv_weight_tmr','grv_weight_fcr','grv_weight_msg'].forEach(k => localStorage.removeItem(k));
+}
 let _teamCompData    = null; /* dados de comparação por equipe/inbox */
 let _chartTeamCache  = {};   /* {`${id}:${since}:${until}`: {data, ts}} — TTL 5min */
 let _authLimited     = false; /* true quando API de relatórios retornou 401/403 */
@@ -911,8 +1047,45 @@ let _agentModalOrder = [];     /* ids na ordem da tabela — para navegar ‹ �
 let _agp             = { sel: new Set() }; /* estado interno do popup */
 
 /* ── TOKEN ── */
+function openSettings() {
+  if (localStorage.getItem('grv_settings_auth') === '1') {
+    showPage('configuracoes');
+  } else {
+    const errEl = document.getElementById('settings-auth-error');
+    errEl.style.display = 'none';
+    document.getElementById('inp-settings-password').value = '';
+    document.getElementById('settings-auth-modal').classList.remove('hidden');
+    setTimeout(() => document.getElementById('inp-settings-password').focus(), 50);
+  }
+}
+
+async function checkSettingsPassword() {
+  const password = document.getElementById('inp-settings-password').value;
+  const errEl    = document.getElementById('settings-auth-error');
+  errEl.style.display = 'none';
+  try {
+    const res  = await fetch('/api/auth-settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      localStorage.setItem('grv_settings_auth', '1');
+      document.getElementById('settings-auth-modal').classList.add('hidden');
+      showPage('configuracoes');
+    } else {
+      errEl.textContent   = 'Senha incorreta.';
+      errEl.style.display = 'block';
+      document.getElementById('inp-settings-password').select();
+    }
+  } catch {
+    errEl.textContent   = 'Erro ao verificar senha. Tente novamente.';
+    errEl.style.display = 'block';
+  }
+}
+
 function showTokenModal() {
-  document.getElementById('inp-token').value     = cfg.token;
   document.getElementById('inp-account').value   = cfg.account;
   document.getElementById('inp-threshold').value = cfg.threshold || '';
   const errEl = document.getElementById('modal-error');
@@ -921,27 +1094,17 @@ function showTokenModal() {
   document.getElementById('token-modal').classList.remove('hidden');
 }
 function saveToken() {
-  const token     = document.getElementById('inp-token').value.trim();
   const account   = document.getElementById('inp-account').value.trim() || '1';
   const threshold = parseInt(document.getElementById('inp-threshold').value, 10) || 0;
-  const errEl     = document.getElementById('modal-error');
-  if (!token) {
-    errEl.textContent   = 'Insira o token de acesso antes de conectar.';
-    errEl.style.display = 'block';
-    document.getElementById('inp-token').focus();
-    return;
-  }
-  errEl.style.display = 'none';
-  localStorage.setItem('grv_token',     token);
   localStorage.setItem('grv_account',   account);
   localStorage.setItem('grv_threshold', threshold);
-  cfg = { token, account, threshold };
+  cfg = { account, threshold };
   document.getElementById('token-modal').classList.add('hidden');
   startDashboard();
 }
 
-if (!cfg.token) showTokenModal();
-else { document.getElementById('token-modal').classList.add('hidden'); startDashboard(); }
+document.getElementById('token-modal').classList.add('hidden');
+startDashboard();
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
@@ -1146,7 +1309,7 @@ async function fetchKPIs() {
 /* ── API ── */
 function api(path) {
   return fetch(`/api${path}`, {
-    headers: { 'Accept': 'application/json', 'api_access_token': cfg.token }
+    headers: { 'Accept': 'application/json' }
   }).then(r => {
     if (!r.ok) { const e = new Error(`HTTP ${r.status}`); e.status = r.status; throw e; }
     return r.json();
@@ -1172,9 +1335,10 @@ function startDashboard() {
 async function fetchAll() {
   document.getElementById('hdr-countdown').textContent = 'Atualizando…';
   try {
-    const [agents, page1, inboxes] = await Promise.all([
+    const [agents, page1, pendingPage1, inboxes] = await Promise.all([
       api(`/v1/accounts/${cfg.account}/agents`),
       api(`/v1/accounts/${cfg.account}/conversations?status=open&page=1`),
+      api(`/v1/accounts/${cfg.account}/conversations?status=pending&page=1`).catch(() => null),
       api(`/v1/accounts/${cfg.account}/inboxes`)
     ]);
 
@@ -1188,6 +1352,19 @@ async function fetchAll() {
         )
       );
       rest.forEach(r => convs = convs.concat(r.data?.payload || []));
+    }
+    if (total > 300) showToast(`⚠ ${total} conversas abertas — exibindo as primeiras 300. Use filtros de inbox para ver todas.`);
+
+    _pendingConvs = pendingPage1?.data?.payload || [];
+    const pendingTotal = pendingPage1?.data?.meta?.all_count || _pendingConvs.length;
+    if (pendingTotal > 25) {
+      const pPages = Math.min(Math.ceil(pendingTotal / 25), 8);
+      const pRest  = await Promise.all(
+        Array.from({ length: pPages - 1 }, (_, i) =>
+          api(`/v1/accounts/${cfg.account}/conversations?status=pending&page=${i + 2}`).catch(() => null)
+        )
+      );
+      pRest.filter(Boolean).forEach(r => { _pendingConvs = _pendingConvs.concat(r.data?.payload || []); });
     }
 
     _inboxMap  = {};
@@ -1205,7 +1382,11 @@ async function fetchAll() {
     document.getElementById('hdr-updated').textContent = `Atualizado às ${now.toLocaleTimeString('pt-BR')}`;
     countdown = REFRESH_SEC;
     document.getElementById('hdr-countdown').textContent = `Próx. atualização em ${countdown}s`;
-    _chartDataStale = true;
+    if (document.getElementById('graficos-page')?.style.display !== 'none') {
+      fetchChartData();
+    } else {
+      _chartDataStale = true;
+    }
   } catch (e) {
     document.getElementById('hdr-countdown').textContent = 'Erro ao atualizar';
     showToast(`Falha ao carregar dados: ${e.message}. Verifique sua conexão ou token de acesso.`);
@@ -1257,14 +1438,23 @@ function renderKPIs(s, sp) {
       lb:   true
     },
     {
-      name: 'Mensagens offline recebidas',
-      desc: 'Recebidas fora do horário ou com agentes offline',
-      nd:   true
+      name: 'Taxa de Resolução',
+      desc: 'Percentual de conversas encerradas como resolvidas no período',
+      val:  (s.conversations_count > 0 && s.resolutions_count != null)
+              ? +(s.resolutions_count / s.conversations_count * 100).toFixed(1) : null,
+      prev: (sp.conversations_count > 0 && sp.resolutions_count != null)
+              ? +(sp.resolutions_count / sp.conversations_count * 100).toFixed(1) : null,
+      lb:   false,
+      fmt:  'pct'
     },
     {
-      name: 'Maior duração de atendimento',
-      desc: 'Tempo da conversa mais longa do período',
-      nd:   true
+      name: 'Mensagens por conversa',
+      desc: 'Média de mensagens trocadas por atendimento · Quanto menor, melhor',
+      val:  (s.conversations_count > 0 && s.incoming_messages_count != null)
+              ? +((s.incoming_messages_count + (s.outgoing_messages_count || 0)) / s.conversations_count).toFixed(1) : null,
+      prev: (sp.conversations_count > 0 && sp.incoming_messages_count != null)
+              ? +((sp.incoming_messages_count + (sp.outgoing_messages_count || 0)) / sp.conversations_count).toFixed(1) : null,
+      lb:   true
     },
     {
       name: 'Tempo médio de duração',
@@ -1278,10 +1468,9 @@ function renderKPIs(s, sp) {
 
   document.getElementById('kpi-tbody').innerHTML = rows.map(r => {
     const nd  = r.nd || r.val == null;
-    const vd  = nd ? '—' : (r.fmt === 'time' ? fmtSec(r.val) : r.val.toLocaleString('pt-BR'));
-    const pvd = nd ? '—' : (r.prev != null
-      ? (r.fmt === 'time' ? `Ant: ${fmtSec(r.prev)}` : `Ant: ${r.prev.toLocaleString('pt-BR')}`)
-      : '—');
+    const fmtVal = (v) => r.fmt === 'time' ? fmtSec(v) : r.fmt === 'pct' ? `${v}%` : v.toLocaleString('pt-BR');
+    const vd  = nd ? '—' : fmtVal(r.val);
+    const pvd = nd ? '—' : (r.prev != null ? `Ant: ${fmtVal(r.prev)}` : '—');
     const showCls = (nd && _showNd) ? ' show-nd' : '';
     return `<tr${nd ? ` class="dim${showCls}"` : ''}>
       <td style="min-width:220px">
@@ -1424,7 +1613,8 @@ function syncAgentChip() {
 function applyInboxAndRender() {
   let convs = applyInboxFilter(_rawConvs);
   convs = applyAgentFilter(convs);
-  _allWaiting = convs.filter(c => !c.meta?.assignee?.id)
+  const pendingFiltered1 = applyInboxFilter(_pendingConvs);
+  _allWaiting = [...convs.filter(c => !c.meta?.assignee?.id), ...pendingFiltered1]
                      .sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
   _allInProg  = convs.filter(c =>  c.meta?.assignee?.id)
                      .sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
@@ -1644,7 +1834,8 @@ function renderConvs(convs) {
   _rawConvs = convs;
   let filtered = applyInboxFilter(convs);
   filtered = applyAgentFilter(filtered);
-  _allWaiting = filtered.filter(c => !c.meta?.assignee?.id)
+  const pendingFiltered2 = applyInboxFilter(_pendingConvs);
+  _allWaiting = [...filtered.filter(c => !c.meta?.assignee?.id), ...pendingFiltered2]
                         .sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
   _allInProg  = filtered.filter(c =>  c.meta?.assignee?.id)
                         .sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
@@ -2028,24 +2219,24 @@ function calcAgentScore(summary) {
   let pts = 0;
   const tmaH = s.avg_resolution_time != null ? s.avg_resolution_time / 3600 : null;
   if (tmaH != null) {
-    if (tmaH <= _SLA_TMA)            pts += 25;
-    else if (tmaH <= _SLA_TMA * 1.5) pts += 12;
+    if (tmaH <= _SLA_TMA)            pts += _WEIGHT_TMA;
+    else if (tmaH <= _SLA_TMA * 1.5) pts += Math.round(_WEIGHT_TMA / 2);
   }
   const tmrM = s.avg_first_response_time != null ? s.avg_first_response_time / 60 : null;
   if (tmrM != null) {
-    if (tmrM <= _SLA_TMR)            pts += 25;
-    else if (tmrM <= _SLA_TMR * 1.5) pts += 12;
+    if (tmrM <= _SLA_TMR)            pts += _WEIGHT_TMR;
+    else if (tmrM <= _SLA_TMR * 1.5) pts += Math.round(_WEIGHT_TMR / 2);
   }
   const fcr = s.conversations_count > 0 ? (s.resolutions_count || 0) / s.conversations_count * 100 : null;
   if (fcr != null) {
-    if (fcr >= _SLA_FCR)             pts += 25;
-    else if (fcr >= _SLA_FCR - 15)   pts += 12;
+    if (fcr >= _SLA_FCR)             pts += _WEIGHT_FCR;
+    else if (fcr >= _SLA_FCR - 15)   pts += Math.round(_WEIGHT_FCR / 2);
   }
   const totalMsgs = (s.incoming_messages_count || 0) + (s.outgoing_messages_count || 0);
   const msgsConv  = s.conversations_count > 0 ? totalMsgs / s.conversations_count : null;
   if (msgsConv != null) {
-    if (msgsConv <= _SLA_MSG)           pts += 25;
-    else if (msgsConv <= _SLA_MSG * 1.5) pts += 12;
+    if (msgsConv <= _SLA_MSG)           pts += _WEIGHT_MSG;
+    else if (msgsConv <= _SLA_MSG * 1.5) pts += Math.round(_WEIGHT_MSG / 2);
   }
   return pts;
 }
@@ -2086,7 +2277,7 @@ async function fetchAgentTab() {
       api(`/v2/accounts/${cfg.account}/reports/summary?type=agent&id=${a.id}&since=${since}&until=${until}`)
         .catch(e => ({ _err: e }))
     )),
-    api(`/v1/accounts/${cfg.account}/reports/agents/satisfaction?since=${since}&until=${until}`)
+    api(`/v1/accounts/${cfg.account}/reports/csat_survey_responses?since=${since}&until=${until}&page=1`)
       .catch(() => null)
   ]);
 
@@ -2100,9 +2291,10 @@ async function fetchAgentTab() {
     });
   }
 
-  if (Array.isArray(csatRaw) && csatRaw.length) {
+  const csatList = Array.isArray(csatRaw) ? csatRaw : (csatRaw?.data || []);
+  if (csatList.length) {
     const byAgent = {};
-    csatRaw.forEach(r => {
+    csatList.forEach(r => {
       const id = r.assigned_agent?.id;
       if (!id) return;
       if (!byAgent[id]) byAgent[id] = { id, name: r.assigned_agent?.name || '—', total: 0, positive: 0 };
@@ -2937,13 +3129,15 @@ function renderCharts() {
 
 /* ── PAGE NAVIGATION ── */
 function showPage(page) {
-  document.getElementById('content').style.display       = page === 'painel'   ? '' : 'none';
-  document.getElementById('graficos-page').style.display = page === 'graficos' ? '' : 'none';
-  document.getElementById('agentes-page').style.display  = page === 'agentes'  ? '' : 'none';
+  document.getElementById('content').style.display       = page === 'painel'        ? '' : 'none';
+  document.getElementById('graficos-page').style.display = page === 'graficos'      ? '' : 'none';
+  document.getElementById('agentes-page').style.display  = page === 'agentes'       ? '' : 'none';
+  document.getElementById('config-page').style.display   = page === 'configuracoes' ? '' : 'none';
   const ib = document.getElementById('inbox-bar');
   if (ib) ib.style.display = page === 'painel' ? (_ibVisible ? 'flex' : 'none') : 'none';
   document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
-  document.getElementById(`nav-${page}`).classList.add('active');
+  const navEl = document.getElementById(`nav-${page}`);
+  if (navEl) navEl.classList.add('active');
   if (page === 'graficos') {
     if (!_chartData.length || _chartDataStale) { _chartDataStale = false; fetchChartData(); }
     else if (_chartsDirty) renderCharts();
@@ -2952,6 +3146,90 @@ function showPage(page) {
     if (!_agentPerfData || _agentTabDirty) { _agentTabDirty = false; fetchAgentTab(); }
     else renderAgentTab();
   }
+  if (page === 'configuracoes') loadConfigPage();
+}
+
+/* ── CONFIGURAÇÕES ── */
+function loadConfigPage() {
+  document.getElementById('cfg-sla-tma').value    = _SLA_TMA;
+  document.getElementById('cfg-sla-tmr').value    = _SLA_TMR;
+  document.getElementById('cfg-sla-fcr').value    = _SLA_FCR;
+  document.getElementById('cfg-sla-msg').value    = _SLA_MSG;
+  document.getElementById('cfg-threshold').value  = cfg.threshold;
+  document.getElementById('cfg-refresh').value    = REFRESH_SEC;
+  document.getElementById('cfg-weight-tma').value = _WEIGHT_TMA;
+  document.getElementById('cfg-weight-tmr').value = _WEIGHT_TMR;
+  document.getElementById('cfg-weight-fcr').value = _WEIGHT_FCR;
+  document.getElementById('cfg-weight-msg').value = _WEIGHT_MSG;
+  updateWeightSum();
+}
+
+function updateWeightSum() {
+  const sum = ['tma','tmr','fcr','msg'].reduce((acc, k) =>
+    acc + (parseInt(document.getElementById(`cfg-weight-${k}`).value, 10) || 0), 0);
+  const el = document.getElementById('cfg-weight-sum');
+  const ok = sum === 100;
+  el.textContent = ok ? `Soma: ${sum} / 100 pts ✓` : `Soma: ${sum} / 100 pts — ajuste os pesos para somar exatamente 100`;
+  el.className   = `config-weight-sum ${ok ? 'ok' : 'err'}`;
+  document.getElementById('cfg-save-btn').disabled = !ok;
+}
+
+function saveConfig() {
+  const slaTma  = Math.max(1,  parseInt(document.getElementById('cfg-sla-tma').value,    10) || 8);
+  const slaTmr  = Math.max(1,  parseInt(document.getElementById('cfg-sla-tmr').value,    10) || 30);
+  const slaFcr  = Math.max(1,  parseInt(document.getElementById('cfg-sla-fcr').value,    10) || 85);
+  const slaMsg  = Math.max(1,  parseInt(document.getElementById('cfg-sla-msg').value,    10) || 10);
+  const thr     = Math.max(0,  parseInt(document.getElementById('cfg-threshold').value,  10) || 0);
+  const refresh = Math.max(15, parseInt(document.getElementById('cfg-refresh').value,    10) || 60);
+  const wTma    = parseInt(document.getElementById('cfg-weight-tma').value, 10) || 0;
+  const wTmr    = parseInt(document.getElementById('cfg-weight-tmr').value, 10) || 0;
+  const wFcr    = parseInt(document.getElementById('cfg-weight-fcr').value, 10) || 0;
+  const wMsg    = parseInt(document.getElementById('cfg-weight-msg').value, 10) || 0;
+
+  if (wTma + wTmr + wFcr + wMsg !== 100) return;
+
+  localStorage.setItem('grv_sla_tma',    slaTma);
+  localStorage.setItem('grv_sla_tmr',    slaTmr);
+  localStorage.setItem('grv_sla_fcr',    slaFcr);
+  localStorage.setItem('grv_sla_msg',    slaMsg);
+  localStorage.setItem('grv_threshold',  thr);
+  localStorage.setItem('grv_refresh_sec', refresh);
+  localStorage.setItem('grv_weight_tma', wTma);
+  localStorage.setItem('grv_weight_tmr', wTmr);
+  localStorage.setItem('grv_weight_fcr', wFcr);
+  localStorage.setItem('grv_weight_msg', wMsg);
+
+  _SLA_TMA    = slaTma;
+  _SLA_TMR    = slaTmr;
+  _SLA_FCR    = slaFcr;
+  _SLA_MSG    = slaMsg;
+  cfg.threshold = thr;
+  REFRESH_SEC = refresh;
+  _WEIGHT_TMA = wTma;
+  _WEIGHT_TMR = wTmr;
+  _WEIGHT_FCR = wFcr;
+  _WEIGHT_MSG = wMsg;
+
+  _agentPerfData = null;
+  _agentMonthCache = {};
+
+  startDashboard();
+  showToast('Configurações salvas');
+  showPage('painel');
+}
+
+function resetConfigDefaults() {
+  document.getElementById('cfg-sla-tma').value    = 8;
+  document.getElementById('cfg-sla-tmr').value    = 30;
+  document.getElementById('cfg-sla-fcr').value    = 85;
+  document.getElementById('cfg-sla-msg').value    = 10;
+  document.getElementById('cfg-threshold').value  = 0;
+  document.getElementById('cfg-refresh').value    = 60;
+  document.getElementById('cfg-weight-tma').value = 25;
+  document.getElementById('cfg-weight-tmr').value = 25;
+  document.getElementById('cfg-weight-fcr').value = 25;
+  document.getElementById('cfg-weight-msg').value = 25;
+  updateWeightSum();
 }
 
 function setAgentTabPeriod(p) {
