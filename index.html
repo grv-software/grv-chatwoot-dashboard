@@ -1006,6 +1006,7 @@ let cfg = {
 let timer = null, countdown = REFRESH_SEC;
 let _rawConvs = [];
 let _allInProg = [], _allWaiting = [], _inboxMap = {}, _shownCount = PAGE_SIZE, _totalOpen = 0;
+let _pendingConvs = [];
 let _kpiPeriod = 'month';
 let _filters = { waiting: {}, inprog: {} };
 let _cfpState = { tbl: null, col: null, vals: [], sel: new Set() };
@@ -1024,6 +1025,10 @@ let _WEIGHT_TMA = parseInt(localStorage.getItem('grv_weight_tma') || '25', 10);
 let _WEIGHT_TMR = parseInt(localStorage.getItem('grv_weight_tmr') || '25', 10);
 let _WEIGHT_FCR = parseInt(localStorage.getItem('grv_weight_fcr') || '25', 10);
 let _WEIGHT_MSG = parseInt(localStorage.getItem('grv_weight_msg') || '25', 10);
+if (_WEIGHT_TMA + _WEIGHT_TMR + _WEIGHT_FCR + _WEIGHT_MSG !== 100) {
+  _WEIGHT_TMA = _WEIGHT_TMR = _WEIGHT_FCR = _WEIGHT_MSG = 25;
+  ['grv_weight_tma','grv_weight_tmr','grv_weight_fcr','grv_weight_msg'].forEach(k => localStorage.removeItem(k));
+}
 let _teamCompData    = null; /* dados de comparação por equipe/inbox */
 let _chartTeamCache  = {};   /* {`${id}:${since}:${until}`: {data, ts}} — TTL 5min */
 let _authLimited     = false; /* true quando API de relatórios retornou 401/403 */
@@ -1330,9 +1335,10 @@ function startDashboard() {
 async function fetchAll() {
   document.getElementById('hdr-countdown').textContent = 'Atualizando…';
   try {
-    const [agents, page1, inboxes] = await Promise.all([
+    const [agents, page1, pendingPage1, inboxes] = await Promise.all([
       api(`/v1/accounts/${cfg.account}/agents`),
       api(`/v1/accounts/${cfg.account}/conversations?status=open&page=1`),
+      api(`/v1/accounts/${cfg.account}/conversations?status=pending&page=1`).catch(() => null),
       api(`/v1/accounts/${cfg.account}/inboxes`)
     ]);
 
@@ -1346,6 +1352,19 @@ async function fetchAll() {
         )
       );
       rest.forEach(r => convs = convs.concat(r.data?.payload || []));
+    }
+    if (total > 300) showToast(`⚠ ${total} conversas abertas — exibindo as primeiras 300. Use filtros de inbox para ver todas.`);
+
+    _pendingConvs = pendingPage1?.data?.payload || [];
+    const pendingTotal = pendingPage1?.data?.meta?.all_count || _pendingConvs.length;
+    if (pendingTotal > 25) {
+      const pPages = Math.min(Math.ceil(pendingTotal / 25), 8);
+      const pRest  = await Promise.all(
+        Array.from({ length: pPages - 1 }, (_, i) =>
+          api(`/v1/accounts/${cfg.account}/conversations?status=pending&page=${i + 2}`).catch(() => null)
+        )
+      );
+      pRest.filter(Boolean).forEach(r => { _pendingConvs = _pendingConvs.concat(r.data?.payload || []); });
     }
 
     _inboxMap  = {};
@@ -1363,7 +1382,11 @@ async function fetchAll() {
     document.getElementById('hdr-updated').textContent = `Atualizado às ${now.toLocaleTimeString('pt-BR')}`;
     countdown = REFRESH_SEC;
     document.getElementById('hdr-countdown').textContent = `Próx. atualização em ${countdown}s`;
-    _chartDataStale = true;
+    if (document.getElementById('graficos-page')?.style.display !== 'none') {
+      fetchChartData();
+    } else {
+      _chartDataStale = true;
+    }
   } catch (e) {
     document.getElementById('hdr-countdown').textContent = 'Erro ao atualizar';
     showToast(`Falha ao carregar dados: ${e.message}. Verifique sua conexão ou token de acesso.`);
@@ -1415,14 +1438,23 @@ function renderKPIs(s, sp) {
       lb:   true
     },
     {
-      name: 'Mensagens offline recebidas',
-      desc: 'Recebidas fora do horário ou com agentes offline',
-      nd:   true
+      name: 'Taxa de Resolução',
+      desc: 'Percentual de conversas encerradas como resolvidas no período',
+      val:  (s.conversations_count > 0 && s.resolutions_count != null)
+              ? +(s.resolutions_count / s.conversations_count * 100).toFixed(1) : null,
+      prev: (sp.conversations_count > 0 && sp.resolutions_count != null)
+              ? +(sp.resolutions_count / sp.conversations_count * 100).toFixed(1) : null,
+      lb:   false,
+      fmt:  'pct'
     },
     {
-      name: 'Maior duração de atendimento',
-      desc: 'Tempo da conversa mais longa do período',
-      nd:   true
+      name: 'Mensagens por conversa',
+      desc: 'Média de mensagens trocadas por atendimento · Quanto menor, melhor',
+      val:  (s.conversations_count > 0 && s.incoming_messages_count != null)
+              ? +((s.incoming_messages_count + (s.outgoing_messages_count || 0)) / s.conversations_count).toFixed(1) : null,
+      prev: (sp.conversations_count > 0 && sp.incoming_messages_count != null)
+              ? +((sp.incoming_messages_count + (sp.outgoing_messages_count || 0)) / sp.conversations_count).toFixed(1) : null,
+      lb:   true
     },
     {
       name: 'Tempo médio de duração',
@@ -1436,10 +1468,9 @@ function renderKPIs(s, sp) {
 
   document.getElementById('kpi-tbody').innerHTML = rows.map(r => {
     const nd  = r.nd || r.val == null;
-    const vd  = nd ? '—' : (r.fmt === 'time' ? fmtSec(r.val) : r.val.toLocaleString('pt-BR'));
-    const pvd = nd ? '—' : (r.prev != null
-      ? (r.fmt === 'time' ? `Ant: ${fmtSec(r.prev)}` : `Ant: ${r.prev.toLocaleString('pt-BR')}`)
-      : '—');
+    const fmtVal = (v) => r.fmt === 'time' ? fmtSec(v) : r.fmt === 'pct' ? `${v}%` : v.toLocaleString('pt-BR');
+    const vd  = nd ? '—' : fmtVal(r.val);
+    const pvd = nd ? '—' : (r.prev != null ? `Ant: ${fmtVal(r.prev)}` : '—');
     const showCls = (nd && _showNd) ? ' show-nd' : '';
     return `<tr${nd ? ` class="dim${showCls}"` : ''}>
       <td style="min-width:220px">
@@ -1582,7 +1613,8 @@ function syncAgentChip() {
 function applyInboxAndRender() {
   let convs = applyInboxFilter(_rawConvs);
   convs = applyAgentFilter(convs);
-  _allWaiting = convs.filter(c => !c.meta?.assignee?.id)
+  const pendingFiltered1 = applyInboxFilter(_pendingConvs);
+  _allWaiting = [...convs.filter(c => !c.meta?.assignee?.id), ...pendingFiltered1]
                      .sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
   _allInProg  = convs.filter(c =>  c.meta?.assignee?.id)
                      .sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
@@ -1802,7 +1834,8 @@ function renderConvs(convs) {
   _rawConvs = convs;
   let filtered = applyInboxFilter(convs);
   filtered = applyAgentFilter(filtered);
-  _allWaiting = filtered.filter(c => !c.meta?.assignee?.id)
+  const pendingFiltered2 = applyInboxFilter(_pendingConvs);
+  _allWaiting = [...filtered.filter(c => !c.meta?.assignee?.id), ...pendingFiltered2]
                         .sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
   _allInProg  = filtered.filter(c =>  c.meta?.assignee?.id)
                         .sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
@@ -2244,7 +2277,7 @@ async function fetchAgentTab() {
       api(`/v2/accounts/${cfg.account}/reports/summary?type=agent&id=${a.id}&since=${since}&until=${until}`)
         .catch(e => ({ _err: e }))
     )),
-    api(`/v1/accounts/${cfg.account}/reports/agents/satisfaction?since=${since}&until=${until}`)
+    api(`/v1/accounts/${cfg.account}/reports/csat_survey_responses?since=${since}&until=${until}&page=1`)
       .catch(() => null)
   ]);
 
@@ -2258,9 +2291,10 @@ async function fetchAgentTab() {
     });
   }
 
-  if (Array.isArray(csatRaw) && csatRaw.length) {
+  const csatList = Array.isArray(csatRaw) ? csatRaw : (csatRaw?.data || []);
+  if (csatList.length) {
     const byAgent = {};
-    csatRaw.forEach(r => {
+    csatList.forEach(r => {
       const id = r.assigned_agent?.id;
       if (!id) return;
       if (!byAgent[id]) byAgent[id] = { id, name: r.assigned_agent?.name || '—', total: 0, positive: 0 };
