@@ -1046,6 +1046,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
         <div class="config-label">Peso Msgs/Conversa</div>
         <input type="number" class="config-input" id="cfg-weight-msg" min="0" max="100" step="1" oninput="updateWeightSum()" />
       </div>
+      <div class="config-row">
+        <div class="config-label">Peso CSAT (★ médio)</div>
+        <input type="number" class="config-input" id="cfg-weight-csat" min="0" max="100" step="1" oninput="updateWeightSum()" />
+      </div>
       <div class="config-weight-sum ok" id="cfg-weight-sum">Soma: 100 / 100 pts ✓</div>
     </div>
 
@@ -1100,13 +1104,14 @@ let _SLA_TMA = parseInt(localStorage.getItem('grv_sla_tma') || '8',  10);
 let _SLA_TMR = parseInt(localStorage.getItem('grv_sla_tmr') || '30', 10);
 let _SLA_FCR = parseInt(localStorage.getItem('grv_sla_fcr') || '85', 10);
 let _SLA_MSG = parseInt(localStorage.getItem('grv_sla_msg') || '10', 10);
-let _WEIGHT_TMA = parseInt(localStorage.getItem('grv_weight_tma') || '25', 10);
-let _WEIGHT_TMR = parseInt(localStorage.getItem('grv_weight_tmr') || '25', 10);
-let _WEIGHT_FCR = parseInt(localStorage.getItem('grv_weight_fcr') || '25', 10);
-let _WEIGHT_MSG = parseInt(localStorage.getItem('grv_weight_msg') || '25', 10);
-if (_WEIGHT_TMA + _WEIGHT_TMR + _WEIGHT_FCR + _WEIGHT_MSG !== 100) {
-  _WEIGHT_TMA = _WEIGHT_TMR = _WEIGHT_FCR = _WEIGHT_MSG = 25;
-  ['grv_weight_tma','grv_weight_tmr','grv_weight_fcr','grv_weight_msg'].forEach(k => localStorage.removeItem(k));
+let _WEIGHT_TMA  = parseInt(localStorage.getItem('grv_weight_tma')  || '25', 10);
+let _WEIGHT_TMR  = parseInt(localStorage.getItem('grv_weight_tmr')  || '25', 10);
+let _WEIGHT_FCR  = parseInt(localStorage.getItem('grv_weight_fcr')  || '25', 10);
+let _WEIGHT_MSG  = parseInt(localStorage.getItem('grv_weight_msg')  || '25', 10);
+let _WEIGHT_CSAT = parseInt(localStorage.getItem('grv_weight_csat') || '0',  10);
+if (_WEIGHT_TMA + _WEIGHT_TMR + _WEIGHT_FCR + _WEIGHT_MSG + _WEIGHT_CSAT !== 100) {
+  _WEIGHT_TMA = _WEIGHT_TMR = _WEIGHT_FCR = _WEIGHT_MSG = 25; _WEIGHT_CSAT = 0;
+  ['grv_weight_tma','grv_weight_tmr','grv_weight_fcr','grv_weight_msg','grv_weight_csat'].forEach(k => localStorage.removeItem(k));
 }
 let _teamCompData    = null; /* dados de comparação por equipe/inbox */
 let _chartTeamCache  = {};   /* {`${id}:${since}:${until}`: {data, ts}} — TTL 5min */
@@ -2372,7 +2377,14 @@ function getAgentMonths() {
   return result;
 }
 
-function calcAgentScore(summary) {
+function getAgentCsatAvg(agentId) {
+  const rows = _agentCsatByAgent[agentId];
+  if (!rows || !rows.length) return null;
+  const nums = rows.map(r => typeof r.rating === 'number' ? r.rating : null).filter(v => v !== null);
+  return nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
+}
+
+function calcAgentScore(summary, csatAvg) {
   if (!summary || (summary.conversations_count || 0) === 0) return null;
   const s = summary;
   let pts = 0;
@@ -2394,8 +2406,20 @@ function calcAgentScore(summary) {
   const totalMsgs = (s.incoming_messages_count || 0) + (s.outgoing_messages_count || 0);
   const msgsConv  = s.conversations_count > 0 ? totalMsgs / s.conversations_count : null;
   if (msgsConv != null) {
-    if (msgsConv <= _SLA_MSG)           pts += _WEIGHT_MSG;
+    if (msgsConv <= _SLA_MSG)            pts += _WEIGHT_MSG;
     else if (msgsConv <= _SLA_MSG * 1.5) pts += Math.round(_WEIGHT_MSG / 2);
+  }
+  /* CSAT: só se há peso configurado e média disponível */
+  if (_WEIGHT_CSAT > 0) {
+    if (csatAvg != null) {
+      if (csatAvg >= 4.0)      pts += _WEIGHT_CSAT;
+      else if (csatAvg >= 3.0) pts += Math.round(_WEIGHT_CSAT / 2);
+      /* normaliza para 100 (CSAT participou do cálculo) */
+    } else {
+      /* sem respostas CSAT: normaliza desconsiderando o peso CSAT */
+      const maxWithoutCsat = 100 - _WEIGHT_CSAT;
+      return maxWithoutCsat > 0 ? Math.round(pts / maxWithoutCsat * 100) : null;
+    }
   }
   return pts;
 }
@@ -2550,7 +2574,7 @@ function renderAgentPerf() {
           ${sorted.map(e => {
             const s    = e.summary;
             const nd   = !s || (s.conversations_count || 0) === 0;
-            const sc   = nd ? null : calcAgentScore(s);
+            const sc   = nd ? null : calcAgentScore(s, getAgentCsatAvg(e.agent.id));
             const tmaH = s?.avg_resolution_time != null ? s.avg_resolution_time / 3600 : null;
             const tmrM = s?.avg_first_response_time != null ? s.avg_first_response_time / 60 : null;
             const fcr  = !nd && s.conversations_count > 0
@@ -2713,7 +2737,7 @@ function renderAgentModalHeader(id) {
   const entry = _agentPerfData?.[id];
   if (!entry) return;
   const s    = entry.summary;
-  const sc   = calcAgentScore(s);
+  const sc   = calcAgentScore(s, getAgentCsatAvg(id));
   const scCls = sc == null ? 'badge-na' : sc >= 75 ? 'score-hi' : sc >= 50 ? 'score-mid' : 'score-lo';
   const ini  = (entry.agent.name || '?')[0].toUpperCase();
 
@@ -3438,16 +3462,17 @@ function loadConfigPage() {
   document.getElementById('cfg-sla-msg').value    = _SLA_MSG;
   document.getElementById('cfg-threshold').value  = cfg.threshold;
   document.getElementById('cfg-refresh').value    = REFRESH_SEC;
-  document.getElementById('cfg-weight-tma').value = _WEIGHT_TMA;
-  document.getElementById('cfg-weight-tmr').value = _WEIGHT_TMR;
-  document.getElementById('cfg-weight-fcr').value = _WEIGHT_FCR;
-  document.getElementById('cfg-weight-msg').value = _WEIGHT_MSG;
+  document.getElementById('cfg-weight-tma').value  = _WEIGHT_TMA;
+  document.getElementById('cfg-weight-tmr').value  = _WEIGHT_TMR;
+  document.getElementById('cfg-weight-fcr').value  = _WEIGHT_FCR;
+  document.getElementById('cfg-weight-msg').value  = _WEIGHT_MSG;
+  document.getElementById('cfg-weight-csat').value = _WEIGHT_CSAT;
   updateWeightSum();
 }
 
 function updateWeightSum() {
-  const sum = ['tma','tmr','fcr','msg'].reduce((acc, k) =>
-    acc + (parseInt(document.getElementById(`cfg-weight-${k}`).value, 10) || 0), 0);
+  const sum = ['tma','tmr','fcr','msg','csat'].reduce((acc, k) =>
+    acc + (parseInt(document.getElementById(`cfg-weight-${k}`)?.value, 10) || 0), 0);
   const el = document.getElementById('cfg-weight-sum');
   const ok = sum === 100;
   el.textContent = ok ? `Soma: ${sum} / 100 pts ✓` : `Soma: ${sum} / 100 pts — ajuste os pesos para somar exatamente 100`;
@@ -3462,34 +3487,37 @@ function saveConfig() {
   const slaMsg  = Math.max(1,  parseInt(document.getElementById('cfg-sla-msg').value,    10) || 10);
   const thr     = Math.max(0,  parseInt(document.getElementById('cfg-threshold').value,  10) || 0);
   const refresh = Math.max(15, parseInt(document.getElementById('cfg-refresh').value,    10) || 60);
-  const wTma    = parseInt(document.getElementById('cfg-weight-tma').value, 10) || 0;
-  const wTmr    = parseInt(document.getElementById('cfg-weight-tmr').value, 10) || 0;
-  const wFcr    = parseInt(document.getElementById('cfg-weight-fcr').value, 10) || 0;
-  const wMsg    = parseInt(document.getElementById('cfg-weight-msg').value, 10) || 0;
+  const wTma    = parseInt(document.getElementById('cfg-weight-tma').value,  10) || 0;
+  const wTmr    = parseInt(document.getElementById('cfg-weight-tmr').value,  10) || 0;
+  const wFcr    = parseInt(document.getElementById('cfg-weight-fcr').value,  10) || 0;
+  const wMsg    = parseInt(document.getElementById('cfg-weight-msg').value,  10) || 0;
+  const wCsat   = parseInt(document.getElementById('cfg-weight-csat').value, 10) || 0;
 
-  if (wTma + wTmr + wFcr + wMsg !== 100) return;
+  if (wTma + wTmr + wFcr + wMsg + wCsat !== 100) return;
 
-  localStorage.setItem('grv_sla_tma',    slaTma);
-  localStorage.setItem('grv_sla_tmr',    slaTmr);
-  localStorage.setItem('grv_sla_fcr',    slaFcr);
-  localStorage.setItem('grv_sla_msg',    slaMsg);
-  localStorage.setItem('grv_threshold',  thr);
+  localStorage.setItem('grv_sla_tma',     slaTma);
+  localStorage.setItem('grv_sla_tmr',     slaTmr);
+  localStorage.setItem('grv_sla_fcr',     slaFcr);
+  localStorage.setItem('grv_sla_msg',     slaMsg);
+  localStorage.setItem('grv_threshold',   thr);
   localStorage.setItem('grv_refresh_sec', refresh);
-  localStorage.setItem('grv_weight_tma', wTma);
-  localStorage.setItem('grv_weight_tmr', wTmr);
-  localStorage.setItem('grv_weight_fcr', wFcr);
-  localStorage.setItem('grv_weight_msg', wMsg);
+  localStorage.setItem('grv_weight_tma',  wTma);
+  localStorage.setItem('grv_weight_tmr',  wTmr);
+  localStorage.setItem('grv_weight_fcr',  wFcr);
+  localStorage.setItem('grv_weight_msg',  wMsg);
+  localStorage.setItem('grv_weight_csat', wCsat);
 
-  _SLA_TMA    = slaTma;
-  _SLA_TMR    = slaTmr;
-  _SLA_FCR    = slaFcr;
-  _SLA_MSG    = slaMsg;
+  _SLA_TMA      = slaTma;
+  _SLA_TMR      = slaTmr;
+  _SLA_FCR      = slaFcr;
+  _SLA_MSG      = slaMsg;
   cfg.threshold = thr;
-  REFRESH_SEC = refresh;
-  _WEIGHT_TMA = wTma;
-  _WEIGHT_TMR = wTmr;
-  _WEIGHT_FCR = wFcr;
-  _WEIGHT_MSG = wMsg;
+  REFRESH_SEC   = refresh;
+  _WEIGHT_TMA   = wTma;
+  _WEIGHT_TMR   = wTmr;
+  _WEIGHT_FCR   = wFcr;
+  _WEIGHT_MSG   = wMsg;
+  _WEIGHT_CSAT  = wCsat;
 
   _agentPerfData = null;
   _agentMonthCache = {};
@@ -3506,10 +3534,11 @@ function resetConfigDefaults() {
   document.getElementById('cfg-sla-msg').value    = 10;
   document.getElementById('cfg-threshold').value  = 0;
   document.getElementById('cfg-refresh').value    = 60;
-  document.getElementById('cfg-weight-tma').value = 25;
-  document.getElementById('cfg-weight-tmr').value = 25;
-  document.getElementById('cfg-weight-fcr').value = 25;
-  document.getElementById('cfg-weight-msg').value = 25;
+  document.getElementById('cfg-weight-tma').value  = 25;
+  document.getElementById('cfg-weight-tmr').value  = 25;
+  document.getElementById('cfg-weight-fcr').value  = 25;
+  document.getElementById('cfg-weight-msg').value  = 25;
+  document.getElementById('cfg-weight-csat').value = 0;
   updateWeightSum();
 }
 
