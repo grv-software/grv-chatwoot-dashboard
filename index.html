@@ -150,6 +150,11 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 .sidebar-item:hover { background:var(--bg3); color:var(--text); }
 .sidebar-item.active { background:rgba(59,130,246,.12); color:var(--accent); }
 .sidebar-footer { margin-top:auto; border-top:1px solid var(--border); padding-top:4px; }
+#nav-connect { opacity:.8; }
+#nav-connect:hover { opacity:1; }
+#conn-icon { font-size:9px; transition:color .3s; }
+#conn-icon.connected    { color:#4ade80; }
+#conn-icon.disconnected { color:#f59e0b; animation:pulse-badge 2s ease-in-out infinite; }
 .sidebar-icon { font-size:17px; flex-shrink:0; width:32px; text-align:center; line-height:1; }
 
 /* CONTENT */
@@ -460,15 +465,20 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 <!-- SETTINGS MODAL -->
 <div id="token-modal">
   <div class="modal-box">
-    <h2>Configurações</h2>
+    <h2>Conectar ao Chatwoot</h2>
     <div class="modal-error" id="modal-error"></div>
+    <label for="inp-token">Token de acesso</label>
+    <input type="password" id="inp-token" placeholder="Cole aqui seu api_access_token"
+      autocomplete="off" onkeydown="if(event.key==='Enter') saveToken()" />
+    <p class="hint">Chatwoot → Perfil → Token de acesso à API</p>
+    <hr class="modal-divider">
     <label for="inp-account">ID da Conta Chatwoot</label>
     <input type="number" id="inp-account" value="1" />
     <hr class="modal-divider">
     <label for="inp-threshold">Alerta de fila — avisar quando aguardando ≥</label>
     <input type="number" id="inp-threshold" placeholder="Ex: 5  (0 = desativado)" min="0" />
     <p class="hint">Badge fica pulsante quando a fila de espera atingir esse número</p>
-    <button class="btn-primary" onclick="saveToken()">Salvar</button>
+    <button class="btn-primary" onclick="saveToken()">Salvar e conectar</button>
   </div>
 </div>
 
@@ -487,6 +497,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     <span class="sidebar-label">Análise</span>
   </div>
   <div class="sidebar-footer">
+    <div class="sidebar-item" id="nav-connect" onclick="showTokenModal()" title="Clique para conectar ao Chatwoot">
+      <span class="sidebar-icon" id="conn-icon">●</span>
+      <span class="sidebar-label" id="conn-label">Conectar</span>
+    </div>
     <div class="sidebar-item" onclick="openSettings()" title="Configurações">
       <span class="sidebar-icon">⚙</span>
       <span class="sidebar-label">Config.</span>
@@ -1001,7 +1015,8 @@ applyTheme(localStorage.getItem('grv_theme') || 'dark', false);
 
 let cfg = {
   account:   localStorage.getItem('grv_account')   || '1',
-  threshold: parseInt(localStorage.getItem('grv_threshold') || '0', 10) || 0
+  threshold: parseInt(localStorage.getItem('grv_threshold') || '0', 10) || 0,
+  token:     localStorage.getItem('grv_token')      || ''
 };
 let timer = null, countdown = REFRESH_SEC;
 let _rawConvs = [];
@@ -1085,26 +1100,53 @@ async function checkSettingsPassword() {
   }
 }
 
+function updateConnStatus() {
+  const icon  = document.getElementById('conn-icon');
+  const label = document.getElementById('conn-label');
+  if (!icon || !label) return;
+  const ok = !!cfg.token;
+  icon.className    = ok ? 'connected' : 'disconnected';
+  label.textContent = ok ? 'Conectado' : 'Conectar';
+  const nav = document.getElementById('nav-connect');
+  if (nav) nav.title = ok ? `Conta ${cfg.account} · clique para alterar conexão` : 'Clique para conectar ao Chatwoot';
+}
 function showTokenModal() {
+  document.getElementById('inp-token').value     = cfg.token || '';
   document.getElementById('inp-account').value   = cfg.account;
   document.getElementById('inp-threshold').value = cfg.threshold || '';
   const errEl = document.getElementById('modal-error');
   errEl.style.display = 'none';
   errEl.textContent   = '';
   document.getElementById('token-modal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('inp-token').focus(), 50);
 }
 function saveToken() {
+  const token     = document.getElementById('inp-token').value.trim();
   const account   = document.getElementById('inp-account').value.trim() || '1';
   const threshold = parseInt(document.getElementById('inp-threshold').value, 10) || 0;
+  if (!token) {
+    const errEl = document.getElementById('modal-error');
+    errEl.textContent   = 'Token obrigatório.';
+    errEl.style.display = '';
+    document.getElementById('inp-token').focus();
+    return;
+  }
+  localStorage.setItem('grv_token',     token);
   localStorage.setItem('grv_account',   account);
   localStorage.setItem('grv_threshold', threshold);
-  cfg = { account, threshold };
+  cfg = { token, account, threshold };
   document.getElementById('token-modal').classList.add('hidden');
+  updateConnStatus();
   startDashboard();
 }
 
-document.getElementById('token-modal').classList.add('hidden');
-startDashboard();
+if (cfg.token) {
+  document.getElementById('token-modal').classList.add('hidden');
+  updateConnStatus();
+  startDashboard();
+} else {
+  showTokenModal();
+}
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
@@ -1308,9 +1350,9 @@ async function fetchKPIs() {
 
 /* ── API ── */
 function api(path) {
-  return fetch(`/api${path}`, {
-    headers: { 'Accept': 'application/json' }
-  }).then(r => {
+  const hdrs = { 'Accept': 'application/json' };
+  if (cfg.token) hdrs['api_access_token'] = cfg.token;
+  return fetch(`/api${path}`, { headers: hdrs }).then(r => {
     if (!r.ok) { const e = new Error(`HTTP ${r.status}`); e.status = r.status; throw e; }
     return r.json();
   });
@@ -1388,6 +1430,16 @@ async function fetchAll() {
       _chartDataStale = true;
     }
   } catch (e) {
+    if (e.status === 401) {
+      clearInterval(timer);
+      cfg.token = '';
+      localStorage.removeItem('grv_token');
+      updateConnStatus();
+      showTokenModal();
+      document.getElementById('modal-error').textContent = 'Token inválido ou expirado. Insira novamente.';
+      document.getElementById('modal-error').style.display = '';
+      return;
+    }
     document.getElementById('hdr-countdown').textContent = 'Erro ao atualizar';
     showToast(`Falha ao carregar dados: ${e.message}. Verifique sua conexão ou token de acesso.`);
     console.error(e);
