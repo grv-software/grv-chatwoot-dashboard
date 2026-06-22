@@ -623,6 +623,38 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     </table>
   </div>
 
+  <!-- PENDÊNCIAS -->
+  <div class="conv-block" id="pending-section">
+    <div class="conv-hdr">
+      <span class="conv-hdr-title">Pendências</span>
+      <span class="badge badge-subtle" id="badge-pending" aria-live="polite">0</span>
+    </div>
+    <div class="urg-legend" aria-label="Legenda de idade das pendências">
+      <span class="urg-legend-item"><span class="urg-dot urg-dot-warn"></span>1 mês</span>
+      <span class="urg-legend-item"><span class="urg-dot urg-dot-alert"></span>2 meses</span>
+      <span class="urg-legend-item"><span class="urg-dot urg-dot-crit"></span>&gt;3 meses</span>
+    </div>
+    <table class="cv-table" role="table" aria-label="Conversas pendentes">
+      <thead>
+        <tr>
+          <th>Ticket</th>
+          <th>Cód. Ref.</th>
+          <th>Cliente</th>
+          <th>Tipo</th>
+          <th>Serviço</th>
+          <th>Atendente</th>
+          <th>Data</th>
+          <th>Idade</th>
+          <th>Origem</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody id="pending-tbody">
+        <tr><td colspan="10" style="padding:20px;text-align:center;color:var(--text3)">Carregando…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
   <!-- EM ATENDIMENTO -->
   <div class="conv-block">
     <div class="conv-hdr">
@@ -1579,6 +1611,26 @@ const URG_ROW_CLS  = ['', 'urg-warn', 'urg-alert', 'urg-crit'];
 const URG_DUR_CLS  = ['', 'dur-warn', 'dur-alert', 'dur-crit'];
 const URG_CARD_CLS = ['', 'lvl-warn', 'lvl-alert', 'lvl-crit'];
 
+function pendingUrgencyLevel(created_at) {
+  if (!created_at) return 0;
+  const days = (Date.now() - created_at * 1000) / 86400000;
+  if (days >= 90) return 3;
+  if (days >= 60) return 2;
+  if (days >= 30) return 1;
+  return 0;
+}
+
+function fmtAge(ms) {
+  const s    = Math.floor(ms / 1000);
+  const days = Math.floor(s / 86400);
+  if (days >= 30) { const m = Math.floor(days / 30); return `${m} ${m === 1 ? 'mês' : 'meses'}`; }
+  if (days >= 1)  return `${days} dia${days > 1 ? 's' : ''}`;
+  const h = Math.floor(s / 3600), mn = Math.round((s % 3600) / 60);
+  if (h > 0) return `${h}hr ${String(mn).padStart(2, '0')}min`;
+  if (mn > 0) return `${mn}min`;
+  return `${s}seg`;
+}
+
 /* ── TRIAGE STRIP ── */
 function renderTriage(waiting) {
   const strip = document.getElementById('triage-strip');
@@ -1665,8 +1717,7 @@ function syncAgentChip() {
 function applyInboxAndRender() {
   let convs = applyInboxFilter(_rawConvs);
   convs = applyAgentFilter(convs);
-  const pendingFiltered1 = applyInboxFilter(_pendingConvs);
-  _allWaiting = [...convs.filter(c => !c.meta?.assignee?.id), ...pendingFiltered1]
+  _allWaiting = convs.filter(c => !c.meta?.assignee?.id)
                      .sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
   _allInProg  = convs.filter(c =>  c.meta?.assignee?.id)
                      .sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
@@ -1674,6 +1725,7 @@ function applyInboxAndRender() {
   renderTriage(_allWaiting);
   renderWaiting();
   renderInprog();
+  renderPending();
   fetchKPIs();
 }
 
@@ -1886,8 +1938,7 @@ function renderConvs(convs) {
   _rawConvs = convs;
   let filtered = applyInboxFilter(convs);
   filtered = applyAgentFilter(filtered);
-  const pendingFiltered2 = applyInboxFilter(_pendingConvs);
-  _allWaiting = [...filtered.filter(c => !c.meta?.assignee?.id), ...pendingFiltered2]
+  _allWaiting = filtered.filter(c => !c.meta?.assignee?.id)
                         .sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
   _allInProg  = filtered.filter(c =>  c.meta?.assignee?.id)
                         .sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
@@ -1895,6 +1946,7 @@ function renderConvs(convs) {
   renderTriage(_allWaiting);
   renderWaiting();
   renderInprog();
+  renderPending();
 }
 
 function renderWaiting() {
@@ -1907,6 +1959,21 @@ function renderWaiting() {
     ? filtered.map(c => rowHtml(c, true)).join('')
     : emptyRow('Nenhuma conversa aguardando atendimento', 10);
   syncFilterButtons('waiting');
+}
+
+function renderPending() {
+  const filtered = applyInboxFilter(_pendingConvs)
+    .sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
+  const bp = document.getElementById('badge-pending');
+  if (!bp) return;
+  const hasCritical = filtered.some(c => pendingUrgencyLevel(c.created_at) === 3);
+  bp.textContent = filtered.length;
+  bp.className   = `badge ${hasCritical ? 'badge-orange' : filtered.length > 0 ? 'badge-subtle' : 'badge-subtle'}`;
+  document.getElementById('pending-tbody').innerHTML = filtered.length
+    ? filtered.map(c => rowHtml(c, true, true)).join('')
+    : emptyRow('Nenhuma conversa pendente', 10);
+  const sec = document.getElementById('pending-section');
+  if (sec) sec.style.display = filtered.length ? '' : 'none';
 }
 
 function renderInprog() {
@@ -1948,18 +2015,19 @@ function isGroup(c) {
   return (c.meta?.sender?.identifier || '').endsWith('@g.us');
 }
 
-function rowHtml(c, applyUrgency) {
+function rowHtml(c, applyUrgency, pendingMode) {
   const inbox  = _inboxMap[c.inbox_id] || {};
   const url    = `https://nxticket.com.br/app/accounts/${cfg.account}/conversations/${c.id}`;
   const ref    = c.meta?.sender?.phone_number || '—';
   const client = c.meta?.sender?.name || `#${c.id}`;
   const svc    = inbox.name || `#${c.inbox_id}`;
   const agent  = c.meta?.assignee?.name || null;
-  const dur    = c.created_at ? fmtMs(Date.now() - c.created_at * 1000) : '—';
+  const elapsed = c.created_at ? Date.now() - c.created_at * 1000 : null;
+  const dur    = elapsed != null ? (pendingMode ? fmtAge(elapsed) : fmtMs(elapsed)) : '—';
   const date   = c.created_at ? fmtDate(c.created_at) : '—';
   const origin = originOf(inbox.channel_type);
   const grupo  = isGroup(c);
-  const lvl    = applyUrgency ? urgencyLevel(c.created_at) : 0;
+  const lvl    = applyUrgency ? (pendingMode ? pendingUrgencyLevel(c.created_at) : urgencyLevel(c.created_at)) : 0;
   const rowCls = URG_ROW_CLS[lvl] ? ` ${URG_ROW_CLS[lvl]}` : '';
   const durCls = URG_DUR_CLS[lvl] ? ` ${URG_DUR_CLS[lvl]}` : '';
   const tipoBadge = grupo
