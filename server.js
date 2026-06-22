@@ -7,7 +7,7 @@ const url = require('url');
 const PORT = 8765;
 const TARGET = 'nxticket.com.br';
 const DIR = __dirname;
-const SETTINGS_PASSWORD = 'grv2026';
+const SETTINGS_PASSWORD = 'Grv@h9';
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.ico': 'image/x-icon' };
 
