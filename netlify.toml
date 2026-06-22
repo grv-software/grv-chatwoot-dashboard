@@ -1,3 +1,12 @@
+[functions]
+  directory = "netlify/functions"
+
+[[redirects]]
+  from = "/api/auth-settings"
+  to = "/.netlify/functions/auth-settings"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/api/*"
   to = "https://nxticket.com.br/api/:splat"
