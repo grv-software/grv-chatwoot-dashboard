@@ -1641,9 +1641,10 @@ function renderTriage(waiting) {
     const origin = originOf((_inboxMap[c.inbox_id] || {}).channel_type);
     if (!byOrigin[origin]) byOrigin[origin] = { count: 0, maxLevel: 0, maxMins: 0 };
     byOrigin[origin].count++;
-    const mins = c.created_at ? (Date.now() - c.created_at * 1000) / 60000 : 0;
+    const waitTs = c.waiting_since && c.waiting_since > 0 ? c.waiting_since : c.created_at;
+    const mins = waitTs ? (Date.now() - waitTs * 1000) / 60000 : 0;
     if (mins > byOrigin[origin].maxMins) byOrigin[origin].maxMins = mins;
-    const lvl = urgencyLevel(c.created_at);
+    const lvl = urgencyLevel(waitTs);
     if (lvl > byOrigin[origin].maxLevel) byOrigin[origin].maxLevel = lvl;
   });
 
@@ -2022,12 +2023,13 @@ function rowHtml(c, applyUrgency, pendingMode) {
   const client = c.meta?.sender?.name || `#${c.id}`;
   const svc    = inbox.name || `#${c.inbox_id}`;
   const agent  = c.meta?.assignee?.name || null;
-  const elapsed = c.created_at ? Date.now() - c.created_at * 1000 : null;
+  const waitTs  = !pendingMode && c.waiting_since && c.waiting_since > 0 ? c.waiting_since : c.created_at;
+  const elapsed = waitTs ? Date.now() - waitTs * 1000 : null;
   const dur    = elapsed != null ? (pendingMode ? fmtAge(elapsed) : fmtMs(elapsed)) : '—';
   const date   = c.created_at ? fmtDate(c.created_at) : '—';
   const origin = originOf(inbox.channel_type);
   const grupo  = isGroup(c);
-  const lvl    = applyUrgency ? (pendingMode ? pendingUrgencyLevel(c.created_at) : urgencyLevel(c.created_at)) : 0;
+  const lvl    = applyUrgency ? (pendingMode ? pendingUrgencyLevel(c.created_at) : urgencyLevel(waitTs)) : 0;
   const rowCls = URG_ROW_CLS[lvl] ? ` ${URG_ROW_CLS[lvl]}` : '';
   const durCls = URG_DUR_CLS[lvl] ? ` ${URG_DUR_CLS[lvl]}` : '';
   const tipoBadge = grupo
