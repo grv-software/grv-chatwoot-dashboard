@@ -733,7 +733,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
         <span class="badge-live">Ao vivo</span>
       </div>
       <div class="chart-card-hdr" style="margin-top:10px">
-        <div><div class="chart-card-title">De onde vêm os atendimentos?</div><div class="chart-card-sub">Volume por canal de comunicação</div></div>
+        <div><div class="chart-card-title">De onde vêm os atendimentos?</div><div class="chart-card-sub">Distribuição por canal · conversas abertas agora (não representa o período histórico)</div></div>
       </div>
       <div class="chart-wrap"><canvas id="chart-channel"></canvas></div>
     </div>
@@ -1393,6 +1393,25 @@ function api(path) {
 function isAuthError(e) {
   return e.status === 401 || e.status === 403;
 }
+
+/* Diagnóstico CSAT — rode diagCsat() no console do DevTools */
+window.diagCsat = async function() {
+  const paths = [
+    `/v1/accounts/${cfg.account}/csat_survey_responses?page=1`,
+    `/v1/accounts/${cfg.account}/reports/csat_survey_responses?page=1`,
+    `/v2/accounts/${cfg.account}/csat_survey_responses?page=1`,
+    `/v1/accounts/${cfg.account}/csat_survey_responses?page=1&since=1&until=9999999999&sort=-created_at`,
+  ];
+  const hdrs = { 'Accept': 'application/json' };
+  if (cfg.token) hdrs['api_access_token'] = cfg.token;
+  for (const p of paths) {
+    try {
+      const r = await fetch(`/api${p}`, { headers: hdrs });
+      const txt = await r.text();
+      console.log(`[${r.status}] ${p}`, txt.slice(0, 200));
+    } catch(e) { console.log(`[ERR] ${p}`, e.message); }
+  }
+};
 
 /* ── DASHBOARD LOOP ── */
 function startDashboard() {
@@ -2394,13 +2413,26 @@ async function fetchAgentTab() {
 
   const { since, until } = getAgentTabRange();
 
-  const [summaryResults, csatRaw] = await Promise.all([
+  const fetchCsatAll = async () => {
+    const all = [];
+    let page = 1;
+    while (page <= 20) {
+      const raw = await api(`/v1/accounts/${cfg.account}/csat_survey_responses?page=${page}&since=${since}&until=${until}&sort=-created_at`)
+        .catch(e => { console.warn('CSAT fetch error:', e?.status, e?.message); return null; });
+      const chunk = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : [];
+      all.push(...chunk);
+      if (chunk.length < 25) break;
+      page++;
+    }
+    return all;
+  };
+
+  const [summaryResults, csatList] = await Promise.all([
     Promise.all(visibleAgents.map(a =>
       api(`/v2/accounts/${cfg.account}/reports/summary?type=agent&id=${a.id}&since=${since}&until=${until}`)
         .catch(e => ({ _err: e }))
     )),
-    api(`/v1/accounts/${cfg.account}/reports/csat_survey_responses?since=${since}&until=${until}&page=1`)
-      .catch(() => null)
+    fetchCsatAll()
   ]);
 
   const firstErr = summaryResults.find(r => r?._err);
@@ -2412,8 +2444,6 @@ async function fetchAgentTab() {
       _agentPerfData[a.id] = { agent: a, summary: summaryResults[i]?._err ? null : summaryResults[i] };
     });
   }
-
-  const csatList = Array.isArray(csatRaw) ? csatRaw : (csatRaw?.data || []);
   if (csatList.length) {
     const byAgent = {};
     csatList.forEach(r => {
@@ -2421,7 +2451,7 @@ async function fetchAgentTab() {
       if (!id) return;
       if (!byAgent[id]) byAgent[id] = { id, name: r.assigned_agent?.name || '—', total: 0, positive: 0 };
       byAgent[id].total++;
-      if (r.rating === 'Satisfied') byAgent[id].positive++;
+      if (r.rating === 'Satisfied' || (typeof r.rating === 'number' && r.rating >= 4)) byAgent[id].positive++;
     });
     _agentCsat = Object.values(byAgent);
   } else {
