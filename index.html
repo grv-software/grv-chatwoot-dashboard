@@ -733,7 +733,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
         <span class="badge-live">Ao vivo</span>
       </div>
       <div class="chart-card-hdr" style="margin-top:10px">
-        <div><div class="chart-card-title">De onde vêm os atendimentos?</div><div class="chart-card-sub">Volume por canal de comunicação</div></div>
+        <div><div class="chart-card-title">De onde vêm os atendimentos?</div><div class="chart-card-sub">Distribuição por canal · conversas abertas agora (não representa o período histórico)</div></div>
       </div>
       <div class="chart-wrap"><canvas id="chart-channel"></canvas></div>
     </div>
@@ -1394,6 +1394,7 @@ function isAuthError(e) {
   return e.status === 401 || e.status === 403;
 }
 
+
 /* ── DASHBOARD LOOP ── */
 function startDashboard() {
   clearInterval(timer);
@@ -1641,9 +1642,10 @@ function renderTriage(waiting) {
     const origin = originOf((_inboxMap[c.inbox_id] || {}).channel_type);
     if (!byOrigin[origin]) byOrigin[origin] = { count: 0, maxLevel: 0, maxMins: 0 };
     byOrigin[origin].count++;
-    const mins = c.created_at ? (Date.now() - c.created_at * 1000) / 60000 : 0;
+    const waitTs = c.waiting_since && c.waiting_since > 0 ? c.waiting_since : c.created_at;
+    const mins = waitTs ? (Date.now() - waitTs * 1000) / 60000 : 0;
     if (mins > byOrigin[origin].maxMins) byOrigin[origin].maxMins = mins;
-    const lvl = urgencyLevel(c.created_at);
+    const lvl = urgencyLevel(waitTs);
     if (lvl > byOrigin[origin].maxLevel) byOrigin[origin].maxLevel = lvl;
   });
 
@@ -2022,12 +2024,13 @@ function rowHtml(c, applyUrgency, pendingMode) {
   const client = c.meta?.sender?.name || `#${c.id}`;
   const svc    = inbox.name || `#${c.inbox_id}`;
   const agent  = c.meta?.assignee?.name || null;
-  const elapsed = c.created_at ? Date.now() - c.created_at * 1000 : null;
+  const waitTs  = !pendingMode && c.waiting_since && c.waiting_since > 0 ? c.waiting_since : c.created_at;
+  const elapsed = waitTs ? Date.now() - waitTs * 1000 : null;
   const dur    = elapsed != null ? (pendingMode ? fmtAge(elapsed) : fmtMs(elapsed)) : '—';
   const date   = c.created_at ? fmtDate(c.created_at) : '—';
   const origin = originOf(inbox.channel_type);
   const grupo  = isGroup(c);
-  const lvl    = applyUrgency ? (pendingMode ? pendingUrgencyLevel(c.created_at) : urgencyLevel(c.created_at)) : 0;
+  const lvl    = applyUrgency ? (pendingMode ? pendingUrgencyLevel(c.created_at) : urgencyLevel(waitTs)) : 0;
   const rowCls = URG_ROW_CLS[lvl] ? ` ${URG_ROW_CLS[lvl]}` : '';
   const durCls = URG_DUR_CLS[lvl] ? ` ${URG_DUR_CLS[lvl]}` : '';
   const tipoBadge = grupo
@@ -2392,13 +2395,26 @@ async function fetchAgentTab() {
 
   const { since, until } = getAgentTabRange();
 
-  const [summaryResults, csatRaw] = await Promise.all([
+  const fetchCsatAll = async () => {
+    const all = [];
+    let page = 1;
+    while (page <= 20) {
+      const raw = await api(`/v1/accounts/${cfg.account}/csat_survey_responses?page=${page}&since=${since}&until=${until}&sort=-created_at`)
+        .catch(e => { console.warn('CSAT fetch error:', e?.status, e?.message); return null; });
+      const chunk = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : [];
+      all.push(...chunk);
+      if (chunk.length < 25) break;
+      page++;
+    }
+    return all;
+  };
+
+  const [summaryResults, csatList] = await Promise.all([
     Promise.all(visibleAgents.map(a =>
       api(`/v2/accounts/${cfg.account}/reports/summary?type=agent&id=${a.id}&since=${since}&until=${until}`)
         .catch(e => ({ _err: e }))
     )),
-    api(`/v1/accounts/${cfg.account}/reports/csat_survey_responses?since=${since}&until=${until}&page=1`)
-      .catch(() => null)
+    fetchCsatAll()
   ]);
 
   const firstErr = summaryResults.find(r => r?._err);
@@ -2410,8 +2426,6 @@ async function fetchAgentTab() {
       _agentPerfData[a.id] = { agent: a, summary: summaryResults[i]?._err ? null : summaryResults[i] };
     });
   }
-
-  const csatList = Array.isArray(csatRaw) ? csatRaw : (csatRaw?.data || []);
   if (csatList.length) {
     const byAgent = {};
     csatList.forEach(r => {
@@ -2419,7 +2433,7 @@ async function fetchAgentTab() {
       if (!id) return;
       if (!byAgent[id]) byAgent[id] = { id, name: r.assigned_agent?.name || '—', total: 0, positive: 0 };
       byAgent[id].total++;
-      if (r.rating === 'Satisfied') byAgent[id].positive++;
+      if (r.rating === 'Satisfied' || (typeof r.rating === 'number' && r.rating >= 4)) byAgent[id].positive++;
     });
     _agentCsat = Object.values(byAgent);
   } else {
