@@ -240,6 +240,29 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 .am-month-table th { background:var(--bg3); color:var(--text2); font-size:11px; font-weight:600; padding:7px 10px; text-align:left; border-bottom:2px solid var(--border); }
 .am-month-table td { padding:7px 10px; border-bottom:1px solid var(--border); }
 .am-month-table tr:last-child td { border:none; }
+/* CSAT tab no modal */
+.am-tabs { display:flex; gap:0; border-bottom:1px solid var(--border); margin:-4px 0 4px; }
+.am-tab { padding:8px 16px; font-size:13px; background:none; border:none; border-bottom:2px solid transparent; margin-bottom:-1px; cursor:pointer; color:var(--text2); font-weight:500; transition:color .15s; }
+.am-tab.active { color:var(--accent); border-bottom-color:var(--accent); font-weight:700; }
+.am-tab:hover:not(.active) { color:var(--text1); }
+#am-csat-content { padding-top:4px; }
+.am-csat-header { display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--text2); margin-bottom:10px; flex-wrap:wrap; gap:8px; }
+.am-csat-controls { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.am-csat-sort { padding:3px 10px; border-radius:12px; font-size:11px; border:1px solid var(--border); background:none; cursor:pointer; color:var(--text2); }
+.am-csat-sort:hover { border-color:var(--accent); color:var(--accent); }
+.am-csat-filter { display:flex; gap:4px; }
+.am-csat-filter button { padding:3px 10px; border-radius:12px; font-size:11px; border:1px solid var(--border); background:none; cursor:pointer; color:var(--text2); }
+.am-csat-filter button.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+.am-csat-row { display:grid; grid-template-columns:64px minmax(80px,140px) 1fr auto auto; align-items:center; gap:10px; padding:7px 6px; border-bottom:1px solid var(--border); font-size:12px; }
+.am-csat-row.csat-row-bad { background:rgba(239,68,68,0.06); border-radius:4px; padding:7px 6px; }
+.am-csat-stars { font-size:14px; letter-spacing:1px; flex-shrink:0; }
+.am-csat-contact { font-weight:600; color:var(--text1); overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.am-csat-msg { color:var(--text2); overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.am-csat-date { color:var(--text3); font-size:11px; white-space:nowrap; }
+.am-csat-link { color:var(--accent); white-space:nowrap; text-decoration:none; font-size:11px; }
+.am-csat-link:hover { text-decoration:underline; }
+.am-csat-more { display:block; width:100%; margin-top:10px; padding:8px; background:var(--bg3); border:1px solid var(--border); border-radius:6px; cursor:pointer; font-size:12px; color:var(--text2); }
+.am-csat-more:hover { border-color:var(--accent); color:var(--accent); }
 .chart-hdr { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px; padding:4px 0; }
 .chart-hdr h2 { font-size:15px; font-weight:700; flex:1; }
 .chart-sel { padding:5px 10px; background:var(--bg3); border:1px solid var(--border); border-radius:4px; color:var(--text); font-size:12px; cursor:pointer; outline:none; }
@@ -877,10 +900,19 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
   <div id="agent-modal" role="dialog" aria-modal="true" aria-label="Perfil do agente">
     <div class="am-header" id="am-header"></div>
     <div class="am-body">
-      <div class="am-highlights" id="am-highlights"></div>
-      <div class="am-chart-wrap"><canvas id="am-chart"></canvas></div>
-      <div id="am-month-loading" class="agent-no-data" style="display:none">Carregando histórico…</div>
-      <div id="am-month-table-wrap"></div>
+      <div class="am-tabs">
+        <button class="am-tab active" data-tab="perf" onclick="switchAgentModalTab('perf')">Desempenho</button>
+        <button class="am-tab" data-tab="csat" id="am-tab-csat" onclick="switchAgentModalTab('csat')">CSAT</button>
+      </div>
+      <div id="am-perf-content">
+        <div class="am-highlights" id="am-highlights"></div>
+        <div class="am-chart-wrap"><canvas id="am-chart"></canvas></div>
+        <div id="am-month-loading" class="agent-no-data" style="display:none">Carregando histórico…</div>
+        <div id="am-month-table-wrap"></div>
+      </div>
+      <div id="am-csat-content" style="display:none">
+        <div id="am-csat-inner"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1092,6 +1124,10 @@ let _agentMonthCache = {};     /* {agentId: {periodKey: months[]}} — lazy */
 let _agentModalId    = null;   /* id do agente com modal aberto */
 let _agentModalOrder = [];     /* ids na ordem da tabela — para navegar ‹ › */
 let _agp             = { sel: new Set() }; /* estado interno do popup */
+let _agentCsatByAgent = {};  /* {agentId: response[]} */
+let _csatModalFilter  = 'all';
+let _csatModalPage    = 1;
+let _csatModalSort    = 'date-desc';
 
 /* ── TOKEN ── */
 function openSettings() {
@@ -2436,8 +2472,16 @@ async function fetchAgentTab() {
       if (r.rating === 'Satisfied' || (typeof r.rating === 'number' && r.rating >= 4)) byAgent[id].positive++;
     });
     _agentCsat = Object.values(byAgent);
+    _agentCsatByAgent = {};
+    csatList.forEach(r => {
+      const id = r.assigned_agent?.id;
+      if (!id) return;
+      if (!_agentCsatByAgent[id]) _agentCsatByAgent[id] = [];
+      _agentCsatByAgent[id].push(r);
+    });
   } else {
     _agentCsat = null;
+    _agentCsatByAgent = {};
   }
 
   const updEl = document.getElementById('agent-tab-updated');
@@ -2599,11 +2643,23 @@ function renderAgentCsat() {
 }
 
 async function openAgentModal(id) {
-  _agentModalId = id;
+  _agentModalId    = id;
+  _csatModalFilter = 'all';
+  _csatModalPage   = 1;
+  _csatModalSort   = 'date-desc';
   const backdrop = document.getElementById('agent-modal-backdrop');
   if (!backdrop) return;
   backdrop.classList.add('open');
   document.addEventListener('keydown', agentModalKeydown);
+  // reset to Desempenho tab
+  document.querySelectorAll('.am-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'perf'));
+  const perfContent = document.getElementById('am-perf-content');
+  const csatContent = document.getElementById('am-csat-content');
+  if (perfContent) perfContent.style.display = '';
+  if (csatContent) csatContent.style.display = 'none';
+  // hide CSAT tab when no CSAT data available
+  const csatTab = document.getElementById('am-tab-csat');
+  if (csatTab) csatTab.style.display = _agentCsat === null ? 'none' : '';
   renderAgentModalHeader(id);
   renderAgentModalHighlights(id, null);
   document.getElementById('am-month-table-wrap').innerHTML = '';
@@ -2860,6 +2916,97 @@ function renderAgentModalMonthTable(id) {
 function renderAgentTab() {
   renderAgentPerf();
   renderAgentCsat();
+}
+
+function switchAgentModalTab(tab) {
+  document.querySelectorAll('.am-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  const perf = document.getElementById('am-perf-content');
+  const csat = document.getElementById('am-csat-content');
+  if (perf) perf.style.display = tab === 'perf' ? '' : 'none';
+  if (csat) csat.style.display = tab === 'csat' ? '' : 'none';
+  if (tab === 'csat') renderAgentCsatModal();
+}
+
+function renderAgentCsatModal() {
+  const el = document.getElementById('am-csat-inner');
+  if (!el) return;
+  const id   = _agentModalId;
+  const rows = _agentCsatByAgent[id] || [];
+
+  if (!rows.length) {
+    el.innerHTML = '<div class="agent-no-data">Nenhuma avaliação no período selecionado.</div>';
+    return;
+  }
+
+  const bad = rows.filter(r => (typeof r.rating === 'number' ? r.rating : 0) <= 3);
+  const src = _csatModalFilter === 'bad' ? bad : rows;
+
+  const sorted = [...src].sort((a, b) => {
+    if (_csatModalSort === 'rating-asc') {
+      const ra = typeof a.rating === 'number' ? a.rating : 5;
+      const rb = typeof b.rating === 'number' ? b.rating : 5;
+      if (ra !== rb) return ra - rb;
+    }
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+
+  const shown   = sorted.slice(0, _csatModalPage * 25);
+  const hasMore = sorted.length > shown.length;
+  const posCount = rows.filter(r => (typeof r.rating === 'number' ? r.rating : 0) >= 4).length;
+  const posPct   = rows.length ? Math.round(posCount / rows.length * 100) : 0;
+
+  const starHtml = r => {
+    const n = typeof r.rating === 'number' ? Math.max(1, Math.min(5, r.rating)) : 0;
+    const color = n >= 5 ? 'var(--green)' : n === 4 ? 'var(--yellow)' : 'var(--red)';
+    return `<span class="am-csat-stars" style="color:${color}">${'★'.repeat(n)}${'☆'.repeat(5 - n)}</span>`;
+  };
+
+  const convUrl = r => {
+    const cid = r.conversation_id ?? r.conversation?.id ?? r.message_id;
+    return cid ? `https://nxticket.com.br/app/accounts/${cfg.account}/conversations/${cid}` : null;
+  };
+
+  const sortLabel = _csatModalSort === 'date-desc' ? '🕓 Data ↓' : '★ Nota ↑';
+  const sortNext  = _csatModalSort === 'date-desc' ? 'rating-asc' : 'date-desc';
+
+  const rowsHtml = shown.length === 0
+    ? `<div class="agent-no-data">${_csatModalFilter === 'bad' ? 'Nenhuma avaliação negativa no período. 👍' : 'Nenhuma avaliação no período selecionado.'}</div>`
+    : shown.map(r => {
+        const rating   = typeof r.rating === 'number' ? r.rating : 0;
+        const contact  = r.contact?.name || r.contact_name || '—';
+        const msg      = (r.feedback_message || '').trim();
+        const msgDisp  = msg.length > 80 ? msg.slice(0, 80) + '…' : (msg || '—');
+        const url      = convUrl(r);
+        const d        = r.created_at ? new Date(r.created_at) : null;
+        const dateStr  = d ? d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '—';
+        const rowCls   = rating > 0 && rating <= 3 ? ' csat-row-bad' : '';
+        return `<div class="am-csat-row${rowCls}">
+          ${starHtml(r)}
+          <span class="am-csat-contact" title="${esc(contact)}">${esc(contact)}</span>
+          <span class="am-csat-msg" title="${esc(msg)}">${esc(msgDisp)}</span>
+          <span class="am-csat-date">${dateStr}</span>
+          ${url
+            ? `<a class="am-csat-link" href="${url}" target="_blank" rel="noopener">Abrir chat →</a>`
+            : '<span class="am-csat-link" style="opacity:.35">—</span>'}
+        </div>`;
+      }).join('');
+
+  el.innerHTML = `
+    <div class="am-csat-header">
+      <span>${rows.length} avaliação${rows.length !== 1 ? 'ões' : ''} · ${posPct}% positivas</span>
+      <div class="am-csat-controls">
+        <button class="am-csat-sort" onclick="_csatModalSort='${sortNext}';renderAgentCsatModal()">${sortLabel}</button>
+        <div class="am-csat-filter">
+          <button class="${_csatModalFilter === 'all' ? 'active' : ''}"
+            onclick="_csatModalFilter='all';_csatModalPage=1;_csatModalSort='date-desc';renderAgentCsatModal()">Todas (${rows.length})</button>
+          <button class="${_csatModalFilter === 'bad' ? 'active' : ''}"
+            onclick="_csatModalFilter='bad';_csatModalPage=1;_csatModalSort='date-desc';renderAgentCsatModal()">Ruins ≤3★ (${bad.length})</button>
+        </div>
+      </div>
+    </div>
+    <div id="am-csat-list">${rowsHtml}</div>
+    ${hasMore ? `<button class="am-csat-more" onclick="_csatModalPage++;renderAgentCsatModal()">Ver mais 25</button>` : ''}
+  `;
 }
 
 function renderCharts() {

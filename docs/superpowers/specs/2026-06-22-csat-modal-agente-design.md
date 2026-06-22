@@ -88,10 +88,13 @@ Wrapper `<div id="am-perf-content">` envolve o conteúdo atual (highlights + gr�
 Cada item renderizado em `renderCsatModal()`:
 
 ```
-[emoji]  [nome do contato]  [comentário truncado 80 chars]  [data]  [Abrir chat →]
+[★★★★☆]  [nome do contato]  [comentário truncado 80 chars]  [data]  [Abrir chat →]
 ```
 
-- Emoji: 😍 rating=5, 😄=4, 😐=3, 😞=2, 😤=1
+- Estrelas: `★`.repeat(rating) + `☆`.repeat(5 - rating), coloridas conforme nota:
+  - rating 5 → `var(--green)`
+  - rating 4 → `var(--yellow)`
+  - rating ≤ 3 → `var(--red)`
 - Linhas com `rating ≤ 3`: classe `csat-row-bad` com `background: rgba(239,68,68,0.06)`
 - Comentário vazio: exibir `—`
 - Data: `fmtDate(created_at)` (já existente)
@@ -104,9 +107,28 @@ Variável `_csatModalPage` (inteiro, reseta ao abrir modal ou trocar filtro). Ex
 
 ---
 
+## Ordenação
+
+Dois modos de ordenação controlados por `_csatModalSort`:
+
+- `date-desc` (padrão): mais recente primeiro — `r.created_at` decrescente
+- `rating-asc`: pior primeiro — `r.rating` crescente, empate por `r.created_at` decrescente
+
+Botão toggle no header da aba CSAT, ao lado do filtro:
+
+```html
+<button id="am-csat-sort" title="Alternar ordenação">🕓 Data ↓</button>
+<!-- ao clicar vira: -->
+<button id="am-csat-sort" title="Alternar ordenação">★ Nota ↑</button>
+```
+
+Resetar para `date-desc` ao: (1) abrir o modal, (2) trocar filtro (all ↔ bad).
+
+---
+
 ## Filtro
 
-Dois estados: `all` (todas as respostas) e `bad` (rating ≤ 3). Filtro é client-side puro sobre `_agentCsatByAgent[id]`. Trocar filtro reseta `_csatModalPage = 1` e re-renderiza.
+Dois estados: `all` (todas as respostas) e `bad` (rating ≤ 3). Filtro é client-side puro sobre `_agentCsatByAgent[id]`. Trocar filtro reseta `_csatModalPage = 1`, `_csatModalSort = 'date-desc'` e re-renderiza.
 
 Contagens nos botões calculadas ao abrir a aba, ex: `Ruins ≤3★ (3)`.
 
