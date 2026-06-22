@@ -1394,24 +1394,6 @@ function isAuthError(e) {
   return e.status === 401 || e.status === 403;
 }
 
-/* Diagnóstico CSAT — rode diagCsat() no console do DevTools */
-window.diagCsat = async function() {
-  const paths = [
-    `/v1/accounts/${cfg.account}/csat_survey_responses?page=1`,
-    `/v1/accounts/${cfg.account}/reports/csat_survey_responses?page=1`,
-    `/v2/accounts/${cfg.account}/csat_survey_responses?page=1`,
-    `/v1/accounts/${cfg.account}/csat_survey_responses?page=1&since=1&until=9999999999&sort=-created_at`,
-  ];
-  const hdrs = { 'Accept': 'application/json' };
-  if (cfg.token) hdrs['api_access_token'] = cfg.token;
-  for (const p of paths) {
-    try {
-      const r = await fetch(`/api${p}`, { headers: hdrs });
-      const txt = await r.text();
-      console.log(`[${r.status}] ${p}`, txt.slice(0, 200));
-    } catch(e) { console.log(`[ERR] ${p}`, e.message); }
-  }
-};
 
 /* ── DASHBOARD LOOP ── */
 function startDashboard() {
