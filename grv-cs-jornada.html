@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRV CS | Jornada do Cliente</title>
+<style>
+:root {
+  --primary: #E05A1E;
+  --primary-light: rgba(224,90,30,.12);
+  --sidebar-bg: #1A1A2E;
+  --sidebar-text: #a0aec0;
+  --bg: #F4F5F7;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --text: #1a202c;
+  --text2: #4a5568;
+  --text3: #718096;
+  --green: #38a169; --green-bg: rgba(56,161,105,.1);
+  --red: #e53e3e;   --red-bg: rgba(229,62,62,.1);
+  --yellow: #d69e2e;--yellow-bg: rgba(214,158,46,.1);
+  --gray: #718096;  --gray-bg: rgba(113,128,150,.1);
+  --blue: #3182ce;  --blue-bg: rgba(49,130,206,.1);
+  --purple: #805ad5;--purple-bg: rgba(128,90,213,.1);
+  --radius: 7px;
+  --shadow: 0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+
+/* ── SIDEBAR ─────────────────────────────────────────────── */
+.sidebar{width:240px;min-height:100vh;background:var(--sidebar-bg);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-logo{padding:20px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-logo-icon{width:36px;height:36px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;flex-shrink:0}
+.sb-logo-text{color:#fff;font-weight:700;font-size:14px;line-height:1.2}
+.sb-logo-text span{display:block;font-weight:400;font-size:11px;color:var(--sidebar-text)}
+.sb-section{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sb-section label{display:block;font-size:10px;color:var(--sidebar-text);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.sb-section select{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);color:#fff;padding:7px 10px;font-size:13px;cursor:pointer;outline:none}
+.sb-section select option{background:#1A1A2E;color:#fff}
+.sb-nav{padding:12px 8px;flex:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius);color:var(--sidebar-text);cursor:pointer;font-size:13px;font-weight:500;transition:background .15s,color .15s;text-decoration:none;margin-bottom:2px}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item.active{background:var(--primary-light);color:var(--primary)}
+.nav-icon{font-size:15px;width:20px;text-align:center}
+
+/* ── CONTENT ─────────────────────────────────────────────── */
+.content{flex:1;min-height:100vh}
+.content-inner{padding:28px;max-width:1200px}
+.page-header{margin-bottom:24px}
+.page-title{font-size:20px;font-weight:700;color:var(--text)}
+.page-subtitle{font-size:13px;color:var(--text3);margin-top:2px}
+
+/* ── METRIC CARDS ────────────────────────────────────────── */
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.metric-card{background:var(--surface);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.metric-card .mc-label{font-size:12px;color:var(--text3);margin-bottom:6px}
+.metric-card .mc-value{font-size:28px;font-weight:700}
+.mc-accent .mc-value{color:var(--primary)}
+.mc-green  .mc-value{color:var(--green)}
+.mc-red    .mc-value{color:var(--red)}
+.mc-gray   .mc-value{color:var(--gray)}
+
+/* ── TABLE ───────────────────────────────────────────────── */
+.table-wrap{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow)}
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{background:#FAFBFC;color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:.05em;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);font-weight:600}
+.data-table td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tbody tr{cursor:pointer;transition:background .1s}
+.data-table tbody tr:hover{background:#f9fafb}
+
+/* ── BADGES ──────────────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.badge-green {background:var(--green-bg); color:var(--green)}
+.badge-red   {background:var(--red-bg);   color:var(--red)}
+.badge-yellow{background:var(--yellow-bg);color:var(--yellow)}
+.badge-gray  {background:var(--gray-bg);  color:var(--gray)}
+.badge-blue  {background:var(--blue-bg);  color:var(--blue)}
+.badge-purple{background:var(--purple-bg);color:var(--purple)}
+.badge-orange{background:rgba(224,90,30,.12);color:var(--primary)}
+.badge-black {background:#2d3748;color:#e2e8f0}
+
+/* ── PROGRESS BAR ────────────────────────────────────────── */
+.prog-wrap{background:#edf2f7;border-radius:4px;height:6px;overflow:hidden}
+.prog-fill{height:100%;border-radius:4px;background:var(--primary);transition:width .3s}
+
+/* ── FILTER TABS ─────────────────────────────────────────── */
+.filter-tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:4px;width:fit-content;flex-wrap:wrap}
+.filter-tab{padding:5px 12px;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text3);border:none;background:none;transition:background .15s,color .15s}
+.filter-tab.active{background:var(--primary);color:#fff}
+.search-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.search-input{padding:7px 12px 7px 32px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text);background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;outline:none;width:240px}
+.search-input:focus{border-color:var(--primary)}
+
+/* ── BUTTONS ─────────────────────────────────────────────── */
+.btn{padding:8px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:opacity .15s;font-family:inherit}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{opacity:.88}
+.btn-secondary{background:var(--surface);color:var(--text2);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--bg)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-sm{padding:5px 12px;font-size:12px}
+
+/* ── CARD BLOCK ──────────────────────────────────────────── */
+.card-block{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);padding:20px}
+
+/* ── DETAIL LAYOUT ───────────────────────────────────────── */
+.detail-layout{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+.detail-header{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:20px;margin-bottom:20px;box-shadow:var(--shadow)}
+.dh-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.dh-top h2{font-size:20px;font-weight:700}
+.dh-projeto{font-size:13px;color:var(--primary);font-weight:600;margin-top:2px}
+.dh-badges{display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap}
+.dh-meta{display:flex;gap:28px;flex-wrap:wrap}
+.dh-meta-item{display:flex;flex-direction:column;gap:2px}
+.dh-meta-label{font-size:11px;color:var(--text3)}
+.dh-meta-value{font-size:13px;font-weight:600;color:var(--text)}
+
+/* ── PLAYBOOK ────────────────────────────────────────────── */
+.phase-row{border-bottom:1px solid var(--border)}
+.phase-row:last-child{border-bottom:none}
+.phase-hdr{display:flex;align-items:center;justify-content:space-between;padding:11px 0;cursor:pointer;user-select:none}
+.phase-hdr-left{display:flex;align-items:center;gap:8px}
+.phase-name{font-weight:600;font-size:13px}
+.phase-ct{font-size:11px;color:var(--text3)}
+.phase-chev{font-size:11px;color:var(--text3);transition:transform .2s}
+.phase-chev.open{transform:rotate(90deg)}
+.phase-body{display:none;padding-bottom:6px}
+.phase-body.open{display:block}
+.task-item{display:flex;align-items:flex-start;gap:10px;padding:6px 4px;border-radius:5px}
+.task-item:hover{background:var(--bg)}
+.task-item input[type=checkbox]{margin-top:2px;accent-color:var(--primary);width:15px;height:15px;cursor:pointer;flex-shrink:0}
+.task-item label{cursor:pointer;font-size:13px;color:var(--text);line-height:1.4}
+.task-item.done label{text-decoration:line-through;color:var(--text3)}
+
+/* ── REGISTROS ───────────────────────────────────────────── */
+.reg-item{padding:10px 0;border-bottom:1px solid var(--border)}
+.reg-item:last-child{border-bottom:none}
+.reg-meta{font-size:11px;color:var(--text3);margin-bottom:4px}
+.reg-meta strong{color:var(--text2)}
+.reg-text{font-size:13px;color:var(--text);line-height:1.5}
+.reg-form{margin-top:14px}
+.reg-form textarea{width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:13px;font-family:inherit;resize:vertical;min-height:72px;outline:none;color:var(--text)}
+.reg-form textarea:focus{border-color:var(--primary)}
+
+/* ── TIMELINE ────────────────────────────────────────────── */
+.tl-wrap{margin-top:4px}
+.tl-item{display:flex;gap:10px;margin-bottom:12px}
+.tl-dot{width:8px;height:8px;border-radius:50%;background:var(--primary);margin-top:5px;flex-shrink:0}
+.tl-body{font-size:12px;color:var(--text2);line-height:1.5}
+.tl-meta{font-size:11px;color:var(--text3)}
+
+/* ── STAGE GRID (Tela 2) ─────────────────────────────────── */
+.stage-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stage-card{background:var(--surface);border-radius:var(--radius);border:2px solid var(--border);padding:16px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.stage-card:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(224,90,30,.12)}
+.stage-card.sc-active{border-color:var(--primary);box-shadow:0 2px 10px rgba(224,90,30,.18)}
+.sc-emoji{font-size:24px;margin-bottom:8px}
+.sc-name{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px}
+.sc-count{font-size:26px;font-weight:700;color:var(--text)}
+
+/* ── FORM (Tela 4) ───────────────────────────────────────── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1 / -1}
+.form-group label{font-size:12px;font-weight:600;color:var(--text2)}
+.form-group input,.form-group select,.form-group textarea{border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:13px;font-family:inherit;color:var(--text);outline:none;background:var(--surface)}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--primary)}
+.form-req{color:var(--red)}
+
+/* ── TASK BUILDER ────────────────────────────────────────── */
+.ptabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:14px;overflow-x:auto}
+.ptab{padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text3);border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s;white-space:nowrap}
+.ptab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.tb-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;min-height:32px}
+.tb-item{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:5px;padding:7px 10px;font-size:13px}
+.tb-text{flex:1;color:var(--text)}
+.tb-rm{background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;line-height:1;padding:0 2px}
+.tb-rm:hover{color:var(--red)}
+.tb-add-row{display:flex;gap:8px}
+.tb-add-row input{flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;outline:none;font-family:inherit}
+.tb-add-row input:focus{border-color:var(--primary)}
+
+/* ── MODAL ───────────────────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:999}
+.modal-overlay.hidden{display:none}
+.modal-box{background:var(--surface);border-radius:10px;padding:24px;width:440px;max-width:95vw;box-shadow:0 8px 30px rgba(0,0,0,.2)}
+.modal-box h3{font-size:16px;font-weight:700;margin-bottom:16px}
+.modal-label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;margin-top:12px}
+.modal-box select,.modal-box textarea{width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:13px;font-family:inherit;color:var(--text);outline:none}
+.modal-box select:focus,.modal-box textarea:focus{border-color:var(--primary)}
+.modal-box textarea{resize:vertical;min-height:80px}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+
+/* ── MISC ────────────────────────────────────────────────── */
+.proj-id{font-size:11px;color:var(--primary);font-weight:600;margin-top:1px}
+.empty-state{text-align:center;padding:48px 24px;color:var(--text3)}
+.es-icon{font-size:40px;margin-bottom:12px}
+.es-text{font-size:14px}
+.back-link{font-size:12px;color:var(--text3);text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-bottom:16px}
+.back-link:hover{color:var(--primary)}
+.err-msg{color:var(--red);font-size:13px;margin-top:8px;display:none}
+.section-title{font-size:14px;font-weight:700;margin-bottom:14px}
+
+/* ── VIEW TOGGLE ─────────────────────────────────────────── */
+.view-toggle{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:3px;gap:2px}
+.vt-btn{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--text3);transition:background .15s,color .15s;white-space:nowrap}
+.vt-btn:hover{background:var(--bg);color:var(--text2)}
+.vt-btn.active{background:var(--primary);color:#fff}
+
+/* ── KANBAN ──────────────────────────────────────────────── */
+.kanban-wrap{display:flex;gap:12px;overflow-x:auto;padding-bottom:16px;align-items:flex-start}
+.kanban-wrap::-webkit-scrollbar{height:6px}
+.kanban-wrap::-webkit-scrollbar-track{background:var(--bg)}
+.kanban-wrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.kanban-wrap::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+.kanban-col{flex-shrink:0;width:220px;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
+.kanban-col-hdr{padding:10px 12px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.kanban-col-name{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--text2)}
+.kanban-col-name .kc-emoji{font-size:14px}
+.kanban-col-ct{background:var(--primary-light);color:var(--primary);font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px}
+.kanban-cards{padding:8px;display:flex;flex-direction:column;gap:8px;min-height:60px}
+
+/* ── KANBAN CARD ─────────────────────────────────────────── */
+.kcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.kcard:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(224,90,30,.12)}
+.kcard-name{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kcard-proj{font-size:11px;color:var(--primary);font-weight:600;margin-top:1px;margin-bottom:8px}
+.kcard-divider{border:none;border-top:1px solid var(--border);margin:8px 0}
+.kcard-prog-row{display:flex;align-items:center;gap:6px;margin-top:6px}
+.kcard-prog-wrap{flex:1;background:#edf2f7;border-radius:4px;height:5px;overflow:hidden}
+.kcard-prog-fill{height:100%;border-radius:4px;background:var(--primary)}
+.kcard-pct{font-size:10px;color:var(--text3);white-space:nowrap}
+.kcard-meta{margin-top:8px;display:flex;flex-direction:column;gap:2px}
+.kcard-consul{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kcard-dias{font-size:10px;color:var(--text3)}
+.kcard-empty{padding:16px 8px;text-align:center;font-size:12px;color:var(--text3);font-style:italic}
+
+/* ── LISTA ACCORDION ─────────────────────────────────────── */
+.lista-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px}
+.lista-section-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none;transition:background .1s}
+.lista-section-hdr:hover{background:#f9fafb}
+.lista-section-hdr-left{display:flex;align-items:center;gap:10px}
+.lista-section-emoji{font-size:16px}
+.lista-section-name{font-size:14px;font-weight:700;color:var(--text)}
+.lista-section-ct{background:var(--primary-light);color:var(--primary);font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px}
+.lista-chev{font-size:11px;color:var(--text3);transition:transform .2s}
+.lista-chev.open{transform:rotate(90deg)}
+.lista-body{display:none}
+.lista-body.open{display:block}
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ──────────────────────────────────────────── -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">G</div>
+    <div class="sb-logo-text">GRV Software <span>CS · Jornada do Cliente</span></div>
+  </div>
+  <div class="sb-section">
+    <label>Consultor ativo</label>
+    <select id="consultor-sel"></select>
+  </div>
+  <nav class="sb-nav">
+    <a class="nav-item" data-route="carteira" href="#carteira">
+      <span class="nav-icon">📋</span> Minha Carteira
+    </a>
+    <a class="nav-item" data-route="jornada" href="#jornada">
+      <span class="nav-icon">📊</span> Jornada
+    </a>
+    <a class="nav-item" data-route="criar" href="#criar">
+      <span class="nav-icon">➕</span> Criar Playbook
+    </a>
+  </nav>
+</aside>
+
+<!-- ── CONTENT ───────────────────────────────────────────── -->
+<main class="content">
+  <div class="content-inner">
+    <section id="sec-carteira" class="sec" style="display:none"></section>
+    <section id="sec-jornada"  class="sec" style="display:none"></section>
+    <section id="sec-cliente"  class="sec" style="display:none"></section>
+    <section id="sec-criar"    class="sec" style="display:none"></section>
+  </div>
+</main>
+
+<!-- ── MODAL ALTERAR ETAPA ──────────────────────────────── -->
+<div class="modal-overlay hidden" id="modal-etapa">
+  <div class="modal-box">
+    <h3>Alterar Etapa</h3>
+    <label class="modal-label">Nova etapa</label>
+    <select id="modal-etapa-sel"></select>
+    <label class="modal-label">Motivo <span class="form-req">*</span></label>
+    <textarea id="modal-motivo" placeholder="Descreva o motivo da mudança..."></textarea>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="modal-save-btn" onclick="saveEtapa()" disabled>Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════
+const ETAPAS = ['1ª Reunião','Engajamento','Evolução','Conclusão','Pausado','Interrompido','Cancelado'];
+
+const ETAPA_META = {
+  '1ª Reunião':  {emoji:'🤝', color:'blue'},
+  'Engajamento': {emoji:'⚡', color:'purple'},
+  'Evolução':    {emoji:'📈', color:'green'},
+  'Conclusão':   {emoji:'🏁', color:'yellow'},
+  'Pausado':     {emoji:'⏸️', color:'gray'},
+  'Interrompido':{emoji:'🚫', color:'red'},
+  'Cancelado':   {emoji:'❌', color:'black'},
+};
+
+const STATUS_COLOR = {
+  'Em ordem':    'green',
+  'Atrasado':    'red',
+  'Pausado':     'gray',
+  'Interrompido':'orange',
+  'Cancelado':   'black',
+};
+
+const TEMPLATE_FASES = [
+  {nome:'1ª Reunião & Kickoff', tarefas:[
+    'Apresentar cronograma do projeto',
+    'Validar interlocutores e lideranças',
+    'Alinhar expectativas e escopo',
+    'Configurar acessos ao SAG',
+  ]},
+  {nome:'Engajamento', tarefas:[
+    'Acompanhar parametrização inicial',
+    'Validar importação de dados',
+    'Treinar usuários-chave',
+    'Revisar módulos prioritários',
+  ]},
+  {nome:'Evolução', tarefas:[
+    'Monitorar adoção do sistema',
+    'Resolver pendências técnicas',
+    'Realizar checkpoint de progresso',
+    'Alinhar próximas etapas com o cliente',
+  ]},
+  {nome:'Conclusão', tarefas:[
+    'Validar entrega final com cliente',
+    'Coletar feedback (CSAT)',
+    'Emitir termo de conclusão',
+    'Transição para sustentação',
+  ]},
+];
+
+// ═══════════════════════════════════════════════════════════
+// SEED DATA
+// ═══════════════════════════════════════════════════════════
+const SEED_CONSULTORES = [
+  {id:'ana-paula', nome:'Ana Paula Souza'},
+  {id:'carlos',    nome:'Carlos Menezes'},
+  {id:'maria',     nome:'Maria Lima'},
+];
+
+function mkFases(checks) {
+  // checks: array of 16 booleans (4 tasks x 4 phases)
+  return TEMPLATE_FASES.map((f, fi) => ({
+    nome: f.nome,
+    tarefas: f.tarefas.map((t, ti) => ({
+      id: `${fi}_${ti}`, texto: t, feita: checks[fi * 4 + ti] || false
+    }))
+  }));
+}
+
+const SEED_CLIENTES = [
+  // ── ANA PAULA ──────────────────────────────────────────
+  {
+    id:'KMSIL', projeto:'SAGP-00036', produto:'CPS', consultorId:'ana-paula',
+    etapa:'Engajamento', dataInicio:'2026-03-05', prazo:'2026-09-30',
+    proximaAcao:'Acompanhar uso do módulo Compras',
+    fases: mkFases([1,1,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0]),
+    registros:[
+      {id:'r2',autor:'Ana Paula Souza',data:'2026-04-02T14:30:00',texto:'Parametrização inicial concluída. Aguardando validação de dados.'},
+      {id:'r1',autor:'Ana Paula Souza',data:'2026-03-10T10:00:00',texto:'Kickoff realizado com sucesso. Equipe bem engajada.'},
+    ],
+    historicoEtapas:[
+      {de:null,       para:'1ª Reunião', data:'2026-03-05T09:00:00',motivo:'Início do projeto'},
+      {de:'1ª Reunião',para:'Engajamento',data:'2026-03-15T10:00:00',motivo:'Kickoff realizado, cliente pronto para avançar'},
+    ],
+  },
+  {
+    id:'RAS METAL', projeto:'SAGP-00091', produto:'CPS', consultorId:'ana-paula',
+    etapa:'Evolução', dataInicio:'2026-01-30', prazo:'2026-05-11',
+    proximaAcao:'Resolver pendência de importação de dados',
+    fases: mkFases([1,1,1,1, 1,0,1,1, 1,0,0,0, 0,0,0,0]),
+    registros:[
+      {id:'r1',autor:'Ana Paula Souza',data:'2026-02-10T11:00:00',texto:'Cliente com dificuldades na importação do sistema legado.'},
+    ],
+    historicoEtapas:[
+      {de:null,        para:'1ª Reunião', data:'2026-01-30T09:00:00',motivo:'Início do projeto'},
+      {de:'1ª Reunião', para:'Engajamento',data:'2026-02-20T10:00:00',motivo:'Kickoff concluído'},
+      {de:'Engajamento',para:'Evolução',   data:'2026-03-25T10:00:00',motivo:'Engajamento validado, avançando para evolução'},
+    ],
+  },
+  {
+    id:'AXONE', projeto:'SAGP-00059', produto:'CPS', consultorId:'ana-paula',
+    etapa:'Engajamento', dataInicio:'2026-03-10', prazo:'2026-08-02',
+    proximaAcao:'Agendamento de treinamento avançado',
+    fases: mkFases([1,1,1,0, 1,0,0,0, 0,0,0,0, 0,0,0,0]),
+    registros:[
+      {id:'r1',autor:'Ana Paula Souza',data:'2026-03-20T09:00:00',texto:'Kickoff realizado. Pendente acesso ao SAG para dois usuários.'},
+    ],
+    historicoEtapas:[
+      {de:null,        para:'1ª Reunião', data:'2026-03-10T09:00:00',motivo:'Início do projeto'},
+      {de:'1ª Reunião', para:'Engajamento',data:'2026-04-01T10:00:00',motivo:'Kickoff realizado com equipe completa'},
+    ],
+  },
+  {
+    id:'AÇO ART', projeto:'SAGP-00068', produto:'CPS', consultorId:'ana-paula',
+    etapa:'Pausado', dataInicio:'2025-12-02', prazo:null,
+    proximaAcao:'Aguardar retorno do cliente',
+    fases: mkFases([1,1,1,1, 1,0,0,0, 0,0,0,0, 0,0,0,0]),
+    registros:[
+      {id:'r1',autor:'Ana Paula Souza',data:'2026-02-15T10:00:00',texto:'Cliente solicitou pausa por mudança interna na gestão.'},
+    ],
+    historicoEtapas:[
+      {de:null,        para:'1ª Reunião', data:'2025-12-02T09:00:00',motivo:'Início do projeto'},
+      {de:'1ª Reunião', para:'Engajamento',data:'2026-01-10T10:00:00',motivo:'Kickoff realizado'},
+      {de:'Engajamento',para:'Pausado',    data:'2026-02-15T10:00:00',motivo:'Mudança na gestão do cliente, solicitaram pausa temporária'},
+    ],
+  },
+  {
+    id:'ALPARGATAS CPS', projeto:'SAGP-00128', produto:'CPS/IOT', consultorId:'ana-paula',
+    etapa:'Conclusão', dataInicio:'2026-04-28', prazo:'2026-11-06',
+    proximaAcao:'Validar entrega final com diretoria',
+    fases: mkFases([1,1,1,1, 1,1,1,1, 1,1,1,1, 0,0,0,0]),
+    registros:[
+      {id:'r1',autor:'Ana Paula Souza',data:'2026-05-10T14:00:00',texto:'Projeto em fase final. Reunião com diretoria agendada para próxima semana.'},
+    ],
+    historicoEtapas:[
+      {de:null,        para:'1ª Reunião', data:'2026-04-28T09:00:00',motivo:'Início do projeto'},
+      {de:'1ª Reunião', para:'Engajamento',data:'2026-05-15T10:00:00',motivo:'Kickoff aprovado pela diretoria'},
+      {de:'Engajamento',para:'Evolução',   data:'2026-06-01T10:00:00',motivo:'Parametrização e treinamentos concluídos'},
+      {de:'Evolução',   para:'Conclusão',  data:'2026-06-18T10:00:00',motivo:'Evolução concluída com sucesso, partindo para finalização'},
+    ],
+  },
+  // ── CARLOS ─────────────────────────────────────────────
+  {
+    id:'FRAY', projeto:'SAGP-00039', produto:'CPS', consultorId:'carlos',
+    etapa:'1ª Reunião', dataInicio:'2026-03-29', prazo:'2026-09-21',
+    proximaAcao:'Agendar reunião de kickoff',
+    fases: mkFases([0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
+    registros:[],
+    historicoEtapas:[
+      {de:null,para:'1ª Reunião',data:'2026-03-29T09:00:00',motivo:'Início do projeto'},
+    ],
+  },
+  {
+    id:'FELIX INDUSTRIAL', projeto:'SAGP-00092', produto:'CPS', consultorId:'carlos',
+    etapa:'1ª Reunião', dataInicio:'2026-01-14', prazo:'2026-09-29',
+    proximaAcao:'Confirmar data de kickoff com o cliente',
+    fases: mkFases([1,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
+    registros:[
+      {id:'r1',autor:'Carlos Menezes',data:'2026-01-20T09:00:00',texto:'Apresentação inicial realizada. Aguardando agenda para kickoff.'},
+    ],
+    historicoEtapas:[
+      {de:null,para:'1ª Reunião',data:'2026-01-14T09:00:00',motivo:'Início do projeto'},
+    ],
+  },
+  {
+    id:'USIMAZA EMBRAER', projeto:'SAGP-00058', produto:'CPS', consultorId:'carlos',
+    etapa:'1ª Reunião', dataInicio:'2026-03-30', prazo:'2026-09-17',
+    proximaAcao:'Primeira reunião de alinhamento',
+    fases: mkFases([0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
+    registros:[],
+    historicoEtapas:[
+      {de:null,para:'1ª Reunião',data:'2026-03-30T09:00:00',motivo:'Início do projeto'},
+    ],
+  },
+  {
+    id:'CAMPOSC', projeto:'SAGP-00038', produto:'CPS', consultorId:'carlos',
+    etapa:'Pausado', dataInicio:'2025-12-16', prazo:null,
+    proximaAcao:'Aguardar definição de novo responsável',
+    fases: mkFases([1,1,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
+    registros:[
+      {id:'r1',autor:'Carlos Menezes',data:'2026-01-08T10:00:00',texto:'Responsável pelo projeto saiu da empresa. Projeto pausado até nova indicação.'},
+    ],
+    historicoEtapas:[
+      {de:null,        para:'1ª Reunião',data:'2025-12-16T09:00:00',motivo:'Início do projeto'},
+      {de:'1ª Reunião',para:'Pausado',   data:'2026-01-08T10:00:00',motivo:'Responsável saiu da empresa, sem substituto definido'},
+    ],
+  },
+  // ── MARIA ──────────────────────────────────────────────
+  {
+    id:'SOARES FERRAMENTARIA', projeto:'SAGP-00131', produto:'CPS', consultorId:'maria',
+    etapa:'1ª Reunião', dataInicio:'2026-06-02', prazo:'2026-09-09',
+    proximaAcao:'Agendar kickoff com equipe do cliente',
+    fases: mkFases([0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
+    registros:[],
+    historicoEtapas:[
+      {de:null,para:'1ª Reunião',data:'2026-06-02T09:00:00',motivo:'Início do projeto'},
+    ],
+  },
+  {
+    id:'LIQUOS', projeto:'SAGP-00093', produto:'CPS', consultorId:'maria',
+    etapa:'Evolução', dataInicio:'2026-01-30', prazo:'2026-09-09',
+    proximaAcao:'Checkpoint de progresso mensal',
+    fases: mkFases([1,1,1,1, 1,1,1,1, 1,0,0,0, 0,0,0,0]),
+    registros:[
+      {id:'r1',autor:'Maria Lima',data:'2026-04-15T10:00:00',texto:'Evolução andando bem. Cliente muito engajado com a plataforma.'},
+    ],
+    historicoEtapas:[
+      {de:null,        para:'1ª Reunião', data:'2026-01-30T09:00:00',motivo:'Início do projeto'},
+      {de:'1ª Reunião', para:'Engajamento',data:'2026-02-20T09:00:00',motivo:'Kickoff realizado com sucesso'},
+      {de:'Engajamento',para:'Evolução',   data:'2026-04-10T09:00:00',motivo:'Engajamento completo, ótima adoção do sistema'},
+    ],
+  },
+];
+
+// ═══════════════════════════════════════════════════════════
+// DB LAYER
+// ═══════════════════════════════════════════════════════════
+const DB = {
+  CLIENTES:   'grv_cs_clientes',
+  CONSULTORES:'grv_cs_consultores',
+  ATIVO:      'grv_cs_consultor_ativo',
+};
+
+function initData() {
+  if (!localStorage.getItem(DB.CONSULTORES))
+    localStorage.setItem(DB.CONSULTORES, JSON.stringify(SEED_CONSULTORES));
+  if (!localStorage.getItem(DB.CLIENTES))
+    localStorage.setItem(DB.CLIENTES, JSON.stringify(SEED_CLIENTES));
+  if (!localStorage.getItem(DB.ATIVO))
+    localStorage.setItem(DB.ATIVO, 'ana-paula');
+}
+
+function getConsultores() { return JSON.parse(localStorage.getItem(DB.CONSULTORES) || '[]'); }
+function getConsultorAtivo() { return localStorage.getItem(DB.ATIVO) || 'ana-paula'; }
+function setConsultorAtivo(id) { localStorage.setItem(DB.ATIVO, id); }
+function getClientes() { return JSON.parse(localStorage.getItem(DB.CLIENTES) || '[]'); }
+function getCliente(id) { return getClientes().find(c => c.id === id) || null; }
+function saveCliente(updated) {
+  const all = getClientes();
+  const idx = all.findIndex(c => c.id === updated.id);
+  if (idx >= 0) all[idx] = updated; else all.push(updated);
+  localStorage.setItem(DB.CLIENTES, JSON.stringify(all));
+}
+
+// ═══════════════════════════════════════════════════════════
+// COMPUTED
+// ═══════════════════════════════════════════════════════════
+function getProgresso(c) {
+  const all = c.fases.flatMap(f => f.tarefas);
+  if (!all.length) return 0;
+  return Math.round(all.filter(t => t.feita).length / all.length * 100);
+}
+
+function getStatus(c) {
+  if (['Pausado','Interrompido','Cancelado'].includes(c.etapa)) return c.etapa;
+  if (c.prazo) {
+    const p = new Date(c.prazo); p.setHours(23,59,59);
+    if (new Date() > p && getProgresso(c) < 100) return 'Atrasado';
+  }
+  return 'Em ordem';
+}
+
+function getDiasNaEtapa(c) {
+  if (!c.historicoEtapas.length) return 0;
+  const last = c.historicoEtapas[c.historicoEtapas.length - 1];
+  return Math.floor((new Date() - new Date(last.data)) / 86400000);
+}
+
+function getEtapaBadge(etapa) {
+  const m = ETAPA_META[etapa] || {emoji:'', color:'gray'};
+  return `<span class="badge badge-${m.color}">${m.emoji} ${etapa}</span>`;
+}
+
+function getStatusBadge(status) {
+  return `<span class="badge badge-${STATUS_COLOR[status] || 'gray'}">${status}</span>`;
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('pt-BR');
+}
+
+function fmtDateTime(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric'});
+}
+
+// ═══════════════════════════════════════════════════════════
+// CONSULTOR SELECTOR
+// ═══════════════════════════════════════════════════════════
+function initConsultorSel() {
+  const sel = document.getElementById('consultor-sel');
+  const ativo = getConsultorAtivo();
+  sel.innerHTML = getConsultores()
+    .map(c => `<option value="${c.id}"${c.id===ativo?' selected':''}>${c.nome}</option>`)
+    .join('');
+  sel.addEventListener('change', () => { setConsultorAtivo(sel.value); route(); });
+}
+
+// ═══════════════════════════════════════════════════════════
+// ROUTER
+// ═══════════════════════════════════════════════════════════
+function navigate(hash) { location.hash = hash; }
+
+function route() {
+  const hash = location.hash.replace('#','') || 'carteira';
+  document.querySelectorAll('.sec').forEach(s => s.style.display = 'none');
+  document.querySelectorAll('.nav-item').forEach(a => a.classList.remove('active'));
+
+  if (hash.startsWith('cliente/')) {
+    document.getElementById('sec-cliente').style.display = 'block';
+    renderCliente(decodeURIComponent(hash.split('/').slice(1).join('/')));
+  } else if (hash === 'jornada') {
+    document.getElementById('sec-jornada').style.display = 'block';
+    document.querySelector('[data-route="jornada"]')?.classList.add('active');
+    renderJornada();
+  } else if (hash === 'criar') {
+    document.getElementById('sec-criar').style.display = 'block';
+    document.querySelector('[data-route="criar"]')?.classList.add('active');
+    renderCriar();
+  } else {
+    document.getElementById('sec-carteira').style.display = 'block';
+    document.querySelector('[data-route="carteira"]')?.classList.add('active');
+    renderCarteira();
+  }
+}
+
+window.addEventListener('hashchange', route);
+window.addEventListener('DOMContentLoaded', () => { initData(); initConsultorSel(); route(); });
+
+// ═══════════════════════════════════════════════════════════
+// TELA 1 — MINHA CARTEIRA
+// ═══════════════════════════════════════════════════════════
+let _filterStatus = 'Todos';
+let _searchQuery  = '';
+
+function renderCarteira() {
+  const ativo     = getConsultorAtivo();
+  const nomeAtivo = getConsultores().find(c => c.id === ativo)?.nome || '';
+  const carteira  = getClientes().filter(c => c.consultorId === ativo);
+
+  const total     = carteira.length;
+  const emOrdem   = carteira.filter(c => getStatus(c) === 'Em ordem').length;
+  const atrasados = carteira.filter(c => getStatus(c) === 'Atrasado').length;
+  const pausados  = carteira.filter(c => ['Pausado','Interrompido','Cancelado'].includes(getStatus(c))).length;
+
+  let filtered = carteira;
+  if (_filterStatus !== 'Todos') {
+    if (_filterStatus === 'Pausado') {
+      filtered = filtered.filter(c => ['Pausado','Interrompido','Cancelado'].includes(getStatus(c)));
+    } else {
+      filtered = filtered.filter(c => getStatus(c) === _filterStatus);
+    }
+  }
+  if (_searchQuery)
+    filtered = filtered.filter(c => c.id.toLowerCase().includes(_searchQuery.toLowerCase()));
+
+  const sec = document.getElementById('sec-carteira');
+  sec.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">Minha Carteira</div>
+      <div class="page-subtitle">Consultor: ${nomeAtivo} · ${total} cliente${total!==1?'s':''}</div>
+    </div>
+
+    <div class="metric-grid">
+      <div class="metric-card mc-accent">
+        <div class="mc-label">Total de clientes</div>
+        <div class="mc-value">${total}</div>
+      </div>
+      <div class="metric-card mc-green">
+        <div class="mc-label">Em ordem</div>
+        <div class="mc-value">${emOrdem}</div>
+      </div>
+      <div class="metric-card mc-red">
+        <div class="mc-label">Atrasados</div>
+        <div class="mc-value">${atrasados}</div>
+      </div>
+      <div class="metric-card mc-gray">
+        <div class="mc-label">Pausados / Interrompidos</div>
+        <div class="mc-value">${pausados}</div>
+      </div>
+    </div>
+
+    <div class="search-row">
+      <div class="filter-tabs">
+        ${['Todos','Em ordem','Atrasado','Pausado'].map(s =>
+          `<button class="filter-tab${_filterStatus===s?' active':''}" onclick="setFilter('${s}')">${s}</button>`
+        ).join('')}
+      </div>
+      <input class="search-input" type="text" placeholder="Buscar cliente..." value="${_searchQuery}"
+        oninput="setSearch(this.value)">
+    </div>
+
+    ${filtered.length === 0 ? `
+      <div class="empty-state">
+        <div class="es-icon">${carteira.length===0?'📋':'🔍'}</div>
+        <div class="es-text">${carteira.length===0
+          ? 'Nenhum cliente nesta carteira.'
+          : 'Nenhum cliente encontrado com este filtro.'}</div>
+      </div>
+    ` : `
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Etapa</th>
+              <th>Status</th>
+              <th style="width:130px">Progresso</th>
+              <th>Próxima Ação</th>
+              <th>Prazo</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filtered.map(c => {
+              const prog = getProgresso(c);
+              const st   = getStatus(c);
+              return `<tr onclick="navigate('cliente/${encodeURIComponent(c.id)}')">
+                <td>
+                  <div style="font-weight:600">${c.id}</div>
+                  <div class="proj-id">${c.projeto}</div>
+                </td>
+                <td>${getEtapaBadge(c.etapa)}</td>
+                <td>${getStatusBadge(st)}</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div class="prog-wrap" style="flex:1">
+                      <div class="prog-fill" style="width:${prog}%"></div>
+                    </div>
+                    <span style="font-size:11px;color:var(--text3);white-space:nowrap">${prog}%</span>
+                  </div>
+                </td>
+                <td style="color:var(--text2);font-size:12px;max-width:180px">${c.proximaAcao||'—'}</td>
+                <td style="font-size:12px;color:${st==='Atrasado'?'var(--red)':'var(--text2)'}">
+                  ${fmtDate(c.prazo)}
+                </td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    `}
+  `;
+}
+
+function setFilter(s) { _filterStatus = s; renderCarteira(); }
+function setSearch(v) { _searchQuery = v; renderCarteira(); }
+
+// ═══════════════════════════════════════════════════════════
+// TELA 2 — JORNADA
+// ═══════════════════════════════════════════════════════════
+const JORNADA_VIEW_KEY = 'grv_cs_jornada_view';
+let _jornada_view         = localStorage.getItem(JORNADA_VIEW_KEY) || 'lista';
+let _lista_collapsed      = new Set(); // etapas colapsadas no modo lista
+
+function setJornadaView(v) {
+  _jornada_view = v;
+  localStorage.setItem(JORNADA_VIEW_KEY, v);
+  renderJornada();
+}
+
+function toggleListaSection(etapa) {
+  if (_lista_collapsed.has(etapa)) _lista_collapsed.delete(etapa);
+  else _lista_collapsed.add(etapa);
+  // toggle sem re-render completo
+  const body = document.getElementById(`lista-body-${CSS.escape(etapa)}`);
+  const chev = document.getElementById(`lista-chev-${CSS.escape(etapa)}`);
+  if (body) body.classList.toggle('open');
+  if (chev) chev.classList.toggle('open');
+}
+
+function renderJornada() {
+  const todos       = getClientes();
+  const consultores = getConsultores();
+  const sec         = document.getElementById('sec-jornada');
+  const isKanban    = _jornada_view === 'kanban';
+
+  // ── toggle pill ───────────────────────────────────────────
+  const toggle = `
+    <div class="view-toggle">
+      <button class="vt-btn${!isKanban?' active':''}" onclick="setJornadaView('lista')">
+        ☰ Lista
+      </button>
+      <button class="vt-btn${isKanban?' active':''}" onclick="setJornadaView('kanban')">
+        ⊞ Kanban
+      </button>
+    </div>`;
+
+  // ── header ────────────────────────────────────────────────
+  const header = `
+    <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+      <div>
+        <div class="page-title">Jornada</div>
+        <div class="page-subtitle">Visão geral de todos os clientes por etapa</div>
+      </div>
+      ${toggle}
+    </div>`;
+
+  // ── MODO LISTA ────────────────────────────────────────────
+  if (!isKanban) {
+    const sections = ETAPAS.map(etapa => {
+      const m      = ETAPA_META[etapa];
+      const cls    = todos.filter(c => c.etapa === etapa);
+      const count  = cls.length;
+      const isOpen = !_lista_collapsed.has(etapa);
+      const etapaId = etapa.replace(/[^a-z0-9]/gi, '_');
+
+      const body = count === 0
+        ? `<div style="padding:20px 16px;text-align:center;color:var(--text3);font-size:13px">Nenhum cliente nesta etapa.</div>`
+        : `<div class="table-wrap" style="border-radius:0;border:none;box-shadow:none">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Etapa</th>
+                  <th>Consultor</th>
+                  <th>Status</th>
+                  <th>Progresso</th>
+                  <th>Tempo na etapa</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${cls.map(c => {
+                  const prog   = getProgresso(c);
+                  const st     = getStatus(c);
+                  const consul = consultores.find(x => x.id === c.consultorId)?.nome || c.consultorId;
+                  const dias   = getDiasNaEtapa(c);
+                  return `<tr onclick="navigate('cliente/${encodeURIComponent(c.id)}')">
+                    <td>
+                      <div style="font-weight:600">${c.id}</div>
+                      <div class="proj-id">${c.projeto}</div>
+                    </td>
+                    <td>${getEtapaBadge(c.etapa)}</td>
+                    <td style="font-size:12px;color:var(--text2)">${consul}</td>
+                    <td>${getStatusBadge(st)}</td>
+                    <td>
+                      <div style="display:flex;align-items:center;gap:8px">
+                        <div class="prog-wrap" style="width:72px">
+                          <div class="prog-fill" style="width:${prog}%"></div>
+                        </div>
+                        <span style="font-size:11px;color:var(--text3)">${prog}%</span>
+                      </div>
+                    </td>
+                    <td style="font-size:12px;color:var(--text3)">${dias} dia${dias!==1?'s':''}</td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>`;
+
+      return `
+        <div class="lista-section">
+          <div class="lista-section-hdr" onclick="toggleListaSection('${etapa}')">
+            <div class="lista-section-hdr-left">
+              <span class="lista-section-emoji">${m.emoji}</span>
+              <span class="lista-section-name">${etapa}</span>
+              <span class="lista-section-ct">${count}</span>
+            </div>
+            <span class="lista-chev${isOpen?' open':''}" id="lista-chev-${etapaId}">▶</span>
+          </div>
+          <div class="lista-body${isOpen?' open':''}" id="lista-body-${etapaId}">${body}</div>
+        </div>`;
+    }).join('');
+
+    sec.innerHTML = header + sections;
+    return;
+  }
+
+  // ── MODO KANBAN ───────────────────────────────────────────
+  const colunas = ETAPAS.map(etapa => {
+    const m   = ETAPA_META[etapa];
+    const cls = todos.filter(c => c.etapa === etapa);
+
+    const cards = cls.length === 0
+      ? `<div class="kcard-empty">Nenhum cliente</div>`
+      : cls.map(c => {
+          const prog   = getProgresso(c);
+          const st     = getStatus(c);
+          const consul = consultores.find(x => x.id === c.consultorId)?.nome || c.consultorId;
+          const dias   = getDiasNaEtapa(c);
+          return `
+            <div class="kcard" onclick="navigate('cliente/${encodeURIComponent(c.id)}')">
+              <div class="kcard-name" title="${c.id}">${c.id}</div>
+              <div class="kcard-proj">${c.projeto}</div>
+              <hr class="kcard-divider">
+              ${getStatusBadge(st)}
+              <div class="kcard-prog-row">
+                <div class="kcard-prog-wrap">
+                  <div class="kcard-prog-fill" style="width:${prog}%"></div>
+                </div>
+                <span class="kcard-pct">${prog}%</span>
+              </div>
+              <div class="kcard-meta">
+                <span class="kcard-consul" title="${consul}">${consul}</span>
+                <span class="kcard-dias">${dias} dia${dias!==1?'s':''} na etapa</span>
+              </div>
+            </div>`;
+        }).join('');
+
+    return `
+      <div class="kanban-col">
+        <div class="kanban-col-hdr">
+          <div class="kanban-col-name">
+            <span class="kc-emoji">${m.emoji}</span>
+            <span>${etapa}</span>
+          </div>
+          <span class="kanban-col-ct">${cls.length}</span>
+        </div>
+        <div class="kanban-cards">${cards}</div>
+      </div>`;
+  }).join('');
+
+  sec.innerHTML = header + `<div class="kanban-wrap">${colunas}</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// TELA 3 — DETALHE DO CLIENTE
+// ═══════════════════════════════════════════════════════════
+let _open_fases = {};
+let _modal_cliente_id = null;
+
+function renderCliente(id) {
+  const c = getCliente(id);
+  const sec = document.getElementById('sec-cliente');
+
+  if (!c) {
+    sec.innerHTML = `<div class="empty-state"><div class="es-icon">❓</div><div class="es-text">Cliente não encontrado.</div></div>`;
+    return;
+  }
+
+  const prog   = getProgresso(c);
+  const status = getStatus(c);
+  const dias   = getDiasNaEtapa(c);
+  const consul = getConsultores().find(x => x.id === c.consultorId)?.nome || c.consultorId;
+
+  // Playbook
+  const fasesHtml = c.fases.map((f, fi) => {
+    const feitas = f.tarefas.filter(t => t.feita).length;
+    const isOpen = _open_fases[fi] !== false;
+    return `<div class="phase-row">
+      <div class="phase-hdr" onclick="toggleFase(${fi})">
+        <div class="phase-hdr-left">
+          <span class="phase-name">${f.nome}</span>
+          <span class="phase-ct">${feitas}/${f.tarefas.length}</span>
+        </div>
+        <span class="phase-chev${isOpen?' open':''}">▶</span>
+      </div>
+      <div class="phase-body${isOpen?' open':''}">
+        ${f.tarefas.map(t => `
+          <div class="task-item${t.feita?' done':''}" id="ti_${t.id}">
+            <input type="checkbox" id="ck_${t.id}"${t.feita?' checked':''}
+              onchange="checkTask('${c.id}',${fi},'${t.id}')">
+            <label for="ck_${t.id}">${t.texto}</label>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Registros
+  const regsHtml = c.registros.length
+    ? c.registros.map(r => `
+      <div class="reg-item">
+        <div class="reg-meta"><strong>${r.autor}</strong> · ${fmtDateTime(r.data)}</div>
+        <div class="reg-text">${r.texto}</div>
+      </div>`).join('')
+    : `<div style="color:var(--text3);font-size:13px;padding:8px 0">Nenhum registro ainda.</div>`;
+
+  // Timeline
+  const tlHtml = c.historicoEtapas.map(h => {
+    const label = h.de
+      ? `${h.de} → <strong style="color:var(--primary)">${h.para}</strong>`
+      : `→ <strong style="color:var(--primary)">${h.para}</strong>`;
+    return `<div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-body">
+        ${label}
+        <div class="tl-meta">${fmtDateTime(h.data)} · ${h.motivo}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  sec.innerHTML = `
+    <a class="back-link" href="#carteira">← Voltar à carteira</a>
+
+    <div class="detail-header">
+      <div class="dh-top">
+        <div>
+          <h2>${c.id}</h2>
+          <div class="dh-projeto">${c.projeto} · ${c.produto}</div>
+        </div>
+        <div class="dh-badges">
+          ${getEtapaBadge(c.etapa)}
+          ${getStatusBadge(status)}
+          <button class="btn btn-primary btn-sm" onclick="openModal('${c.id}')">Alterar Etapa</button>
+        </div>
+      </div>
+      <div class="dh-meta">
+        <div class="dh-meta-item">
+          <span class="dh-meta-label">Consultor</span>
+          <span class="dh-meta-value">${consul}</span>
+        </div>
+        <div class="dh-meta-item">
+          <span class="dh-meta-label">Início</span>
+          <span class="dh-meta-value">${fmtDate(c.dataInicio)}</span>
+        </div>
+        <div class="dh-meta-item">
+          <span class="dh-meta-label">Prazo</span>
+          <span class="dh-meta-value" style="${status==='Atrasado'?'color:var(--red)':''}">${fmtDate(c.prazo)}</span>
+        </div>
+        <div class="dh-meta-item">
+          <span class="dh-meta-label">Dias na etapa</span>
+          <span class="dh-meta-value">${dias} dia${dias!==1?'s':''}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-layout">
+      <!-- Playbook -->
+      <div>
+        <div class="card-block">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div class="section-title" style="margin-bottom:0">Playbook</div>
+            <span id="prog-pct-${c.id}" style="font-size:15px;font-weight:700;color:var(--primary)">${prog}%</span>
+          </div>
+          <div class="prog-wrap" style="height:8px;margin-bottom:18px">
+            <div class="prog-fill" id="prog-bar-${c.id}" style="width:${prog}%"></div>
+          </div>
+          ${fasesHtml}
+        </div>
+      </div>
+
+      <!-- Lateral -->
+      <div>
+        <div class="card-block">
+          <div class="section-title">Registros</div>
+          <div id="regs-${c.id}">${regsHtml}</div>
+          <div class="reg-form">
+            <textarea id="reg-input-${c.id}" placeholder="Adicionar anotação..."></textarea>
+            <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="addRegistro('${c.id}')">
+              Salvar registro
+            </button>
+          </div>
+        </div>
+
+        <div class="card-block" style="margin-top:16px">
+          <div class="section-title">Histórico de etapas</div>
+          <div class="tl-wrap">${tlHtml}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function toggleFase(idx) {
+  _open_fases[idx] = (_open_fases[idx] === false) ? true : false;
+  const bodies  = document.querySelectorAll('#sec-cliente .phase-body');
+  const chevs   = document.querySelectorAll('#sec-cliente .phase-chev');
+  if (bodies[idx]) bodies[idx].classList.toggle('open');
+  if (chevs[idx])  chevs[idx].classList.toggle('open');
+}
+
+function checkTask(clienteId, faseIdx, tarefaId) {
+  const c = getCliente(clienteId);
+  const t = c.fases[faseIdx].tarefas.find(x => x.id === tarefaId);
+  if (!t) return;
+  t.feita = !t.feita;
+  saveCliente(c);
+
+  // update progress without full re-render
+  const prog = getProgresso(c);
+  const bar  = document.getElementById(`prog-bar-${clienteId}`);
+  const pct  = document.getElementById(`prog-pct-${clienteId}`);
+  if (bar) bar.style.width = prog + '%';
+  if (pct) pct.textContent = prog + '%';
+
+  // update task style
+  const item = document.getElementById(`ti_${tarefaId}`);
+  if (item) { t.feita ? item.classList.add('done') : item.classList.remove('done'); }
+}
+
+function addRegistro(clienteId) {
+  const ta    = document.getElementById(`reg-input-${clienteId}`);
+  const texto = ta?.value?.trim();
+  if (!texto) return;
+
+  const c       = getCliente(clienteId);
+  const ativo   = getConsultorAtivo();
+  const nome    = getConsultores().find(x => x.id === ativo)?.nome || ativo;
+
+  c.registros.unshift({id:'r'+Date.now(), autor:nome, data:new Date().toISOString(), texto});
+  saveCliente(c);
+  ta.value = '';
+
+  // re-render only registros block
+  const regsEl = document.getElementById(`regs-${clienteId}`);
+  if (regsEl) {
+    regsEl.innerHTML = c.registros.map(r => `
+      <div class="reg-item">
+        <div class="reg-meta"><strong>${r.autor}</strong> · ${fmtDateTime(r.data)}</div>
+        <div class="reg-text">${r.texto}</div>
+      </div>`).join('');
+  }
+}
+
+// ── MODAL ALTERAR ETAPA ────────────────────────────────────
+function openModal(clienteId) {
+  _modal_cliente_id = clienteId;
+  const c   = getCliente(clienteId);
+  const sel = document.getElementById('modal-etapa-sel');
+  sel.innerHTML = ETAPAS.filter(e => e !== c.etapa)
+    .map(e => `<option value="${e}">${ETAPA_META[e].emoji} ${e}</option>`)
+    .join('');
+  const motivo = document.getElementById('modal-motivo');
+  motivo.value = '';
+  document.getElementById('modal-save-btn').disabled = true;
+  motivo.oninput = () => {
+    document.getElementById('modal-save-btn').disabled = !motivo.value.trim();
+  };
+  document.getElementById('modal-etapa').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('modal-etapa').classList.add('hidden');
+  _modal_cliente_id = null;
+}
+
+function saveEtapa() {
+  const novaEtapa = document.getElementById('modal-etapa-sel').value;
+  const motivo    = document.getElementById('modal-motivo').value.trim();
+  if (!motivo || !_modal_cliente_id) return;
+
+  const c = getCliente(_modal_cliente_id);
+  c.historicoEtapas.push({de:c.etapa, para:novaEtapa, data:new Date().toISOString(), motivo});
+  c.etapa = novaEtapa;
+  saveCliente(c);
+
+  const savedId = _modal_cliente_id;
+  closeModal();
+  renderCliente(savedId);
+}
+
+// close modal on overlay click
+document.getElementById('modal-etapa').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ═══════════════════════════════════════════════════════════
+// TELA 4 — CRIAR PLAYBOOK
+// ═══════════════════════════════════════════════════════════
+let _bFases = null;
+let _bTab   = 0;
+
+function initBFases() {
+  _bFases = TEMPLATE_FASES.map((f, fi) => ({
+    nome: f.nome,
+    tarefas: f.tarefas.map((t, ti) => ({id:`nb_${fi}_${ti}_${Date.now()}`, texto:t, feita:false}))
+  }));
+}
+
+function renderCriar() {
+  if (!_bFases) initBFases();
+  const consultores = getConsultores();
+  const ativo       = getConsultorAtivo();
+  const sec         = document.getElementById('sec-criar');
+
+  sec.innerHTML = `
+    <div class="page-header">
+      <div class="page-title">Criar Playbook</div>
+      <div class="page-subtitle">Cadastre um novo cliente e monte o playbook de implantação</div>
+    </div>
+
+    <div class="card-block" style="max-width:760px">
+      <div class="section-title">Dados do cliente</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nome do cliente <span class="form-req">*</span></label>
+          <input type="text" id="f-nome" placeholder="Ex: ACME LTDA">
+        </div>
+        <div class="form-group">
+          <label>ID do cliente <span class="form-req">*</span></label>
+          <input type="text" id="f-id" placeholder="Ex: ACME" style="text-transform:uppercase"
+            oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div class="form-group">
+          <label>Projeto SAGP <span class="form-req">*</span></label>
+          <input type="text" id="f-projeto" placeholder="Ex: SAGP-00150"
+            oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div class="form-group">
+          <label>Produto</label>
+          <select id="f-produto">
+            <option>CPS</option>
+            <option>IOT</option>
+            <option>Portal da Cotação</option>
+            <option>GRV Connect</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Consultor responsável</label>
+          <select id="f-consultor">
+            ${consultores.map(c =>
+              `<option value="${c.id}"${c.id===ativo?' selected':''}>${c.nome}</option>`
+            ).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Etapa inicial</label>
+          <select id="f-etapa">
+            ${ETAPAS.map(e =>
+              `<option value="${e}">${ETAPA_META[e].emoji} ${e}</option>`
+            ).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Data início</label>
+          <input type="date" id="f-inicio">
+        </div>
+        <div class="form-group">
+          <label>Prazo final</label>
+          <input type="date" id="f-prazo">
+        </div>
+        <div class="form-group full">
+          <label>Próxima ação</label>
+          <input type="text" id="f-acao" placeholder="Ex: Agendar reunião de kickoff">
+        </div>
+        <div class="form-group full">
+          <label>Observações</label>
+          <textarea id="f-obs" rows="3"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-block" style="max-width:760px;margin-top:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div class="section-title" style="margin-bottom:0">Tarefas do playbook</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary btn-sm" onclick="usarTemplate()">📋 Usar template padrão</button>
+          <button class="btn btn-secondary btn-sm" onclick="limparBuilder()">🗑️ Limpar</button>
+        </div>
+      </div>
+      <div class="ptabs" id="ptabs">
+        ${_bFases.map((f,i) =>
+          `<button class="ptab${i===_bTab?' active':''}" onclick="switchTab(${i})">${f.nome}</button>`
+        ).join('')}
+      </div>
+      <div id="builder-content">${renderBuilderTab(_bTab)}</div>
+    </div>
+
+    <div style="max-width:760px;margin-top:16px;display:flex;gap:10px">
+      <button class="btn btn-primary" onclick="salvarPlaybook()">💾 Salvar playbook</button>
+      <button class="btn btn-secondary" onclick="navigate('carteira')">Cancelar</button>
+    </div>
+    <div id="criar-err" class="err-msg" style="max-width:760px"></div>
+  `;
+}
+
+function renderBuilderTab(idx) {
+  const fase = _bFases[idx];
+  const list = fase.tarefas.length
+    ? fase.tarefas.map(t => `
+      <div class="tb-item" id="tbi_${t.id}">
+        <span class="tb-text">${t.texto}</span>
+        <button class="tb-rm" onclick="rmTarefa(${idx},'${t.id}')">✕</button>
+      </div>`).join('')
+    : `<div style="color:var(--text3);font-size:13px;padding:4px 0">Nenhuma tarefa. Adicione abaixo.</div>`;
+  return `
+    <div class="tb-list">${list}</div>
+    <div class="tb-add-row">
+      <input type="text" id="tb-inp-${idx}" placeholder="Nova tarefa..."
+        onkeydown="if(event.key==='Enter'){event.preventDefault();addTarefa(${idx})}">
+      <button class="btn btn-secondary btn-sm" onclick="addTarefa(${idx})">+ Tarefa</button>
+    </div>`;
+}
+
+function switchTab(idx) {
+  _bTab = idx;
+  document.querySelectorAll('.ptab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  document.getElementById('builder-content').innerHTML = renderBuilderTab(idx);
+}
+
+function addTarefa(faseIdx) {
+  const inp   = document.getElementById(`tb-inp-${faseIdx}`);
+  const texto = inp?.value?.trim();
+  if (!texto) return;
+  _bFases[faseIdx].tarefas.push({id:`nb_${Date.now()}`, texto, feita:false});
+  inp.value = '';
+  document.getElementById('builder-content').innerHTML = renderBuilderTab(faseIdx);
+  document.getElementById(`tb-inp-${faseIdx}`)?.focus();
+}
+
+function rmTarefa(faseIdx, tarefaId) {
+  _bFases[faseIdx].tarefas = _bFases[faseIdx].tarefas.filter(t => t.id !== tarefaId);
+  document.getElementById('builder-content').innerHTML = renderBuilderTab(faseIdx);
+}
+
+function usarTemplate() {
+  initBFases();
+  document.getElementById('builder-content').innerHTML = renderBuilderTab(_bTab);
+}
+
+function limparBuilder() {
+  _bFases = TEMPLATE_FASES.map(f => ({nome:f.nome, tarefas:[]}));
+  document.getElementById('builder-content').innerHTML = renderBuilderTab(_bTab);
+}
+
+function salvarPlaybook() {
+  const nome    = document.getElementById('f-nome')?.value?.trim();
+  const id      = document.getElementById('f-id')?.value?.trim().toUpperCase();
+  const projeto = document.getElementById('f-projeto')?.value?.trim().toUpperCase();
+  const produto = document.getElementById('f-produto')?.value;
+  const consul  = document.getElementById('f-consultor')?.value;
+  const etapa   = document.getElementById('f-etapa')?.value;
+  const inicio  = document.getElementById('f-inicio')?.value;
+  const prazo   = document.getElementById('f-prazo')?.value || null;
+  const acao    = document.getElementById('f-acao')?.value?.trim();
+
+  const errEl = document.getElementById('criar-err');
+
+  if (!nome || !id || !projeto) {
+    errEl.textContent = 'Preencha obrigatoriamente: Nome, ID e Projeto SAGP.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (getCliente(id)) {
+    errEl.textContent = `Já existe um cliente com ID "${id}". Escolha outro ID.`;
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+
+  const dataInicio = inicio || new Date().toISOString().split('T')[0];
+  const novo = {
+    id, projeto, produto, consultorId: consul, etapa,
+    dataInicio, prazo,
+    proximaAcao: acao || '',
+    fases: _bFases.map(f => ({
+      nome: f.nome,
+      tarefas: f.tarefas.map(t => ({...t, feita:false}))
+    })),
+    registros: [],
+    historicoEtapas: [{
+      de: null, para: etapa,
+      data: dataInicio + 'T09:00:00',
+      motivo: 'Início do projeto'
+    }],
+  };
+
+  saveCliente(novo);
+  _bFases = null;
+  _bTab   = 0;
+  navigate(`cliente/${encodeURIComponent(id)}`);
+}
+</script>
+</body>
+</html>
