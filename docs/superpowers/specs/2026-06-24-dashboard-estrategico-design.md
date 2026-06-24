@@ -14,6 +14,14 @@ Transformar o dashboard de Projetos GRV em um instrumento de decisão estratégi
 
 ---
 
+## Pré-condição verificada
+
+As funções abaixo já existem no arquivo e estão funcionais (verificado em 2026-06-24):
+`computeDashboardKPIs` (linha ~952), `computeAtivacao` (linha ~1055), `computeBacklog` (linha ~1067), `computeAlertas` (linha ~1124), `chartGaugeConfig` (linha ~1081), `renderTabelaConsultores` (linha ~1162), `sortConsul` (linha ~1191).
+Este spec pode ser implementado imediatamente — nenhuma dependência pendente.
+
+---
+
 ## Arquitetura
 
 Single-file SPA (`grv-cs-jornada.html`) — sem build step. Todas as mudanças são CSS + JS inline. Chart.js v4 via CDN já presente. Sidebar colapsável via CSS `width` transition + classe `sidebar--collapsed` no `<aside>`.
@@ -67,7 +75,7 @@ Grid `1fr 1fr 1fr` abaixo do banner. Números 56px, bold, com breathing room.
 | Atrasados | `kpis.atrasado` + `(pct%)` em subtexto | `▲▼ N vs mês ant.` em vermelho/verde |
 | Concluídos no Mês | `kpis.concluido` | `▲▼ N vs mês ant.` |
 
-**Trend simulado:** função `simulateTrend(value, seed)` — usa `Math.sin(seed) * 0.1 * value` arredondado para gerar variação determinística de ±10% (mesmo resultado a cada render, não aleatório).
+**Trend simulado — dado ilustrativo:** função `simulateTrend(value, seed)` — usa `Math.sin(seed) * 0.1 * value` arredondado para gerar variação determinística de ±10% (mesmo resultado a cada render). O badge exibe `★ ilustrativo` em tooltip. Quando mostrado para gestores (Hidalgo, Val), deixar explícito que o "vs mês ant." é simulado e só virará dado real com integração ao SAG. Não remover o aviso visual.
 
 #### Top 3 Alertas
 Ao lado direito das hero metrics (grid `2fr 1fr`). Só os 3 mais críticos de `computeAlertas()`. Formato compacto: ícone + título + ação em uma linha. Link "Ver todos ↓" âncora para a Zona 2.
@@ -79,15 +87,22 @@ Ao lado direito das hero metrics (grid `2fr 1fr`). Só os 3 mais críticos de `c
 **Objetivo:** Identificar produto e consultor com maior concentração de risco.
 
 #### Chart: Distribuição por Status
-- **Manchete narrativa** acima: `computeNarrativaDonut(kpis, clientes)` → ex: *"CPS concentra 70% dos atrasos — 7 dos 10 projetos atrasados são CPS"*
-- Donut Chart.js com cores sólidas semânticas (já existentes — gradiente não é suportado nativamente em doughnut no Chart.js v4)
-- Label central: número total em 28px + "projetos" em 11px, via plugin `afterDraw`
-- Legenda à direita com percentual calculado em cada item (`(valor/total*100).toFixed(0)%`)
+- **Manchete narrativa** acima: `computeNarrativaDonut(kpis, clientes)`
+  - Lógica: identifica o produto (`c.produto.split('/')[0]`) com maior contagem de atrasados (`getStatusDash(c) === 'Atrasado'`). Se um produto tiver `>= 50%` dos atrasados, vira protagonista da frase.
+  - Exemplo concreto com os dados atuais (10 atrasados, 7 são CPS): *"CPS concentra 70% dos atrasos — 7 dos 10 projetos atrasados são CPS"*
+  - Fallback (nenhum produto dominante): *"Atrasos distribuídos entre os produtos — {n} projetos precisam de atenção"*
+  - Fallback (0 atrasados): *"Nenhum atraso no portfólio — {n} projetos em andamento saudável"*
+- Donut Chart.js com cores sólidas semânticas (gradiente não é suportado nativamente em doughnut no Chart.js v4 — não tentar)
+- Label central via plugin `afterDraw` (ver seção "Linha de meta nos charts" — distinção obrigatória entre bar e donut)
+- Legenda à direita com percentual: `(valor/total*100).toFixed(0)%` calculado no `tooltip.callbacks.label`
 
 #### Chart: Performance por Consultor
-- **Manchete narrativa**: `computeNarrativaConsultor(data)` → ex: *"Felipe concentra a maior carga de atrasos — 40% da carteira dele está atrasada"*
+- **Manchete narrativa**: `computeNarrativaConsultor(data)`
+  - Lógica: ordena `computePerformance()` por `pctAtrasado` desc. Pega o primeiro (pior). Se `pctAtrasado > 25%`, vira protagonista.
+  - Exemplo: dados atuais com Felipe em 40% atrasado: *"Felipe concentra a maior carga de atrasos — 40% da carteira está atrasada"*
+  - Fallback (todos abaixo de 25%): *"Equipe dentro do esperado — nenhum consultor com concentração crítica de atrasos"*
 - Barras horizontais empilhadas (Chart.js, `indexAxis: 'y'`)
-- Consultor com `pctAtrasado > 30%`: nome em **vermelho** no label do eixo Y, barra de atrasados mais saturada
+- Consultor com `pctAtrasado > 30%`: label do eixo Y em cor vermelha via `afterDraw` plugin (Chart.js não suporta cor por item no eixo Y nativamente — usar `afterDraw` para redesenhar o texto do label em vermelho)
 - Tabela de performance abaixo do chart, ordenável (já existe, manter)
 
 #### Alertas Completos (todos, não só top 3)
@@ -140,10 +155,37 @@ Seção expandida com todos os alertas de `computeAlertas()`. Mantém o layout d
 
 ### Gradiente nas barras (Chart.js)
 - Usar `ctx.createLinearGradient(0, 0, 0, height)` com `addColorStop(0, cor)` e `addColorStop(1, cor + '66')`
-- Aplicar em `chartBarrasConfig` e `chartConsulConfig`
+- Aplicar **somente** em `chartBarrasConfig` e `chartConsulConfig` (charts tipo `bar`)
+- **Não aplicar em doughnut** — Chart.js v4 não suporta canvas gradient em datasets de doughnut
 
-### Linha de meta nos charts
-- Adicionar dataset extra tipo `'line'` com `data: Array(n).fill(metaValue)`, `borderColor: '#E05A1E'`, `borderDash: [4,4]`, `pointRadius: 0`, `borderWidth: 1.5`
+### Linha de meta nos charts — DISTINÇÃO OBRIGATÓRIA
+
+**Em charts tipo `bar` (barras agrupadas por produto):**
+- Adicionar dataset extra tipo `'line'` com `data: Array(n).fill(metaValue)`, `borderColor: '#E05A1E'`, `borderDash: [4,4]`, `pointRadius: 0`, `borderWidth: 1.5`, `fill: false`
+- Funciona porque charts `bar` aceitam datasets mistos (bar + line)
+
+**Em charts tipo `doughnut` (gauges de ativação CPS e NX):**
+- Dataset extra tipo `'line'` **NÃO funciona** em doughnut — ignorar essa abordagem
+- Usar exclusivamente plugin `afterDraw` para desenhar a marca de meta no arco:
+  ```javascript
+  afterDraw(chart) {
+    const {ctx, chartArea: {width, height}} = chart;
+    // calcular ângulo correspondente a 85% do arco semicircular
+    const angle = Math.PI + (Math.PI * 0.85); // 85% de 180°
+    const cx = width / 2, cy = height * 0.85;
+    const r = Math.min(width, height * 2) * 0.36;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(cx + (r-10)*Math.cos(angle), cy + (r-10)*Math.sin(angle));
+    ctx.lineTo(cx + (r+10)*Math.cos(angle), cy + (r+10)*Math.sin(angle));
+    ctx.strokeStyle = '#E05A1E'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.restore();
+  }
+  ```
+
+**Label central do donut (distribuição por status):**
+- Também via plugin `afterDraw`, não via elemento HTML absoluto (o HTML absoluto desalinha em resize)
+- Desenhar `kpis.total` em 28px bold e "projetos" em 11px no centro geométrico do donut
 
 ---
 
