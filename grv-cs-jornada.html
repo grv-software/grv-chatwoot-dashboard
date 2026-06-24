@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GRV CS | Jornada do Cliente</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <style>
 :root {
   --primary: #E05A1E;
@@ -93,6 +94,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .search-input{padding:7px 12px 7px 32px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text);background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;outline:none;width:240px}
 .search-input:focus{border-color:var(--primary)}
 
+/* ── FILTER BAR (Projetos GRV) ───────────────────────────── */
+.filter-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.filter-bar select{padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);outline:none;background:var(--surface);cursor:pointer}
+.filter-bar select:focus{border-color:var(--primary)}
+
 /* ── BUTTONS ─────────────────────────────────────────────── */
 .btn{padding:8px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:opacity .15s;font-family:inherit}
 .btn-primary{background:var(--primary);color:#fff}
@@ -151,22 +157,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .tl-body{font-size:12px;color:var(--text2);line-height:1.5}
 .tl-meta{font-size:11px;color:var(--text3)}
 
-/* ── STAGE GRID (Tela 2) ─────────────────────────────────── */
-.stage-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-.stage-card{background:var(--surface);border-radius:var(--radius);border:2px solid var(--border);padding:16px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
-.stage-card:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(224,90,30,.12)}
-.stage-card.sc-active{border-color:var(--primary);box-shadow:0 2px 10px rgba(224,90,30,.18)}
-.sc-emoji{font-size:24px;margin-bottom:8px}
-.sc-name{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px}
-.sc-count{font-size:26px;font-weight:700;color:var(--text)}
-
-/* ── FORM (Tela 4) ───────────────────────────────────────── */
+/* ── FORM (Tela Criar) ───────────────────────────────────── */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .form-group{display:flex;flex-direction:column;gap:5px}
 .form-group.full{grid-column:1 / -1}
 .form-group label{font-size:12px;font-weight:600;color:var(--text2)}
 .form-group input,.form-group select,.form-group textarea{border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:13px;font-family:inherit;color:var(--text);outline:none;background:var(--surface)}
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--primary)}
+.form-group input[readonly]{background:#f7f8fa;color:var(--text2);cursor:not-allowed}
 .form-req{color:var(--red)}
 
 /* ── TASK BUILDER ────────────────────────────────────────── */
@@ -190,18 +188,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .modal-label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;margin-top:12px}
 .modal-box select,.modal-box textarea{width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:13px;font-family:inherit;color:var(--text);outline:none}
 .modal-box select:focus,.modal-box textarea:focus{border-color:var(--primary)}
+.modal-box select:disabled{background:#f7f8fa;color:var(--text2);cursor:not-allowed}
 .modal-box textarea{resize:vertical;min-height:80px}
 .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
-
-/* ── MISC ────────────────────────────────────────────────── */
-.proj-id{font-size:11px;color:var(--primary);font-weight:600;margin-top:1px}
-.empty-state{text-align:center;padding:48px 24px;color:var(--text3)}
-.es-icon{font-size:40px;margin-bottom:12px}
-.es-text{font-size:14px}
-.back-link{font-size:12px;color:var(--text3);text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-bottom:16px}
-.back-link:hover{color:var(--primary)}
-.err-msg{color:var(--red);font-size:13px;margin-top:8px;display:none}
-.section-title{font-size:14px;font-weight:700;margin-bottom:14px}
 
 /* ── VIEW TOGGLE ─────────────────────────────────────────── */
 .view-toggle{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:3px;gap:2px}
@@ -215,7 +204,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .kanban-wrap::-webkit-scrollbar-track{background:var(--bg)}
 .kanban-wrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 .kanban-wrap::-webkit-scrollbar-thumb:hover{background:var(--text3)}
-.kanban-col{flex-shrink:0;width:220px;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
+.kanban-col{flex-shrink:0;width:220px;background:var(--bg);border-radius:var(--radius);border:2px solid var(--border);overflow:hidden;transition:border-color .15s,background .15s}
+.kanban-col.drag-over{border-color:var(--primary) !important;background:rgba(224,90,30,.04)}
 .kanban-col-hdr{padding:10px 12px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .kanban-col-name{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--text2)}
 .kanban-col-name .kc-emoji{font-size:14px}
@@ -223,8 +213,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .kanban-cards{padding:8px;display:flex;flex-direction:column;gap:8px;min-height:60px}
 
 /* ── KANBAN CARD ─────────────────────────────────────────── */
-.kcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.kcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;cursor:pointer;transition:border-color .15s,box-shadow .15s,opacity .15s}
 .kcard:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(224,90,30,.12)}
+.kcard[draggable="true"]{cursor:grab}
+.kcard[draggable="true"]:active{cursor:grabbing}
+.kcard.dragging{opacity:.45;border:2px dashed var(--primary)}
 .kcard-name{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kcard-proj{font-size:11px;color:var(--primary);font-weight:600;margin-top:1px;margin-bottom:8px}
 .kcard-divider{border:none;border-top:1px solid var(--border);margin:8px 0}
@@ -237,7 +230,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .kcard-dias{font-size:10px;color:var(--text3)}
 .kcard-empty{padding:16px 8px;text-align:center;font-size:12px;color:var(--text3);font-style:italic}
 
-/* ── LISTA ACCORDION ─────────────────────────────────────── */
+/* ── LISTA ACCORDION (Carteira Jornada) ──────────────────── */
 .lista-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px}
 .lista-section-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none;transition:background .1s}
 .lista-section-hdr:hover{background:#f9fafb}
@@ -249,6 +242,22 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .lista-chev.open{transform:rotate(90deg)}
 .lista-body{display:none}
 .lista-body.open{display:block}
+
+/* ── MISC ────────────────────────────────────────────────── */
+.proj-id{font-size:11px;color:var(--primary);font-weight:600;margin-top:1px}
+.empty-state{text-align:center;padding:48px 24px;color:var(--text3)}
+.es-icon{font-size:40px;margin-bottom:12px}
+.es-text{font-size:14px}
+.back-link{font-size:12px;color:var(--text3);text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-bottom:16px}
+.back-link:hover{color:var(--primary)}
+.err-msg{color:var(--red);font-size:13px;margin-top:8px;display:none}
+.section-title{font-size:14px;font-weight:700;margin-bottom:14px}
+
+/* ── TOAST ───────────────────────────────────────────────── */
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:1100;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none}
+.toast{background:var(--primary);color:#fff;padding:12px 20px;border-radius:var(--radius);font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(224,90,30,.35);animation:toast-in .2s ease;max-width:320px}
+.toast-fade{opacity:0;transition:opacity .3s ease}
+@keyframes toast-in{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
 </style>
 </head>
 <body>
@@ -264,11 +273,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
     <select id="consultor-sel"></select>
   </div>
   <nav class="sb-nav">
+    <a class="nav-item" data-route="projetos" href="#projetos">
+      <span class="nav-icon">🌐</span> Projetos GRV
+    </a>
     <a class="nav-item" data-route="carteira" href="#carteira">
       <span class="nav-icon">📋</span> Minha Carteira
-    </a>
-    <a class="nav-item" data-route="jornada" href="#jornada">
-      <span class="nav-icon">📊</span> Jornada
     </a>
     <a class="nav-item" data-route="criar" href="#criar">
       <span class="nav-icon">➕</span> Criar Playbook
@@ -279,8 +288,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 <!-- ── CONTENT ───────────────────────────────────────────── -->
 <main class="content">
   <div class="content-inner">
+    <section id="sec-projetos" class="sec" style="display:none"></section>
     <section id="sec-carteira" class="sec" style="display:none"></section>
-    <section id="sec-jornada"  class="sec" style="display:none"></section>
     <section id="sec-cliente"  class="sec" style="display:none"></section>
     <section id="sec-criar"    class="sec" style="display:none"></section>
   </div>
@@ -300,6 +309,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
     </div>
   </div>
 </div>
+
+<!-- ── TOAST CONTAINER ──────────────────────────────────── -->
+<div id="toast-container"></div>
 
 <script>
 // ═══════════════════════════════════════════════════════════
@@ -324,6 +336,11 @@ const STATUS_COLOR = {
   'Interrompido':'orange',
   'Cancelado':   'black',
 };
+
+// fase index → next etapa (null = toast only)
+const FASE_ADVANCE = ['Engajamento','Evolução','Conclusão',null];
+// current etapa that triggers advance for each fase
+const FASE_ETAPA_GATE = ['1ª Reunião','Engajamento','Evolução','Conclusão'];
 
 const TEMPLATE_FASES = [
   {nome:'1ª Reunião & Kickoff', tarefas:[
@@ -362,7 +379,6 @@ const SEED_CONSULTORES = [
 ];
 
 function mkFases(checks) {
-  // checks: array of 16 booleans (4 tasks x 4 phases)
   return TEMPLATE_FASES.map((f, fi) => ({
     nome: f.nome,
     tarefas: f.tarefas.map((t, ti) => ({
@@ -372,7 +388,6 @@ function mkFases(checks) {
 }
 
 const SEED_CLIENTES = [
-  // ── ANA PAULA ──────────────────────────────────────────
   {
     id:'KMSIL', projeto:'SAGP-00036', produto:'CPS', consultorId:'ana-paula',
     etapa:'Engajamento', dataInicio:'2026-03-05', prazo:'2026-09-30',
@@ -383,7 +398,7 @@ const SEED_CLIENTES = [
       {id:'r1',autor:'Ana Paula Souza',data:'2026-03-10T10:00:00',texto:'Kickoff realizado com sucesso. Equipe bem engajada.'},
     ],
     historicoEtapas:[
-      {de:null,       para:'1ª Reunião', data:'2026-03-05T09:00:00',motivo:'Início do projeto'},
+      {de:null,        para:'1ª Reunião', data:'2026-03-05T09:00:00',motivo:'Início do projeto'},
       {de:'1ª Reunião',para:'Engajamento',data:'2026-03-15T10:00:00',motivo:'Kickoff realizado, cliente pronto para avançar'},
     ],
   },
@@ -443,16 +458,13 @@ const SEED_CLIENTES = [
       {de:'Evolução',   para:'Conclusão',  data:'2026-06-18T10:00:00',motivo:'Evolução concluída com sucesso, partindo para finalização'},
     ],
   },
-  // ── CARLOS ─────────────────────────────────────────────
   {
     id:'FRAY', projeto:'SAGP-00039', produto:'CPS', consultorId:'carlos',
     etapa:'1ª Reunião', dataInicio:'2026-03-29', prazo:'2026-09-21',
     proximaAcao:'Agendar reunião de kickoff',
     fases: mkFases([0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
-    historicoEtapas:[
-      {de:null,para:'1ª Reunião',data:'2026-03-29T09:00:00',motivo:'Início do projeto'},
-    ],
+    historicoEtapas:[{de:null,para:'1ª Reunião',data:'2026-03-29T09:00:00',motivo:'Início do projeto'}],
   },
   {
     id:'FELIX INDUSTRIAL', projeto:'SAGP-00092', produto:'CPS', consultorId:'carlos',
@@ -462,9 +474,7 @@ const SEED_CLIENTES = [
     registros:[
       {id:'r1',autor:'Carlos Menezes',data:'2026-01-20T09:00:00',texto:'Apresentação inicial realizada. Aguardando agenda para kickoff.'},
     ],
-    historicoEtapas:[
-      {de:null,para:'1ª Reunião',data:'2026-01-14T09:00:00',motivo:'Início do projeto'},
-    ],
+    historicoEtapas:[{de:null,para:'1ª Reunião',data:'2026-01-14T09:00:00',motivo:'Início do projeto'}],
   },
   {
     id:'USIMAZA EMBRAER', projeto:'SAGP-00058', produto:'CPS', consultorId:'carlos',
@@ -472,9 +482,7 @@ const SEED_CLIENTES = [
     proximaAcao:'Primeira reunião de alinhamento',
     fases: mkFases([0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
-    historicoEtapas:[
-      {de:null,para:'1ª Reunião',data:'2026-03-30T09:00:00',motivo:'Início do projeto'},
-    ],
+    historicoEtapas:[{de:null,para:'1ª Reunião',data:'2026-03-30T09:00:00',motivo:'Início do projeto'}],
   },
   {
     id:'CAMPOSC', projeto:'SAGP-00038', produto:'CPS', consultorId:'carlos',
@@ -489,16 +497,13 @@ const SEED_CLIENTES = [
       {de:'1ª Reunião',para:'Pausado',   data:'2026-01-08T10:00:00',motivo:'Responsável saiu da empresa, sem substituto definido'},
     ],
   },
-  // ── MARIA ──────────────────────────────────────────────
   {
     id:'SOARES FERRAMENTARIA', projeto:'SAGP-00131', produto:'CPS', consultorId:'maria',
     etapa:'1ª Reunião', dataInicio:'2026-06-02', prazo:'2026-09-09',
     proximaAcao:'Agendar kickoff com equipe do cliente',
     fases: mkFases([0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
-    historicoEtapas:[
-      {de:null,para:'1ª Reunião',data:'2026-06-02T09:00:00',motivo:'Início do projeto'},
-    ],
+    historicoEtapas:[{de:null,para:'1ª Reunião',data:'2026-06-02T09:00:00',motivo:'Início do projeto'}],
   },
   {
     id:'LIQUOS', projeto:'SAGP-00093', produto:'CPS', consultorId:'maria',
@@ -516,6 +521,11 @@ const SEED_CLIENTES = [
   },
 ];
 
+const SEED_PROJETOS = [
+  {id:'WELDMACH',   nome:'WELDMACH',   projeto:'SAGP-00145', produto:'CPS', consultorId:'ana-paula'},
+  {id:'RETIMICRON', nome:'RETIMICRON', projeto:'SAGP-00148', produto:'IOT', consultorId:'carlos'},
+];
+
 // ═══════════════════════════════════════════════════════════
 // DB LAYER
 // ═══════════════════════════════════════════════════════════
@@ -523,6 +533,7 @@ const DB = {
   CLIENTES:   'grv_cs_clientes',
   CONSULTORES:'grv_cs_consultores',
   ATIVO:      'grv_cs_consultor_ativo',
+  PROJETOS:   'grv_cs_projetos',
 };
 
 function initData() {
@@ -532,18 +543,28 @@ function initData() {
     localStorage.setItem(DB.CLIENTES, JSON.stringify(SEED_CLIENTES));
   if (!localStorage.getItem(DB.ATIVO))
     localStorage.setItem(DB.ATIVO, 'ana-paula');
+  if (!localStorage.getItem(DB.PROJETOS))
+    localStorage.setItem(DB.PROJETOS, JSON.stringify(SEED_PROJETOS));
 }
 
-function getConsultores() { return JSON.parse(localStorage.getItem(DB.CONSULTORES) || '[]'); }
-function getConsultorAtivo() { return localStorage.getItem(DB.ATIVO) || 'ana-paula'; }
-function setConsultorAtivo(id) { localStorage.setItem(DB.ATIVO, id); }
-function getClientes() { return JSON.parse(localStorage.getItem(DB.CLIENTES) || '[]'); }
-function getCliente(id) { return getClientes().find(c => c.id === id) || null; }
+function getConsultores()     { return JSON.parse(localStorage.getItem(DB.CONSULTORES) || '[]'); }
+function getConsultorAtivo()  { return localStorage.getItem(DB.ATIVO) || 'ana-paula'; }
+function setConsultorAtivo(id){ localStorage.setItem(DB.ATIVO, id); }
+function getClientes()        { return JSON.parse(localStorage.getItem(DB.CLIENTES) || '[]'); }
+function getCliente(id)       { return getClientes().find(c => c.id === id) || null; }
 function saveCliente(updated) {
   const all = getClientes();
   const idx = all.findIndex(c => c.id === updated.id);
   if (idx >= 0) all[idx] = updated; else all.push(updated);
   localStorage.setItem(DB.CLIENTES, JSON.stringify(all));
+}
+function getProjetosPendentes() {
+  const all = JSON.parse(localStorage.getItem(DB.PROJETOS) || '[]');
+  return all.filter(p => !getCliente(p.id));
+}
+function removeProjetoPendente(id) {
+  const all = JSON.parse(localStorage.getItem(DB.PROJETOS) || '[]');
+  localStorage.setItem(DB.PROJETOS, JSON.stringify(all.filter(p => p.id !== id)));
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -562,6 +583,30 @@ function getStatus(c) {
     if (new Date() > p && getProgresso(c) < 100) return 'Atrasado';
   }
   return 'Em ordem';
+}
+
+function getStatusDash(c) {
+  if (c.etapa === 'Cancelado') return 'Cancelado';
+  if (getProgresso(c) === 100) return 'Concluído';
+  if (getStatus(c) === 'Atrasado') return 'Atrasado';
+  if (c.etapa === 'Pausado' || c.etapa === 'Interrompido') return 'Pausado';
+  if (['Engajamento','Evolução','Conclusão'].includes(c.etapa)) return 'Em Andamento';
+  return 'Não Iniciado';
+}
+
+function computeDashboardKPIs(clientes) {
+  const r = {total:0, naoIniciado:0, emAndamento:0, atrasado:0, pausado:0, concluido:0, cancelado:0};
+  clientes.forEach(c => {
+    r.total++;
+    const s = getStatusDash(c);
+    if      (s==='Não Iniciado')  r.naoIniciado++;
+    else if (s==='Em Andamento')  r.emAndamento++;
+    else if (s==='Atrasado')      r.atrasado++;
+    else if (s==='Pausado')       r.pausado++;
+    else if (s==='Concluído')     r.concluido++;
+    else if (s==='Cancelado')     r.cancelado++;
+  });
+  return r;
 }
 
 function getDiasNaEtapa(c) {
@@ -589,6 +634,10 @@ function fmtDateTime(iso) {
   return new Date(iso).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric'});
 }
 
+function etapaToId(etapa) {
+  return etapa.replace(/[^a-z0-9]/gi, '_');
+}
+
 // ═══════════════════════════════════════════════════════════
 // CONSULTOR SELECTOR
 // ═══════════════════════════════════════════════════════════
@@ -614,10 +663,10 @@ function route() {
   if (hash.startsWith('cliente/')) {
     document.getElementById('sec-cliente').style.display = 'block';
     renderCliente(decodeURIComponent(hash.split('/').slice(1).join('/')));
-  } else if (hash === 'jornada') {
-    document.getElementById('sec-jornada').style.display = 'block';
-    document.querySelector('[data-route="jornada"]')?.classList.add('active');
-    renderJornada();
+  } else if (hash === 'projetos') {
+    document.getElementById('sec-projetos').style.display = 'block';
+    document.querySelector('[data-route="projetos"]')?.classList.add('active');
+    renderProjetosGRV();
   } else if (hash === 'criar') {
     document.getElementById('sec-criar').style.display = 'block';
     document.querySelector('[data-route="criar"]')?.classList.add('active');
@@ -633,247 +682,217 @@ window.addEventListener('hashchange', route);
 window.addEventListener('DOMContentLoaded', () => { initData(); initConsultorSel(); route(); });
 
 // ═══════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════
+function showToast(msg, duration) {
+  duration = duration || 3000;
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = msg;
+  container.appendChild(toast);
+  setTimeout(function() {
+    toast.classList.add('toast-fade');
+    setTimeout(function() { toast.remove(); }, 320);
+  }, duration);
+}
+
+// ═══════════════════════════════════════════════════════════
 // TELA 1 — MINHA CARTEIRA
 // ═══════════════════════════════════════════════════════════
-let _filterStatus = 'Todos';
-let _searchQuery  = '';
+const CARTEIRA_VIEW_KEY = 'grv_cs_view_carteira';
+let _carteira_view = localStorage.getItem(CARTEIRA_VIEW_KEY) || 'lista';
+let _filterStatus  = 'Todos';
+let _searchQuery   = '';
+let _carteira_jornada_collapsed = new Set();
+
+function setCarteiraView(v) {
+  _carteira_view = v;
+  localStorage.setItem(CARTEIRA_VIEW_KEY, v);
+  renderCarteira();
+}
 
 function renderCarteira() {
-  const ativo     = getConsultorAtivo();
-  const nomeAtivo = getConsultores().find(c => c.id === ativo)?.nome || '';
-  const carteira  = getClientes().filter(c => c.consultorId === ativo);
+  const ativo      = getConsultorAtivo();
+  const nomeAtivo  = getConsultores().find(c => c.id === ativo)?.nome || '';
+  const carteira   = getClientes().filter(c => c.consultorId === ativo);
+  const consultores = getConsultores();
 
   const total     = carteira.length;
   const emOrdem   = carteira.filter(c => getStatus(c) === 'Em ordem').length;
   const atrasados = carteira.filter(c => getStatus(c) === 'Atrasado').length;
   const pausados  = carteira.filter(c => ['Pausado','Interrompido','Cancelado'].includes(getStatus(c))).length;
 
-  let filtered = carteira;
-  if (_filterStatus !== 'Todos') {
-    if (_filterStatus === 'Pausado') {
-      filtered = filtered.filter(c => ['Pausado','Interrompido','Cancelado'].includes(getStatus(c)));
-    } else {
-      filtered = filtered.filter(c => getStatus(c) === _filterStatus);
-    }
-  }
-  if (_searchQuery)
-    filtered = filtered.filter(c => c.id.toLowerCase().includes(_searchQuery.toLowerCase()));
+  const toggle = `
+    <div class="view-toggle">
+      <button class="vt-btn${_carteira_view==='lista'?' active':''}" onclick="setCarteiraView('lista')">☰ Lista</button>
+      <button class="vt-btn${_carteira_view==='jornada'?' active':''}" onclick="setCarteiraView('jornada')">⚡ Jornada</button>
+      <button class="vt-btn${_carteira_view==='kanban'?' active':''}" onclick="setCarteiraView('kanban')">⊞ Kanban</button>
+    </div>`;
+
+  const header = `
+    <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+      <div>
+        <div class="page-title">Minha Carteira</div>
+        <div class="page-subtitle">Consultor: ${nomeAtivo} · ${total} cliente${total!==1?'s':''}</div>
+      </div>
+      ${toggle}
+    </div>
+    <div class="metric-grid">
+      <div class="metric-card mc-accent"><div class="mc-label">Total de clientes</div><div class="mc-value">${total}</div></div>
+      <div class="metric-card mc-green"><div class="mc-label">Em ordem</div><div class="mc-value">${emOrdem}</div></div>
+      <div class="metric-card mc-red"><div class="mc-label">Atrasados</div><div class="mc-value">${atrasados}</div></div>
+      <div class="metric-card mc-gray"><div class="mc-label">Pausados / Interrompidos</div><div class="mc-value">${pausados}</div></div>
+    </div>`;
 
   const sec = document.getElementById('sec-carteira');
-  sec.innerHTML = `
-    <div class="page-header">
-      <div class="page-title">Minha Carteira</div>
-      <div class="page-subtitle">Consultor: ${nomeAtivo} · ${total} cliente${total!==1?'s':''}</div>
-    </div>
 
-    <div class="metric-grid">
-      <div class="metric-card mc-accent">
-        <div class="mc-label">Total de clientes</div>
-        <div class="mc-value">${total}</div>
-      </div>
-      <div class="metric-card mc-green">
-        <div class="mc-label">Em ordem</div>
-        <div class="mc-value">${emOrdem}</div>
-      </div>
-      <div class="metric-card mc-red">
-        <div class="mc-label">Atrasados</div>
-        <div class="mc-value">${atrasados}</div>
-      </div>
-      <div class="metric-card mc-gray">
-        <div class="mc-label">Pausados / Interrompidos</div>
-        <div class="mc-value">${pausados}</div>
-      </div>
-    </div>
+  if (_carteira_view === 'lista') {
+    let filtered = carteira;
+    if (_filterStatus !== 'Todos') {
+      if (_filterStatus === 'Pausado')
+        filtered = filtered.filter(c => ['Pausado','Interrompido','Cancelado'].includes(getStatus(c)));
+      else
+        filtered = filtered.filter(c => getStatus(c) === _filterStatus);
+    }
+    if (_searchQuery)
+      filtered = filtered.filter(c => c.id.toLowerCase().includes(_searchQuery.toLowerCase()));
 
-    <div class="search-row">
-      <div class="filter-tabs">
-        ${['Todos','Em ordem','Atrasado','Pausado'].map(s =>
-          `<button class="filter-tab${_filterStatus===s?' active':''}" onclick="setFilter('${s}')">${s}</button>`
-        ).join('')}
-      </div>
-      <input class="search-input" type="text" placeholder="Buscar cliente..." value="${_searchQuery}"
-        oninput="setSearch(this.value)">
-    </div>
+    const body = filtered.length === 0
+      ? `<div class="empty-state">
+           <div class="es-icon">${carteira.length===0?'📋':'🔍'}</div>
+           <div class="es-text">${carteira.length===0?'Nenhum cliente nesta carteira.':'Nenhum cliente encontrado com este filtro.'}</div>
+         </div>`
+      : `<div class="table-wrap">
+           <table class="data-table">
+             <thead><tr>
+               <th>Cliente</th><th>Etapa</th><th>Status</th>
+               <th style="width:130px">Progresso</th><th>Próxima Ação</th><th>Prazo</th>
+             </tr></thead>
+             <tbody>
+               ${filtered.map(c => {
+                 const prog = getProgresso(c);
+                 const st   = getStatus(c);
+                 return `<tr onclick="navigate('cliente/${encodeURIComponent(c.id)}')">
+                   <td><div style="font-weight:600">${c.id}</div><div class="proj-id">${c.projeto}</div></td>
+                   <td>${getEtapaBadge(c.etapa)}</td>
+                   <td>${getStatusBadge(st)}</td>
+                   <td>
+                     <div style="display:flex;align-items:center;gap:8px">
+                       <div class="prog-wrap" style="flex:1"><div class="prog-fill" style="width:${prog}%"></div></div>
+                       <span style="font-size:11px;color:var(--text3);white-space:nowrap">${prog}%</span>
+                     </div>
+                   </td>
+                   <td style="color:var(--text2);font-size:12px;max-width:180px">${c.proximaAcao||'—'}</td>
+                   <td style="font-size:12px;color:${st==='Atrasado'?'var(--red)':'var(--text2)'}">${fmtDate(c.prazo)}</td>
+                 </tr>`;
+               }).join('')}
+             </tbody>
+           </table>
+         </div>`;
 
-    ${filtered.length === 0 ? `
-      <div class="empty-state">
-        <div class="es-icon">${carteira.length===0?'📋':'🔍'}</div>
-        <div class="es-text">${carteira.length===0
-          ? 'Nenhum cliente nesta carteira.'
-          : 'Nenhum cliente encontrado com este filtro.'}</div>
+    sec.innerHTML = header + `
+      <div class="search-row">
+        <div class="filter-tabs">
+          ${['Todos','Em ordem','Atrasado','Pausado'].map(s =>
+            `<button class="filter-tab${_filterStatus===s?' active':''}" onclick="setFilter('${s}')">${s}</button>`
+          ).join('')}
+        </div>
+        <input class="search-input" type="text" placeholder="Buscar cliente..." value="${_searchQuery}"
+          oninput="setSearch(this.value)">
       </div>
-    ` : `
-      <div class="table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Cliente</th>
-              <th>Etapa</th>
-              <th>Status</th>
-              <th style="width:130px">Progresso</th>
-              <th>Próxima Ação</th>
-              <th>Prazo</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${filtered.map(c => {
-              const prog = getProgresso(c);
-              const st   = getStatus(c);
-              return `<tr onclick="navigate('cliente/${encodeURIComponent(c.id)}')">
-                <td>
-                  <div style="font-weight:600">${c.id}</div>
-                  <div class="proj-id">${c.projeto}</div>
-                </td>
-                <td>${getEtapaBadge(c.etapa)}</td>
-                <td>${getStatusBadge(st)}</td>
-                <td>
-                  <div style="display:flex;align-items:center;gap:8px">
-                    <div class="prog-wrap" style="flex:1">
-                      <div class="prog-fill" style="width:${prog}%"></div>
-                    </div>
-                    <span style="font-size:11px;color:var(--text3);white-space:nowrap">${prog}%</span>
-                  </div>
-                </td>
-                <td style="color:var(--text2);font-size:12px;max-width:180px">${c.proximaAcao||'—'}</td>
-                <td style="font-size:12px;color:${st==='Atrasado'?'var(--red)':'var(--text2)'}">
-                  ${fmtDate(c.prazo)}
-                </td>
-              </tr>`;
-            }).join('')}
-          </tbody>
-        </table>
-      </div>
-    `}
-  `;
+      ${body}`;
+
+  } else if (_carteira_view === 'jornada') {
+    sec.innerHTML = header + renderJornadaAccordion(carteira, consultores);
+
+  } else {
+    // kanban with DnD
+    sec.innerHTML = header + renderKanbanBoard(carteira, consultores, true);
+  }
 }
 
 function setFilter(s) { _filterStatus = s; renderCarteira(); }
-function setSearch(v) { _searchQuery = v; renderCarteira(); }
+function setSearch(v) { _searchQuery  = v; renderCarteira(); }
 
-// ═══════════════════════════════════════════════════════════
-// TELA 2 — JORNADA
-// ═══════════════════════════════════════════════════════════
-const JORNADA_VIEW_KEY = 'grv_cs_jornada_view';
-let _jornada_view         = localStorage.getItem(JORNADA_VIEW_KEY) || 'lista';
-let _lista_collapsed      = new Set(); // etapas colapsadas no modo lista
-
-function setJornadaView(v) {
-  _jornada_view = v;
-  localStorage.setItem(JORNADA_VIEW_KEY, v);
-  renderJornada();
-}
-
-function toggleListaSection(etapa) {
-  if (_lista_collapsed.has(etapa)) _lista_collapsed.delete(etapa);
-  else _lista_collapsed.add(etapa);
-  // toggle sem re-render completo
-  const body = document.getElementById(`lista-body-${CSS.escape(etapa)}`);
-  const chev = document.getElementById(`lista-chev-${CSS.escape(etapa)}`);
+// ─── Jornada accordion (Minha Carteira) ────────────────────
+function toggleCarteiraJornada(etapa) {
+  if (_carteira_jornada_collapsed.has(etapa)) _carteira_jornada_collapsed.delete(etapa);
+  else _carteira_jornada_collapsed.add(etapa);
+  const eid  = etapaToId(etapa);
+  const body = document.getElementById('cj-body-' + eid);
+  const chev = document.getElementById('cj-chev-' + eid);
   if (body) body.classList.toggle('open');
   if (chev) chev.classList.toggle('open');
 }
 
-function renderJornada() {
-  const todos       = getClientes();
-  const consultores = getConsultores();
-  const sec         = document.getElementById('sec-jornada');
-  const isKanban    = _jornada_view === 'kanban';
+function renderJornadaAccordion(clientes, consultores) {
+  return ETAPAS.map(etapa => {
+    const m      = ETAPA_META[etapa];
+    const cls    = clientes.filter(c => c.etapa === etapa);
+    const count  = cls.length;
+    const isOpen = !_carteira_jornada_collapsed.has(etapa);
+    const eid    = etapaToId(etapa);
 
-  // ── toggle pill ───────────────────────────────────────────
-  const toggle = `
-    <div class="view-toggle">
-      <button class="vt-btn${!isKanban?' active':''}" onclick="setJornadaView('lista')">
-        ☰ Lista
-      </button>
-      <button class="vt-btn${isKanban?' active':''}" onclick="setJornadaView('kanban')">
-        ⊞ Kanban
-      </button>
-    </div>`;
+    const body = count === 0
+      ? `<div style="padding:20px 16px;text-align:center;color:var(--text3);font-size:13px">Nenhum cliente nesta etapa.</div>`
+      : `<div class="table-wrap" style="border-radius:0;border:none;box-shadow:none">
+           <table class="data-table">
+             <thead><tr>
+               <th>Cliente</th><th>Consultor</th><th>Status</th>
+               <th>Progresso</th><th>Tempo na etapa</th>
+             </tr></thead>
+             <tbody>
+               ${cls.map(c => {
+                 const prog   = getProgresso(c);
+                 const st     = getStatus(c);
+                 const consul = consultores.find(x => x.id === c.consultorId)?.nome || c.consultorId;
+                 const dias   = getDiasNaEtapa(c);
+                 return `<tr onclick="navigate('cliente/${encodeURIComponent(c.id)}')">
+                   <td><div style="font-weight:600">${c.id}</div><div class="proj-id">${c.projeto}</div></td>
+                   <td style="font-size:12px;color:var(--text2)">${consul}</td>
+                   <td>${getStatusBadge(st)}</td>
+                   <td>
+                     <div style="display:flex;align-items:center;gap:8px">
+                       <div class="prog-wrap" style="width:72px"><div class="prog-fill" style="width:${prog}%"></div></div>
+                       <span style="font-size:11px;color:var(--text3)">${prog}%</span>
+                     </div>
+                   </td>
+                   <td style="font-size:12px;color:var(--text3)">${dias} dia${dias!==1?'s':''}</td>
+                 </tr>`;
+               }).join('')}
+             </tbody>
+           </table>
+         </div>`;
 
-  // ── header ────────────────────────────────────────────────
-  const header = `
-    <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
-      <div>
-        <div class="page-title">Jornada</div>
-        <div class="page-subtitle">Visão geral de todos os clientes por etapa</div>
-      </div>
-      ${toggle}
-    </div>`;
-
-  // ── MODO LISTA ────────────────────────────────────────────
-  if (!isKanban) {
-    const sections = ETAPAS.map(etapa => {
-      const m      = ETAPA_META[etapa];
-      const cls    = todos.filter(c => c.etapa === etapa);
-      const count  = cls.length;
-      const isOpen = !_lista_collapsed.has(etapa);
-      const etapaId = etapa.replace(/[^a-z0-9]/gi, '_');
-
-      const body = count === 0
-        ? `<div style="padding:20px 16px;text-align:center;color:var(--text3);font-size:13px">Nenhum cliente nesta etapa.</div>`
-        : `<div class="table-wrap" style="border-radius:0;border:none;box-shadow:none">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Cliente</th>
-                  <th>Etapa</th>
-                  <th>Consultor</th>
-                  <th>Status</th>
-                  <th>Progresso</th>
-                  <th>Tempo na etapa</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${cls.map(c => {
-                  const prog   = getProgresso(c);
-                  const st     = getStatus(c);
-                  const consul = consultores.find(x => x.id === c.consultorId)?.nome || c.consultorId;
-                  const dias   = getDiasNaEtapa(c);
-                  return `<tr onclick="navigate('cliente/${encodeURIComponent(c.id)}')">
-                    <td>
-                      <div style="font-weight:600">${c.id}</div>
-                      <div class="proj-id">${c.projeto}</div>
-                    </td>
-                    <td>${getEtapaBadge(c.etapa)}</td>
-                    <td style="font-size:12px;color:var(--text2)">${consul}</td>
-                    <td>${getStatusBadge(st)}</td>
-                    <td>
-                      <div style="display:flex;align-items:center;gap:8px">
-                        <div class="prog-wrap" style="width:72px">
-                          <div class="prog-fill" style="width:${prog}%"></div>
-                        </div>
-                        <span style="font-size:11px;color:var(--text3)">${prog}%</span>
-                      </div>
-                    </td>
-                    <td style="font-size:12px;color:var(--text3)">${dias} dia${dias!==1?'s':''}</td>
-                  </tr>`;
-                }).join('')}
-              </tbody>
-            </table>
-          </div>`;
-
-      return `
-        <div class="lista-section">
-          <div class="lista-section-hdr" onclick="toggleListaSection('${etapa}')">
-            <div class="lista-section-hdr-left">
-              <span class="lista-section-emoji">${m.emoji}</span>
-              <span class="lista-section-name">${etapa}</span>
-              <span class="lista-section-ct">${count}</span>
-            </div>
-            <span class="lista-chev${isOpen?' open':''}" id="lista-chev-${etapaId}">▶</span>
+    return `
+      <div class="lista-section">
+        <div class="lista-section-hdr" onclick="toggleCarteiraJornada('${etapa}')">
+          <div class="lista-section-hdr-left">
+            <span class="lista-section-emoji">${m.emoji}</span>
+            <span class="lista-section-name">${etapa}</span>
+            <span class="lista-section-ct">${count}</span>
           </div>
-          <div class="lista-body${isOpen?' open':''}" id="lista-body-${etapaId}">${body}</div>
-        </div>`;
-    }).join('');
+          <span class="lista-chev${isOpen?' open':''}" id="cj-chev-${eid}">▶</span>
+        </div>
+        <div class="lista-body${isOpen?' open':''}" id="cj-body-${eid}">${body}</div>
+      </div>`;
+  }).join('');
+}
 
-    sec.innerHTML = header + sections;
-    return;
-  }
+// ─── Kanban board (shared, DnD optional) ───────────────────
+let _isDragging   = false;
+let _dragClienteId = null;
+let _dragFromEtapa = null;
 
-  // ── MODO KANBAN ───────────────────────────────────────────
+function renderKanbanBoard(clientes, consultores, enableDnD) {
   const colunas = ETAPAS.map(etapa => {
     const m   = ETAPA_META[etapa];
-    const cls = todos.filter(c => c.etapa === etapa);
+    const cls = clientes.filter(c => c.etapa === etapa);
+
+    const colAttrs = enableDnD
+      ? `ondragover="dragOverCol(event,this,'${etapa}')" ondrop="dropOnCol(this,'${etapa}')" data-etapa="${etapa}"`
+      : `data-etapa="${etapa}"`;
 
     const cards = cls.length === 0
       ? `<div class="kcard-empty">Nenhum cliente</div>`
@@ -882,16 +901,17 @@ function renderJornada() {
           const st     = getStatus(c);
           const consul = consultores.find(x => x.id === c.consultorId)?.nome || c.consultorId;
           const dias   = getDiasNaEtapa(c);
+          const dragAttrs = enableDnD
+            ? `draggable="true" ondragstart="dragStart(event,'${c.id}','${etapa}')" ondragend="dragEnd(event)"`
+            : '';
           return `
-            <div class="kcard" onclick="navigate('cliente/${encodeURIComponent(c.id)}')">
+            <div class="kcard" ${dragAttrs} onclick="if(!_isDragging)navigate('cliente/${encodeURIComponent(c.id)}')">
               <div class="kcard-name" title="${c.id}">${c.id}</div>
               <div class="kcard-proj">${c.projeto}</div>
               <hr class="kcard-divider">
               ${getStatusBadge(st)}
               <div class="kcard-prog-row">
-                <div class="kcard-prog-wrap">
-                  <div class="kcard-prog-fill" style="width:${prog}%"></div>
-                </div>
+                <div class="kcard-prog-wrap"><div class="kcard-prog-fill" style="width:${prog}%"></div></div>
                 <span class="kcard-pct">${prog}%</span>
               </div>
               <div class="kcard-meta">
@@ -902,29 +922,167 @@ function renderJornada() {
         }).join('');
 
     return `
-      <div class="kanban-col">
+      <div class="kanban-col" ${colAttrs}>
         <div class="kanban-col-hdr">
-          <div class="kanban-col-name">
-            <span class="kc-emoji">${m.emoji}</span>
-            <span>${etapa}</span>
-          </div>
+          <div class="kanban-col-name"><span class="kc-emoji">${m.emoji}</span><span>${etapa}</span></div>
           <span class="kanban-col-ct">${cls.length}</span>
         </div>
         <div class="kanban-cards">${cards}</div>
       </div>`;
   }).join('');
 
-  sec.innerHTML = header + `<div class="kanban-wrap">${colunas}</div>`;
+  return `<div class="kanban-wrap">${colunas}</div>`;
+}
+
+// ─── Drag & Drop handlers ───────────────────────────────────
+function dragStart(event, clienteId, fromEtapa) {
+  _isDragging    = true;
+  _dragClienteId = clienteId;
+  _dragFromEtapa = fromEtapa;
+  event.dataTransfer.effectAllowed = 'move';
+  event.target.classList.add('dragging');
+}
+
+function dragEnd(event) {
+  event.target.classList.remove('dragging');
+  document.querySelectorAll('.kanban-col.drag-over').forEach(c => c.classList.remove('drag-over'));
+  setTimeout(function() { _isDragging = false; }, 60);
+}
+
+function dragOverCol(event, el, etapa) {
+  event.preventDefault();
+  document.querySelectorAll('.kanban-col.drag-over').forEach(c => c.classList.remove('drag-over'));
+  if (etapa !== _dragFromEtapa) el.classList.add('drag-over');
+}
+
+function dropOnCol(el, destEtapa) {
+  el.classList.remove('drag-over');
+  if (_dragClienteId && destEtapa !== _dragFromEtapa) {
+    openModal(_dragClienteId, destEtapa);
+  }
+  _dragClienteId = null;
+  _dragFromEtapa = null;
+}
+
+// ═══════════════════════════════════════════════════════════
+// TELA 2 — PROJETOS GRV
+// ═══════════════════════════════════════════════════════════
+const PROJETOS_VIEW_KEY = 'grv_cs_projetos_view';
+let _proj_view      = localStorage.getItem(PROJETOS_VIEW_KEY) || 'dashboard';
+let _proj_consultor = '';
+let _proj_etapa     = '';
+let _proj_status    = '';
+let _dashCharts     = {};
+
+function setProjetosView(v) {
+  _proj_view = v;
+  localStorage.setItem(PROJETOS_VIEW_KEY, v);
+  renderProjetosGRV();
+}
+
+function setProjConsultor(v) { _proj_consultor = v; renderProjetosGRV(); }
+function setProjEtapa(v)     { _proj_etapa     = v; renderProjetosGRV(); }
+function setProjStatus(v)    { _proj_status    = v; renderProjetosGRV(); }
+
+function renderProjetosGRV() {
+  const todos      = getClientes();
+  const consultores = getConsultores();
+
+  let filtered = todos;
+  if (_proj_consultor) filtered = filtered.filter(c => c.consultorId === _proj_consultor);
+  if (_proj_etapa)     filtered = filtered.filter(c => c.etapa === _proj_etapa);
+  if (_proj_status)    filtered = filtered.filter(c => getStatus(c) === _proj_status);
+
+  const total     = todos.length;
+  const emOrdem   = todos.filter(c => getStatus(c) === 'Em ordem').length;
+  const atrasados = todos.filter(c => getStatus(c) === 'Atrasado').length;
+  const pausados  = todos.filter(c => ['Pausado','Interrompido','Cancelado'].includes(getStatus(c))).length;
+
+  const toggle = `
+    <div class="view-toggle">
+      <button class="vt-btn${_proj_view==='lista'?' active':''}" onclick="setProjetosView('lista')">☰ Lista</button>
+      <button class="vt-btn${_proj_view==='kanban'?' active':''}" onclick="setProjetosView('kanban')">⊞ Kanban</button>
+    </div>`;
+
+  const filterBar = `
+    <div class="filter-bar">
+      <select onchange="setProjConsultor(this.value)">
+        <option value="">Todos consultores</option>
+        ${consultores.map(c => `<option value="${c.id}"${c.id===_proj_consultor?' selected':''}>${c.nome}</option>`).join('')}
+      </select>
+      <select onchange="setProjEtapa(this.value)">
+        <option value="">Todas etapas</option>
+        ${ETAPAS.map(e => `<option value="${e}"${e===_proj_etapa?' selected':''}>${ETAPA_META[e].emoji} ${e}</option>`).join('')}
+      </select>
+      <select onchange="setProjStatus(this.value)">
+        <option value="">Todos status</option>
+        ${Object.keys(STATUS_COLOR).map(s => `<option value="${s}"${s===_proj_status?' selected':''}>${s}</option>`).join('')}
+      </select>
+    </div>`;
+
+  const sec = document.getElementById('sec-projetos');
+
+  let content;
+  if (_proj_view === 'lista') {
+    content = filtered.length === 0
+      ? `<div class="empty-state"><div class="es-icon">🔍</div><div class="es-text">Nenhum projeto encontrado com este filtro.</div></div>`
+      : `<div class="table-wrap">
+           <table class="data-table">
+             <thead><tr>
+               <th>Cliente</th><th>Consultor</th><th>Etapa</th><th>Status</th>
+               <th style="width:130px">Progresso</th><th>Prazo</th>
+             </tr></thead>
+             <tbody>
+               ${filtered.map(c => {
+                 const prog   = getProgresso(c);
+                 const st     = getStatus(c);
+                 const consul = consultores.find(x => x.id === c.consultorId)?.nome || c.consultorId;
+                 return `<tr onclick="navigate('cliente/${encodeURIComponent(c.id)}')">
+                   <td><div style="font-weight:600">${c.id}</div><div class="proj-id">${c.projeto}</div></td>
+                   <td style="font-size:12px;color:var(--text2)">${consul}</td>
+                   <td>${getEtapaBadge(c.etapa)}</td>
+                   <td>${getStatusBadge(st)}</td>
+                   <td>
+                     <div style="display:flex;align-items:center;gap:8px">
+                       <div class="prog-wrap" style="flex:1"><div class="prog-fill" style="width:${prog}%"></div></div>
+                       <span style="font-size:11px;color:var(--text3);white-space:nowrap">${prog}%</span>
+                     </div>
+                   </td>
+                   <td style="font-size:12px;color:${st==='Atrasado'?'var(--red)':'var(--text2)'}">${fmtDate(c.prazo)}</td>
+                 </tr>`;
+               }).join('')}
+             </tbody>
+           </table>
+         </div>`;
+  } else {
+    content = renderKanbanBoard(filtered, consultores, false);
+  }
+
+  sec.innerHTML = `
+    <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+      <div>
+        <div class="page-title">Projetos GRV</div>
+        <div class="page-subtitle">Visão global de todos os projetos em implantação · ${total} total</div>
+      </div>
+      ${toggle}
+    </div>
+    <div class="metric-grid">
+      <div class="metric-card mc-accent"><div class="mc-label">Total de projetos</div><div class="mc-value">${total}</div></div>
+      <div class="metric-card mc-green"><div class="mc-label">Em ordem</div><div class="mc-value">${emOrdem}</div></div>
+      <div class="metric-card mc-red"><div class="mc-label">Atrasados</div><div class="mc-value">${atrasados}</div></div>
+      <div class="metric-card mc-gray"><div class="mc-label">Pausados / Interrompidos</div><div class="mc-value">${pausados}</div></div>
+    </div>
+    ${filterBar}
+    ${content}`;
 }
 
 // ═══════════════════════════════════════════════════════════
 // TELA 3 — DETALHE DO CLIENTE
 // ═══════════════════════════════════════════════════════════
 let _open_fases = {};
-let _modal_cliente_id = null;
 
 function renderCliente(id) {
-  const c = getCliente(id);
+  const c   = getCliente(id);
   const sec = document.getElementById('sec-cliente');
 
   if (!c) {
@@ -937,7 +1095,6 @@ function renderCliente(id) {
   const dias   = getDiasNaEtapa(c);
   const consul = getConsultores().find(x => x.id === c.consultorId)?.nome || c.consultorId;
 
-  // Playbook
   const fasesHtml = c.fases.map((f, fi) => {
     const feitas = f.tarefas.filter(t => t.feita).length;
     const isOpen = _open_fases[fi] !== false;
@@ -960,7 +1117,6 @@ function renderCliente(id) {
     </div>`;
   }).join('');
 
-  // Registros
   const regsHtml = c.registros.length
     ? c.registros.map(r => `
       <div class="reg-item">
@@ -969,7 +1125,6 @@ function renderCliente(id) {
       </div>`).join('')
     : `<div style="color:var(--text3);font-size:13px;padding:8px 0">Nenhum registro ainda.</div>`;
 
-  // Timeline
   const tlHtml = c.historicoEtapas.map(h => {
     const label = h.de
       ? `${h.de} → <strong style="color:var(--primary)">${h.para}</strong>`
@@ -985,7 +1140,6 @@ function renderCliente(id) {
 
   sec.innerHTML = `
     <a class="back-link" href="#carteira">← Voltar à carteira</a>
-
     <div class="detail-header">
       <div class="dh-top">
         <div>
@@ -999,27 +1153,17 @@ function renderCliente(id) {
         </div>
       </div>
       <div class="dh-meta">
-        <div class="dh-meta-item">
-          <span class="dh-meta-label">Consultor</span>
-          <span class="dh-meta-value">${consul}</span>
-        </div>
-        <div class="dh-meta-item">
-          <span class="dh-meta-label">Início</span>
-          <span class="dh-meta-value">${fmtDate(c.dataInicio)}</span>
-        </div>
+        <div class="dh-meta-item"><span class="dh-meta-label">Consultor</span><span class="dh-meta-value">${consul}</span></div>
+        <div class="dh-meta-item"><span class="dh-meta-label">Início</span><span class="dh-meta-value">${fmtDate(c.dataInicio)}</span></div>
         <div class="dh-meta-item">
           <span class="dh-meta-label">Prazo</span>
           <span class="dh-meta-value" style="${status==='Atrasado'?'color:var(--red)':''}">${fmtDate(c.prazo)}</span>
         </div>
-        <div class="dh-meta-item">
-          <span class="dh-meta-label">Dias na etapa</span>
-          <span class="dh-meta-value">${dias} dia${dias!==1?'s':''}</span>
-        </div>
+        <div class="dh-meta-item"><span class="dh-meta-label">Dias na etapa</span><span class="dh-meta-value">${dias} dia${dias!==1?'s':''}</span></div>
       </div>
     </div>
 
     <div class="detail-layout">
-      <!-- Playbook -->
       <div>
         <div class="card-block">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -1032,33 +1176,27 @@ function renderCliente(id) {
           ${fasesHtml}
         </div>
       </div>
-
-      <!-- Lateral -->
       <div>
         <div class="card-block">
           <div class="section-title">Registros</div>
           <div id="regs-${c.id}">${regsHtml}</div>
           <div class="reg-form">
             <textarea id="reg-input-${c.id}" placeholder="Adicionar anotação..."></textarea>
-            <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="addRegistro('${c.id}')">
-              Salvar registro
-            </button>
+            <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="addRegistro('${c.id}')">Salvar registro</button>
           </div>
         </div>
-
         <div class="card-block" style="margin-top:16px">
           <div class="section-title">Histórico de etapas</div>
           <div class="tl-wrap">${tlHtml}</div>
         </div>
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
 function toggleFase(idx) {
   _open_fases[idx] = (_open_fases[idx] === false) ? true : false;
-  const bodies  = document.querySelectorAll('#sec-cliente .phase-body');
-  const chevs   = document.querySelectorAll('#sec-cliente .phase-chev');
+  const bodies = document.querySelectorAll('#sec-cliente .phase-body');
+  const chevs  = document.querySelectorAll('#sec-cliente .phase-chev');
   if (bodies[idx]) bodies[idx].classList.toggle('open');
   if (chevs[idx])  chevs[idx].classList.toggle('open');
 }
@@ -1070,33 +1208,59 @@ function checkTask(clienteId, faseIdx, tarefaId) {
   t.feita = !t.feita;
   saveCliente(c);
 
-  // update progress without full re-render
   const prog = getProgresso(c);
-  const bar  = document.getElementById(`prog-bar-${clienteId}`);
-  const pct  = document.getElementById(`prog-pct-${clienteId}`);
+  const bar  = document.getElementById('prog-bar-' + clienteId);
+  const pct  = document.getElementById('prog-pct-' + clienteId);
   if (bar) bar.style.width = prog + '%';
   if (pct) pct.textContent = prog + '%';
 
-  // update task style
-  const item = document.getElementById(`ti_${tarefaId}`);
+  const item = document.getElementById('ti_' + tarefaId);
   if (item) { t.feita ? item.classList.add('done') : item.classList.remove('done'); }
+
+  // auto-advance check — only when checking, not unchecking
+  if (t.feita) {
+    const fase = c.fases[faseIdx];
+    const faseCompleta = fase.tarefas.every(function(x){ return x.feita; });
+    if (faseCompleta) {
+      const prevComplete = c.fases.slice(0, faseIdx).every(function(f){ return f.tarefas.every(function(x){ return x.feita; }); });
+      if (prevComplete) {
+        const nextEtapa = FASE_ADVANCE[faseIdx];
+        if (nextEtapa === null) {
+          showToast('🎉 Projeto concluído! Todas as fases foram concluídas.');
+        } else {
+          const gateEtapa = FASE_ETAPA_GATE[faseIdx];
+          if (c.etapa === gateEtapa) {
+            const cFresh = getCliente(clienteId);
+            cFresh.historicoEtapas.push({
+              de: gateEtapa, para: nextEtapa,
+              data: new Date().toISOString(),
+              motivo: 'Avanço automático por conclusão de fase'
+            });
+            cFresh.etapa = nextEtapa;
+            saveCliente(cFresh);
+            showToast('⚡ ' + clienteId + ' avançou para ' + nextEtapa);
+            renderCliente(clienteId);
+          }
+        }
+      }
+    }
+  }
 }
 
 function addRegistro(clienteId) {
-  const ta    = document.getElementById(`reg-input-${clienteId}`);
+  const ta    = document.getElementById('reg-input-' + clienteId);
   const texto = ta?.value?.trim();
   if (!texto) return;
 
-  const c       = getCliente(clienteId);
-  const ativo   = getConsultorAtivo();
-  const nome    = getConsultores().find(x => x.id === ativo)?.nome || ativo;
+  const c     = getCliente(clienteId);
+  const ativo = getConsultorAtivo();
+  const nome  = getConsultores().find(x => x.id === ativo)?.nome || ativo;
 
   c.registros.unshift({id:'r'+Date.now(), autor:nome, data:new Date().toISOString(), texto});
   saveCliente(c);
   ta.value = '';
 
-  // re-render only registros block
-  const regsEl = document.getElementById(`regs-${clienteId}`);
+  const regsEl = document.getElementById('regs-' + clienteId);
   if (regsEl) {
     regsEl.innerHTML = c.registros.map(r => `
       <div class="reg-item">
@@ -1106,26 +1270,36 @@ function addRegistro(clienteId) {
   }
 }
 
-// ── MODAL ALTERAR ETAPA ────────────────────────────────────
-function openModal(clienteId) {
-  _modal_cliente_id = clienteId;
+// ─── Modal Alterar Etapa ────────────────────────────────────
+let _modal_cliente_id       = null;
+let _modal_return_to_kanban = false;
+
+function openModal(clienteId, dragDestEtapa) {
+  _modal_cliente_id       = clienteId;
+  _modal_return_to_kanban = !!dragDestEtapa;
+
   const c   = getCliente(clienteId);
   const sel = document.getElementById('modal-etapa-sel');
+
   sel.innerHTML = ETAPAS.filter(e => e !== c.etapa)
-    .map(e => `<option value="${e}">${ETAPA_META[e].emoji} ${e}</option>`)
+    .map(e => `<option value="${e}"${e===dragDestEtapa?' selected':''}>${ETAPA_META[e].emoji} ${e}</option>`)
     .join('');
+  sel.disabled = !!dragDestEtapa;
+
   const motivo = document.getElementById('modal-motivo');
   motivo.value = '';
   document.getElementById('modal-save-btn').disabled = true;
-  motivo.oninput = () => {
+  motivo.oninput = function() {
     document.getElementById('modal-save-btn').disabled = !motivo.value.trim();
   };
   document.getElementById('modal-etapa').classList.remove('hidden');
 }
 
 function closeModal() {
+  document.getElementById('modal-etapa-sel').disabled = false;
   document.getElementById('modal-etapa').classList.add('hidden');
-  _modal_cliente_id = null;
+  _modal_cliente_id       = null;
+  _modal_return_to_kanban = false;
 }
 
 function saveEtapa() {
@@ -1138,12 +1312,14 @@ function saveEtapa() {
   c.etapa = novaEtapa;
   saveCliente(c);
 
-  const savedId = _modal_cliente_id;
+  const savedId    = _modal_cliente_id;
+  const toKanban   = _modal_return_to_kanban;
   closeModal();
-  renderCliente(savedId);
+
+  if (toKanban) renderCarteira();
+  else          renderCliente(savedId);
 }
 
-// close modal on overlay click
 document.getElementById('modal-etapa').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
@@ -1151,89 +1327,171 @@ document.getElementById('modal-etapa').addEventListener('click', function(e) {
 // ═══════════════════════════════════════════════════════════
 // TELA 4 — CRIAR PLAYBOOK
 // ═══════════════════════════════════════════════════════════
-let _bFases = null;
-let _bTab   = 0;
+let _bFases          = null;
+let _bTab            = 0;
+let _criar_projeto   = null;  // selected pending project
+let _criar_manual    = false; // manual entry mode
 
 function initBFases() {
   _bFases = TEMPLATE_FASES.map((f, fi) => ({
     nome: f.nome,
-    tarefas: f.tarefas.map((t, ti) => ({id:`nb_${fi}_${ti}_${Date.now()}`, texto:t, feita:false}))
+    tarefas: f.tarefas.map((t, ti) => ({id:'nb_'+fi+'_'+ti+'_'+Date.now(), texto:t, feita:false}))
   }));
+}
+
+function selecionarProjeto(id) {
+  _criar_projeto = id ? (getProjetosPendentes().find(p => p.id === id) || null) : null;
+  renderCriar();
+}
+
+function entrarModoManual() {
+  _criar_manual  = true;
+  _criar_projeto = null;
+  renderCriar();
+}
+
+function voltarSelecao() {
+  _criar_manual = false;
+  renderCriar();
 }
 
 function renderCriar() {
   if (!_bFases) initBFases();
   const consultores = getConsultores();
   const ativo       = getConsultorAtivo();
+  const pendentes   = getProjetosPendentes();
   const sec         = document.getElementById('sec-criar');
+
+  // If no pending projects, go straight to manual mode
+  const forceManual = pendentes.length === 0;
+  const showSelector = !_criar_manual && !forceManual;
+
+  let clienteSection;
+
+  if (showSelector) {
+    const sel = _criar_projeto;
+    clienteSection = `
+      <div class="card-block" style="max-width:760px">
+        <div class="section-title">Selecionar projeto</div>
+        <div class="form-group" style="max-width:380px">
+          <label>Projeto <span class="form-req">*</span></label>
+          <select onchange="selecionarProjeto(this.value)">
+            <option value="">Escolha um projeto...</option>
+            ${pendentes.map(p => `<option value="${p.id}"${sel?.id===p.id?' selected':''}>${p.projeto} — ${p.nome}</option>`).join('')}
+          </select>
+        </div>
+        ${sel ? `
+          <div class="form-grid" style="margin-top:16px">
+            <div class="form-group">
+              <label>Nome do cliente</label>
+              <input type="text" value="${sel.nome}" readonly>
+            </div>
+            <div class="form-group">
+              <label>ID do cliente</label>
+              <input type="text" value="${sel.id}" readonly>
+            </div>
+            <div class="form-group">
+              <label>Projeto SAGP</label>
+              <input type="text" value="${sel.projeto}" readonly>
+            </div>
+            <div class="form-group">
+              <label>Produto</label>
+              <input type="text" value="${sel.produto}" readonly>
+            </div>
+            <div class="form-group">
+              <label>Consultor responsável</label>
+              <input type="text" value="${consultores.find(c=>c.id===sel.consultorId)?.nome||sel.consultorId}" readonly>
+            </div>
+            <div class="form-group">
+              <label>Etapa inicial</label>
+              <select id="f-etapa">
+                ${ETAPAS.map(e => `<option value="${e}">${ETAPA_META[e].emoji} ${e}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Data início</label>
+              <input type="date" id="f-inicio">
+            </div>
+            <div class="form-group">
+              <label>Prazo final</label>
+              <input type="date" id="f-prazo">
+            </div>
+            <div class="form-group full">
+              <label>Próxima ação</label>
+              <input type="text" id="f-acao" placeholder="Ex: Agendar reunião de kickoff">
+            </div>
+          </div>` : ''}
+        <div style="margin-top:14px">
+          <button class="btn btn-secondary btn-sm" onclick="entrarModoManual()">+ Criar novo projeto</button>
+        </div>
+      </div>`;
+  } else {
+    clienteSection = `
+      <div class="card-block" style="max-width:760px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <div class="section-title" style="margin-bottom:0">Dados do cliente</div>
+          ${!forceManual ? `<button class="btn btn-secondary btn-sm" onclick="voltarSelecao()">← Selecionar projeto existente</button>` : ''}
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nome do cliente <span class="form-req">*</span></label>
+            <input type="text" id="f-nome" placeholder="Ex: ACME LTDA">
+          </div>
+          <div class="form-group">
+            <label>ID do cliente <span class="form-req">*</span></label>
+            <input type="text" id="f-id" placeholder="Ex: ACME" style="text-transform:uppercase"
+              oninput="this.value=this.value.toUpperCase()">
+          </div>
+          <div class="form-group">
+            <label>Projeto SAGP <span class="form-req">*</span></label>
+            <input type="text" id="f-projeto" placeholder="Ex: SAGP-00150"
+              oninput="this.value=this.value.toUpperCase()">
+          </div>
+          <div class="form-group">
+            <label>Produto</label>
+            <select id="f-produto">
+              <option>CPS</option><option>IOT</option>
+              <option>Portal da Cotação</option><option>GRV Connect</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Consultor responsável</label>
+            <select id="f-consultor">
+              ${consultores.map(c => `<option value="${c.id}"${c.id===ativo?' selected':''}>${c.nome}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Etapa inicial</label>
+            <select id="f-etapa">
+              ${ETAPAS.map(e => `<option value="${e}">${ETAPA_META[e].emoji} ${e}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Data início</label>
+            <input type="date" id="f-inicio">
+          </div>
+          <div class="form-group">
+            <label>Prazo final</label>
+            <input type="date" id="f-prazo">
+          </div>
+          <div class="form-group full">
+            <label>Próxima ação</label>
+            <input type="text" id="f-acao" placeholder="Ex: Agendar reunião de kickoff">
+          </div>
+          <div class="form-group full">
+            <label>Observações</label>
+            <textarea id="f-obs" rows="3"></textarea>
+          </div>
+        </div>
+      </div>`;
+  }
 
   sec.innerHTML = `
     <div class="page-header">
       <div class="page-title">Criar Playbook</div>
       <div class="page-subtitle">Cadastre um novo cliente e monte o playbook de implantação</div>
     </div>
-
-    <div class="card-block" style="max-width:760px">
-      <div class="section-title">Dados do cliente</div>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Nome do cliente <span class="form-req">*</span></label>
-          <input type="text" id="f-nome" placeholder="Ex: ACME LTDA">
-        </div>
-        <div class="form-group">
-          <label>ID do cliente <span class="form-req">*</span></label>
-          <input type="text" id="f-id" placeholder="Ex: ACME" style="text-transform:uppercase"
-            oninput="this.value=this.value.toUpperCase()">
-        </div>
-        <div class="form-group">
-          <label>Projeto SAGP <span class="form-req">*</span></label>
-          <input type="text" id="f-projeto" placeholder="Ex: SAGP-00150"
-            oninput="this.value=this.value.toUpperCase()">
-        </div>
-        <div class="form-group">
-          <label>Produto</label>
-          <select id="f-produto">
-            <option>CPS</option>
-            <option>IOT</option>
-            <option>Portal da Cotação</option>
-            <option>GRV Connect</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Consultor responsável</label>
-          <select id="f-consultor">
-            ${consultores.map(c =>
-              `<option value="${c.id}"${c.id===ativo?' selected':''}>${c.nome}</option>`
-            ).join('')}
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Etapa inicial</label>
-          <select id="f-etapa">
-            ${ETAPAS.map(e =>
-              `<option value="${e}">${ETAPA_META[e].emoji} ${e}</option>`
-            ).join('')}
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Data início</label>
-          <input type="date" id="f-inicio">
-        </div>
-        <div class="form-group">
-          <label>Prazo final</label>
-          <input type="date" id="f-prazo">
-        </div>
-        <div class="form-group full">
-          <label>Próxima ação</label>
-          <input type="text" id="f-acao" placeholder="Ex: Agendar reunião de kickoff">
-        </div>
-        <div class="form-group full">
-          <label>Observações</label>
-          <textarea id="f-obs" rows="3"></textarea>
-        </div>
-      </div>
-    </div>
-
+    ${clienteSection}
     <div class="card-block" style="max-width:760px;margin-top:16px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
         <div class="section-title" style="margin-bottom:0">Tarefas do playbook</div>
@@ -1243,19 +1501,15 @@ function renderCriar() {
         </div>
       </div>
       <div class="ptabs" id="ptabs">
-        ${_bFases.map((f,i) =>
-          `<button class="ptab${i===_bTab?' active':''}" onclick="switchTab(${i})">${f.nome}</button>`
-        ).join('')}
+        ${_bFases.map((f,i) => `<button class="ptab${i===_bTab?' active':''}" onclick="switchTab(${i})">${f.nome}</button>`).join('')}
       </div>
       <div id="builder-content">${renderBuilderTab(_bTab)}</div>
     </div>
-
     <div style="max-width:760px;margin-top:16px;display:flex;gap:10px">
       <button class="btn btn-primary" onclick="salvarPlaybook()">💾 Salvar playbook</button>
       <button class="btn btn-secondary" onclick="navigate('carteira')">Cancelar</button>
     </div>
-    <div id="criar-err" class="err-msg" style="max-width:760px"></div>
-  `;
+    <div id="criar-err" class="err-msg" style="max-width:760px"></div>`;
 }
 
 function renderBuilderTab(idx) {
@@ -1283,13 +1537,13 @@ function switchTab(idx) {
 }
 
 function addTarefa(faseIdx) {
-  const inp   = document.getElementById(`tb-inp-${faseIdx}`);
+  const inp   = document.getElementById('tb-inp-' + faseIdx);
   const texto = inp?.value?.trim();
   if (!texto) return;
-  _bFases[faseIdx].tarefas.push({id:`nb_${Date.now()}`, texto, feita:false});
+  _bFases[faseIdx].tarefas.push({id:'nb_'+Date.now(), texto, feita:false});
   inp.value = '';
   document.getElementById('builder-content').innerHTML = renderBuilderTab(faseIdx);
-  document.getElementById(`tb-inp-${faseIdx}`)?.focus();
+  document.getElementById('tb-inp-' + faseIdx)?.focus();
 }
 
 function rmTarefa(faseIdx, tarefaId) {
@@ -1297,36 +1551,51 @@ function rmTarefa(faseIdx, tarefaId) {
   document.getElementById('builder-content').innerHTML = renderBuilderTab(faseIdx);
 }
 
-function usarTemplate() {
-  initBFases();
-  document.getElementById('builder-content').innerHTML = renderBuilderTab(_bTab);
-}
-
-function limparBuilder() {
-  _bFases = TEMPLATE_FASES.map(f => ({nome:f.nome, tarefas:[]}));
-  document.getElementById('builder-content').innerHTML = renderBuilderTab(_bTab);
-}
+function usarTemplate()  { initBFases(); document.getElementById('builder-content').innerHTML = renderBuilderTab(_bTab); }
+function limparBuilder() { _bFases = TEMPLATE_FASES.map(f => ({nome:f.nome, tarefas:[]})); document.getElementById('builder-content').innerHTML = renderBuilderTab(_bTab); }
 
 function salvarPlaybook() {
-  const nome    = document.getElementById('f-nome')?.value?.trim();
-  const id      = document.getElementById('f-id')?.value?.trim().toUpperCase();
-  const projeto = document.getElementById('f-projeto')?.value?.trim().toUpperCase();
-  const produto = document.getElementById('f-produto')?.value;
-  const consul  = document.getElementById('f-consultor')?.value;
-  const etapa   = document.getElementById('f-etapa')?.value;
-  const inicio  = document.getElementById('f-inicio')?.value;
-  const prazo   = document.getElementById('f-prazo')?.value || null;
-  const acao    = document.getElementById('f-acao')?.value?.trim();
-
   const errEl = document.getElementById('criar-err');
+  const pendentes = getProjetosPendentes();
+  const forceManual = pendentes.length === 0;
+  const useSelector = !_criar_manual && !forceManual && _criar_projeto;
 
-  if (!nome || !id || !projeto) {
-    errEl.textContent = 'Preencha obrigatoriamente: Nome, ID e Projeto SAGP.';
-    errEl.style.display = 'block';
-    return;
+  let id, projeto, produto, consul, etapa, inicio, prazo, acao;
+
+  if (useSelector) {
+    const p = _criar_projeto;
+    id      = p.id;
+    projeto = p.projeto;
+    produto = p.produto;
+    consul  = p.consultorId;
+    etapa   = document.getElementById('f-etapa')?.value;
+    inicio  = document.getElementById('f-inicio')?.value;
+    prazo   = document.getElementById('f-prazo')?.value || null;
+    acao    = document.getElementById('f-acao')?.value?.trim();
+    if (!etapa) {
+      errEl.textContent = 'Selecione a etapa inicial.';
+      errEl.style.display = 'block';
+      return;
+    }
+  } else {
+    const nome = document.getElementById('f-nome')?.value?.trim();
+    id      = document.getElementById('f-id')?.value?.trim().toUpperCase();
+    projeto = document.getElementById('f-projeto')?.value?.trim().toUpperCase();
+    produto = document.getElementById('f-produto')?.value;
+    consul  = document.getElementById('f-consultor')?.value;
+    etapa   = document.getElementById('f-etapa')?.value;
+    inicio  = document.getElementById('f-inicio')?.value;
+    prazo   = document.getElementById('f-prazo')?.value || null;
+    acao    = document.getElementById('f-acao')?.value?.trim();
+    if (!nome || !id || !projeto) {
+      errEl.textContent = 'Preencha obrigatoriamente: Nome, ID e Projeto SAGP.';
+      errEl.style.display = 'block';
+      return;
+    }
   }
+
   if (getCliente(id)) {
-    errEl.textContent = `Já existe um cliente com ID "${id}". Escolha outro ID.`;
+    errEl.textContent = 'Já existe um cliente com ID "' + id + '". Escolha outro ID.';
     errEl.style.display = 'block';
     return;
   }
@@ -1337,22 +1606,19 @@ function salvarPlaybook() {
     id, projeto, produto, consultorId: consul, etapa,
     dataInicio, prazo,
     proximaAcao: acao || '',
-    fases: _bFases.map(f => ({
-      nome: f.nome,
-      tarefas: f.tarefas.map(t => ({...t, feita:false}))
-    })),
+    fases: _bFases.map(f => ({nome:f.nome, tarefas:f.tarefas.map(t => ({...t, feita:false}))})),
     registros: [],
-    historicoEtapas: [{
-      de: null, para: etapa,
-      data: dataInicio + 'T09:00:00',
-      motivo: 'Início do projeto'
-    }],
+    historicoEtapas: [{de:null, para:etapa, data:dataInicio+'T09:00:00', motivo:'Início do projeto'}],
   };
 
   saveCliente(novo);
-  _bFases = null;
-  _bTab   = 0;
-  navigate(`cliente/${encodeURIComponent(id)}`);
+  if (useSelector) removeProjetoPendente(id);
+
+  _bFases        = null;
+  _bTab          = 0;
+  _criar_projeto = null;
+  _criar_manual  = false;
+  navigate('cliente/' + encodeURIComponent(id));
 }
 </script>
 </body>
