@@ -684,6 +684,11 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
       <span class="conv-hdr-title">Conversas em atendimento</span>
       <span class="badge badge-subtle" id="badge-inprog">—</span>
     </div>
+    <div class="urg-legend" aria-label="Legenda de urgência em atendimento">
+      <span class="urg-legend-item"><span class="urg-dot urg-dot-warn"></span>5–15min</span>
+      <span class="urg-legend-item"><span class="urg-dot urg-dot-alert"></span>15–40min</span>
+      <span class="urg-legend-item"><span class="urg-dot urg-dot-crit"></span>&gt;40min</span>
+    </div>
     <table class="cv-table" role="table" aria-label="Conversas em atendimento">
       <thead>
         <tr>
@@ -1653,6 +1658,15 @@ const URG_ROW_CLS  = ['', 'urg-warn', 'urg-alert', 'urg-crit'];
 const URG_DUR_CLS  = ['', 'dur-warn', 'dur-alert', 'dur-crit'];
 const URG_CARD_CLS = ['', 'lvl-warn', 'lvl-alert', 'lvl-crit'];
 
+function inprogUrgencyLevel(created_at) {
+  if (!created_at) return 0;
+  const mins = (Date.now() - created_at * 1000) / 60000;
+  if (mins >= 40) return 3;
+  if (mins >= 15) return 2;
+  if (mins >= 5)  return 1;
+  return 0;
+}
+
 function pendingUrgencyLevel(created_at) {
   if (!created_at) return 0;
   const days = (Date.now() - created_at * 1000) / 86400000;
@@ -2034,7 +2048,7 @@ function renderInprog() {
   groupOrder.forEach(iid => {
     const name = (_inboxMap[iid] || {}).name || `Fila #${iid}`;
     html += `<tr class="queue-row"><td colspan="10">${esc(name)}</td></tr>`;
-    html += groups[iid].map(c => rowHtml(c, false)).join('');
+    html += groups[iid].map(c => rowHtml(c, true, false, true)).join('');
   });
 
   if (!html) html = emptyRow('Nenhuma conversa em atendimento', 10);
@@ -2058,7 +2072,7 @@ function isGroup(c) {
   return (c.meta?.sender?.identifier || '').endsWith('@g.us');
 }
 
-function rowHtml(c, applyUrgency, pendingMode) {
+function rowHtml(c, applyUrgency, pendingMode, inprogMode) {
   const inbox  = _inboxMap[c.inbox_id] || {};
   const url    = `https://nxticket.com.br/app/accounts/${cfg.account}/conversations/${c.id}`;
   const ref    = c.meta?.sender?.phone_number || '—';
@@ -2071,7 +2085,7 @@ function rowHtml(c, applyUrgency, pendingMode) {
   const date   = c.created_at ? fmtDate(c.created_at) : '—';
   const origin = originOf(inbox.channel_type);
   const grupo  = isGroup(c);
-  const lvl    = applyUrgency ? (pendingMode ? pendingUrgencyLevel(c.created_at) : urgencyLevel(waitTs)) : 0;
+  const lvl    = applyUrgency ? (pendingMode ? pendingUrgencyLevel(c.created_at) : inprogMode ? inprogUrgencyLevel(c.created_at) : urgencyLevel(waitTs)) : 0;
   const rowCls = URG_ROW_CLS[lvl] ? ` ${URG_ROW_CLS[lvl]}` : '';
   const durCls = URG_DUR_CLS[lvl] ? ` ${URG_DUR_CLS[lvl]}` : '';
   const tipoBadge = grupo
