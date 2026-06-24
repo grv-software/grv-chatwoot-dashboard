@@ -43,7 +43,16 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius);color:var(--text2);cursor:pointer;font-size:13px;font-weight:500;transition:background .15s,color .15s;text-decoration:none;margin-bottom:2px}
 .nav-item:hover{background:#f7f8fa;color:var(--text)}
 .nav-item.active{background:var(--primary-light);color:var(--primary);font-weight:600}
-.nav-icon{font-size:15px;width:20px;text-align:center}
+.nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.sb-toggle{width:100%;background:none;border:none;text-align:left;padding:10px 16px;cursor:pointer;font-size:18px;color:var(--text3);display:block;border-bottom:1px solid var(--border);line-height:1}
+.sb-toggle:hover{color:var(--primary)}
+.sidebar{transition:width 0.2s ease}
+.sidebar--collapsed{width:56px;overflow:hidden}
+.sidebar--collapsed .sb-logo-text{display:none}
+.sidebar--collapsed .sb-section{display:none}
+.sidebar--collapsed .nav-label{display:none}
+.sidebar--collapsed .nav-item{justify-content:center;padding:10px 0}
+.sidebar--collapsed .sb-toggle{text-align:center;padding:10px 0}
 
 /* ── CONTENT ─────────────────────────────────────────────── */
 .content{flex:1;min-height:100vh}
@@ -302,7 +311,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 <body>
 
 <!-- ── SIDEBAR ──────────────────────────────────────────── -->
-<aside class="sidebar">
+<aside class="sidebar" id="main-sidebar">
+  <button class="sb-toggle" onclick="toggleSidebar()" title="Recolher/Expandir menu">☰</button>
   <div class="sb-logo">
     <div class="sb-logo-icon">G</div>
     <div class="sb-logo-text">GRV Software <span>CS · Jornada do Cliente</span></div>
@@ -312,14 +322,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
     <select id="consultor-sel"></select>
   </div>
   <nav class="sb-nav">
-    <a class="nav-item" data-route="projetos" href="#projetos">
-      <span class="nav-icon">🌐</span> Projetos GRV
+    <a class="nav-item" data-route="projetos" href="#projetos" title="Projetos GRV">
+      <span class="nav-icon">🌐</span><span class="nav-label"> Projetos GRV</span>
     </a>
-    <a class="nav-item" data-route="carteira" href="#carteira">
-      <span class="nav-icon">📋</span> Minha Carteira
+    <a class="nav-item" data-route="carteira" href="#carteira" title="Minha Carteira">
+      <span class="nav-icon">📋</span><span class="nav-label"> Minha Carteira</span>
     </a>
-    <a class="nav-item" data-route="criar" href="#criar">
-      <span class="nav-icon">➕</span> Criar Playbook
+    <a class="nav-item" data-route="criar" href="#criar" title="Criar Playbook">
+      <span class="nav-icon">➕</span><span class="nav-label"> Criar Playbook</span>
     </a>
   </nav>
 </aside>
@@ -1331,6 +1341,15 @@ function etapaToId(etapa) {
 }
 
 // ═══════════════════════════════════════════════════════════
+// SIDEBAR TOGGLE
+// ═══════════════════════════════════════════════════════════
+function toggleSidebar() {
+  const aside = document.getElementById('main-sidebar');
+  const collapsed = aside.classList.toggle('sidebar--collapsed');
+  localStorage.setItem('grv_cs_sidebar_collapsed', collapsed ? '1' : '');
+}
+
+// ═══════════════════════════════════════════════════════════
 // CONSULTOR SELECTOR
 // ═══════════════════════════════════════════════════════════
 function initConsultorSel() {
@@ -1371,7 +1390,13 @@ function route() {
 }
 
 window.addEventListener('hashchange', route);
-window.addEventListener('DOMContentLoaded', () => { initData(); initConsultorSel(); route(); });
+window.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem('grv_cs_sidebar_collapsed')) {
+    const aside = document.getElementById('main-sidebar');
+    if (aside) aside.classList.add('sidebar--collapsed');
+  }
+  initData(); initConsultorSel(); route();
+});
 
 // ═══════════════════════════════════════════════════════════
 // TOAST
