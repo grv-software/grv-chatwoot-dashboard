@@ -8,9 +8,9 @@
 <style>
 :root {
   --primary: #E05A1E;
-  --primary-light: rgba(224,90,30,.12);
-  --sidebar-bg: #1A1A2E;
-  --sidebar-text: #a0aec0;
+  --primary-light: rgba(224,90,30,.10);
+  --sidebar-bg: #ffffff;
+  --sidebar-text: #718096;
   --bg: #F4F5F7;
   --surface: #ffffff;
   --border: #e2e8f0;
@@ -30,19 +30,19 @@
 body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
 
 /* ── SIDEBAR ─────────────────────────────────────────────── */
-.sidebar{width:240px;min-height:100vh;background:var(--sidebar-bg);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
-.sb-logo{padding:20px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sidebar{width:240px;min-height:100vh;background:var(--sidebar-bg);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;border-right:1px solid var(--border)}
+.sb-logo{padding:20px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
 .sb-logo-icon{width:36px;height:36px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;flex-shrink:0}
-.sb-logo-text{color:#fff;font-weight:700;font-size:14px;line-height:1.2}
+.sb-logo-text{color:var(--text);font-weight:700;font-size:14px;line-height:1.2}
 .sb-logo-text span{display:block;font-weight:400;font-size:11px;color:var(--sidebar-text)}
-.sb-section{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sb-section{padding:14px 16px;border-bottom:1px solid var(--border)}
 .sb-section label{display:block;font-size:10px;color:var(--sidebar-text);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
-.sb-section select{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);color:#fff;padding:7px 10px;font-size:13px;cursor:pointer;outline:none}
-.sb-section select option{background:#1A1A2E;color:#fff}
+.sb-section select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:7px 10px;font-size:13px;cursor:pointer;outline:none}
+.sb-section select:focus{border-color:var(--primary)}
 .sb-nav{padding:12px 8px;flex:1}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius);color:var(--sidebar-text);cursor:pointer;font-size:13px;font-weight:500;transition:background .15s,color .15s;text-decoration:none;margin-bottom:2px}
-.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
-.nav-item.active{background:var(--primary-light);color:var(--primary)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius);color:var(--text2);cursor:pointer;font-size:13px;font-weight:500;transition:background .15s,color .15s;text-decoration:none;margin-bottom:2px}
+.nav-item:hover{background:#f7f8fa;color:var(--text)}
+.nav-item.active{background:var(--primary-light);color:var(--primary);font-weight:600}
 .nav-icon{font-size:15px;width:20px;text-align:center}
 
 /* ── CONTENT ─────────────────────────────────────────────── */
