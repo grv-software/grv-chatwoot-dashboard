@@ -970,6 +970,29 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
   <div class="config-page">
     <h2 style="margin:0;font-size:18px;font-weight:700;color:var(--text)">Configurações</h2>
 
+    <!-- Conexão Chatwoot -->
+    <div class="config-card">
+      <h3>Conexão Chatwoot</h3>
+      <div class="config-row">
+        <div>
+          <div class="config-label">Token API</div>
+          <div class="config-unit">Chatwoot → Perfil → Token de acesso à API</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input type="password" class="config-input" id="cfg-token" autocomplete="off" placeholder="api_access_token" style="width:200px" />
+          <button onclick="toggleCfgTokenVisibility()" title="Mostrar/ocultar token" style="background:none;border:1px solid var(--border);border-radius:5px;padding:4px 8px;cursor:pointer;color:var(--text2);font-size:13px;height:34px">👁</button>
+        </div>
+      </div>
+      <div class="config-row">
+        <div>
+          <div class="config-label">Conta (Account ID)</div>
+          <div class="config-unit">Número da conta no Chatwoot</div>
+        </div>
+        <input type="number" class="config-input" id="cfg-account-field" min="1" step="1" />
+      </div>
+      <div id="cfg-sync-status" style="font-size:12px;color:var(--text3);margin-top:4px;padding:0 4px"></div>
+    </div>
+
     <!-- SLAs -->
     <div class="config-card">
       <h3>SLAs de Desempenho</h3>
@@ -1086,6 +1109,7 @@ let cfg = {
   threshold: parseInt(localStorage.getItem('grv_threshold') || '0', 10) || 0,
   token:     localStorage.getItem('grv_token')      || ''
 };
+let _settingsPassword = '';
 let timer = null, countdown = REFRESH_SEC;
 let _rawConvs = [];
 let _allInProg = [], _allWaiting = [], _inboxMap = {}, _shownCount = PAGE_SIZE, _totalOpen = 0;
@@ -1159,6 +1183,7 @@ async function checkSettingsPassword() {
     });
     const data = await res.json();
     if (data.ok) {
+      _settingsPassword = password;
       localStorage.setItem('grv_settings_auth', '1');
       document.getElementById('settings-auth-modal').classList.add('hidden');
       showPage('configuracoes');
@@ -3456,18 +3481,26 @@ function showPage(page) {
 
 /* ── CONFIGURAÇÕES ── */
 function loadConfigPage() {
-  document.getElementById('cfg-sla-tma').value    = _SLA_TMA;
-  document.getElementById('cfg-sla-tmr').value    = _SLA_TMR;
-  document.getElementById('cfg-sla-fcr').value    = _SLA_FCR;
-  document.getElementById('cfg-sla-msg').value    = _SLA_MSG;
-  document.getElementById('cfg-threshold').value  = cfg.threshold;
-  document.getElementById('cfg-refresh').value    = REFRESH_SEC;
-  document.getElementById('cfg-weight-tma').value  = _WEIGHT_TMA;
-  document.getElementById('cfg-weight-tmr').value  = _WEIGHT_TMR;
-  document.getElementById('cfg-weight-fcr').value  = _WEIGHT_FCR;
-  document.getElementById('cfg-weight-msg').value  = _WEIGHT_MSG;
-  document.getElementById('cfg-weight-csat').value = _WEIGHT_CSAT;
+  document.getElementById('cfg-token').value         = cfg.token || '';
+  document.getElementById('cfg-account-field').value = cfg.account || '1';
+  document.getElementById('cfg-sla-tma').value       = _SLA_TMA;
+  document.getElementById('cfg-sla-tmr').value       = _SLA_TMR;
+  document.getElementById('cfg-sla-fcr').value       = _SLA_FCR;
+  document.getElementById('cfg-sla-msg').value       = _SLA_MSG;
+  document.getElementById('cfg-threshold').value     = cfg.threshold;
+  document.getElementById('cfg-refresh').value       = REFRESH_SEC;
+  document.getElementById('cfg-weight-tma').value    = _WEIGHT_TMA;
+  document.getElementById('cfg-weight-tmr').value    = _WEIGHT_TMR;
+  document.getElementById('cfg-weight-fcr').value    = _WEIGHT_FCR;
+  document.getElementById('cfg-weight-msg').value    = _WEIGHT_MSG;
+  document.getElementById('cfg-weight-csat').value   = _WEIGHT_CSAT;
+  document.getElementById('cfg-sync-status').textContent = '';
   updateWeightSum();
+}
+
+function toggleCfgTokenVisibility() {
+  const inp = document.getElementById('cfg-token');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
 }
 
 function updateWeightSum() {
@@ -3480,7 +3513,7 @@ function updateWeightSum() {
   document.getElementById('cfg-save-btn').disabled = !ok;
 }
 
-function saveConfig() {
+async function saveConfig() {
   const slaTma  = Math.max(1,  parseInt(document.getElementById('cfg-sla-tma').value,    10) || 8);
   const slaTmr  = Math.max(1,  parseInt(document.getElementById('cfg-sla-tmr').value,    10) || 30);
   const slaFcr  = Math.max(1,  parseInt(document.getElementById('cfg-sla-fcr').value,    10) || 85);
@@ -3492,26 +3525,56 @@ function saveConfig() {
   const wFcr    = parseInt(document.getElementById('cfg-weight-fcr').value,  10) || 0;
   const wMsg    = parseInt(document.getElementById('cfg-weight-msg').value,  10) || 0;
   const wCsat   = parseInt(document.getElementById('cfg-weight-csat').value, 10) || 0;
+  const token   = (document.getElementById('cfg-token').value         || '').trim();
+  const account = (document.getElementById('cfg-account-field').value || '1').trim();
 
   if (wTma + wTmr + wFcr + wMsg + wCsat !== 100) return;
 
-  localStorage.setItem('grv_sla_tma',     slaTma);
-  localStorage.setItem('grv_sla_tmr',     slaTmr);
-  localStorage.setItem('grv_sla_fcr',     slaFcr);
-  localStorage.setItem('grv_sla_msg',     slaMsg);
-  localStorage.setItem('grv_threshold',   thr);
-  localStorage.setItem('grv_refresh_sec', refresh);
-  localStorage.setItem('grv_weight_tma',  wTma);
-  localStorage.setItem('grv_weight_tmr',  wTmr);
-  localStorage.setItem('grv_weight_fcr',  wFcr);
-  localStorage.setItem('grv_weight_msg',  wMsg);
-  localStorage.setItem('grv_weight_csat', wCsat);
+  const saveBtn = document.getElementById('cfg-save-btn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Salvando...';
 
+  let syncOk = false;
+  try {
+    const res = await fetch('/api/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        password:    _settingsPassword,
+        token,
+        account:     parseInt(account, 10) || 1,
+        sla_tma:     slaTma,
+        sla_tmr:     slaTmr,
+        sla_fcr:     slaFcr,
+        sla_msg:     slaMsg,
+        threshold:   thr,
+        refresh_sec: refresh,
+        weight_tma:  wTma,
+        weight_tmr:  wTmr,
+        weight_fcr:  wFcr,
+        weight_msg:  wMsg,
+        weight_csat: wCsat,
+      }),
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      showToast('Senha inválida — não foi possível sincronizar com o Supabase');
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Salvar configurações';
+      return;
+    }
+    syncOk = true;
+  } catch {
+    showToast('Supabase indisponível — configurações salvas apenas localmente');
+  }
+
+  cfg.token     = token;
+  cfg.account   = account;
+  cfg.threshold = thr;
   _SLA_TMA      = slaTma;
   _SLA_TMR      = slaTmr;
   _SLA_FCR      = slaFcr;
   _SLA_MSG      = slaMsg;
-  cfg.threshold = thr;
   REFRESH_SEC   = refresh;
   _WEIGHT_TMA   = wTma;
   _WEIGHT_TMR   = wTmr;
@@ -3519,11 +3582,30 @@ function saveConfig() {
   _WEIGHT_MSG   = wMsg;
   _WEIGHT_CSAT  = wCsat;
 
-  _agentPerfData = null;
+  localStorage.setItem('grv_token',       token);
+  localStorage.setItem('grv_account',     account);
+  localStorage.setItem('grv_threshold',   thr);
+  localStorage.setItem('grv_sla_tma',     slaTma);
+  localStorage.setItem('grv_sla_tmr',     slaTmr);
+  localStorage.setItem('grv_sla_fcr',     slaFcr);
+  localStorage.setItem('grv_sla_msg',     slaMsg);
+  localStorage.setItem('grv_refresh_sec', refresh);
+  localStorage.setItem('grv_weight_tma',  wTma);
+  localStorage.setItem('grv_weight_tmr',  wTmr);
+  localStorage.setItem('grv_weight_fcr',  wFcr);
+  localStorage.setItem('grv_weight_msg',  wMsg);
+  localStorage.setItem('grv_weight_csat', wCsat);
+
+  _agentPerfData   = null;
   _agentMonthCache = {};
 
+  const overlay = document.getElementById('onboarding-overlay');
+  if (overlay) overlay.classList.add('hidden');
+
+  saveBtn.disabled = false;
+  saveBtn.textContent = 'Salvar configurações';
+  showToast(syncOk ? 'Configurações salvas e sincronizadas' : 'Configurações salvas localmente');
   startDashboard();
-  showToast('Configurações salvas');
   showPage('painel');
 }
 
