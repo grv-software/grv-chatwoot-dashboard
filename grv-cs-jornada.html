@@ -159,6 +159,25 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .hero-trend-up{color:#e53e3e}
 .hero-trend-down{color:#38a169}
 .hero-trend-neutral{color:var(--text3)}
+.vg-card{background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border-radius:var(--radius);padding:28px 32px 20px;margin-bottom:28px;color:#fff;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.vg-glow{position:absolute;top:-60px;right:-60px;width:260px;height:260px;background:radial-gradient(circle,rgba(224,90,30,.22) 0%,transparent 70%);pointer-events:none}
+.vg-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px}
+.vg-eyebrow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.38);margin-bottom:8px}
+.vg-headline{font-size:36px;font-weight:800;line-height:1;letter-spacing:-1.5px;margin-bottom:8px}
+.vg-caption{font-size:13px;color:rgba(255,255,255,.45)}
+.vg-saude-badge{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:24px;border:1px solid;font-size:12px;font-weight:700;letter-spacing:.02em;flex-shrink:0;backdrop-filter:blur(4px)}
+.vg-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.07)}
+.vg-kpi{padding:0 20px;border-right:1px solid rgba(255,255,255,.07)}
+.vg-kpi:first-child{padding-left:0}
+.vg-kpi:last-child{border-right:none;padding-right:0}
+.vg-kpi-n{font-size:42px;font-weight:800;line-height:1;letter-spacing:-2px}
+.vg-kpi-l{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.07em;margin-top:5px}
+.vg-kpi-pct{font-size:11px;color:rgba(255,255,255,.25);margin-top:2px}
+.vg-bar{height:12px;border-radius:6px;display:flex;overflow:hidden;gap:2px;margin-bottom:10px}
+.vg-bar-seg{height:100%;min-width:3px}
+.vg-legend{display:flex;gap:18px;flex-wrap:wrap}
+.vg-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,.45)}
+.vg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .dash-zone{margin-bottom:32px}
 .dash-zone-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;padding-bottom:12px;border-bottom:2px solid var(--border);margin-bottom:20px}
 .chart-headline{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;line-height:1.3}
@@ -1389,6 +1408,75 @@ function initCharts(kpis, clientes, consultores) {
   if (get('ch-gauge-nx'))  _dashCharts.gaugeNX  = new Chart(get('ch-gauge-nx'), chartGaugeConfig(computeAtivacao(clientes,'NX').pct));
 }
 
+function renderVisaoGeral(kpis, clientes, consultores) {
+  const ativos   = kpis.total - kpis.cancelado;
+  const nConsul  = consultores.filter(c => clientes.some(cl => cl.consultorId === c.id)).length;
+  const produtos = [...new Set(clientes.map(c => c.produto.split('/')[0]))].filter(Boolean).join(' · ');
+  const saude    = computeSaudePortfolio(kpis);
+  const pct      = n => kpis.total ? Math.round(n / kpis.total * 100) : 0;
+  const saudeTxt = saude.nivel === 'ok' ? 'Portfólio saudável' : saude.nivel === 'atencao' ? 'Requer atenção' : 'Em risco';
+  const saudeBg  = saude.nivel === 'ok' ? 'rgba(56,161,105,.18)' : saude.nivel === 'atencao' ? 'rgba(214,158,46,.18)' : 'rgba(229,62,62,.18)';
+  const saudeBd  = saude.nivel === 'ok' ? 'rgba(56,161,105,.4)' : saude.nivel === 'atencao' ? 'rgba(214,158,46,.4)' : 'rgba(229,62,62,.4)';
+
+  const segs = [
+    { n: kpis.emAndamento, label: 'Em Andamento', cor: '#3b82f6' },
+    { n: kpis.concluido,   label: 'Concluídos',   cor: '#22c55e' },
+    { n: kpis.atrasado,    label: 'Atrasados',    cor: '#ef4444' },
+    { n: kpis.pausado,     label: 'Pausados',     cor: '#eab308' },
+    { n: kpis.naoIniciado, label: 'Não Iniciado', cor: 'rgba(255,255,255,.12)' },
+  ].filter(s => s.n > 0);
+
+  return `
+    <div class="vg-card">
+      <div class="vg-glow"></div>
+      <div class="vg-header">
+        <div>
+          <div class="vg-eyebrow">GRV · Gestão de Implantação</div>
+          <div class="vg-headline">${ativos} projetos ativos</div>
+          <div class="vg-caption">${nConsul} consultor${nConsul!==1?'es':''} · ${produtos}${kpis.cancelado ? ` · ${kpis.cancelado} cancelados` : ''}</div>
+        </div>
+        <div class="vg-saude-badge" style="background:${saudeBg};border-color:${saudeBd}">
+          <span style="font-size:16px">${saude.icone}</span> ${saudeTxt}
+        </div>
+      </div>
+      <div class="vg-kpis">
+        <div class="vg-kpi">
+          <div class="vg-kpi-n" style="color:#E05A1E">${kpis.total}</div>
+          <div class="vg-kpi-l">Total</div>
+        </div>
+        <div class="vg-kpi">
+          <div class="vg-kpi-n">${kpis.emAndamento}</div>
+          <div class="vg-kpi-l">Em Andamento</div>
+          <div class="vg-kpi-pct">${pct(kpis.emAndamento)}% do total</div>
+        </div>
+        <div class="vg-kpi">
+          <div class="vg-kpi-n" style="color:#22c55e">${kpis.concluido}</div>
+          <div class="vg-kpi-l">Concluídos</div>
+          <div class="vg-kpi-pct">${pct(kpis.concluido)}% do total</div>
+        </div>
+        <div class="vg-kpi">
+          <div class="vg-kpi-n" style="color:${kpis.atrasado > 0 ? '#ef4444' : 'rgba(255,255,255,.3)'}">${kpis.atrasado}</div>
+          <div class="vg-kpi-l">Atrasados</div>
+          <div class="vg-kpi-pct">${pct(kpis.atrasado)}% do total</div>
+        </div>
+        <div class="vg-kpi">
+          <div class="vg-kpi-n">${kpis.pausado}</div>
+          <div class="vg-kpi-l">Pausados</div>
+          <div class="vg-kpi-pct">${pct(kpis.pausado)}% do total</div>
+        </div>
+      </div>
+      <div class="vg-bar">
+        ${segs.map(s => `<div class="vg-bar-seg" style="flex:${s.n};background:${s.cor}" title="${s.label}: ${s.n} (${pct(s.n)}%)"></div>`).join('')}
+      </div>
+      <div class="vg-legend">
+        ${segs.filter(s=>s.cor!=='rgba(255,255,255,.12)').map(s =>
+          `<div class="vg-legend-item"><div class="vg-dot" style="background:${s.cor}"></div>${s.label} <strong style="color:rgba(255,255,255,.7)">${pct(s.n)}%</strong></div>`
+        ).join('')}
+        ${kpis.naoIniciado > 0 ? `<div class="vg-legend-item"><div class="vg-dot" style="background:rgba(255,255,255,.25)"></div>Não Iniciado <strong style="color:rgba(255,255,255,.35)">${pct(kpis.naoIniciado)}%</strong></div>` : ''}
+      </div>
+    </div>`;
+}
+
 function renderZona1(kpis, clientes) {
   const saude  = computeSaudePortfolio(kpis);
   const ativos = kpis.total - kpis.cancelado;
@@ -1549,7 +1637,7 @@ function renderDashboardProjetos(clientes, consultores) {
   }
 
   const kpis = computeDashboardKPIs(clientes);
-  return filterBar + renderZona1(kpis, clientes) + renderZona2(kpis, clientes, consultores) + renderZona3(kpis, clientes);
+  return filterBar + renderVisaoGeral(kpis, clientes, consultores) + renderZona1(kpis, clientes) + renderZona2(kpis, clientes, consultores) + renderZona3(kpis, clientes);
 }
 
 function getDiasNaEtapa(c) {
