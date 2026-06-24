@@ -120,6 +120,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .dash-backlog-box{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;gap:16px}
 .dash-backlog-stat .bs-label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:4px}
 .dash-backlog-stat .bs-value{font-size:28px;font-weight:700}
+.dash-card{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.dash-card-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:4px}
 .alerta-card{padding:14px 16px;border-radius:var(--radius);margin-bottom:8px;display:flex;align-items:flex-start;gap:12px}
 .alerta-critico{background:#FFF5F5;border-left:4px solid #e53e3e}
 .alerta-atencao{background:#FFFFF0;border-left:4px solid #d69e2e}
@@ -997,8 +999,207 @@ function animateKpis(kpis) {
   vals.forEach((v,i) => { const el = document.getElementById('kpi-v-'+i); if (el) countUp(el, v); });
 }
 
+function chartDonutConfig(kpis) {
+  return {
+    type: 'doughnut',
+    data: {
+      labels: ['Concluídos','Em Andamento','Atrasados','Pausados','Não Iniciado','Cancelados'],
+      datasets: [{
+        data: [kpis.concluido, kpis.emAndamento, kpis.atrasado, kpis.pausado, kpis.naoIniciado, kpis.cancelado],
+        backgroundColor: ['#38a169','#3182ce','#e53e3e','#d69e2e','#718096','#4a5568'],
+        borderWidth: 2, borderColor: '#fff', hoverOffset: 6,
+      }]
+    },
+    options: {
+      cutout: '65%',
+      plugins: {
+        legend: { position:'right', labels:{ boxWidth:12, padding:16, font:{size:12} } },
+        tooltip: { callbacks: { label: ctx => {
+          const pct = kpis.total ? Math.round(ctx.parsed / kpis.total * 100) : 0;
+          return ` ${ctx.label}: ${ctx.parsed} (${pct}%)`;
+        }}}
+      },
+      animation: { duration:500 }
+    }
+  };
+}
+
+function chartBarrasConfig(clientes) {
+  const produtos = [...new Set(clientes.map(c => c.produto.split('/')[0]))].filter(Boolean).sort();
+  const series = [
+    {label:'Em Andamento', key:'emAndamento', color:'#3182ce'},
+    {label:'Atrasados',    key:'atrasado',    color:'#e53e3e'},
+    {label:'Pausados',     key:'pausado',     color:'#d69e2e'},
+    {label:'Concluídos',   key:'concluido',   color:'#38a169'},
+  ];
+  const datasets = series.map(s => ({
+    label: s.label,
+    data: produtos.map(p => computeDashboardKPIs(clientes.filter(c => c.produto.split('/')[0] === p))[s.key]),
+    backgroundColor: s.color,
+    borderRadius: 4,
+  }));
+  return {
+    type: 'bar',
+    data: { labels: produtos, datasets },
+    options: {
+      plugins: { legend:{ position:'bottom', labels:{ boxWidth:12, font:{size:12} } } },
+      scales: {
+        y: { beginAtZero:true, grid:{ color:'#edf2f7' }, ticks:{ stepSize:1 } },
+        x: { grid:{ display:false } }
+      },
+      animation: { duration:500 }
+    }
+  };
+}
+
+function computeAtivacao(clientes, produtoPrefix) {
+  const sub       = clientes.filter(c => c.produto.split('/')[0] === produtoPrefix);
+  const concluidos = sub.filter(c => getProgresso(c) === 100);
+  const noPrazo   = concluidos.filter(c => c.prazo && new Date() <= new Date(c.prazo));
+  return {
+    total:     sub.length,
+    concluidos:concluidos.length,
+    noPrazo:   noPrazo.length,
+    pct:       concluidos.length ? Math.round(noPrazo.length / concluidos.length * 100) : 0,
+  };
+}
+
+function computeBacklog(clientes) {
+  const hoje     = new Date();
+  const atrasados = clientes.filter(c => getStatus(c) === 'Atrasado');
+  const diasTotal = atrasados.reduce((acc, c) => {
+    if (!c.prazo) return acc;
+    return acc + Math.max(0, Math.floor((hoje - new Date(c.prazo)) / 86400000));
+  }, 0);
+  return { total:diasTotal, media: atrasados.length ? Math.round(diasTotal / atrasados.length) : 0, qtd:atrasados.length };
+}
+
+function fmtMilhares(n) {
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function chartGaugeConfig(pct) {
+  const cor = pct >= 85 ? '#38a169' : '#e53e3e';
+  return {
+    type: 'doughnut',
+    data: { datasets: [{ data:[pct, 100-pct], backgroundColor:[cor,'#edf2f7'], borderWidth:0, circumference:180, rotation:-90 }] },
+    options: { cutout:'72%', plugins:{ legend:{display:false}, tooltip:{enabled:false} }, animation:{duration:500} }
+  };
+}
+
+let _sortConsul = {key:'pctAtrasado', dir:'desc'};
+
+function computePerformance(clientes, consultores) {
+  return consultores.map(con => {
+    const sub  = clientes.filter(c => c.consultorId === con.id);
+    const kpis = computeDashboardKPIs(sub);
+    return { id:con.id, nome:con.nome, total:kpis.total, andamento:kpis.emAndamento,
+             atrasado:kpis.atrasado, pausado:kpis.pausado, concluido:kpis.concluido,
+             pctAtrasado: kpis.total ? Math.round(kpis.atrasado / kpis.total * 100) : 0 };
+  }).filter(r => r.total > 0)
+    .sort((a,b) => _sortConsul.dir==='desc' ? b[_sortConsul.key]-a[_sortConsul.key] : a[_sortConsul.key]-b[_sortConsul.key]);
+}
+
+function chartConsulConfig(data) {
+  return {
+    type: 'bar',
+    data: {
+      labels: data.map(d => d.nome.split(' ')[0]),
+      datasets: [
+        {label:'Em Andamento', data:data.map(d=>d.andamento), backgroundColor:'#3182ce', stack:'s'},
+        {label:'Atrasados',    data:data.map(d=>d.atrasado),  backgroundColor:'#e53e3e', stack:'s'},
+        {label:'Pausados',     data:data.map(d=>d.pausado),   backgroundColor:'#d69e2e', stack:'s'},
+        {label:'Concluídos',   data:data.map(d=>d.concluido), backgroundColor:'#38a169', stack:'s'},
+      ]
+    },
+    options: {
+      indexAxis:'y',
+      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:12, font:{size:12} } } },
+      scales:{ x:{ stacked:true, grid:{color:'#edf2f7'} }, y:{ stacked:true, grid:{display:false} } },
+      animation:{ duration:500 }
+    }
+  };
+}
+
+function computeAlertas(kpis, clientes) {
+  const alertas   = [];
+  const backlog   = computeBacklog(clientes);
+  const pctAtr    = kpis.total ? kpis.atrasado / kpis.total : 0;
+  const pctPaus   = kpis.total ? kpis.pausado  / kpis.total : 0;
+  if (pctAtr > 0.15) alertas.push({ sev:'critico',
+    titulo:'Portfólio atrasado: ' + Math.round(pctAtr*100) + '% (' + kpis.atrasado + '/' + kpis.total + ' projetos)',
+    acao:'Acima de 15% — escalar para gestão' });
+  if (backlog.total > 500) alertas.push({ sev:'critico',
+    titulo:'Backlog em dias atrasados: ' + fmtMilhares(backlog.total) + ' dias acumulados',
+    acao:'Ação imediata de vazão necessária' });
+  if (kpis.atrasado > 0) alertas.push({ sev:'critico',
+    titulo:'Estouro de prazo: ' + kpis.atrasado + ' projeto(s) ultrapassaram a data limite',
+    acao:'Revisar escopo ou formalizar extensão com o cliente' });
+  if (pctPaus > 0.10) alertas.push({ sev:'atencao',
+    titulo:'Projetos pausados: ' + kpis.pausado + ' (' + Math.round(pctPaus*100) + '% do portfólio)',
+    acao:'Confirmar data de retomada com cada cliente' });
+  if (backlog.media > 90) alertas.push({ sev:'atencao',
+    titulo:'Média de atraso: ' + backlog.media + ' dias por projeto atrasado',
+    acao:'Confirmar plano de recuperação com consultores' });
+  return alertas;
+}
+
+function renderAlertas(alertas) {
+  if (!alertas.length) return `<div class="alerta-card alerta-ok">
+    <div class="alerta-dot alerta-dot-green"></div>
+    <div class="alerta-body"><div class="ab-title">Portfólio saudável — sem alertas críticos no momento</div></div>
+  </div>`;
+  return alertas.map(a => `
+    <div class="alerta-card alerta-${a.sev}">
+      <div class="alerta-dot alerta-dot-${a.sev==='critico'?'red':'yellow'}"></div>
+      <div class="alerta-body">
+        <div class="ab-title">${a.titulo}</div>
+        <div class="ab-acao">${a.acao}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderTabelaConsultores(data) {
+  const si = (key) => _sortConsul.key===key ? (_sortConsul.dir==='desc'?'↓':'↑') : '↕';
+  const bp  = (pct) => `<span class="badge ${pct>30?'badge-red':pct>15?'badge-yellow':'badge-green'}">${pct}%</span>`;
+  return `<div class="table-wrap" style="margin-top:16px">
+    <table class="data-table">
+      <thead><tr>
+        <th>Consultor</th>
+        <th style="text-align:center;cursor:pointer" onclick="sortConsul('total')">Total ${si('total')}</th>
+        <th style="text-align:center;color:#3182ce">Em And.</th>
+        <th style="text-align:center;color:#e53e3e">Atrasados</th>
+        <th style="text-align:center;cursor:pointer" onclick="sortConsul('pctAtrasado')">% Atrasado ${si('pctAtrasado')}</th>
+        <th style="text-align:center;color:#d69e2e">Pausados</th>
+        <th style="text-align:center;color:#38a169">Concluídos</th>
+      </tr></thead>
+      <tbody>
+        ${data.map(d => `<tr>
+          <td style="font-weight:600">${d.nome}</td>
+          <td style="text-align:center">${d.total}</td>
+          <td style="text-align:center;color:#3182ce">${d.andamento}</td>
+          <td style="text-align:center;color:#e53e3e;font-weight:600">${d.atrasado}</td>
+          <td style="text-align:center">${bp(d.pctAtrasado)}</td>
+          <td style="text-align:center;color:#d69e2e">${d.pausado}</td>
+          <td style="text-align:center;color:#38a169">${d.concluido}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function sortConsul(key) {
+  _sortConsul = _sortConsul.key===key ? {key, dir:_sortConsul.dir==='desc'?'asc':'desc'} : {key, dir:'desc'};
+  renderProjetosGRV();
+}
+
 function initCharts(kpis, clientes, consultores) {
-  // populated in Tasks 4–7
+  const get = id => document.getElementById(id);
+  if (get('ch-donut'))     _dashCharts.donut    = new Chart(get('ch-donut'),    chartDonutConfig(kpis));
+  if (get('ch-barras'))    _dashCharts.barras   = new Chart(get('ch-barras'),   chartBarrasConfig(clientes));
+  if (get('ch-gauge-cps')) _dashCharts.gaugeCPS = new Chart(get('ch-gauge-cps'),chartGaugeConfig(computeAtivacao(clientes,'CPS').pct));
+  if (get('ch-gauge-nx'))  _dashCharts.gaugeNX  = new Chart(get('ch-gauge-nx'), chartGaugeConfig(computeAtivacao(clientes,'NX').pct));
+  if (get('ch-consul'))    _dashCharts.consul   = new Chart(get('ch-consul'),   chartConsulConfig(computePerformance(clientes, consultores)));
 }
 
 function renderDashboardProjetos(clientes, consultores) {
@@ -1024,7 +1225,80 @@ function renderDashboardProjetos(clientes, consultores) {
       </select>
     </div>
     ${renderKpiRow(kpis)}
-    <div id="dash-rest" style="color:var(--text3);font-size:13px;padding:4px 0">Gráficos em breve...</div>`;
+
+    <div class="dash-chart-row">
+      <div class="dash-card">
+        <div class="dash-card-title">Distribuição por Status</div>
+        <div style="position:relative;height:260px;display:flex;align-items:center;justify-content:center">
+          <canvas id="ch-donut" style="max-height:260px"></canvas>
+          <div style="position:absolute;left:28%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;line-height:1.2">
+            <div style="font-size:28px;font-weight:700;color:var(--text)">${kpis.total}</div>
+            <div style="font-size:11px;color:var(--text3)">projetos</div>
+          </div>
+        </div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-title">Status por Produto</div>
+        <div style="height:260px"><canvas id="ch-barras" style="max-height:260px"></canvas></div>
+      </div>
+    </div>
+
+    ${(()=>{
+      const cps  = computeAtivacao(clientes, 'CPS');
+      const nx   = computeAtivacao(clientes, 'NX');
+      const back = computeBacklog(clientes);
+      const corCPS = cps.pct >= 85 ? '#38a169' : '#e53e3e';
+      const corNX  = nx.pct  >= 85 ? '#38a169' : '#e53e3e';
+      return `
+      <div class="dash-gauge-row">
+        <div class="dash-card" style="text-align:center">
+          <div class="dash-card-title">Ativação CPS (no prazo)</div>
+          <div style="position:relative;height:120px;overflow:hidden">
+            <canvas id="ch-gauge-cps" style="max-height:140px"></canvas>
+          </div>
+          <div style="margin-top:-16px;font-size:26px;font-weight:700;color:${corCPS}">${cps.pct}%</div>
+          <div style="font-size:12px;color:var(--text3)">${cps.noPrazo}/${cps.concluidos} concluídos no prazo · meta 85%</div>
+        </div>
+        <div class="dash-card" style="text-align:center">
+          <div class="dash-card-title">Ativação NX (no prazo)</div>
+          <div style="position:relative;height:120px;overflow:hidden">
+            <canvas id="ch-gauge-nx" style="max-height:140px"></canvas>
+          </div>
+          <div style="margin-top:-16px;font-size:26px;font-weight:700;color:${corNX}">${nx.pct}%</div>
+          <div style="font-size:12px;color:var(--text3)">${nx.noPrazo}/${nx.concluidos} concluídos no prazo · meta 85%</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-title">Backlog de Atrasos</div>
+          <div style="margin-top:16px">
+            <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #edf2f7">
+              <span style="color:var(--text3);font-size:13px">Projetos atrasados</span>
+              <span style="font-weight:700;color:#e53e3e;font-size:18px">${back.qtd}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #edf2f7">
+              <span style="color:var(--text3);font-size:13px">Total dias atrasados</span>
+              <span style="font-weight:700;color:var(--text);font-size:18px">${fmtMilhares(back.total)}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:12px 0">
+              <span style="color:var(--text3);font-size:13px">Média por projeto</span>
+              <span style="font-weight:700;color:${back.media>90?'#e53e3e':back.media>45?'#d69e2e':'#38a169'};font-size:18px">${back.media} dias</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    })()}
+
+    <div class="dash-card" style="margin-bottom:24px">
+      <div class="dash-card-title">Alertas Operacionais</div>
+      <div id="dash-alertas" style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+        ${renderAlertas(computeAlertas(kpis, clientes))}
+      </div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-card-title">Performance por Consultor</div>
+      <div style="height:220px;margin-top:12px"><canvas id="ch-consul" style="max-height:220px"></canvas></div>
+      ${renderTabelaConsultores(computePerformance(clientes, consultores))}
+    </div>`;
 }
 
 function getDiasNaEtapa(c) {
