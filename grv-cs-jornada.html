@@ -977,17 +977,17 @@ function countUp(el, target, duration) {
 
 function renderKpiRow(kpis) {
   const cards = [
-    {label:'Total',        value:kpis.total,        cls:'',             color:'#1A1A2E'},
-    {label:'Não Iniciado', value:kpis.naoIniciado,  cls:'',             color:'#718096'},
-    {label:'Em Andamento', value:kpis.emAndamento,  cls:'',             color:'#3182ce'},
-    {label:'Atrasados',    value:kpis.atrasado,     cls:'kpi-atrasado', color:'#e53e3e'},
-    {label:'Pausados',     value:kpis.pausado,      cls:'kpi-pausado',  color:'#d69e2e'},
-    {label:'Concluídos',   value:kpis.concluido,    cls:'kpi-concluido',color:'#38a169'},
-    {label:'Cancelados',   value:kpis.cancelado,    cls:'',             color:'#4a5568'},
+    {label:'Total',        value:kpis.total,        cls:'',             color:'#1A1A2E', drill:''},
+    {label:'Não Iniciado', value:kpis.naoIniciado,  cls:'',             color:'#718096', drill:'Não Iniciado'},
+    {label:'Em Andamento', value:kpis.emAndamento,  cls:'',             color:'#3182ce', drill:'Em Andamento'},
+    {label:'Atrasados',    value:kpis.atrasado,     cls:'kpi-atrasado', color:'#e53e3e', drill:'Atrasado'},
+    {label:'Pausados',     value:kpis.pausado,      cls:'kpi-pausado',  color:'#d69e2e', drill:'Pausado'},
+    {label:'Concluídos',   value:kpis.concluido,    cls:'kpi-concluido',color:'#38a169', drill:'Concluído'},
+    {label:'Cancelados',   value:kpis.cancelado,    cls:'',             color:'#4a5568', drill:'Cancelado'},
   ];
   return `<div class="dash-kpi-row">
     ${cards.map((c,i) => `
-      <div class="dash-kpi-card ${c.cls}">
+      <div class="dash-kpi-card ${c.cls}" onclick="drillKpi('${c.drill}')" title="Ver lista: ${c.label}" style="cursor:pointer">
         <div class="dash-kpi-label">${c.label}</div>
         <div class="dash-kpi-value" id="kpi-v-${i}" style="color:${c.color}">0</div>
       </div>`).join('')}
@@ -1664,6 +1664,7 @@ let _proj_view      = localStorage.getItem(PROJETOS_VIEW_KEY) || 'dashboard';
 let _proj_consultor = '';
 let _proj_etapa     = '';
 let _proj_status    = '';
+let _proj_kpi_filter = '';
 let _dashCharts     = {};
 
 function setProjetosView(v) {
@@ -1673,8 +1674,17 @@ function setProjetosView(v) {
 }
 
 function setProjConsultor(v) { _proj_consultor = v; renderProjetosGRV(); }
-function setProjEtapa(v)     { _proj_etapa     = v; renderProjetosGRV(); }
-function setProjStatus(v)    { _proj_status    = v; renderProjetosGRV(); }
+function setProjEtapa(v)     { _proj_etapa = v; _proj_kpi_filter = ''; renderProjetosGRV(); }
+function setProjStatus(v)    { _proj_status = v; _proj_kpi_filter = ''; renderProjetosGRV(); }
+
+function drillKpi(statusDash) {
+  _proj_view = 'lista';
+  _proj_kpi_filter = statusDash;
+  _proj_etapa  = '';
+  _proj_status = '';
+  localStorage.setItem(PROJETOS_VIEW_KEY, 'lista');
+  renderProjetosGRV();
+}
 
 function renderProjetosGRV() {
   const todos       = getClientes();
@@ -1683,8 +1693,11 @@ function renderProjetosGRV() {
   let filtered = todos;
   if (_proj_consultor) filtered = filtered.filter(c => c.consultorId === _proj_consultor);
   if (_proj_view !== 'dashboard') {
-    if (_proj_etapa)  filtered = filtered.filter(c => c.etapa === _proj_etapa);
-    if (_proj_status) filtered = filtered.filter(c => getStatus(c) === _proj_status);
+    if (_proj_kpi_filter) filtered = filtered.filter(c => getStatusDash(c) === _proj_kpi_filter);
+    else {
+      if (_proj_etapa)  filtered = filtered.filter(c => c.etapa === _proj_etapa);
+      if (_proj_status) filtered = filtered.filter(c => getStatus(c) === _proj_status);
+    }
   }
 
   const total     = todos.length;
@@ -1716,12 +1729,19 @@ function renderProjetosGRV() {
     return;
   }
 
+  const kpiPill = _proj_kpi_filter
+    ? `<span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#E05A1E22;border:1px solid #E05A1E66;border-radius:20px;font-size:12px;color:#E05A1E;font-weight:600">
+        Filtro: ${_proj_kpi_filter}
+        <span onclick="drillKpi('')" style="cursor:pointer;font-size:14px;line-height:1" title="Limpar filtro">×</span>
+       </span>` : '';
+
   const filterBar = `
     <div class="filter-bar">
       <select onchange="setProjConsultor(this.value)">
         <option value="">Todos consultores</option>
         ${consultores.map(c => `<option value="${c.id}"${c.id===_proj_consultor?' selected':''}>${c.nome}</option>`).join('')}
       </select>
+      ${_proj_kpi_filter ? kpiPill : `
       <select onchange="setProjEtapa(this.value)">
         <option value="">Todas etapas</option>
         ${ETAPAS.map(e => `<option value="${e}"${e===_proj_etapa?' selected':''}>${ETAPA_META[e].emoji} ${e}</option>`).join('')}
@@ -1729,7 +1749,7 @@ function renderProjetosGRV() {
       <select onchange="setProjStatus(this.value)">
         <option value="">Todos status</option>
         ${Object.keys(STATUS_COLOR).map(s => `<option value="${s}"${s===_proj_status?' selected':''}>${s}</option>`).join('')}
-      </select>
+      </select>`}
     </div>`;
 
   const sec = document.getElementById('sec-projetos');
