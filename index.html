@@ -24,8 +24,6 @@
 body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI',sans-serif; font-size: 14px; min-height: 100vh; }
 
 /* MODAL */
-#token-modal { position:fixed; inset:0; background:rgba(0,0,0,.82); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; z-index:9999; }
-#token-modal.hidden { display:none; }
 #settings-auth-modal { display:flex; }
 #settings-auth-modal.hidden { display:none; }
 .modal-box { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:28px; width:440px; max-width:95vw; }
@@ -150,11 +148,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 .sidebar-item:hover { background:var(--bg3); color:var(--text); }
 .sidebar-item.active { background:rgba(59,130,246,.12); color:var(--accent); }
 .sidebar-footer { margin-top:auto; border-top:1px solid var(--border); padding-top:4px; }
-#nav-connect { opacity:.8; }
-#nav-connect:hover { opacity:1; }
-#conn-icon { font-size:9px; transition:color .3s; }
-#conn-icon.connected    { color:#4ade80; }
-#conn-icon.disconnected { color:#f59e0b; animation:pulse-badge 2s ease-in-out infinite; }
 .sidebar-icon { font-size:17px; flex-shrink:0; width:32px; text-align:center; line-height:1; }
 
 /* CONTENT */
@@ -486,24 +479,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 </div>
 
 <!-- SETTINGS MODAL -->
-<div id="token-modal">
-  <div class="modal-box">
-    <h2>Conectar ao Chatwoot</h2>
-    <div class="modal-error" id="modal-error"></div>
-    <label for="inp-token">Token de acesso</label>
-    <input type="password" id="inp-token" placeholder="Cole aqui seu api_access_token"
-      autocomplete="off" onkeydown="if(event.key==='Enter') saveToken()" />
-    <p class="hint">Chatwoot → Perfil → Token de acesso à API</p>
-    <hr class="modal-divider">
-    <label for="inp-account">ID da Conta Chatwoot</label>
-    <input type="number" id="inp-account" value="1" />
-    <hr class="modal-divider">
-    <label for="inp-threshold">Alerta de fila — avisar quando aguardando ≥</label>
-    <input type="number" id="inp-threshold" placeholder="Ex: 5  (0 = desativado)" min="0" />
-    <p class="hint">Badge fica pulsante quando a fila de espera atingir esse número</p>
-    <button class="btn-primary" onclick="saveToken()">Salvar e conectar</button>
-  </div>
-</div>
 
 <!-- SIDEBAR -->
 <nav class="sidebar" id="sidebar" aria-label="Navegação principal">
@@ -520,10 +495,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     <span class="sidebar-label">Análise</span>
   </div>
   <div class="sidebar-footer">
-    <div class="sidebar-item" id="nav-connect" onclick="showTokenModal()" title="Clique para conectar ao Chatwoot">
-      <span class="sidebar-icon" id="conn-icon">●</span>
-      <span class="sidebar-label" id="conn-label">Conectar</span>
-    </div>
     <div class="sidebar-item" onclick="openSettings()" title="Configurações">
       <span class="sidebar-icon">⚙</span>
       <span class="sidebar-label">Config.</span>
@@ -1084,6 +1055,26 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
   </div>
 </div>
 
+<!-- ONBOARDING OVERLAY (Caso B: sem token em lugar nenhum) -->
+<div id="onboarding-overlay" class="hidden" style="position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:8000;gap:16px;padding:24px">
+  <div style="font-size:48px;line-height:1">⚙</div>
+  <h2 style="margin:0;font-size:22px;color:var(--text)">Bem-vindo ao GRV SAC</h2>
+  <p style="margin:0;color:var(--text2);text-align:center;max-width:380px;line-height:1.6">Configure o token do Chatwoot para começar a usar o dashboard.</p>
+  <button class="btn-primary" onclick="openSettingsFromOnboarding()">Configurar agora</button>
+</div>
+
+<!-- MIGRATE BANNER (Caso A: tem token local, Supabase vazio) -->
+<div id="migrate-banner" class="hidden" style="position:fixed;top:0;left:0;right:0;background:var(--accent);color:#fff;padding:10px 16px;z-index:7999;display:flex;align-items:center;gap:12px;font-size:13px">
+  <span>Config local encontrada. Deseja sincronizar com o Supabase?</span>
+  <button onclick="syncLocalToSupabase()" style="background:#fff;color:var(--accent);border:none;border-radius:5px;padding:4px 12px;cursor:pointer;font-weight:600;font-size:13px">Sincronizar agora</button>
+  <button onclick="dismissMigrate()" style="background:none;border:none;color:#fff;cursor:pointer;margin-left:auto;font-size:20px;line-height:1;padding:0 4px">×</button>
+</div>
+
+<!-- OFFLINE BANNER -->
+<div id="offline-banner" class="hidden" style="position:fixed;top:0;left:0;right:0;background:var(--bg2);border-bottom:1px solid var(--border);color:var(--text3);padding:6px 16px;z-index:7999;font-size:12px">
+  ⚠ Usando config local — Supabase indisponível
+</div>
+
 <script>
 let REFRESH_SEC = parseInt(localStorage.getItem('grv_refresh_sec') || '60', 10);
 const PAGE_SIZE   = 20;
@@ -1110,6 +1101,74 @@ let cfg = {
   token:     localStorage.getItem('grv_token')      || ''
 };
 let _settingsPassword = '';
+
+function applyRemoteConfig(data) {
+  const ri = (v, d) => { const n = parseInt(v, 10); return Number.isFinite(n) ? n : d; };
+  cfg.token     = data.token     || '';
+  cfg.account   = String(data.account || '1');
+  cfg.threshold = ri(data.threshold,  0);
+  _SLA_TMA      = ri(data.sla_tma,   8);
+  _SLA_TMR      = ri(data.sla_tmr,   30);
+  _SLA_FCR      = ri(data.sla_fcr,   85);
+  _SLA_MSG      = ri(data.sla_msg,   10);
+  REFRESH_SEC   = ri(data.refresh_sec, 60);
+  const wTma  = ri(data.weight_tma,  25);
+  const wTmr  = ri(data.weight_tmr,  25);
+  const wFcr  = ri(data.weight_fcr,  25);
+  const wMsg  = ri(data.weight_msg,  25);
+  const wCsat = ri(data.weight_csat, 0);
+  if (wTma + wTmr + wFcr + wMsg + wCsat === 100) {
+    _WEIGHT_TMA = wTma; _WEIGHT_TMR = wTmr; _WEIGHT_FCR = wFcr;
+    _WEIGHT_MSG = wMsg; _WEIGHT_CSAT = wCsat;
+  }
+  localStorage.setItem('grv_token',       cfg.token);
+  localStorage.setItem('grv_account',     cfg.account);
+  localStorage.setItem('grv_threshold',   cfg.threshold);
+  localStorage.setItem('grv_sla_tma',     _SLA_TMA);
+  localStorage.setItem('grv_sla_tmr',     _SLA_TMR);
+  localStorage.setItem('grv_sla_fcr',     _SLA_FCR);
+  localStorage.setItem('grv_sla_msg',     _SLA_MSG);
+  localStorage.setItem('grv_refresh_sec', REFRESH_SEC);
+  localStorage.setItem('grv_weight_tma',  _WEIGHT_TMA);
+  localStorage.setItem('grv_weight_tmr',  _WEIGHT_TMR);
+  localStorage.setItem('grv_weight_fcr',  _WEIGHT_FCR);
+  localStorage.setItem('grv_weight_msg',  _WEIGHT_MSG);
+  localStorage.setItem('grv_weight_csat', _WEIGHT_CSAT);
+}
+
+async function loadRemoteConfig() {
+  try {
+    const res = await fetch('/api/config');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (data.token) {
+      applyRemoteConfig(data);
+      return 'ok';
+    }
+    return localStorage.getItem('grv_token') ? 'migrate' : 'setup';
+  } catch(e) {
+    if (localStorage.getItem('grv_token')) {
+      document.getElementById('offline-banner').classList.remove('hidden');
+      return 'offline';
+    }
+    return 'setup';
+  }
+}
+
+function openSettingsFromOnboarding() {
+  document.getElementById('onboarding-overlay').classList.add('hidden');
+  openSettings();
+}
+
+function dismissMigrate() {
+  document.getElementById('migrate-banner').classList.add('hidden');
+}
+
+function syncLocalToSupabase() {
+  document.getElementById('migrate-banner').classList.add('hidden');
+  openSettings();
+}
+
 let timer = null, countdown = REFRESH_SEC;
 let _rawConvs = [];
 let _allInProg = [], _allWaiting = [], _inboxMap = {}, _shownCount = PAGE_SIZE, _totalOpen = 0;
@@ -1198,53 +1257,17 @@ async function checkSettingsPassword() {
   }
 }
 
-function updateConnStatus() {
-  const icon  = document.getElementById('conn-icon');
-  const label = document.getElementById('conn-label');
-  if (!icon || !label) return;
-  const ok = !!cfg.token;
-  icon.className    = ok ? 'connected' : 'disconnected';
-  label.textContent = ok ? 'Conectado' : 'Conectar';
-  const nav = document.getElementById('nav-connect');
-  if (nav) nav.title = ok ? `Conta ${cfg.account} · clique para alterar conexão` : 'Clique para conectar ao Chatwoot';
-}
-function showTokenModal() {
-  document.getElementById('inp-token').value     = cfg.token || '';
-  document.getElementById('inp-account').value   = cfg.account;
-  document.getElementById('inp-threshold').value = cfg.threshold || '';
-  const errEl = document.getElementById('modal-error');
-  errEl.style.display = 'none';
-  errEl.textContent   = '';
-  document.getElementById('token-modal').classList.remove('hidden');
-  setTimeout(() => document.getElementById('inp-token').focus(), 50);
-}
-function saveToken() {
-  const token     = document.getElementById('inp-token').value.trim();
-  const account   = document.getElementById('inp-account').value.trim() || '1';
-  const threshold = parseInt(document.getElementById('inp-threshold').value, 10) || 0;
-  if (!token) {
-    const errEl = document.getElementById('modal-error');
-    errEl.textContent   = 'Token obrigatório.';
-    errEl.style.display = '';
-    document.getElementById('inp-token').focus();
-    return;
-  }
-  localStorage.setItem('grv_token',     token);
-  localStorage.setItem('grv_account',   account);
-  localStorage.setItem('grv_threshold', threshold);
-  cfg = { token, account, threshold };
-  document.getElementById('token-modal').classList.add('hidden');
-  updateConnStatus();
-  startDashboard();
-}
 
-if (cfg.token) {
-  document.getElementById('token-modal').classList.add('hidden');
-  updateConnStatus();
-  startDashboard();
-} else {
-  showTokenModal();
-}
+loadRemoteConfig().then(function(result) {
+  if (result === 'ok' || result === 'offline') {
+    startDashboard();
+  } else if (result === 'migrate') {
+    document.getElementById('migrate-banner').classList.remove('hidden');
+    startDashboard();
+  } else {
+    document.getElementById('onboarding-overlay').classList.remove('hidden');
+  }
+});
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
@@ -1533,10 +1556,8 @@ async function fetchAll() {
       clearInterval(timer);
       cfg.token = '';
       localStorage.removeItem('grv_token');
-      updateConnStatus();
-      showTokenModal();
-      document.getElementById('modal-error').textContent = 'Token inválido ou expirado. Insira novamente.';
-      document.getElementById('modal-error').style.display = '';
+      showToast('Token inválido ou expirado. Atualize o token nas Configurações.');
+      document.getElementById('onboarding-overlay').classList.remove('hidden');
       return;
     }
     document.getElementById('hdr-countdown').textContent = 'Erro ao atualizar';
