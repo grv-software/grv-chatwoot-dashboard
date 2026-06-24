@@ -99,6 +99,43 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .filter-bar select{padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);outline:none;background:var(--surface);cursor:pointer}
 .filter-bar select:focus{border-color:var(--primary)}
 
+/* ── DASHBOARD ───────────────────────────────────────────── */
+.dash-section{margin-bottom:24px}
+.dash-section-title{font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.dash-kpi-row{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;margin-bottom:24px}
+.dash-kpi-card{background:var(--surface);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.dash-kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:4px}
+.dash-kpi-value{font-size:32px;font-weight:700;line-height:1}
+.dash-kpi-card.kpi-atrasado{background:#FFF5F5;border-top:3px solid #e53e3e}
+.dash-kpi-card.kpi-pausado{background:#FFFFF0}
+.dash-kpi-card.kpi-concluido{background:#F0FFF4}
+.dash-chart-row{display:grid;grid-template-columns:55fr 45fr;gap:16px;margin-bottom:24px}
+.dash-chart-box{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.dash-chart-box canvas{max-width:100%}
+.dash-gauge-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px}
+.dash-gauge-box{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);text-align:center}
+.dash-gauge-wrap{position:relative;display:inline-block;width:160px;height:90px}
+.dash-gauge-label{margin-top:8px;font-size:22px;font-weight:700}
+.dash-gauge-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.dash-backlog-box{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;gap:16px}
+.dash-backlog-stat .bs-label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:4px}
+.dash-backlog-stat .bs-value{font-size:28px;font-weight:700}
+.alerta-card{padding:14px 16px;border-radius:var(--radius);margin-bottom:8px;display:flex;align-items:flex-start;gap:12px}
+.alerta-critico{background:#FFF5F5;border-left:4px solid #e53e3e}
+.alerta-atencao{background:#FFFFF0;border-left:4px solid #d69e2e}
+.alerta-ok{background:#F0FFF4;border-left:4px solid #38a169}
+.alerta-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.alerta-dot-red{background:#e53e3e}
+.alerta-dot-yellow{background:#d69e2e}
+.alerta-dot-green{background:#38a169}
+.alerta-body .ab-title{font-size:13px;font-weight:600;color:var(--text)}
+.alerta-body .ab-acao{font-size:12px;color:var(--text3);margin-top:2px}
+.dash-filter-bar{display:flex;gap:10px;margin-bottom:16px;align-items:center}
+.dash-filter-bar select{padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);outline:none;background:var(--surface);cursor:pointer}
+.dash-filter-bar select:focus{border-color:var(--primary)}
+@media(max-width:1100px){.dash-kpi-row{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:800px){.dash-kpi-row{grid-template-columns:repeat(2,1fr)}.dash-chart-row{grid-template-columns:1fr}.dash-gauge-row{grid-template-columns:1fr}}
+
 /* ── BUTTONS ─────────────────────────────────────────────── */
 .btn{padding:8px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:opacity .15s;font-family:inherit}
 .btn-primary{background:var(--primary);color:#fff}
@@ -925,6 +962,71 @@ function computeDashboardKPIs(clientes) {
   return r;
 }
 
+function countUp(el, target, duration) {
+  duration = duration || 500;
+  const start = performance.now();
+  function tick(now) {
+    const p = Math.min((now - start) / duration, 1);
+    el.textContent = Math.round(p * target);
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+function renderKpiRow(kpis) {
+  const cards = [
+    {label:'Total',        value:kpis.total,        cls:'',             color:'#1A1A2E'},
+    {label:'Não Iniciado', value:kpis.naoIniciado,  cls:'',             color:'#718096'},
+    {label:'Em Andamento', value:kpis.emAndamento,  cls:'',             color:'#3182ce'},
+    {label:'Atrasados',    value:kpis.atrasado,     cls:'kpi-atrasado', color:'#e53e3e'},
+    {label:'Pausados',     value:kpis.pausado,      cls:'kpi-pausado',  color:'#d69e2e'},
+    {label:'Concluídos',   value:kpis.concluido,    cls:'kpi-concluido',color:'#38a169'},
+    {label:'Cancelados',   value:kpis.cancelado,    cls:'',             color:'#4a5568'},
+  ];
+  return `<div class="dash-kpi-row">
+    ${cards.map((c,i) => `
+      <div class="dash-kpi-card ${c.cls}">
+        <div class="dash-kpi-label">${c.label}</div>
+        <div class="dash-kpi-value" id="kpi-v-${i}" style="color:${c.color}">0</div>
+      </div>`).join('')}
+  </div>`;
+}
+
+function animateKpis(kpis) {
+  const vals = [kpis.total,kpis.naoIniciado,kpis.emAndamento,kpis.atrasado,kpis.pausado,kpis.concluido,kpis.cancelado];
+  vals.forEach((v,i) => { const el = document.getElementById('kpi-v-'+i); if (el) countUp(el, v); });
+}
+
+function initCharts(kpis, clientes, consultores) {
+  // populated in Tasks 4–7
+}
+
+function renderDashboardProjetos(clientes, consultores) {
+  Object.values(_dashCharts).forEach(ch => { try{ ch.destroy(); }catch(e){} });
+  _dashCharts = {};
+
+  if (clientes.length === 0) {
+    return `<div class="dash-filter-bar">
+      <select onchange="setProjConsultor(this.value)">
+        <option value="">Todos consultores</option>
+        ${consultores.map(c => `<option value="${c.id}"${c.id===_proj_consultor?' selected':''}>${c.nome}</option>`).join('')}
+      </select>
+    </div>
+    <div class="empty-state"><div class="es-icon">📊</div><div class="es-text">Nenhum projeto encontrado para este consultor.</div></div>`;
+  }
+
+  const kpis = computeDashboardKPIs(clientes);
+  return `
+    <div class="dash-filter-bar">
+      <select onchange="setProjConsultor(this.value)">
+        <option value="">Todos consultores</option>
+        ${consultores.map(c => `<option value="${c.id}"${c.id===_proj_consultor?' selected':''}>${c.nome}</option>`).join('')}
+      </select>
+    </div>
+    ${renderKpiRow(kpis)}
+    <div id="dash-rest" style="color:var(--text3);font-size:13px;padding:4px 0">Gráficos em breve...</div>`;
+}
+
 function getDiasNaEtapa(c) {
   if (!c.historicoEtapas.length) return 0;
   const last = c.historicoEtapas[c.historicoEtapas.length - 1];
@@ -1301,13 +1403,15 @@ function setProjEtapa(v)     { _proj_etapa     = v; renderProjetosGRV(); }
 function setProjStatus(v)    { _proj_status    = v; renderProjetosGRV(); }
 
 function renderProjetosGRV() {
-  const todos      = getClientes();
+  const todos       = getClientes();
   const consultores = getConsultores();
 
   let filtered = todos;
   if (_proj_consultor) filtered = filtered.filter(c => c.consultorId === _proj_consultor);
-  if (_proj_etapa)     filtered = filtered.filter(c => c.etapa === _proj_etapa);
-  if (_proj_status)    filtered = filtered.filter(c => getStatus(c) === _proj_status);
+  if (_proj_view !== 'dashboard') {
+    if (_proj_etapa)  filtered = filtered.filter(c => c.etapa === _proj_etapa);
+    if (_proj_status) filtered = filtered.filter(c => getStatus(c) === _proj_status);
+  }
 
   const total     = todos.length;
   const emOrdem   = todos.filter(c => getStatus(c) === 'Em ordem').length;
@@ -1316,9 +1420,27 @@ function renderProjetosGRV() {
 
   const toggle = `
     <div class="view-toggle">
+      <button class="vt-btn${_proj_view==='dashboard'?' active':''}" onclick="setProjetosView('dashboard')">📊 Dashboard</button>
       <button class="vt-btn${_proj_view==='lista'?' active':''}" onclick="setProjetosView('lista')">☰ Lista</button>
       <button class="vt-btn${_proj_view==='kanban'?' active':''}" onclick="setProjetosView('kanban')">⊞ Kanban</button>
     </div>`;
+
+  if (_proj_view === 'dashboard') {
+    const dashClientes = _proj_consultor ? todos.filter(c => c.consultorId === _proj_consultor) : todos;
+    const dashKpis     = computeDashboardKPIs(dashClientes);
+    document.getElementById('sec-projetos').innerHTML = `
+      <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+        <div>
+          <div class="page-title">Projetos GRV</div>
+          <div class="page-subtitle">Visão estratégica do portfólio · ${todos.length} projetos</div>
+        </div>
+        ${toggle}
+      </div>
+      ${renderDashboardProjetos(dashClientes, consultores)}`;
+    animateKpis(dashKpis);
+    initCharts(dashKpis, dashClientes, consultores);
+    return;
+  }
 
   const filterBar = `
     <div class="filter-bar">
