@@ -8,42 +8,51 @@
 <style>
 :root {
   --primary: #E05A1E;
-  --primary-light: rgba(224,90,30,.12);
-  --sidebar-bg: #1A1A2E;
-  --sidebar-text: #a0aec0;
-  --bg: #F4F5F7;
+  --primary-light: rgba(224,90,30,.10);
+  --sidebar-bg: #ffffff;
+  --sidebar-text: #718096;
+  --bg: #f8f9fb;
   --surface: #ffffff;
-  --border: #e2e8f0;
+  --border: #e8ecf0;
+  --border-2: #f0f2f5;
   --text: #1a202c;
   --text2: #4a5568;
   --text3: #718096;
+  --text4: #a0aec0;
   --green: #38a169; --green-bg: rgba(56,161,105,.1);
   --red: #e53e3e;   --red-bg: rgba(229,62,62,.1);
   --yellow: #d69e2e;--yellow-bg: rgba(214,158,46,.1);
   --gray: #718096;  --gray-bg: rgba(113,128,150,.1);
   --blue: #3182ce;  --blue-bg: rgba(49,130,206,.1);
   --purple: #805ad5;--purple-bg: rgba(128,90,213,.1);
-  --radius: 7px;
+  --b-green-bg: #F0FFF4;
+  --b-red-bg:   #FFF5F5;
+  --b-orange-bg:#FFF3EE;
+  --b-blue-bg:  #EBF8FF;
+  --radius: 9px;
+  --radius-sm: 7px;
   --shadow: 0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.05);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
 
 /* ── SIDEBAR ─────────────────────────────────────────────── */
-.sidebar{width:240px;min-height:100vh;background:var(--sidebar-bg);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
-.sb-logo{padding:20px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.07)}
-.sb-logo-icon{width:36px;height:36px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;flex-shrink:0}
-.sb-logo-text{color:#fff;font-weight:700;font-size:14px;line-height:1.2}
-.sb-logo-text span{display:block;font-weight:400;font-size:11px;color:var(--sidebar-text)}
-.sb-section{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
-.sb-section label{display:block;font-size:10px;color:var(--sidebar-text);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
-.sb-section select{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);color:#fff;padding:7px 10px;font-size:13px;cursor:pointer;outline:none}
-.sb-section select option{background:#1A1A2E;color:#fff}
-.sb-nav{padding:12px 8px;flex:1}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius);color:var(--sidebar-text);cursor:pointer;font-size:13px;font-weight:500;transition:background .15s,color .15s;text-decoration:none;margin-bottom:2px}
-.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
-.nav-item.active{background:var(--primary-light);color:var(--primary)}
-.nav-icon{font-size:15px;width:20px;text-align:center}
+.sidebar{width:210px;min-height:100vh;background:var(--sidebar-bg);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;border-right:1px solid var(--border)}
+.sb-logo{padding:18px 16px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-2)}
+.sb-logo-icon{width:32px;height:32px;flex-shrink:0}
+.sb-logo-text{color:var(--text);font-weight:700;font-size:12px;line-height:1.2}
+.sb-logo-text span{display:block;font-weight:400;font-size:9px;color:var(--text4)}
+.sb-nav{padding:10px;flex:1;display:flex;flex-direction:column;gap:1px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-sm);color:var(--text2);cursor:pointer;font-size:12px;font-weight:500;transition:background .12s,color .12s;text-decoration:none;margin-bottom:1px}
+.nav-item:hover{background:#f7f8fa;color:var(--text)}
+.nav-item.active{background:var(--b-orange-bg);color:var(--primary);font-weight:700}
+.nav-icon{width:16px;height:16px;flex-shrink:0;opacity:.45}
+.nav-item.active .nav-icon{opacity:1}
+.sb-footer{padding:12px 14px;border-top:1px solid var(--border-2)}
+.sb-footer-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text4);margin-bottom:5px;font-weight:700}
+.sb-consul-val{display:flex;align-items:center;gap:8px;background:#f7f8fa;border-radius:var(--radius-sm);padding:7px 10px}
+.sb-avatar{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--primary),#ff8c5a);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0}
+.sb-cname{font-size:11px;color:var(--text);font-weight:600}
 
 /* ── CONTENT ─────────────────────────────────────────────── */
 .content{flex:1;min-height:100vh}
@@ -137,6 +146,48 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .dash-filter-bar select:focus{border-color:var(--primary)}
 @media(max-width:1100px){.dash-kpi-row{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:800px){.dash-kpi-row{grid-template-columns:repeat(2,1fr)}.dash-chart-row{grid-template-columns:1fr}.dash-gauge-row{grid-template-columns:1fr}}
+
+/* ── DASHBOARD ESTRATÉGICO v2 ───────────────────────── */
+.health-banner{padding:16px 20px;border-radius:var(--radius);border-left:5px solid;margin-bottom:20px;display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;line-height:1.4}
+.hero-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:0}
+.hero-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.hero-card{background:var(--surface);border-radius:var(--radius);padding:24px 20px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.hero-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;font-weight:700}
+.hero-value{font-size:52px;font-weight:800;line-height:1;letter-spacing:-1px}
+.hero-sub{font-size:13px;color:var(--text3);margin-top:6px}
+.hero-trend{font-size:12px;font-weight:600;margin-top:8px}
+.hero-trend-up{color:#e53e3e}
+.hero-trend-down{color:#38a169}
+.hero-trend-neutral{color:var(--text3)}
+.vg-card{background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border-radius:var(--radius);padding:28px 32px 20px;margin-bottom:28px;color:#fff;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.vg-glow{position:absolute;top:-60px;right:-60px;width:260px;height:260px;background:radial-gradient(circle,rgba(224,90,30,.22) 0%,transparent 70%);pointer-events:none}
+.vg-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px}
+.vg-eyebrow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.38);margin-bottom:8px}
+.vg-headline{font-size:36px;font-weight:800;line-height:1;letter-spacing:-1.5px;margin-bottom:8px}
+.vg-caption{font-size:13px;color:rgba(255,255,255,.45)}
+.vg-saude-badge{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:24px;border:1px solid;font-size:12px;font-weight:700;letter-spacing:.02em;flex-shrink:0;backdrop-filter:blur(4px)}
+.vg-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.07)}
+.vg-kpi{padding:0 20px;border-right:1px solid rgba(255,255,255,.07)}
+.vg-kpi:first-child{padding-left:0}
+.vg-kpi:last-child{border-right:none;padding-right:0}
+.vg-kpi-n{font-size:42px;font-weight:800;line-height:1;letter-spacing:-2px}
+.vg-kpi-l{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.07em;margin-top:5px}
+.vg-kpi-pct{font-size:11px;color:rgba(255,255,255,.25);margin-top:2px}
+.vg-bar{height:12px;border-radius:6px;display:flex;overflow:hidden;gap:2px;margin-bottom:10px}
+.vg-bar-seg{height:100%;min-width:3px}
+.vg-legend{display:flex;gap:18px;flex-wrap:wrap}
+.vg-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,.45)}
+.vg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dash-zone{margin-bottom:32px}
+.dash-zone-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;padding-bottom:12px;border-bottom:2px solid var(--border);margin-bottom:20px}
+.chart-headline{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;line-height:1.3}
+.chart-subline{font-size:12px;color:var(--text3);margin-bottom:16px}
+.alerts-compact{display:flex;flex-direction:column;gap:8px}
+.alert-compact{padding:10px 12px;border-radius:var(--radius);border-left:3px solid;display:flex;align-items:flex-start;gap:8px;font-size:12px}
+.alert-compact-title{font-weight:600;color:var(--text);line-height:1.3}
+.alert-compact-acao{color:var(--text3);margin-top:2px;font-size:11px}
+@media(max-width:1100px){.hero-metrics{grid-template-columns:1fr 1fr}.hero-row{grid-template-columns:1fr}}
+@media(max-width:800px){.hero-metrics{grid-template-columns:1fr}}
 
 /* ── BUTTONS ─────────────────────────────────────────────── */
 .btn{padding:8px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:opacity .15s;font-family:inherit}
@@ -232,10 +283,140 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
 
 /* ── VIEW TOGGLE ─────────────────────────────────────────── */
-.view-toggle{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:3px;gap:2px}
-.vt-btn{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--text3);transition:background .15s,color .15s;white-space:nowrap}
+.view-toggle{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.vt-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:0;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text3);transition:background .12s,color .12s;white-space:nowrap}
 .vt-btn:hover{background:var(--bg);color:var(--text2)}
-.vt-btn.active{background:var(--primary);color:#fff}
+.vt-btn.active{background:var(--b-orange-bg);color:var(--primary)}
+/* ── FEED CARDS ──────────────────────────────────────────── */
+.feed-wrap{padding:16px 24px;display:flex;flex-direction:column;gap:7px}
+.feed-card{display:flex;align-items:center;background:var(--surface);border-radius:var(--radius);padding:12px 16px;border:1px solid var(--border);cursor:pointer;transition:border-color .12s,box-shadow .12s;position:relative;overflow:hidden}
+.feed-card:hover{border-color:var(--primary);box-shadow:0 2px 12px rgba(224,90,30,.08)}
+.fc-stripe{position:absolute;left:0;top:0;bottom:0;width:4px}
+.fc-body{display:flex;align-items:center;gap:12px;flex:1;margin-left:4px}
+.fc-avatar{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0}
+.fc-info{flex:1}
+.fc-nome{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
+.fc-meta{font-size:11px;color:var(--text3)}
+.fc-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.fc-csat{font-size:10px;color:var(--text3)}
+.fc-prog{width:64px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.fc-progbar{height:4px;border-radius:2px}
+/* ── STATUS BADGES ───────────────────────────────────────── */
+.status-badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}
+.s-atrasado{background:var(--red)}
+.s-atencao{background:var(--yellow)}
+.s-em_ordem{background:var(--green)}
+.s-inicio{background:var(--blue)}
+.s-cs_ativo{background:var(--primary)}
+.b-atrasado{background:var(--b-red-bg);color:var(--red)}
+.b-atencao{background:#FFFBEB;color:var(--yellow)}
+.b-em_ordem{background:var(--b-green-bg);color:var(--green)}
+.b-inicio{background:var(--b-blue-bg);color:var(--blue)}
+.b-cs_ativo{background:var(--b-orange-bg);color:var(--primary)}
+/* ── CARTEIRA KANBAN ─────────────────────────────────────── */
+.ck-wrap{padding:16px 24px;display:flex;gap:14px;overflow-x:auto;flex:1;align-items:flex-start}
+.ck-col{flex-shrink:0;width:220px}
+.ck-col-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.ck-col-lbl{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
+.ck-col-cnt{width:20px;height:20px;border-radius:6px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--text3)}
+.ck-card{background:var(--surface);border-radius:var(--radius);padding:11px 13px;border:1px solid var(--border);margin-bottom:8px;cursor:pointer;transition:border-color .12s;position:relative;overflow:hidden}
+.ck-card:hover{border-color:var(--primary)}
+.ck-stripe{position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0}
+.ck-nome{font-size:12px;font-weight:700;color:var(--text);margin:7px 0 3px}
+.ck-fase{font-size:10px;color:var(--text3);margin-bottom:6px}
+.ck-foot{display:flex;align-items:center;justify-content:space-between}
+.ck-pct{font-size:10px;font-weight:700}
+/* ── ACTIVITY OVERLAY ────────────────────────────────────── */
+.ov-backdrop{position:fixed;inset:0;background:rgba(15,20,30,.35);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}
+.ov-backdrop.open{opacity:1;pointer-events:all}
+.ov-panel{position:fixed;top:0;right:0;bottom:0;width:420px;background:var(--surface);border-left:1px solid var(--border);z-index:201;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s cubic-bezier(.4,0,.2,1);box-shadow:-4px 0 24px rgba(0,0,0,.08)}
+.ov-panel.open{transform:translateX(0)}
+.ov-hd{padding:14px 16px 0;border-bottom:1px solid var(--border-2);flex-shrink:0}
+.ov-hd-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.ov-title{font-size:14px;font-weight:800;color:var(--text);flex:1;margin-right:12px;line-height:1.3}
+.ov-close{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--text3);flex-shrink:0}
+.ov-close:hover{background:var(--border-2)}
+.ov-meta{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.ov-tabs{display:flex}
+.ov-tab{padding:8px 14px;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s}
+.ov-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.ov-body{flex:1;overflow-y:auto;padding:16px}
+.ov-footer{padding:12px 16px;border-top:1px solid var(--border-2);flex-shrink:0;background:var(--surface)}
+.ov-btn-concluir{width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .15s}
+.ov-btn-concluir:hover{opacity:.88}
+.ov-btn-concluir.done{background:var(--border-2);color:var(--text3);cursor:default}
+.ov-dates-row{display:flex;gap:10px;padding:8px 0 4px}
+
+/* ── Novo header do cliente ────────────────────────── */
+.dc-header{display:flex;align-items:center;gap:16px;padding:20px 0 18px}
+.dc-back{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--text3);flex-shrink:0;text-decoration:none}
+.dc-back:hover{background:var(--bg)}
+.dc-avatar-lg{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;flex-shrink:0}
+.dc-info{flex:1;min-width:0}
+.dc-name{font-size:20px;font-weight:800;color:var(--text);line-height:1.2}
+.dc-sub{font-size:12px;color:var(--text3);margin-top:3px}
+.dc-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.chip-status-atrasado{background:#FFF5F5;color:var(--red)}
+.chip-status-em_ordem{background:#F0FFF4;color:var(--green)}
+.chip-status-atencao{background:#FFFFF0;color:var(--yellow)}
+.chip-status-inicio{background:#EBF8FF;color:var(--blue)}
+.chip-base{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.chip-seg{background:var(--border-2);color:var(--text2)}
+.chip-prod{background:#FFF3EE;color:var(--primary)}
+
+/* ── Atividades: duas colunas ──────────────────────── */
+.at-cols{display:grid;grid-template-columns:240px 1fr;min-height:480px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.at-left-col{border-right:1px solid var(--border);background:#fafbfc;padding:12px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:5px}
+.at-left-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text4);padding:0 6px 4px}
+.at-pb-card{padding:10px 12px;border-radius:9px;border:1.5px solid transparent;cursor:pointer;background:var(--surface);transition:all .12s}
+.at-pb-card:hover{border-color:var(--border)}
+.at-pb-card.sel{border-color:var(--primary);background:#FFF3EE;box-shadow:0 0 0 3px rgba(224,90,30,.08)}
+.at-pb-card-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.at-pb-card-meta{font-size:10px;color:var(--text4);margin-bottom:6px}
+.at-pb-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.at-pb-bar-fill{height:100%;border-radius:2px;background:var(--primary);transition:width .3s}
+.at-pb-bar-fill.done{background:var(--green)}
+.at-right-col{overflow-y:auto;background:var(--surface);display:flex;flex-direction:column}
+.at-right-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border-2);flex-shrink:0;gap:10px}
+.at-right-title{font-size:14px;font-weight:800;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.at-row-new{display:flex;align-items:center;gap:10px;padding:11px 20px;border-bottom:1px solid var(--border-2);cursor:pointer;transition:background .1s}
+.at-row-new:hover{background:var(--bg)}
+.at-checkbox{width:17px;height:17px;border-radius:4px;border:1.5px solid #cbd5e0;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;font-weight:800}
+.at-checkbox.done{background:var(--green);border-color:var(--green);color:#fff}
+.at-row-name{font-size:13px;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.at-row-name.done{text-decoration:line-through;color:var(--text4)}
+.at-row-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.at-row-resp{font-size:11px;color:var(--text4)}
+.at-status-concluida{font-size:10px;font-weight:700;color:var(--green)}
+.at-status-atrasada{font-size:10px;font-weight:700;color:var(--red)}
+.at-status-pendente{font-size:10px;font-weight:700;color:var(--text3)}
+.at-status-em_andamento{font-size:10px;font-weight:700;color:var(--blue)}
+/* registro */
+.ov-reg-form{display:flex;gap:8px;margin-bottom:16px}
+.ov-reg-av{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--primary),#ff8c5a);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;margin-top:2px}
+.ov-reg-wrap{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px}
+.ov-reg-ta{border:none;outline:none;font-size:12px;color:var(--text);background:transparent;width:100%;resize:none;font-family:inherit;min-height:40px}
+.ov-reg-send{float:right;margin-top:6px;padding:5px 12px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer}
+.ov-reg-item{display:flex;gap:10px;margin-bottom:14px}
+.ov-reg-iav{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0}
+.ov-reg-ibody{flex:1}
+.ov-reg-iwho{font-size:11px;font-weight:700;color:var(--text)}
+.ov-reg-iwhen{font-size:10px;color:var(--text4)}
+.ov-reg-itext{font-size:12px;color:var(--text2);line-height:1.6;margin-top:4px;background:var(--bg);border-radius:8px;padding:8px 10px}
+.ov-reg-event{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);margin-bottom:12px}
+.ov-reg-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+/* checklist */
+.ov-cl-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-2)}
+.ov-cl-check{width:17px;height:17px;border-radius:4px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer}
+.ov-cl-check.done{background:var(--green);border-color:var(--green);color:#fff;font-size:9px}
+.ov-cl-lbl{font-size:12px;color:var(--text2);flex:1}
+.ov-cl-lbl.done{text-decoration:line-through;color:var(--text4)}
+/* anotação */
+.ov-ano-form{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:14px}
+.ov-ano-ta{border:none;outline:none;font-size:12px;color:var(--text);background:transparent;width:100%;resize:none;font-family:inherit;height:70px}
+.ov-ano-card{background:#FFFBEB;border:1px solid #fde68a;border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px}
+.ov-ano-date{font-size:10px;color:var(--text4);margin-bottom:4px}
+.ov-ano-text{font-size:12px;color:var(--text2);line-height:1.6}
 
 /* ── KANBAN ──────────────────────────────────────────────── */
 .kanban-wrap{display:flex;gap:12px;overflow-x:auto;padding-bottom:16px;align-items:flex-start}
@@ -297,31 +478,80 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .toast{background:var(--primary);color:#fff;padding:12px 20px;border-radius:var(--radius);font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(224,90,30,.35);animation:toast-in .2s ease;max-width:320px}
 .toast-fade{opacity:0;transition:opacity .3s ease}
 @keyframes toast-in{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* ── Abas do cliente ─────────────────────────────── */
+.cliente-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:24px}
+.cliente-tab{padding:10px 20px;font-size:13px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;background:none;border-top:none;border-left:none;border-right:none}
+.cliente-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.cliente-tab:hover:not(.active){color:var(--text)}
+
+/* ── Grid 360° ───────────────────────────────────── */
+.grid-360{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.card-360{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px}
+.c360-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:8px}
+.c360-value{font-size:17px;font-weight:700;color:var(--text);line-height:1.3}
+.c360-prog{height:6px;background:#edf2f7;border-radius:3px;margin-top:8px}
+.c360-prog-fill{height:100%;border-radius:3px;background:var(--primary)}
+
+/* ── Atividades master-detail ─────────────────────── */
+.pb-layout{display:grid;grid-template-columns:260px 1fr;gap:0;min-height:440px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.pb-sidebar{border-right:1px solid var(--border);padding:14px 10px;background:#fafbfc;overflow-y:auto}
+.pb-panel{padding:24px;overflow-y:auto;background:#fff}
+.pb-title-row{display:flex;align-items:center;gap:6px;padding:6px 8px;cursor:pointer;border-radius:6px;font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.pb-title-row:hover{background:#f0f4f8}
+.pb-chev{font-size:10px;margin-left:auto;color:var(--text3)}
+.pb-item{padding:6px 10px 6px 24px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text2);margin-bottom:2px}
+.pb-item:hover{background:#f0f4f8}
+.pb-item.active{background:#FFF3EE;color:var(--primary);border-left:3px solid var(--primary);padding-left:21px;font-weight:600}
+.pb-add-btn{width:100%;padding:7px;border:1px dashed var(--border);border-radius:6px;background:none;color:var(--text3);font-size:12px;cursor:pointer;text-align:center;margin:6px 0 14px}
+.pb-add-btn:hover{border-color:var(--primary);color:var(--primary)}
+.pb-inline-form{padding:4px 8px 8px;display:flex;gap:6px}
+.pb-inline-input{flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px}
+
+/* ── Painel de atividade ─────────────────────────── */
+.at-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);text-align:center;gap:8px;font-size:13px}
+.at-title{font-size:18px;font-weight:700;color:var(--text);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.at-reg-item{padding:12px 0;border-bottom:1px solid var(--border)}
+.at-reg-item:last-of-type{border-bottom:none}
+.at-reg-meta{font-size:11px;color:var(--text3);margin-bottom:4px}
+.at-reg-text{font-size:13px;color:var(--text);line-height:1.6}
+.at-write{margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
 </style>
 </head>
 <body>
 
 <!-- ── SIDEBAR ──────────────────────────────────────────── -->
-<aside class="sidebar">
+<aside class="sidebar" id="main-sidebar">
   <div class="sb-logo">
-    <div class="sb-logo-icon">G</div>
+    <svg class="sb-logo-icon" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="8" fill="#E05A1E"/>
+      <text x="16" y="22" text-anchor="middle" font-size="17" font-weight="900" fill="white" font-family="system-ui">G</text>
+    </svg>
     <div class="sb-logo-text">GRV Software <span>CS · Jornada do Cliente</span></div>
   </div>
-  <div class="sb-section">
-    <label>Consultor ativo</label>
-    <select id="consultor-sel"></select>
-  </div>
   <nav class="sb-nav">
-    <a class="nav-item" data-route="projetos" href="#projetos">
-      <span class="nav-icon">🌐</span> Projetos GRV
-    </a>
-    <a class="nav-item" data-route="carteira" href="#carteira">
-      <span class="nav-icon">📋</span> Minha Carteira
-    </a>
-    <a class="nav-item" data-route="criar" href="#criar">
-      <span class="nav-icon">➕</span> Criar Playbook
-    </a>
+    <div class="nav-item" id="nav-projetos" data-route="projetos" onclick="navigate('projetos')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+      Projetos GRV
+    </div>
+    <div class="nav-item" id="nav-carteira" data-route="carteira" onclick="navigate('carteira')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      Minha Carteira
+    </div>
+    <div class="nav-item" id="nav-criar" data-route="criar" onclick="navigate('criar')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      Criar Playbook
+    </div>
   </nav>
+  <div class="sb-footer">
+    <div class="sb-footer-lbl">Consultor ativo</div>
+    <div class="sb-consul-val" title="Trocar consultor" onclick="document.getElementById('consultor-sel-hidden').click()">
+      <div class="sb-avatar" id="sb-avatar">?</div>
+      <div class="sb-cname" id="sb-nome">—</div>
+    </div>
+    <select id="consultor-sel" style="display:none"></select>
+    <select id="consultor-sel-hidden" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px"></select>
+  </div>
 </aside>
 
 <!-- ── CONTENT ───────────────────────────────────────────── -->
@@ -346,6 +576,40 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
       <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary" id="modal-save-btn" onclick="saveEtapa()" disabled>Salvar</button>
     </div>
+  </div>
+</div>
+
+<!-- ── ACTIVITY OVERLAY ──────────────────────────────────── -->
+<div class="ov-backdrop" id="ov-backdrop" onclick="closeAtividade()"></div>
+<div class="ov-panel" id="ov-panel">
+  <div class="ov-hd">
+    <div class="ov-hd-top">
+      <div class="ov-title" id="ov-titulo">Atividade</div>
+      <div class="ov-close" onclick="closeAtividade()">✕</div>
+    </div>
+    <div class="ov-meta" id="ov-meta"></div>
+    <div id="ov-deadline-wrap" style="display:none;padding:4px 0 0;font-size:11px;font-weight:600">
+      <span id="ov-deadline"></span>
+    </div>
+    <div class="ov-dates-row">
+      <div style="flex:1">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text4);margin-bottom:3px">Início</div>
+        <input type="date" id="ov-data-inicio" onchange="saveOvDatas()" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:11px;color:var(--text);background:var(--bg);outline:none;cursor:pointer">
+      </div>
+      <div style="flex:1">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text4);margin-bottom:3px">Meta (fim)</div>
+        <input type="date" id="ov-data-fim" onchange="saveOvDatas()" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:11px;color:var(--text);background:var(--bg);outline:none;cursor:pointer">
+      </div>
+    </div>
+    <div class="ov-tabs">
+      <div class="ov-tab active" onclick="setOverlayTab('registro',this)">Registro</div>
+      <div class="ov-tab" onclick="setOverlayTab('checklist',this)">Checklist</div>
+      <div class="ov-tab" onclick="setOverlayTab('anotacao',this)">Anotação</div>
+    </div>
+  </div>
+  <div class="ov-body" id="ov-body"></div>
+  <div class="ov-footer">
+    <button class="ov-btn-concluir" id="ov-btn-concluir" onclick="concluirAtividade()">✓ Marcar como Concluída</button>
   </div>
 </div>
 
@@ -409,6 +673,43 @@ const TEMPLATE_FASES = [
 ];
 
 // ═══════════════════════════════════════════════════════════
+// ── CHART.JS PLUGINS GLOBAIS ─────────────────────────────
+Chart.register({
+  id: 'donutCenter',
+  afterDraw(chart) {
+    if (chart.config.type !== 'doughnut') return;
+    if (!chart.config.options._showCenter) return;
+    const {ctx, chartArea} = chart;
+    if (!chartArea) return;
+    const cx = (chartArea.left + chartArea.right) / 2;
+    const cy = (chartArea.top  + chartArea.bottom) / 2;
+    const total = chart.config.data.datasets[0].data.reduce((a,b)=>a+b,0);
+    ctx.save();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#1a202c'; ctx.font = '800 28px Segoe UI,sans-serif';
+    ctx.fillText(total, cx, cy - 8);
+    ctx.fillStyle = '#718096'; ctx.font = '400 11px Segoe UI,sans-serif';
+    ctx.fillText('projetos', cx, cy + 14);
+    ctx.restore();
+  }
+});
+
+Chart.register({
+  id: 'barGradient',
+  beforeDatasetsDraw(chart) {
+    if (chart.config.type !== 'bar') return;
+    const {ctx, chartArea} = chart;
+    if (!chartArea) return;
+    chart.data.datasets.forEach(ds => {
+      if (!ds._gradColor) return;
+      const grad = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+      grad.addColorStop(0, ds._gradColor);
+      grad.addColorStop(1, ds._gradColor + '55');
+      ds.backgroundColor = grad;
+    });
+  }
+});
+
 // SEED DATA
 // ═══════════════════════════════════════════════════════════
 const SEED_CONSULTORES = [
@@ -432,9 +733,17 @@ function mkFases(checks) {
 
 const SEED_CLIENTES = [
   {
-    id:'KMSIL', projeto:'SAGP-00036', produto:'CPS', consultorId:'ana-paula',
+    id:'KMSIL', projeto:'SAGP-00036', produto:'CPS', consultorId:'ana-paula', segmento:'Saúde', csId:'cristiano',
     etapa:'Engajamento', dataInicio:'2026-03-05', prazo:'2026-09-30',
     proximaAcao:'Acompanhar uso do módulo Compras',
+    ativPlaybooks:[
+      {id:'pb_k1',nome:'Implantação CPS',criadoEm:'2026-03-10T09:00:00',atividades:[
+        {id:'at_k1',nome:'1ª Reunião de engajamento',registros:[
+          {id:'reg_k1',autor:'Ana Paula Souza',data:'2026-03-10T14:00:00',texto:'Kickoff realizado com equipe de TI. Alinhado acesso ao ambiente de homologação.'}
+        ]},
+        {id:'at_k2',nome:'2ª Reunião de engajamento',registros:[]}
+      ]}
+    ],
     fases: mkFases([1,1,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[
       {id:'r2',autor:'Ana Paula Souza',data:'2026-04-02T14:30:00',texto:'Parametrização inicial concluída. Aguardando validação de dados.'},
@@ -446,9 +755,23 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'RAS METAL', projeto:'SAGP-00091', produto:'CPS', consultorId:'ana-paula',
+    id:'RAS METAL', projeto:'SAGP-00091', produto:'CPS', consultorId:'ana-paula', segmento:'Indústria', csId:'felipe',
     etapa:'Evolução', dataInicio:'2026-01-30', prazo:'2026-05-11',
     proximaAcao:'Resolver pendência de importação de dados',
+    ativPlaybooks:[
+      {id:'pb_r1',nome:'Implantação CPS',criadoEm:'2026-02-01T09:00:00',atividades:[
+        {id:'at_r1',nome:'1ª Reunião de engajamento',registros:[
+          {id:'reg_r1',autor:'Ana Paula Souza',data:'2026-02-01T14:00:00',texto:'Kickoff realizado. Cliente com dificuldades de acesso ao sistema legado.'},
+          {id:'reg_r2',autor:'Ana Paula Souza',data:'2026-02-08T10:30:00',texto:'Follow-up: acesso ao sistema legado resolvido. Importação de dados agendada.'}
+        ]},
+        {id:'at_r2',nome:'2ª Reunião de evolução',registros:[
+          {id:'reg_r3',autor:'Ana Paula Souza',data:'2026-03-15T15:00:00',texto:'Parametrização do módulo Compras concluída. Aguardando validação do cliente.'}
+        ]}
+      ]},
+      {id:'pb_r2',nome:'Visita técnica',criadoEm:'2026-03-20T09:00:00',atividades:[
+        {id:'at_r3',nome:'Visita de campo',registros:[]}
+      ]}
+    ],
     fases: mkFases([1,1,1,1, 1,0,1,1, 1,0,0,0, 0,0,0,0]),
     registros:[
       {id:'r1',autor:'Ana Paula Souza',data:'2026-02-10T11:00:00',texto:'Cliente com dificuldades na importação do sistema legado.'},
@@ -460,9 +783,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'AXONE', projeto:'SAGP-00059', produto:'CPS', consultorId:'ana-paula',
+    id:'AXONE', projeto:'SAGP-00059', produto:'CPS', consultorId:'ana-paula', segmento:'Serviços', csId:'silvia',
     etapa:'Engajamento', dataInicio:'2026-03-10', prazo:'2026-08-02',
     proximaAcao:'Agendamento de treinamento avançado',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,0, 1,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[
       {id:'r1',autor:'Ana Paula Souza',data:'2026-03-20T09:00:00',texto:'Kickoff realizado. Pendente acesso ao SAG para dois usuários.'},
@@ -473,9 +797,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'AÇO ART', projeto:'SAGP-00068', produto:'CPS', consultorId:'ana-paula',
+    id:'AÇO ART', projeto:'SAGP-00068', produto:'CPS', consultorId:'ana-paula', segmento:'Indústria', csId:'carlos',
     etapa:'Pausado', dataInicio:'2025-12-02', prazo:null,
     proximaAcao:'Aguardar retorno do cliente',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[
       {id:'r1',autor:'Ana Paula Souza',data:'2026-02-15T10:00:00',texto:'Cliente solicitou pausa por mudança interna na gestão.'},
@@ -487,9 +812,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'ALPARGATAS CPS', projeto:'SAGP-00128', produto:'CPS/IOT', consultorId:'ana-paula',
+    id:'ALPARGATAS CPS', projeto:'SAGP-00128', produto:'CPS/IOT', consultorId:'ana-paula', segmento:'Indústria', csId:'maria',
     etapa:'Conclusão', dataInicio:'2026-04-28', prazo:'2026-11-06',
     proximaAcao:'Validar entrega final com diretoria',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,1,1,1, 0,0,0,0]),
     registros:[
       {id:'r1',autor:'Ana Paula Souza',data:'2026-05-10T14:00:00',texto:'Projeto em fase final. Reunião com diretoria agendada para próxima semana.'},
@@ -502,17 +828,19 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'FRAY', projeto:'SAGP-00039', produto:'CPS', consultorId:'carlos',
+    id:'FRAY', projeto:'SAGP-00039', produto:'CPS', consultorId:'carlos', segmento:'Saúde', csId:'ana-paula',
     etapa:'1ª Reunião', dataInicio:'2026-03-29', prazo:'2026-09-21',
     proximaAcao:'Agendar reunião de kickoff',
+    ativPlaybooks:[],
     fases: mkFases([0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[{de:null,para:'1ª Reunião',data:'2026-03-29T09:00:00',motivo:'Início do projeto'}],
   },
   {
-    id:'FELIX INDUSTRIAL', projeto:'SAGP-00092', produto:'CPS', consultorId:'carlos',
+    id:'FELIX INDUSTRIAL', projeto:'SAGP-00092', produto:'CPS', consultorId:'carlos', segmento:'Indústria', csId:'severiano',
     etapa:'1ª Reunião', dataInicio:'2026-01-14', prazo:'2026-09-29',
     proximaAcao:'Confirmar data de kickoff com o cliente',
+    ativPlaybooks:[],
     fases: mkFases([1,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[
       {id:'r1',autor:'Carlos Menezes',data:'2026-01-20T09:00:00',texto:'Apresentação inicial realizada. Aguardando agenda para kickoff.'},
@@ -520,17 +848,19 @@ const SEED_CLIENTES = [
     historicoEtapas:[{de:null,para:'1ª Reunião',data:'2026-01-14T09:00:00',motivo:'Início do projeto'}],
   },
   {
-    id:'USIMAZA EMBRAER', projeto:'SAGP-00058', produto:'CPS', consultorId:'carlos',
+    id:'USIMAZA EMBRAER', projeto:'SAGP-00058', produto:'CPS', consultorId:'carlos', segmento:'Indústria', csId:'silvia',
     etapa:'1ª Reunião', dataInicio:'2026-03-30', prazo:'2026-09-17',
     proximaAcao:'Primeira reunião de alinhamento',
+    ativPlaybooks:[],
     fases: mkFases([0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[{de:null,para:'1ª Reunião',data:'2026-03-30T09:00:00',motivo:'Início do projeto'}],
   },
   {
-    id:'CAMPOSC', projeto:'SAGP-00038', produto:'CPS', consultorId:'carlos',
+    id:'CAMPOSC', projeto:'SAGP-00038', produto:'CPS', consultorId:'carlos', segmento:'Agronegócio', csId:'carlos',
     etapa:'Pausado', dataInicio:'2025-12-16', prazo:null,
     proximaAcao:'Aguardar definição de novo responsável',
+    ativPlaybooks:[],
     fases: mkFases([1,1,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[
       {id:'r1',autor:'Carlos Menezes',data:'2026-01-08T10:00:00',texto:'Responsável pelo projeto saiu da empresa. Projeto pausado até nova indicação.'},
@@ -541,17 +871,19 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'SOARES FERRAMENTARIA', projeto:'SAGP-00131', produto:'CPS', consultorId:'maria',
+    id:'SOARES FERRAMENTARIA', projeto:'SAGP-00131', produto:'CPS', consultorId:'maria', segmento:'Indústria', csId:'ana-paula',
     etapa:'1ª Reunião', dataInicio:'2026-06-02', prazo:'2026-09-09',
     proximaAcao:'Agendar kickoff com equipe do cliente',
+    ativPlaybooks:[],
     fases: mkFases([0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[{de:null,para:'1ª Reunião',data:'2026-06-02T09:00:00',motivo:'Início do projeto'}],
   },
   {
-    id:'LIQUOS', projeto:'SAGP-00093', produto:'CPS', consultorId:'maria',
+    id:'LIQUOS', projeto:'SAGP-00093', produto:'CPS', consultorId:'maria', segmento:'Saúde', csId:'cristiano',
     etapa:'Evolução', dataInicio:'2026-01-30', prazo:'2026-09-09',
     proximaAcao:'Checkpoint de progresso mensal',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,0,0,0, 0,0,0,0]),
     registros:[
       {id:'r1',autor:'Maria Lima',data:'2026-04-15T10:00:00',texto:'Evolução andando bem. Cliente muito engajado com a plataforma.'},
@@ -564,9 +896,10 @@ const SEED_CLIENTES = [
   },
   // ── Cristiano Santos ──────────────────────────────────────
   {
-    id:'METALVALE', projeto:'SAGP-00101', produto:'CPS', consultorId:'cristiano',
+    id:'METALVALE', projeto:'SAGP-00101', produto:'CPS', consultorId:'cristiano', segmento:'Indústria', csId:'felipe',
     etapa:'Evolução', dataInicio:'2026-02-10', prazo:'2026-12-15',
     proximaAcao:'Checkpoint mensal de evolução',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -576,9 +909,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'SIMONSEN', projeto:'SAGP-00102', produto:'CPS', consultorId:'cristiano',
+    id:'SIMONSEN', projeto:'SAGP-00102', produto:'CPS', consultorId:'cristiano', segmento:'Varejo', csId:'maria',
     etapa:'Evolução', dataInicio:'2025-10-01', prazo:'2026-03-31',
     proximaAcao:'Retomar agenda com gerência do cliente',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,1,0,0, 0,0,0,0]),
     registros:[{id:'r1',autor:'Cristiano Santos',data:'2026-04-01T10:00:00',texto:'Prazo expirado. Aguardando retomada com nova data.'}],
     historicoEtapas:[
@@ -588,9 +922,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'MECATRON', projeto:'SAGP-00103', produto:'CPS', consultorId:'cristiano',
+    id:'MECATRON', projeto:'SAGP-00103', produto:'CPS', consultorId:'cristiano', segmento:'Indústria', csId:'severiano',
     etapa:'Engajamento', dataInicio:'2025-09-15', prazo:'2026-01-31',
     proximaAcao:'Escalar para gestão comercial',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -599,9 +934,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'POLIMOLD', projeto:'SAGP-00104', produto:'CPS', consultorId:'cristiano',
+    id:'POLIMOLD', projeto:'SAGP-00104', produto:'CPS', consultorId:'cristiano', segmento:'Indústria', csId:'ana-paula',
     etapa:'Engajamento', dataInicio:'2025-11-01', prazo:'2026-04-30',
     proximaAcao:'Agendar reunião de alinhamento urgente',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -610,9 +946,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'ELETROTINS', projeto:'SAGP-00105', produto:'CPS', consultorId:'cristiano',
+    id:'ELETROTINS', projeto:'SAGP-00105', produto:'CPS', consultorId:'cristiano', segmento:'Indústria', csId:'carlos',
     etapa:'Pausado', dataInicio:'2025-08-01', prazo:null,
     proximaAcao:'Aguardar reestruturação interna do cliente',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -621,9 +958,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'BORBOREMA', projeto:'SAGP-00106', produto:'CPS', consultorId:'cristiano',
+    id:'BORBOREMA', projeto:'SAGP-00106', produto:'CPS', consultorId:'cristiano', segmento:'Varejo', csId:'felipe',
     etapa:'Pausado', dataInicio:'2025-07-15', prazo:null,
     proximaAcao:'Confirmar data de retomada',
+    ativPlaybooks:[],
     fases: mkFases([1,1,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -632,9 +970,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'RETALHOMAX', projeto:'SAGP-00107', produto:'CPS', consultorId:'cristiano',
+    id:'RETALHOMAX', projeto:'SAGP-00107', produto:'CPS', consultorId:'cristiano', segmento:'Varejo', csId:'silvia',
     etapa:'Conclusão', dataInicio:'2025-06-01', prazo:'2026-06-30',
     proximaAcao:'Encerramento formal com NPS',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1]),
     registros:[],
     historicoEtapas:[
@@ -645,18 +984,20 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'TORNEFER', projeto:'SAGP-00108', produto:'CPS', consultorId:'cristiano',
+    id:'TORNEFER', projeto:'SAGP-00108', produto:'CPS', consultorId:'cristiano', segmento:'Indústria', csId:'maria',
     etapa:'1ª Reunião', dataInicio:'2026-06-01', prazo:'2026-12-20',
     proximaAcao:'Agendar kickoff com equipe técnica',
+    ativPlaybooks:[],
     fases: mkFases([0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[{de:null,para:'1ª Reunião',data:'2026-06-01T09:00:00',motivo:'Início do projeto'}],
   },
   // ── Felipe Alves ──────────────────────────────────────────
   {
-    id:'INDALPE', projeto:'SAGP-00111', produto:'CPS', consultorId:'felipe',
+    id:'INDALPE', projeto:'SAGP-00111', produto:'CPS', consultorId:'felipe', segmento:'Saúde', csId:'cristiano',
     etapa:'Engajamento', dataInicio:'2026-03-15', prazo:'2026-10-30',
     proximaAcao:'Treinamento módulo Vendas',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -665,9 +1006,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'ROTOFER', projeto:'SAGP-00112', produto:'NX/IOT', consultorId:'felipe',
+    id:'ROTOFER', projeto:'SAGP-00112', produto:'NX/IOT', consultorId:'felipe', segmento:'Indústria', csId:'ana-paula',
     etapa:'Evolução', dataInicio:'2026-01-10', prazo:'2026-07-31',
     proximaAcao:'Validação de sensores NX linha 3',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,1,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -677,9 +1019,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'AGROFLEX', projeto:'SAGP-00113', produto:'NX/IOT', consultorId:'felipe',
+    id:'AGROFLEX', projeto:'SAGP-00113', produto:'NX/IOT', consultorId:'felipe', segmento:'Agronegócio', csId:'carlos',
     etapa:'Engajamento', dataInicio:'2025-10-20', prazo:'2026-03-15',
     proximaAcao:'Resolver problema de integração IOT',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -688,9 +1031,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'LAMIFER', projeto:'SAGP-00114', produto:'CPS', consultorId:'felipe',
+    id:'LAMIFER', projeto:'SAGP-00114', produto:'CPS', consultorId:'felipe', segmento:'Indústria', csId:'severiano',
     etapa:'Evolução', dataInicio:'2025-12-01', prazo:'2026-05-01',
     proximaAcao:'Retomada após troca de TI no cliente',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -700,9 +1044,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'PLASVALE', projeto:'SAGP-00115', produto:'CPS', consultorId:'felipe',
+    id:'PLASVALE', projeto:'SAGP-00115', produto:'CPS', consultorId:'felipe', segmento:'Saúde', csId:'felipe',
     etapa:'Pausado', dataInicio:'2025-09-01', prazo:null,
     proximaAcao:'Aguardar liberação de budget 2026',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -711,9 +1056,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'LAMINEX', projeto:'SAGP-00116', produto:'NX/IOT', consultorId:'felipe',
+    id:'LAMINEX', projeto:'SAGP-00116', produto:'NX/IOT', consultorId:'felipe', segmento:'Serviços', csId:'silvia',
     etapa:'Conclusão', dataInicio:'2025-04-01', prazo:'2026-06-30',
     proximaAcao:'Encerramento formal e NPS',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1]),
     registros:[],
     historicoEtapas:[
@@ -724,18 +1070,20 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'COMPRESSEI', projeto:'SAGP-00117', produto:'CPS', consultorId:'felipe',
+    id:'COMPRESSEI', projeto:'SAGP-00117', produto:'CPS', consultorId:'felipe', segmento:'Indústria', csId:'maria',
     etapa:'1ª Reunião', dataInicio:'2026-05-20', prazo:'2026-11-30',
     proximaAcao:'Kick-off agendado para próxima semana',
+    ativPlaybooks:[],
     fases: mkFases([0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[{de:null,para:'1ª Reunião',data:'2026-05-20T09:00:00',motivo:'Início do projeto'}],
   },
   // ── Silvia Costa ──────────────────────────────────────────
   {
-    id:'NXTEC', projeto:'SAGP-00121', produto:'NX/IOT', consultorId:'silvia',
+    id:'NXTEC', projeto:'SAGP-00121', produto:'NX/IOT', consultorId:'silvia', segmento:'Serviços', csId:'ana-paula',
     etapa:'Engajamento', dataInicio:'2026-02-15', prazo:'2026-10-15',
     proximaAcao:'Configuração de dashboards NX com operadores',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -744,9 +1092,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'SENSORTEC', projeto:'SAGP-00122', produto:'NX/IOT', consultorId:'silvia',
+    id:'SENSORTEC', projeto:'SAGP-00122', produto:'NX/IOT', consultorId:'silvia', segmento:'Serviços', csId:'cristiano',
     etapa:'Evolução', dataInicio:'2025-11-01', prazo:'2026-08-31',
     proximaAcao:'Calibração de sensores linha 2',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,1,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -756,9 +1105,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'METATRON', projeto:'SAGP-00123', produto:'NX/IOT', consultorId:'silvia',
+    id:'METATRON', projeto:'SAGP-00123', produto:'NX/IOT', consultorId:'silvia', segmento:'Indústria', csId:'carlos',
     etapa:'Engajamento', dataInicio:'2025-10-01', prazo:'2026-03-01',
     proximaAcao:'Reunião de alinhamento urgente — prazo vencido',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -767,9 +1117,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'PLASTIMETAL', projeto:'SAGP-00124', produto:'NX/IOT', consultorId:'silvia',
+    id:'PLASTIMETAL', projeto:'SAGP-00124', produto:'NX/IOT', consultorId:'silvia', segmento:'Indústria', csId:'severiano',
     etapa:'Evolução', dataInicio:'2025-09-01', prazo:'2026-02-28',
     proximaAcao:'Escalar dificuldades técnicas para coordenação',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -779,9 +1130,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'IOTSYSTEM', projeto:'SAGP-00125', produto:'NX/IOT', consultorId:'silvia',
+    id:'IOTSYSTEM', projeto:'SAGP-00125', produto:'NX/IOT', consultorId:'silvia', segmento:'Serviços', csId:'felipe',
     etapa:'Pausado', dataInicio:'2025-07-01', prazo:null,
     proximaAcao:'Aguardar resolução técnica do cliente',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -791,9 +1143,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'NXPRIME', projeto:'SAGP-00126', produto:'NX/IOT', consultorId:'silvia',
+    id:'NXPRIME', projeto:'SAGP-00126', produto:'NX/IOT', consultorId:'silvia', segmento:'Serviços', csId:'maria',
     etapa:'Conclusão', dataInicio:'2025-03-01', prazo:'2026-05-31',
     proximaAcao:'NPS e documentação de encerramento',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1]),
     registros:[],
     historicoEtapas:[
@@ -805,9 +1158,20 @@ const SEED_CLIENTES = [
   },
   // ── Severiano Rocha ───────────────────────────────────────
   {
-    id:'ROBOTIX', projeto:'SAGP-00131', produto:'NX/IOT', consultorId:'severiano',
+    id:'ROBOTIX', projeto:'SAGP-00131', produto:'NX/IOT', consultorId:'severiano', segmento:'Serviços', csId:'silvia',
     etapa:'Engajamento', dataInicio:'2026-01-20', prazo:'2026-11-30',
     proximaAcao:'Integração com sistemas legados ERP',
+    ativPlaybooks:[
+      {id:'pb_rob1',nome:'Implantação NX/IOT',criadoEm:'2026-04-05T09:00:00',atividades:[
+        {id:'at_rob1',nome:'1ª Reunião de engajamento',registros:[
+          {id:'reg_rob1',autor:'Severiano Rocha',data:'2026-04-05T14:00:00',texto:'Kickoff realizado com sucesso. Equipe técnica bem engajada. Cronograma de instalação dos sensores definido.'}
+        ]},
+        {id:'at_rob2',nome:'Configuração de sensores',registros:[
+          {id:'reg_rob2',autor:'Severiano Rocha',data:'2026-04-20T16:00:00',texto:'12 sensores instalados na linha de produção principal. Testes de conectividade OK.'}
+        ]},
+        {id:'at_rob3',nome:'Treinamento de usuários',registros:[]}
+      ]}
+    ],
     fases: mkFases([1,1,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -816,9 +1180,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'AUTOMIND', projeto:'SAGP-00132', produto:'NX/IOT', consultorId:'severiano',
+    id:'AUTOMIND', projeto:'SAGP-00132', produto:'NX/IOT', consultorId:'severiano', segmento:'Serviços', csId:'ana-paula',
     etapa:'Evolução', dataInicio:'2026-02-01', prazo:'2026-09-30',
     proximaAcao:'Treinamento avançado de operadores',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -828,9 +1193,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'USINAGEM3D', projeto:'SAGP-00133', produto:'NX/IOT', consultorId:'severiano',
+    id:'USINAGEM3D', projeto:'SAGP-00133', produto:'NX/IOT', consultorId:'severiano', segmento:'Indústria', csId:'cristiano',
     etapa:'Evolução', dataInicio:'2025-08-01', prazo:'2026-01-31',
     proximaAcao:'Resolver falha de comunicação NX — urgente',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,1,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -840,9 +1206,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'FERROPLAST', projeto:'SAGP-00134', produto:'NX/IOT', consultorId:'severiano',
+    id:'FERROPLAST', projeto:'SAGP-00134', produto:'NX/IOT', consultorId:'severiano', segmento:'Indústria', csId:'carlos',
     etapa:'Engajamento', dataInicio:'2025-11-15', prazo:'2026-05-15',
     proximaAcao:'Retomada após férias coletivas na fábrica',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -851,9 +1218,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'MAXPRESS', projeto:'SAGP-00135', produto:'NX/IOT', consultorId:'severiano',
+    id:'MAXPRESS', projeto:'SAGP-00135', produto:'NX/IOT', consultorId:'severiano', segmento:'Indústria', csId:'felipe',
     etapa:'Pausado', dataInicio:'2025-06-01', prazo:null,
     proximaAcao:'Confirmar retomada 2º semestre 2026',
+    ativPlaybooks:[],
     fases: mkFases([1,1,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -864,9 +1232,10 @@ const SEED_CLIENTES = [
   },
   // ── Cancelado (Carlos) ────────────────────────────────────
   {
-    id:'FUNDIFER', projeto:'SAGP-00141', produto:'CPS', consultorId:'carlos',
+    id:'FUNDIFER', projeto:'SAGP-00141', produto:'CPS', consultorId:'carlos', segmento:'Indústria', csId:'severiano',
     etapa:'Cancelado', dataInicio:'2025-05-01', prazo:null,
     proximaAcao:'',
+    ativPlaybooks:[],
     fases: mkFases([1,1,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -875,6 +1244,251 @@ const SEED_CLIENTES = [
     ],
   },
 ];
+
+// ─── Enriquecimento do SEED para demonstração ─────────────────────────────
+(function migrateSeed() {
+  // CSAT por cliente (valores fixos para demo consistente)
+  var CSAT = {
+    'KMSIL':4.3,'RAS METAL':3.9,'AXONE':4.1,'AÇO ART':4.4,'ALPARGATAS CPS':4.8,
+    'FRAY':4.0,'FELIX INDUSTRIAL':3.7,'USIMAZA EMBRAER':4.6,'CAMPOSC':4.2,
+    'SOARES FERRAMENTARIA':4.5,'LIQUOS':4.8,'METALVALE':3.6,'SIMONSEN':4.3,
+    'MECATRON':4.1,'POLIMOLD':4.7,'ELETROTINS':3.8,'BORBOREMA':4.2,'RETALHOMAX':4.5,
+    'TORNEFER':3.9,'INDALPE':4.4,'ROTOFER':4.1,'AGROFLEX':4.6,'LAMIFER':4.3,
+    'PLASVALE':4.0,'LAMINEX':4.2,'COMPRESSEI':4.5,'NXTEC':4.7,'SENSORTEC':4.3,
+    'METATRON':4.1,'PLASTIMETAL':4.4,'IOTSYSTEM':4.8,'NXPRIME':4.2,'ROBOTIX':4.6,
+    'AUTOMIND':4.4,'USINAGEM3D':4.0,'FERROPLAST':3.8,'MAXPRESS':4.3,'FUNDIFER':3.5
+  };
+
+  // Clientes que já concluíram a implantação (entrou em CS)
+  var CS_ATIVO = {
+    'ALPARGATAS CPS':'2026-05-20','AUTOMIND':'2026-01-15','LAMINEX':'2026-02-10',
+    'RETALHOMAX':'2026-04-01','LAMIFER':'2026-04-20','CAMPOSC':'2025-12-15'
+  };
+
+  // Playbooks ricos para a carteira da Ana Paula (csId='ana-paula') + alguns outros
+  var RICH_PBS = {
+    // ── POLIMOLD (csId:'ana-paula') — ATRASADO ──────────────────────────────
+    'POLIMOLD': [{
+      id:'pb_poli1', nome:'Implantação CPS', fase:'implantacao', donoId:'ana-paula',
+      criadoEm:'2025-11-05T09:00:00', atividades:[
+        {id:'at_poli1',nome:'Reunião de kickoff',status:'concluida',responsavelId:'ana-paula',registros:[
+          {id:'rp1',autor:'Cristiano Santos',data:'2025-11-05T14:00:00',texto:'Kickoff com a diretoria. Escopo validado: módulos Compras e Produção. Alta expectativa do CEO.'},
+          {id:'rp2',autor:'Ana Paula Souza',data:'2025-11-06T09:00:00',texto:'Cronograma enviado ao cliente. Próxima etapa: levantamento de processos.'}
+        ],checklist:[{id:'cp1',texto:'Validar escopo com diretoria',done:true},{id:'cp2',texto:'Confirmar acesso ao sistema',done:true}],anotacoes:[]},
+        {id:'at_poli2',nome:'Levantamento e mapeamento de processos',status:'concluida',responsavelId:'cristiano',registros:[
+          {id:'rp3',autor:'Cristiano Santos',data:'2025-12-10T15:00:00',texto:'18 processos mapeados. Fluxo de aprovação tem 3 níveis hierárquicos — customização necessária.'}
+        ],checklist:[{id:'cp3',texto:'Mapear módulo Compras',done:true},{id:'cp4',texto:'Mapear módulo Produção',done:true},{id:'cp5',texto:'Mapear fluxo de aprovações',done:true}],anotacoes:[
+          {id:'ap1',autor:'Ana Paula Souza',data:'2025-12-10T16:00:00',texto:'Aprovação de compras acima de R$50k exige 2 assinaturas digitais — confirmar suporte no CPS.'}
+        ]},
+        {id:'at_poli3',nome:'Parametrização e configurações',status:'atrasada',dataLimite:'2026-06-10',responsavelId:'ana-paula',registros:[
+          {id:'rp4',autor:'Ana Paula Souza',data:'2026-01-15T10:00:00',texto:'Parametrização módulo Compras 60% concluída. Módulo Produção parado — cliente atrasou envio do plano de contas.'},
+          {id:'rp5',autor:'Ana Paula Souza',data:'2026-05-20T14:00:00',texto:'Seguimento: plano de contas chegou com inconsistências. Prazo comprometido. Escalei para o gestor de conta.'}
+        ],checklist:[{id:'cp6',texto:'Parametrizar módulo Compras',done:true},{id:'cp7',texto:'Parametrizar módulo Produção',done:false},{id:'cp8',texto:'Configurar aprovações multinível',done:false}],anotacoes:[
+          {id:'ap2',autor:'Ana Paula Souza',data:'2026-05-21T09:00:00',texto:'Risco alto. Cliente precisa resolver pendências internas antes que eu possa avançar.'}
+        ]},
+        {id:'at_poli4',nome:'Treinamento da equipe',status:'pendente',dataLimite:'2026-07-10',responsavelId:'ana-paula',registros:[],checklist:[{id:'cp9',texto:'Treinar equipe manhã',done:false},{id:'cp10',texto:'Treinar equipe tarde',done:false}],anotacoes:[]},
+        {id:'at_poli5',nome:'Go-live e validação final',status:'pendente',dataLimite:'2026-08-01',responsavelId:'ana-paula',registros:[],checklist:[],anotacoes:[]}
+      ]
+    }],
+    // ── FRAY (csId:'ana-paula') — EM ORDEM ─────────────────────────────────
+    'FRAY': [{
+      id:'pb_fray1', nome:'Implantação CPS', fase:'implantacao', donoId:'ana-paula',
+      criadoEm:'2026-03-29T09:00:00', atividades:[
+        {id:'at_fray1',nome:'1ª Reunião e kickoff',status:'concluida',responsavelId:'ana-paula',registros:[
+          {id:'rf1',autor:'Carlos Menezes',data:'2026-03-29T14:00:00',texto:'Kickoff realizado. Equipe de saúde com processos bem definidos. Acesso ao ambiente de homologação liberado.'},
+          {id:'rf2',autor:'Ana Paula Souza',data:'2026-03-30T10:00:00',texto:'Cronograma enviado. Próximo passo: levantamento de processos.'}
+        ],checklist:[{id:'cf1',texto:'Apresentar equipe GRV',done:true},{id:'cf2',texto:'Validar acesso ao sistema',done:true}],anotacoes:[]},
+        {id:'at_fray2',nome:'Levantamento de processos',status:'concluida',responsavelId:'carlos',registros:[
+          {id:'rf3',autor:'Carlos Menezes',data:'2026-04-10T15:00:00',texto:'14 processos mapeados. Fluxo de requisição de materiais é o principal gargalo a ser automatizado.'}
+        ],checklist:[{id:'cf3',texto:'Mapear requisições',done:true},{id:'cf4',texto:'Mapear compras',done:true},{id:'cf5',texto:'Documentar aprovações',done:true}],anotacoes:[
+          {id:'af1',autor:'Ana Paula Souza',data:'2026-04-10T16:30:00',texto:'Compras acima de R$30k precisam de 2 assinaturas digitais — checar suporte nativo no CPS.'}
+        ]},
+        {id:'at_fray3',nome:'Parametrização do sistema',status:'em_andamento',dataLimite:'2026-07-05',responsavelId:'ana-paula',registros:[
+          {id:'rf4',autor:'Ana Paula Souza',data:'2026-05-10T09:00:00',texto:'Módulo de Compras parametrizado e validado. Iniciando módulo de Almoxarifado esta semana.'}
+        ],checklist:[{id:'cf6',texto:'Parametrizar Compras',done:true},{id:'cf7',texto:'Parametrizar Almoxarifado',done:false},{id:'cf8',texto:'Configurar aprovações',done:false}],anotacoes:[]},
+        {id:'at_fray4',nome:'Treinamento da equipe',status:'pendente',dataLimite:'2026-07-20',responsavelId:'ana-paula',registros:[],checklist:[{id:'cf9',texto:'Treinamento módulo básico',done:false},{id:'cf10',texto:'Treinamento módulo avançado',done:false}],anotacoes:[]},
+        {id:'at_fray5',nome:'Go-live e validação final',status:'pendente',dataLimite:'2026-08-15',responsavelId:'ana-paula',registros:[],checklist:[],anotacoes:[]}
+      ]
+    }],
+    // ── SOARES FERRAMENTARIA (csId:'ana-paula') — INÍCIO ───────────────────
+    'SOARES FERRAMENTARIA': [{
+      id:'pb_soar1', nome:'Implantação CPS Industrial', fase:'implantacao', donoId:'ana-paula',
+      criadoEm:'2026-06-02T09:00:00', atividades:[
+        {id:'at_soar1',nome:'Kickoff e alinhamento inicial',status:'concluida',responsavelId:'ana-paula',registros:[
+          {id:'rs1',autor:'Maria Lima',data:'2026-06-02T14:00:00',texto:'Kickoff realizado com diretor industrial e equipe de TI. Escopo validado: Produção, Compras e Qualidade.'},
+          {id:'rs2',autor:'Ana Paula Souza',data:'2026-06-03T09:00:00',texto:'Acessos liberados. Cronograma enviado. Meta: go-live em setembro.'}
+        ],checklist:[{id:'cs1',texto:'Validar escopo',done:true},{id:'cs2',texto:'Liberar acessos',done:true}],anotacoes:[]},
+        {id:'at_soar2',nome:'Levantamento de processos produtivos',status:'pendente',dataLimite:'2026-07-15',responsavelId:'maria',registros:[],checklist:[{id:'cs3',texto:'Mapear linha de produção',done:false},{id:'cs4',texto:'Mapear controle de qualidade',done:false},{id:'cs5',texto:'Documentar não-conformidades',done:false}],anotacoes:[]},
+        {id:'at_soar3',nome:'Mapeamento de requisitos ERP',status:'pendente',dataLimite:'2026-07-25',responsavelId:'ana-paula',registros:[],checklist:[],anotacoes:[]},
+        {id:'at_soar4',nome:'Parametrização módulo Produção',status:'pendente',dataLimite:'2026-08-05',responsavelId:'ana-paula',registros:[],checklist:[],anotacoes:[]},
+        {id:'at_soar5',nome:'Parametrização módulo Compras',status:'pendente',dataLimite:'2026-08-15',responsavelId:'ana-paula',registros:[],checklist:[],anotacoes:[]},
+        {id:'at_soar6',nome:'Integração com ERP legado (Microsiga)',status:'pendente',dataLimite:'2026-08-25',responsavelId:'ana-paula',registros:[],checklist:[{id:'cs6',texto:'Mapear campos do ERP',done:false},{id:'cs7',texto:'Desenvolver conector',done:false}],anotacoes:[]},
+        {id:'at_soar7',nome:'Treinamento operadores',status:'pendente',dataLimite:'2026-09-01',responsavelId:'ana-paula',registros:[],checklist:[],anotacoes:[]},
+        {id:'at_soar8',nome:'Go-live e validação final',status:'pendente',dataLimite:'2026-09-05',responsavelId:'ana-paula',registros:[],checklist:[],anotacoes:[]}
+      ]
+    }],
+    // ── NXTEC (csId:'ana-paula') — ATENÇÃO ─────────────────────────────────
+    'NXTEC': [{
+      id:'pb_nxtec1', nome:'Implantação NX/IOT', fase:'implantacao', donoId:'ana-paula',
+      criadoEm:'2026-02-15T09:00:00', atividades:[
+        {id:'at_nxt1',nome:'Kickoff e levantamento de requisitos',status:'concluida',responsavelId:'ana-paula',registros:[
+          {id:'rn1',autor:'Silvia Costa',data:'2026-02-15T14:00:00',texto:'Kickoff realizado. Escopo: monitoramento de temperatura, vibração e consumo energético em 4 galpões.'},
+          {id:'rn2',autor:'Ana Paula Souza',data:'2026-02-16T09:00:00',texto:'Plano de instalação aprovado. 24 sensores necessários.'}
+        ],checklist:[{id:'cn1',texto:'Validar localização dos sensores',done:true},{id:'cn2',texto:'Confirmar infraestrutura de rede',done:true}],anotacoes:[]},
+        {id:'at_nxt2',nome:'Instalação e configuração dos sensores',status:'concluida',responsavelId:'silvia',registros:[
+          {id:'rn3',autor:'Silvia Costa',data:'2026-03-20T16:00:00',texto:'24 sensores instalados nos 4 galpões. Conectividade testada em 100% dos pontos. Dados na plataforma com latência < 1s.'}
+        ],checklist:[{id:'cn3',texto:'Galpão A',done:true},{id:'cn4',texto:'Galpão B',done:true},{id:'cn5',texto:'Galpões C e D',done:true}],anotacoes:[]},
+        {id:'at_nxt3',nome:'Configuração de dashboards e alertas',status:'concluida',responsavelId:'ana-paula',registros:[
+          {id:'rn4',autor:'Ana Paula Souza',data:'2026-04-25T10:00:00',texto:'8 KPIs operacionais configurados. Alertas de temperatura e vibração validados pelo gestor de manutenção.'}
+        ],checklist:[{id:'cn6',texto:'Dashboard de temperatura',done:true},{id:'cn7',texto:'Alertas críticos',done:true},{id:'cn8',texto:'Validar com gestor',done:true}],anotacoes:[]},
+        {id:'at_nxt4',nome:'Treinamento da equipe e go-live',status:'em_andamento',dataLimite:'2026-06-28',responsavelId:'ana-paula',registros:[
+          {id:'rn5',autor:'Ana Paula Souza',data:'2026-06-15T09:00:00',texto:'Treinamento turno manhã concluído — 8 operadores. Falta treinar turno tarde (6 operadores), agendado para dia 24.'}
+        ],checklist:[{id:'cn9',texto:'Treinar turno manhã',done:true},{id:'cn10',texto:'Treinar turno tarde',done:false},{id:'cn11',texto:'Documentar manual de operação',done:false}],anotacoes:[
+          {id:'an1',autor:'Ana Paula Souza',data:'2026-06-16T08:00:00',texto:'Prazo apertado mas factível. Treinamento dia 24, documentação até dia 27 — deve fechar no prazo.'}
+        ]}
+      ]
+    }],
+    // ── ROTOFER (csId:'ana-paula') — EM ORDEM ──────────────────────────────
+    'ROTOFER': [{
+      id:'pb_rot1', nome:'Implantação NX/IOT', fase:'implantacao', donoId:'ana-paula',
+      criadoEm:'2026-01-10T09:00:00', atividades:[
+        {id:'at_rot1',nome:'Kickoff e levantamento',status:'concluida',responsavelId:'ana-paula',registros:[
+          {id:'rr1',autor:'Felipe Alves',data:'2026-01-10T14:00:00',texto:'Kickoff com engenharia. 3 linhas de produção serão monitoradas. Gerente de fábrica muito animado.'}
+        ],checklist:[{id:'cr1',texto:'Validar topologia de rede',done:true}],anotacoes:[]},
+        {id:'at_rot2',nome:'Instalação sensores NX — linha 1',status:'concluida',responsavelId:'felipe',registros:[
+          {id:'rr2',autor:'Felipe Alves',data:'2026-02-05T16:00:00',texto:'Linha 1: 8 sensores NX instalados. Temperatura, vibração e corrente elétrica monitoradas em tempo real.'}
+        ],checklist:[{id:'cr2',texto:'Instalar sensores',done:true},{id:'cr3',texto:'Calibrar sensores',done:true}],anotacoes:[]},
+        {id:'at_rot3',nome:'Instalação sensores NX — linha 2',status:'concluida',responsavelId:'felipe',registros:[
+          {id:'rr3',autor:'Felipe Alves',data:'2026-03-18T15:00:00',texto:'Linha 2 concluída. 10 sensores. Detectada falha no motor 2B via alerta automático — manutenção preventiva antecipada.'}
+        ],checklist:[{id:'cr4',texto:'Instalar sensores',done:true},{id:'cr5',texto:'Testar alertas',done:true}],anotacoes:[]},
+        {id:'at_rot4',nome:'Instalação sensores NX — linha 3',status:'concluida',responsavelId:'felipe',registros:[
+          {id:'rr4',autor:'Felipe Alves',data:'2026-04-30T14:00:00',texto:'Linha 3 concluída. Total: 26 sensores nas 3 linhas. Cobertura de 100% dos ativos críticos.'}
+        ],checklist:[{id:'cr6',texto:'Instalar sensores',done:true}],anotacoes:[]},
+        {id:'at_rot5',nome:'Configuração de dashboards gerenciais',status:'em_andamento',dataLimite:'2026-07-15',responsavelId:'ana-paula',registros:[
+          {id:'rr5',autor:'Ana Paula Souza',data:'2026-06-10T09:00:00',texto:'Dashboard do gerente 80% pronto. Falta adicionar relatório de OEE e integrar com planilha de metas.'}
+        ],checklist:[{id:'cr7',texto:'Dashboard operacional',done:true},{id:'cr8',texto:'Relatório OEE',done:false},{id:'cr9',texto:'Integrar metas da fábrica',done:false}],anotacoes:[]},
+        {id:'at_rot6',nome:'Treinamento e go-live',status:'pendente',dataLimite:'2026-07-30',responsavelId:'ana-paula',registros:[],checklist:[{id:'cr10',texto:'Treinar operadores',done:false},{id:'cr11',texto:'Treinar supervisores',done:false},{id:'cr12',texto:'Go-live oficial',done:false}],anotacoes:[]}
+      ]
+    }],
+    // ── AUTOMIND (csId:'ana-paula') — CS ATIVO ─────────────────────────────
+    'AUTOMIND': [
+      {id:'pb_auto1', nome:'Implantação NX/IOT', fase:'implantacao', donoId:'ana-paula', encerrado:true,
+       criadoEm:'2025-05-01T09:00:00', atividades:[
+        {id:'at_auto1',nome:'Kickoff e levantamento',status:'concluida',responsavelId:'ana-paula',registros:[{id:'ra1',autor:'Severiano Rocha',data:'2025-05-05T10:00:00',texto:'Kickoff excelente. Escopo: monitoramento de 42 ativos críticos em toda a linha de produção.'}],checklist:[],anotacoes:[]},
+        {id:'at_auto2',nome:'Instalação dos sensores IoT',status:'concluida',responsavelId:'severiano',registros:[{id:'ra2',autor:'Severiano Rocha',data:'2025-07-20T14:00:00',texto:'42 sensores IoT instalados e calibrados. Cobertura total. Dados na plataforma com latência < 2s.'}],checklist:[],anotacoes:[]},
+        {id:'at_auto3',nome:'Configuração de dashboards e alertas',status:'concluida',responsavelId:'severiano',registros:[{id:'ra3',autor:'Severiano Rocha',data:'2025-09-15T10:00:00',texto:'18 dashboards configurados. Sistema de alertas com 3 níveis de criticidade operacional.'}],checklist:[],anotacoes:[]},
+        {id:'at_auto4',nome:'Treinamento e go-live',status:'concluida',responsavelId:'ana-paula',registros:[{id:'ra4',autor:'Ana Paula Souza',data:'2025-12-10T10:00:00',texto:'Treinamento concluído para 35 usuários. Go-live em 15/12/2025. CSAT pós-implantação: 4.8 ⭐'}],checklist:[],anotacoes:[]}
+      ]},
+      {id:'pb_auto2', nome:'CS NX/IOT — Revisão Contínua', fase:'cs', donoId:'ana-paula',
+       criadoEm:'2026-01-15T09:00:00', atividades:[
+        {id:'at_auto5',nome:'Review Q1 2026 — Adoção e uso',status:'concluida',responsavelId:'ana-paula',registros:[{id:'ra5',autor:'Ana Paula Souza',data:'2026-04-10T10:00:00',texto:'Review Q1 realizado. 96% dos alarmes registrados no sistema (meta 90%). 34 paradas não-planejadas evitadas. ROI estimado: R$280k. CSAT 4.4.'}],checklist:[{id:'ca1',texto:'Analisar métricas de uso',done:true},{id:'ca2',texto:'Relatório de ROI',done:true},{id:'ca3',texto:'Plano de ação Q2',done:true}],anotacoes:[]},
+        {id:'at_auto6',nome:'Review Q2 2026 — Proposta de expansão',status:'em_andamento',dataLimite:'2026-07-15',responsavelId:'ana-paula',registros:[{id:'ra6',autor:'Ana Paula Souza',data:'2026-06-15T14:00:00',texto:'Proposta de expansão para 2 novas linhas em elaboração. Reunião com diretor industrial agendada para 15/07.'}],checklist:[{id:'ca4',texto:'Relatório de uso Q2',done:true},{id:'ca5',texto:'Proposta de expansão',done:false},{id:'ca6',texto:'Apresentar ao diretor',done:false}],anotacoes:[]}
+      ]}
+    ],
+    // ── ROBOTIX — enricher atividades já existentes no seed ────────────────
+    'ROBOTIX': [{
+      id:'pb_rob1', nome:'Implantação NX/IOT', fase:'implantacao', donoId:'silvia',
+      criadoEm:'2026-04-05T09:00:00', atividades:[
+        {id:'at_rob1',nome:'1ª Reunião de engajamento',status:'concluida',responsavelId:'silvia',registros:[
+          {id:'reg_rob1',autor:'Severiano Rocha',data:'2026-04-05T14:00:00',texto:'Kickoff realizado com sucesso. Equipe técnica muito engajada. Cronograma de instalação dos sensores definido.'}
+        ],checklist:[{id:'rb1',texto:'Validar infraestrutura',done:true},{id:'rb2',texto:'Definir pontos de instalação',done:true}],anotacoes:[]},
+        {id:'at_rob2',nome:'Configuração de sensores IoT',status:'concluida',responsavelId:'severiano',registros:[
+          {id:'reg_rob2',autor:'Severiano Rocha',data:'2026-04-20T16:00:00',texto:'12 sensores instalados na linha de produção principal. Testes de conectividade OK. Dados chegando na plataforma.'}
+        ],checklist:[{id:'rb3',texto:'Instalar sensores linha 1',done:true},{id:'rb4',texto:'Calibrar e testar',done:true}],anotacoes:[]},
+        {id:'at_rob3',nome:'Configuração de dashboards operacionais',status:'em_andamento',dataLimite:'2026-07-10',responsavelId:'silvia',registros:[
+          {id:'reg_rob3',autor:'Silvia Costa',data:'2026-06-01T10:00:00',texto:'Dashboard principal 60% configurado. Aguardando validação de KPIs com o gerente de produção.'}
+        ],checklist:[{id:'rb5',texto:'Dashboard operacional',done:false},{id:'rb6',texto:'Configurar alertas',done:false},{id:'rb7',texto:'Validar com gerência',done:false}],anotacoes:[]},
+        {id:'at_rob4',nome:'Treinamento da equipe e go-live',status:'pendente',dataLimite:'2026-07-30',responsavelId:'silvia',registros:[],checklist:[{id:'rb8',texto:'Treinar operadores',done:false},{id:'rb9',texto:'Go-live oficial',done:false}],anotacoes:[]}
+      ]
+    }],
+    // ── KMSIL — enriquecer registros e checklist ────────────────────────────
+    'KMSIL': [{
+      id:'pb_k1', nome:'Implantação CPS', fase:'implantacao', donoId:'cristiano',
+      criadoEm:'2026-03-10T09:00:00', atividades:[
+        {id:'at_k1',nome:'1ª Reunião de engajamento',status:'concluida',responsavelId:'cristiano',registros:[
+          {id:'reg_k1',autor:'Ana Paula Souza',data:'2026-03-10T14:00:00',texto:'Kickoff realizado com equipe de TI. Alinhado acesso ao ambiente de homologação. Cliente da área de saúde — expectativa alta.'}
+        ],checklist:[{id:'kc1',texto:'Validar acesso ao sistema',done:true},{id:'kc2',texto:'Alinhar cronograma',done:true}],anotacoes:[]},
+        {id:'at_k2',nome:'Levantamento e parametrização',status:'em_andamento',dataLimite:'2026-07-20',responsavelId:'cristiano',registros:[
+          {id:'reg_k2',autor:'Ana Paula Souza',data:'2026-04-02T14:30:00',texto:'Parametrização inicial concluída. Aguardando validação de dados mestres pelo cliente.'}
+        ],checklist:[{id:'kc3',texto:'Mapear processos',done:true},{id:'kc4',texto:'Parametrizar módulo Compras',done:false},{id:'kc5',texto:'Validar com usuário-chave',done:false}],anotacoes:[]},
+        {id:'at_k3',nome:'Treinamento e go-live',status:'pendente',dataLimite:'2026-09-01',responsavelId:'cristiano',registros:[],checklist:[{id:'kc6',texto:'Treinar equipe',done:false},{id:'kc7',texto:'Go-live',done:false}],anotacoes:[]}
+      ]
+    }]
+  };
+
+  // Gerador de playbook genérico com SLA cumulativo desde o início do projeto
+  // SLA padrão por atividade: 7d kickoff, +15d levantamento, +30d param, +30d go-live
+  var SLA_NOMES = ['1ª Reunião e kickoff','Levantamento de processos','Parametrização e treinamento','Go-live e validação'];
+  var SLA_DIAS  = [7, 15, 30, 30];    // duração de cada atividade (dias)
+  var SLA_CUM   = [7, 22, 52, 82];    // prazo cumulativo desde o início do projeto
+
+  function addDias(dataStr, dias) {
+    var d = new Date(dataStr + 'T00:00:00');
+    d.setDate(d.getDate() + dias);
+    return d.toISOString().split('T')[0];
+  }
+
+  function makeGenericPb(c) {
+    var etapa = c.etapa || '1ª Reunião';
+    var pid   = 'pb_' + c.id.replace(/[^a-z0-9]/gi,'').toLowerCase() + '1';
+    var start = c.dataInicio || '2025-01-01';
+    var doneMap = {'1ª Reunião':[0,0,0,0],'Engajamento':[1,1,0,0],'Evolução':[1,1,1,0],'Conclusão':[1,1,1,1],'Pausado':[1,0,0,0],'Cancelado':[1,0,0,0]};
+    var done = doneMap[etapa] || [0,0,0,0];
+    var atividades = SLA_NOMES.map(function(nome, i) {
+      var dl  = addDias(start, SLA_CUM[i]);
+      var st  = done[i] ? 'concluida' : 'pendente';
+      return {id:'at_'+pid+'_'+i, nome:nome, status:st, responsavelId:c.csId,
+              slasDias:SLA_DIAS[i], dataLimite:dl, registros:[], checklist:[], anotacoes:[]};
+    });
+    return [{id:pid, nome:'Implantação '+(c.produto||'CPS'), fase:'implantacao', donoId:c.csId,
+             criadoEm:start+'T09:00:00', atividades:atividades}];
+  }
+
+  // Loop principal
+  SEED_CLIENTES.forEach(function(c) {
+    // Status e lifecycle
+    if (CS_ATIVO[c.id]) {
+      c.status = 'cs_ativo';
+      if (!c.dataInicioCS) c.dataInicioCS = CS_ATIVO[c.id];
+    } else {
+      if (!c.status) c.status = 'em_implantacao';
+    }
+    if (!c.dataInicioImplantacao) c.dataInicioImplantacao = c.dataInicio || '2025-01-01';
+    if (c.dataInicioCS === undefined && !CS_ATIVO[c.id]) c.dataInicioCS = null;
+
+    // CSAT
+    if (!c.csat && CSAT[c.id]) c.csat = CSAT[c.id];
+
+    // Playbooks — usa RICH_PBS se disponível, senão gera genérico
+    if (RICH_PBS[c.id]) {
+      c.ativPlaybooks = RICH_PBS[c.id];
+    } else if (!c.ativPlaybooks || !c.ativPlaybooks.length) {
+      c.ativPlaybooks = makeGenericPb(c);
+    }
+
+    // Normaliza campos de playbooks e atividades
+    (c.ativPlaybooks || []).forEach(function(pb) {
+      if (!pb.donoId) pb.donoId = c.csId;
+      if (!pb.fase) pb.fase = 'implantacao';
+      if (c.status === 'cs_ativo' && pb.fase === 'implantacao' && !pb.encerrado) pb.encerrado = true;
+      (pb.atividades || []).forEach(function(at) {
+        if (!at.id) at.id = 'at_' + pb.id + '_' + Math.abs(at.nome.length * 31 + (pb.id||'').length);
+        if (!at.responsavelId) at.responsavelId = pb.donoId || c.csId;
+        if (!at.checklist) at.checklist = [];
+        if (!at.anotacoes) at.anotacoes = [];
+        if (!at.registros) at.registros = [];
+        if (!at.status) at.status = at.registros.length > 0 ? 'concluida' : 'pendente';
+        // SLA automático: se não tem dataLimite, calcula pela posição + data de início do pb
+        if (at.status !== 'concluida' && !at.dataLimite) {
+          var idx = pb.atividades.indexOf(at);
+          var cum = SLA_CUM[idx] !== undefined ? SLA_CUM[idx] : (SLA_CUM[SLA_CUM.length-1] + idx * 15);
+          at.dataLimite = addDias((pb.criadoEm || c.dataInicio || '2025-01-01').split('T')[0], cum);
+          at.slasDias   = SLA_DIAS[idx] || 15;
+        }
+      });
+    });
+  });
+})();
 
 const SEED_PROJETOS = [
   {id:'WELDMACH',   nome:'WELDMACH',   projeto:'SAGP-00145', produto:'CPS', consultorId:'ana-paula'},
@@ -892,6 +1506,14 @@ const DB = {
 };
 
 function initData() {
+  // Versão dos dados — incrementar força re-seed para todos os usuários
+  var DATA_V = 'v4';
+  if (localStorage.getItem('grv_cs_v') !== DATA_V) {
+    localStorage.removeItem(DB.CLIENTES);
+    localStorage.removeItem(DB.CONSULTORES);
+    localStorage.removeItem(DB.PROJETOS);
+    localStorage.setItem('grv_cs_v', DATA_V);
+  }
   if (!localStorage.getItem(DB.CONSULTORES))
     localStorage.setItem(DB.CONSULTORES, JSON.stringify(SEED_CONSULTORES));
   if (!localStorage.getItem(DB.CLIENTES))
@@ -900,6 +1522,28 @@ function initData() {
     localStorage.setItem(DB.ATIVO, 'ana-paula');
   if (!localStorage.getItem(DB.PROJETOS))
     localStorage.setItem(DB.PROJETOS, JSON.stringify(SEED_PROJETOS));
+  // Migrate existing data for new fields
+  (function migrateLS() {
+    const clientes = getClientes();
+    let dirty = false;
+    clientes.forEach(function(c) {
+      if (!c.status) { c.status = 'em_implantacao'; dirty = true; }
+      if (!c.dataInicioImplantacao) { c.dataInicioImplantacao = c.dataInicio || '2025-01-01'; dirty = true; }
+      if (c.dataInicioCS === undefined) { c.dataInicioCS = null; dirty = true; }
+      (c.ativPlaybooks || []).forEach(function(pb) {
+        if (!pb.donoId) { pb.donoId = c.csId; dirty = true; }
+        if (!pb.fase) { pb.fase = 'implantacao'; dirty = true; }
+        (pb.atividades || []).forEach(function(at) {
+          if (!at.id) { at.id = 'at_' + Math.random().toString(36).slice(2); dirty = true; }
+          if (!at.responsavelId) { at.responsavelId = pb.donoId || c.csId; dirty = true; }
+          if (!at.checklist) { at.checklist = []; dirty = true; }
+          if (!at.anotacoes) { at.anotacoes = []; dirty = true; }
+          if (!at.registros) { at.registros = []; dirty = true; }
+        });
+      });
+    });
+    if (dirty) localStorage.setItem(DB.CLIENTES, JSON.stringify(clientes));
+  })();
 }
 
 function getConsultores()     { return JSON.parse(localStorage.getItem(DB.CONSULTORES) || '[]'); }
@@ -929,6 +1573,43 @@ function getProgresso(c) {
   const all = c.fases.flatMap(f => f.tarefas);
   if (!all.length) return 0;
   return Math.round(all.filter(t => t.feita).length / all.length * 100);
+}
+
+function calcProgresso(pbOrArray) {
+  const pbs = Array.isArray(pbOrArray) ? pbOrArray : (pbOrArray ? [pbOrArray] : []);
+  const ats = pbs.flatMap(pb => pb.atividades || []);
+  if (!ats.length) return 0;
+  return Math.round(ats.filter(a => a.status === 'concluida').length / ats.length * 100);
+}
+
+function getMinhaCarteira(consultorId) {
+  return getClientes().filter(c =>
+    (c.ativPlaybooks || []).some(pb => pb.donoId === consultorId)
+  );
+}
+
+function getStatusCliente(cliente, consultorId) {
+  const meusPbs    = (cliente.ativPlaybooks || []).filter(pb => pb.donoId === consultorId);
+  const atividades = meusPbs.flatMap(pb => pb.atividades || []);
+  const hoje  = new Date(); hoje.setHours(0,0,0,0);
+  const em7   = new Date(hoje); em7.setDate(em7.getDate() + 7);
+  const pend  = atividades.filter(a => a.status !== 'concluida');
+  if (pend.some(a => a.dataLimite && new Date(a.dataLimite) < hoje))  return 'atrasado';
+  if (pend.some(a => a.dataLimite && new Date(a.dataLimite) <= em7))  return 'atencao';
+  if (calcProgresso(meusPbs) < 15) return 'inicio';
+  return 'em_ordem';
+}
+
+function getKanbanColuna(cliente, consultorId) {
+  if (cliente.status === 'cs_ativo') return 'CS Ativo';
+  const pb = (cliente.ativPlaybooks || []).find(
+    p => p.fase === 'implantacao' && p.donoId === consultorId
+  ) || (cliente.ativPlaybooks || [])[0];
+  const prog = calcProgresso(pb);
+  if (prog < 15) return '1ª Reunião';
+  if (prog < 50) return 'Implantação';
+  if (prog < 85) return 'Evolução';
+  return 'Conclusão';
 }
 
 function getStatus(c) {
@@ -1012,10 +1693,21 @@ function chartDonutConfig(kpis) {
     },
     options: {
       cutout: '65%',
+      _showCenter: true,
       plugins: {
-        legend: { position:'right', labels:{ boxWidth:12, padding:16, font:{size:12} } },
+        legend: { position:'right', labels:{ boxWidth:12, padding:14, font:{size:12},
+          generateLabels(chart) {
+            const d = chart.data;
+            const total = d.datasets[0].data.reduce((a,b)=>a+b,0);
+            return d.labels.map((label,i) => ({
+              text: `${label} (${total?Math.round(d.datasets[0].data[i]/total*100):0}%)`,
+              fillStyle: d.datasets[0].backgroundColor[i], index:i,
+            }));
+          }
+        }},
         tooltip: { callbacks: { label: ctx => {
-          const pct = kpis.total ? Math.round(ctx.parsed / kpis.total * 100) : 0;
+          const total = ctx.dataset.data.reduce((a,b)=>a+b,0);
+          const pct   = total ? Math.round(ctx.parsed / total * 100) : 0;
           return ` ${ctx.label}: ${ctx.parsed} (${pct}%)`;
         }}}
       },
@@ -1032,12 +1724,21 @@ function chartBarrasConfig(clientes) {
     {label:'Pausados',     key:'pausado',     color:'#d69e2e'},
     {label:'Concluídos',   key:'concluido',   color:'#38a169'},
   ];
+  const metaData = produtos.map(p =>
+    Math.round(clientes.filter(c => c.produto.split('/')[0] === p).length * 0.85)
+  );
   const datasets = series.map(s => ({
     label: s.label,
     data: produtos.map(p => computeDashboardKPIs(clientes.filter(c => c.produto.split('/')[0] === p))[s.key]),
     backgroundColor: s.color,
+    _gradColor: s.color,
     borderRadius: 4,
   }));
+  datasets.push({
+    label:'Meta (85%)', type:'line', data:metaData,
+    borderColor:'#E05A1E', borderDash:[5,4], borderWidth:1.5,
+    pointRadius:0, fill:false, backgroundColor:'transparent',
+  });
   return {
     type: 'bar',
     data: { labels: produtos, datasets },
@@ -1080,10 +1781,36 @@ function fmtMilhares(n) {
 
 function chartGaugeConfig(pct) {
   const cor = pct >= 85 ? '#38a169' : '#e53e3e';
+  const metaPlugin = {
+    id: 'gaugeMetaLine',
+    afterDraw(chart) {
+      if (!chart.config.options._isGauge) return;
+      const {ctx, chartArea} = chart;
+      if (!chartArea) return;
+      const cx = (chartArea.left + chartArea.right) / 2;
+      const cy = chartArea.bottom;
+      const outerR = (chartArea.right - chartArea.left) / 2;
+      const innerR = outerR * 0.72;
+      const midR   = (outerR + innerR) / 2;
+      const angle  = Math.PI + (Math.PI * 0.85);
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(cx + (midR - 10) * Math.cos(angle), cy + (midR - 10) * Math.sin(angle));
+      ctx.lineTo(cx + (midR + 10) * Math.cos(angle), cy + (midR + 10) * Math.sin(angle));
+      ctx.strokeStyle = '#E05A1E'; ctx.lineWidth = 2.5; ctx.stroke();
+      ctx.fillStyle = '#E05A1E'; ctx.font = '600 10px Segoe UI,sans-serif';
+      ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      const lx = cx + (midR + 14) * Math.cos(angle);
+      const ly = cy + (midR + 14) * Math.sin(angle);
+      ctx.fillText('meta', lx, ly);
+      ctx.restore();
+    }
+  };
   return {
     type: 'doughnut',
     data: { datasets: [{ data:[pct, 100-pct], backgroundColor:[cor,'#edf2f7'], borderWidth:0, circumference:180, rotation:-90 }] },
-    options: { cutout:'72%', plugins:{ legend:{display:false}, tooltip:{enabled:false} }, animation:{duration:500} }
+    options: { cutout:'72%', _isGauge:true, plugins:{ legend:{display:false}, tooltip:{enabled:false}, gaugeMetaLine:{} }, animation:{duration:500} },
+    plugins: [metaPlugin]
   };
 }
 
@@ -1106,16 +1833,21 @@ function chartConsulConfig(data) {
     data: {
       labels: data.map(d => d.nome.split(' ')[0]),
       datasets: [
-        {label:'Em Andamento', data:data.map(d=>d.andamento), backgroundColor:'#3182ce', stack:'s'},
-        {label:'Atrasados',    data:data.map(d=>d.atrasado),  backgroundColor:'#e53e3e', stack:'s'},
-        {label:'Pausados',     data:data.map(d=>d.pausado),   backgroundColor:'#d69e2e', stack:'s'},
-        {label:'Concluídos',   data:data.map(d=>d.concluido), backgroundColor:'#38a169', stack:'s'},
+        {label:'Em Andamento', data:data.map(d=>d.andamento), backgroundColor:'#3182ce', _gradColor:'#3182ce', stack:'s'},
+        {label:'Atrasados',    data:data.map(d=>d.atrasado),  backgroundColor:'#e53e3e', _gradColor:'#e53e3e', stack:'s'},
+        {label:'Pausados',     data:data.map(d=>d.pausado),   backgroundColor:'#d69e2e', _gradColor:'#d69e2e', stack:'s'},
+        {label:'Concluídos',   data:data.map(d=>d.concluido), backgroundColor:'#38a169', _gradColor:'#38a169', stack:'s'},
       ]
     },
     options: {
       indexAxis:'y',
       plugins:{ legend:{ position:'bottom', labels:{ boxWidth:12, font:{size:12} } } },
-      scales:{ x:{ stacked:true, grid:{color:'#edf2f7'} }, y:{ stacked:true, grid:{display:false} } },
+      scales:{
+        x:{ stacked:true, grid:{color:'#edf2f7'} },
+        y:{ stacked:true, grid:{display:false},
+          ticks:{ color: (ctx) => data[ctx.index]?.pctAtrasado > 30 ? '#e53e3e' : '#4a5568' }
+        }
+      },
       animation:{ duration:500 }
     }
   };
@@ -1142,6 +1874,71 @@ function computeAlertas(kpis, clientes) {
     titulo:'Média de atraso: ' + backlog.media + ' dias por projeto atrasado',
     acao:'Confirmar plano de recuperação com consultores' });
   return alertas;
+}
+
+// ── HELPERS DASHBOARD v2 ─────────────────────────────────
+function simulateTrend(value, seed) {
+  const delta = Math.round(Math.abs(Math.sin(seed * 7.3) * 0.12 * value));
+  const dir   = Math.sin(seed * 3.7) > 0 ? 'up' : 'down';
+  return {delta, dir};
+}
+
+function renderTrendBadge(delta, dir, invertido) {
+  if (!delta) return '';
+  const melhorou = invertido ? dir === 'down' : dir === 'up';
+  const seta = dir === 'up' ? '▲' : '▼';
+  const cls  = melhorou ? 'hero-trend-down' : 'hero-trend-up';
+  return `<div class="hero-trend ${cls}" title="Estimativa ilustrativa — não é dado real">${seta} ${delta} vs mês ant. ★</div>`;
+}
+
+function computeSaudePortfolio(kpis) {
+  const pct    = kpis.total ? Math.round(kpis.atrasado / kpis.total * 100) : 0;
+  const ativos = kpis.total - kpis.cancelado;
+  if (pct < 10) return {nivel:'ok', cor:'#38a169', bg:'#F0FFF4', icone:'✅',
+    frase:`Portfólio saudável — ${ativos} projetos ativos, tudo dentro do esperado`};
+  if (pct <= 20) return {nivel:'atencao', cor:'#d69e2e', bg:'#FFFFF0', icone:'⚠️',
+    frase:`Atenção — ${pct}% do portfólio precisa de acompanhamento (${kpis.atrasado} projetos atrasados)`};
+  return {nivel:'risco', cor:'#e53e3e', bg:'#FFF5F5', icone:'🚨',
+    frase:`Portfólio em risco — ${pct}% atrasados, acima do limite saudável de 20%`};
+}
+
+function computeNarrativaDonut(kpis, clientes) {
+  if (!kpis.atrasado) return `Nenhum atraso no portfólio — ${kpis.emAndamento} projetos em andamento saudável`;
+  const contagem = {};
+  clientes.filter(c => getStatusDash(c) === 'Atrasado').forEach(c => {
+    const p = c.produto.split('/')[0];
+    contagem[p] = (contagem[p] || 0) + 1;
+  });
+  const top = Object.entries(contagem).sort((a,b) => b[1]-a[1])[0];
+  if (top && top[1] / kpis.atrasado >= 0.5) {
+    const pct = Math.round(top[1] / kpis.atrasado * 100);
+    return `${top[0]} concentra ${pct}% dos atrasos — ${top[1]} dos ${kpis.atrasado} projetos atrasados são ${top[0]}`;
+  }
+  return `Atrasos distribuídos entre os produtos — ${kpis.atrasado} projetos precisam de atenção`;
+}
+
+function computeNarrativaConsultor(data) {
+  if (!data.length) return 'Nenhum consultor com dados disponíveis';
+  const pior = data[0];
+  if (pior.pctAtrasado > 25)
+    return `${pior.nome.split(' ')[0]} concentra a maior carga de atrasos — ${pior.pctAtrasado}% da carteira está atrasada`;
+  return 'Equipe dentro do esperado — nenhum consultor com concentração crítica de atrasos';
+}
+
+function computeNarrativaBarras(clientes) {
+  const produtos = [...new Set(clientes.map(c => c.produto.split('/')[0]))].filter(Boolean);
+  if (produtos.length < 2) return 'Distribuição de status por produto';
+  const taxas = produtos.map(p => {
+    const sub  = clientes.filter(c => c.produto.split('/')[0] === p);
+    const conc = sub.filter(c => getStatusDash(c) === 'Concluído').length;
+    return {p, taxa: sub.length ? Math.round(conc / sub.length * 100) : 0};
+  }).sort((a,b) => b.taxa - a.taxa);
+  const melhor = taxas[0], pior = taxas[taxas.length - 1];
+  if (melhor.taxa > 0 && pior.taxa < melhor.taxa) {
+    const mult = pior.taxa > 0 ? Math.round(melhor.taxa / pior.taxa) : '∞';
+    return `${melhor.p} tem taxa de conclusão ${mult}× maior que ${pior.p} neste período`;
+  }
+  return 'Comparativo de status entre produtos';
 }
 
 function renderAlertas(alertas) {
@@ -1194,78 +1991,198 @@ function sortConsul(key) {
 }
 
 function initCharts(kpis, clientes, consultores) {
-  const get = id => document.getElementById(id);
+  const get  = id => document.getElementById(id);
+  const perf = computePerformance(clientes, consultores);
   if (get('ch-donut'))     _dashCharts.donut    = new Chart(get('ch-donut'),    chartDonutConfig(kpis));
+  if (get('ch-consul'))    _dashCharts.consul   = new Chart(get('ch-consul'),   chartConsulConfig(perf));
   if (get('ch-barras'))    _dashCharts.barras   = new Chart(get('ch-barras'),   chartBarrasConfig(clientes));
   if (get('ch-gauge-cps')) _dashCharts.gaugeCPS = new Chart(get('ch-gauge-cps'),chartGaugeConfig(computeAtivacao(clientes,'CPS').pct));
   if (get('ch-gauge-nx'))  _dashCharts.gaugeNX  = new Chart(get('ch-gauge-nx'), chartGaugeConfig(computeAtivacao(clientes,'NX').pct));
-  if (get('ch-consul'))    _dashCharts.consul   = new Chart(get('ch-consul'),   chartConsulConfig(computePerformance(clientes, consultores)));
 }
 
-function renderDashboardProjetos(clientes, consultores) {
-  Object.values(_dashCharts).forEach(ch => { try{ ch.destroy(); }catch(e){} });
-  _dashCharts = {};
+function renderVisaoGeral(kpis, clientes, consultores) {
+  const ativos   = kpis.total - kpis.cancelado;
+  const nConsul  = consultores.filter(c => clientes.some(cl => cl.consultorId === c.id)).length;
+  const produtos = [...new Set(clientes.map(c => c.produto.split('/')[0]))].filter(Boolean).join(' · ');
+  const saude    = computeSaudePortfolio(kpis);
+  const pct      = n => kpis.total ? Math.round(n / kpis.total * 100) : 0;
+  const saudeTxt = saude.nivel === 'ok' ? 'Portfólio saudável' : saude.nivel === 'atencao' ? 'Requer atenção' : 'Em risco';
+  const saudeBg  = saude.nivel === 'ok' ? 'rgba(56,161,105,.18)' : saude.nivel === 'atencao' ? 'rgba(214,158,46,.18)' : 'rgba(229,62,62,.18)';
+  const saudeBd  = saude.nivel === 'ok' ? 'rgba(56,161,105,.4)' : saude.nivel === 'atencao' ? 'rgba(214,158,46,.4)' : 'rgba(229,62,62,.4)';
 
-  if (clientes.length === 0) {
-    return `<div class="dash-filter-bar">
-      <select onchange="setProjConsultor(this.value)">
-        <option value="">Todos consultores</option>
-        ${consultores.map(c => `<option value="${c.id}"${c.id===_proj_consultor?' selected':''}>${c.nome}</option>`).join('')}
-      </select>
-    </div>
-    <div class="empty-state"><div class="es-icon">📊</div><div class="es-text">Nenhum projeto encontrado para este consultor.</div></div>`;
-  }
+  const segs = [
+    { n: kpis.emAndamento, label: 'Em Andamento', cor: '#3b82f6' },
+    { n: kpis.concluido,   label: 'Concluídos',   cor: '#22c55e' },
+    { n: kpis.atrasado,    label: 'Atrasados',    cor: '#ef4444' },
+    { n: kpis.pausado,     label: 'Pausados',     cor: '#eab308' },
+    { n: kpis.naoIniciado, label: 'Não Iniciado', cor: 'rgba(255,255,255,.12)' },
+  ].filter(s => s.n > 0);
 
-  const kpis = computeDashboardKPIs(clientes);
   return `
-    <div class="dash-filter-bar">
-      <select onchange="setProjConsultor(this.value)">
-        <option value="">Todos consultores</option>
-        ${consultores.map(c => `<option value="${c.id}"${c.id===_proj_consultor?' selected':''}>${c.nome}</option>`).join('')}
-      </select>
-    </div>
-    ${renderKpiRow(kpis)}
-
-    <div class="dash-chart-row">
-      <div class="dash-card">
-        <div class="dash-card-title">Distribuição por Status</div>
-        <div style="position:relative;height:260px;display:flex;align-items:center;justify-content:center">
-          <canvas id="ch-donut" style="max-height:260px"></canvas>
-          <div style="position:absolute;left:28%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;line-height:1.2">
-            <div style="font-size:28px;font-weight:700;color:var(--text)">${kpis.total}</div>
-            <div style="font-size:11px;color:var(--text3)">projetos</div>
-          </div>
+    <div class="vg-card">
+      <div class="vg-glow"></div>
+      <div class="vg-header">
+        <div>
+          <div class="vg-eyebrow">GRV · Gestão de Implantação</div>
+          <div class="vg-headline">${ativos} projetos ativos</div>
+          <div class="vg-caption">${nConsul} consultor${nConsul!==1?'es':''} · ${produtos}${kpis.cancelado ? ` · ${kpis.cancelado} cancelados` : ''}</div>
+        </div>
+        <div class="vg-saude-badge" style="background:${saudeBg};border-color:${saudeBd}">
+          <span style="font-size:16px">${saude.icone}</span> ${saudeTxt}
         </div>
       </div>
-      <div class="dash-card">
-        <div class="dash-card-title">Status por Produto</div>
-        <div style="height:260px"><canvas id="ch-barras" style="max-height:260px"></canvas></div>
+      <div class="vg-kpis">
+        <div class="vg-kpi">
+          <div class="vg-kpi-n" style="color:#E05A1E">${kpis.total}</div>
+          <div class="vg-kpi-l">Total</div>
+        </div>
+        <div class="vg-kpi">
+          <div class="vg-kpi-n">${kpis.emAndamento}</div>
+          <div class="vg-kpi-l">Em Andamento</div>
+          <div class="vg-kpi-pct">${pct(kpis.emAndamento)}% do total</div>
+        </div>
+        <div class="vg-kpi">
+          <div class="vg-kpi-n" style="color:#22c55e">${kpis.concluido}</div>
+          <div class="vg-kpi-l">Concluídos</div>
+          <div class="vg-kpi-pct">${pct(kpis.concluido)}% do total</div>
+        </div>
+        <div class="vg-kpi">
+          <div class="vg-kpi-n" style="color:${kpis.atrasado > 0 ? '#ef4444' : 'rgba(255,255,255,.3)'}">${kpis.atrasado}</div>
+          <div class="vg-kpi-l">Atrasados</div>
+          <div class="vg-kpi-pct">${pct(kpis.atrasado)}% do total</div>
+        </div>
+        <div class="vg-kpi">
+          <div class="vg-kpi-n">${kpis.pausado}</div>
+          <div class="vg-kpi-l">Pausados</div>
+          <div class="vg-kpi-pct">${pct(kpis.pausado)}% do total</div>
+        </div>
       </div>
-    </div>
+      <div class="vg-bar">
+        ${segs.map(s => `<div class="vg-bar-seg" style="flex:${s.n};background:${s.cor}" title="${s.label}: ${s.n} (${pct(s.n)}%)"></div>`).join('')}
+      </div>
+      <div class="vg-legend">
+        ${segs.filter(s=>s.cor!=='rgba(255,255,255,.12)').map(s =>
+          `<div class="vg-legend-item"><div class="vg-dot" style="background:${s.cor}"></div>${s.label} <strong style="color:rgba(255,255,255,.7)">${pct(s.n)}%</strong></div>`
+        ).join('')}
+        ${kpis.naoIniciado > 0 ? `<div class="vg-legend-item"><div class="vg-dot" style="background:rgba(255,255,255,.25)"></div>Não Iniciado <strong style="color:rgba(255,255,255,.35)">${pct(kpis.naoIniciado)}%</strong></div>` : ''}
+      </div>
+    </div>`;
+}
 
-    ${(()=>{
-      const cps  = computeAtivacao(clientes, 'CPS');
-      const nx   = computeAtivacao(clientes, 'NX');
-      const back = computeBacklog(clientes);
-      const corCPS = cps.pct >= 85 ? '#38a169' : '#e53e3e';
-      const corNX  = nx.pct  >= 85 ? '#38a169' : '#e53e3e';
-      return `
+function renderZona1(kpis, clientes) {
+  const saude  = computeSaudePortfolio(kpis);
+  const ativos = kpis.total - kpis.cancelado;
+  const pctAtr = kpis.total ? Math.round(kpis.atrasado / kpis.total * 100) : 0;
+  const t1 = simulateTrend(ativos,         1);
+  const t2 = simulateTrend(kpis.atrasado,  2);
+  const t3 = simulateTrend(kpis.concluido, 3);
+  const alertas = computeAlertas(kpis, clientes);
+  const top3    = alertas.slice(0, 3);
+  const sevIcon = s => s === 'critico' ? '🚨' : '⚠️';
+  return `
+    <div class="dash-zone">
+      <div class="dash-zone-title">Zona 1 — Está tudo bem?</div>
+      <div class="health-banner" style="background:${saude.bg};border-color:${saude.cor};color:${saude.cor}">
+        <span style="font-size:20px">${saude.icone}</span>
+        <span style="color:#2d3748">${saude.frase}</span>
+      </div>
+      <div class="hero-row">
+        <div class="hero-metrics">
+          <div class="hero-card" onclick="drillKpi('')" style="cursor:pointer">
+            <div class="hero-label">Projetos Ativos</div>
+            <div class="hero-value" style="color:var(--text)">${ativos}</div>
+            <div class="hero-sub">${kpis.total} total · ${kpis.cancelado} cancelados</div>
+            ${renderTrendBadge(t1.delta, t1.dir, false)}
+          </div>
+          <div class="hero-card" onclick="drillKpi('Atrasado')" style="cursor:pointer">
+            <div class="hero-label">Atrasados</div>
+            <div class="hero-value" style="color:${kpis.atrasado>0?'#e53e3e':'#38a169'}">${kpis.atrasado}</div>
+            <div class="hero-sub">${pctAtr}% do portfólio</div>
+            ${kpis.atrasado ? renderTrendBadge(t2.delta, t2.dir, true) : ''}
+          </div>
+          <div class="hero-card" onclick="drillKpi('Concluído')" style="cursor:pointer">
+            <div class="hero-label">Concluídos</div>
+            <div class="hero-value" style="color:#38a169">${kpis.concluido}</div>
+            <div class="hero-sub">${kpis.total ? Math.round(kpis.concluido/kpis.total*100) : 0}% do total</div>
+            ${renderTrendBadge(t3.delta, t3.dir, false)}
+          </div>
+        </div>
+        <div class="dash-card" style="margin:0">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Top Alertas</div>
+          ${top3.length === 0
+            ? `<div style="color:#38a169;font-size:13px;font-weight:600">✅ Sem alertas críticos</div>`
+            : `<div class="alerts-compact">${top3.map(a => `
+                <div class="alert-compact" style="border-color:${a.sev==='critico'?'#e53e3e':'#d69e2e'};background:${a.sev==='critico'?'#FFF5F5':'#FFFFF0'}">
+                  <span style="font-size:14px">${sevIcon(a.sev)}</span>
+                  <div>
+                    <div class="alert-compact-title">${a.titulo}</div>
+                    <div class="alert-compact-acao">${a.acao}</div>
+                  </div>
+                </div>`).join('')}
+              </div>`}
+          ${alertas.length > 3 ? `<div style="font-size:11px;color:var(--text3);margin-top:8px">+${alertas.length-3} alertas abaixo ↓</div>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderZona2(kpis, clientes, consultores) {
+  const perf      = computePerformance(clientes, consultores);
+  const narrDonut = computeNarrativaDonut(kpis, clientes);
+  const narrConsul = computeNarrativaConsultor(perf);
+  const alertas   = computeAlertas(kpis, clientes);
+  return `
+    <div class="dash-zone">
+      <div class="dash-zone-title">Zona 2 — Onde estão os problemas?</div>
+      <div class="dash-chart-row">
+        <div class="dash-card">
+          <div class="chart-headline">${narrDonut}</div>
+          <div class="chart-subline">Distribuição por status do portfólio</div>
+          <div style="height:240px"><canvas id="ch-donut" style="max-height:240px"></canvas></div>
+        </div>
+        <div class="dash-card">
+          <div class="chart-headline">${narrConsul}</div>
+          <div class="chart-subline">Carteira por consultor · empilhado</div>
+          <div style="height:240px;margin-top:4px"><canvas id="ch-consul" style="max-height:240px"></canvas></div>
+        </div>
+      </div>
+      ${renderTabelaConsultores(perf)}
+      <div class="dash-card" style="margin-top:20px">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Todos os Alertas Operacionais</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${renderAlertas(alertas)}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderZona3(kpis, clientes) {
+  const cps  = computeAtivacao(clientes, 'CPS');
+  const nx   = computeAtivacao(clientes, 'NX');
+  const back = computeBacklog(clientes);
+  const corCPS = cps.pct >= 85 ? '#38a169' : '#e53e3e';
+  const corNX  = nx.pct  >= 85 ? '#38a169' : '#e53e3e';
+  const narrBarras = computeNarrativaBarras(clientes);
+  const tb = simulateTrend(back.media, 5);
+  return `
+    <div class="dash-zone">
+      <div class="dash-zone-title">Zona 3 — Estamos batendo as metas?</div>
       <div class="dash-gauge-row">
         <div class="dash-card" style="text-align:center">
           <div class="dash-card-title">Ativação CPS (no prazo)</div>
           <div style="position:relative;height:120px;overflow:hidden">
             <canvas id="ch-gauge-cps" style="max-height:140px"></canvas>
           </div>
-          <div style="margin-top:-16px;font-size:26px;font-weight:700;color:${corCPS}">${cps.pct}%</div>
-          <div style="font-size:12px;color:var(--text3)">${cps.noPrazo}/${cps.concluidos} concluídos no prazo · meta 85%</div>
+          <div style="margin-top:-16px;font-size:32px;font-weight:800;color:${corCPS};letter-spacing:-1px">${cps.pct}%</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:4px">${cps.noPrazo}/${cps.concluidos} no prazo · meta 85%</div>
         </div>
         <div class="dash-card" style="text-align:center">
           <div class="dash-card-title">Ativação NX (no prazo)</div>
           <div style="position:relative;height:120px;overflow:hidden">
             <canvas id="ch-gauge-nx" style="max-height:140px"></canvas>
           </div>
-          <div style="margin-top:-16px;font-size:26px;font-weight:700;color:${corNX}">${nx.pct}%</div>
-          <div style="font-size:12px;color:var(--text3)">${nx.noPrazo}/${nx.concluidos} concluídos no prazo · meta 85%</div>
+          <div style="margin-top:-16px;font-size:32px;font-weight:800;color:${corNX};letter-spacing:-1px">${nx.pct}%</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:4px">${nx.noPrazo}/${nx.concluidos} no prazo · meta 85%</div>
         </div>
         <div class="dash-card">
           <div class="dash-card-title">Backlog de Atrasos</div>
@@ -1280,25 +2197,39 @@ function renderDashboardProjetos(clientes, consultores) {
             </div>
             <div style="display:flex;justify-content:space-between;padding:12px 0">
               <span style="color:var(--text3);font-size:13px">Média por projeto</span>
-              <span style="font-weight:700;color:${back.media>90?'#e53e3e':back.media>45?'#d69e2e':'#38a169'};font-size:18px">${back.media} dias</span>
+              <div>
+                <span style="font-weight:700;color:${back.media>90?'#e53e3e':back.media>45?'#d69e2e':'#38a169'};font-size:18px">${back.media} dias</span>
+                ${renderTrendBadge(tb.delta, tb.dir, true)}
+              </div>
             </div>
           </div>
         </div>
-      </div>`;
-    })()}
-
-    <div class="dash-card" style="margin-bottom:24px">
-      <div class="dash-card-title">Alertas Operacionais</div>
-      <div id="dash-alertas" style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
-        ${renderAlertas(computeAlertas(kpis, clientes))}
       </div>
-    </div>
-
-    <div class="dash-card">
-      <div class="dash-card-title">Performance por Consultor</div>
-      <div style="height:220px;margin-top:12px"><canvas id="ch-consul" style="max-height:220px"></canvas></div>
-      ${renderTabelaConsultores(computePerformance(clientes, consultores))}
+      <div class="dash-card" style="margin-top:0">
+        <div class="chart-headline">${narrBarras}</div>
+        <div class="chart-subline">Status por produto · linha tracejada = meta 85%</div>
+        <div style="height:260px;margin-top:4px"><canvas id="ch-barras" style="max-height:260px"></canvas></div>
+      </div>
     </div>`;
+}
+
+function renderDashboardProjetos(clientes, consultores) {
+  Object.values(_dashCharts).forEach(ch => { try{ ch.destroy(); }catch(e){} });
+  _dashCharts = {};
+
+  const filterBar = `<div class="dash-filter-bar">
+    <select onchange="setProjConsultor(this.value)">
+      <option value="">Todos consultores</option>
+      ${consultores.map(c => `<option value="${c.id}"${c.id===_proj_consultor?' selected':''}>${c.nome}</option>`).join('')}
+    </select>
+  </div>`;
+
+  if (clientes.length === 0) {
+    return filterBar + `<div class="empty-state"><div class="es-icon">📊</div><div class="es-text">Nenhum projeto encontrado para este consultor.</div></div>`;
+  }
+
+  const kpis = computeDashboardKPIs(clientes);
+  return filterBar + renderVisaoGeral(kpis, clientes, consultores) + renderZona1(kpis, clientes) + renderZona2(kpis, clientes, consultores) + renderZona3(kpis, clientes);
 }
 
 function getDiasNaEtapa(c) {
@@ -1331,15 +2262,46 @@ function etapaToId(etapa) {
 }
 
 // ═══════════════════════════════════════════════════════════
+// SIDEBAR TOGGLE
+// ═══════════════════════════════════════════════════════════
+function toggleSidebar() {
+  const aside = document.getElementById('main-sidebar');
+  const collapsed = aside.classList.toggle('sidebar--collapsed');
+  localStorage.setItem('grv_cs_sidebar_collapsed', collapsed ? '1' : '');
+}
+
+// ═══════════════════════════════════════════════════════════
 // CONSULTOR SELECTOR
 // ═══════════════════════════════════════════════════════════
+function updateSidebarConsultor() {
+  const id   = getConsultorAtivo();
+  const lista = getConsultores();
+  const c    = lista.find(x => x.id === id) || { nome: id };
+  const av   = document.getElementById('sb-avatar');
+  const nm   = document.getElementById('sb-nome');
+  if (av) av.textContent = (c.nome || id)[0].toUpperCase();
+  if (nm) nm.textContent = c.nome || id;
+}
+
+function setActiveNav(page) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('nav-' + page);
+  if (el) el.classList.add('active');
+}
+
 function initConsultorSel() {
   const sel = document.getElementById('consultor-sel');
   const ativo = getConsultorAtivo();
-  sel.innerHTML = getConsultores()
+  const opts = getConsultores()
     .map(c => `<option value="${c.id}"${c.id===ativo?' selected':''}>${c.nome}</option>`)
     .join('');
-  sel.addEventListener('change', () => { setConsultorAtivo(sel.value); route(); });
+  if (sel) sel.innerHTML = opts;
+  const selH = document.getElementById('consultor-sel-hidden');
+  if (selH) {
+    selH.innerHTML = opts;
+    selH.addEventListener('change', () => { setConsultorAtivo(selH.value); updateSidebarConsultor(); route(); });
+  }
+  updateSidebarConsultor();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1350,28 +2312,30 @@ function navigate(hash) { location.hash = hash; }
 function route() {
   const hash = location.hash.replace('#','') || 'carteira';
   document.querySelectorAll('.sec').forEach(s => s.style.display = 'none');
-  document.querySelectorAll('.nav-item').forEach(a => a.classList.remove('active'));
 
   if (hash.startsWith('cliente/')) {
     document.getElementById('sec-cliente').style.display = 'block';
+    setActiveNav('');
     renderCliente(decodeURIComponent(hash.split('/').slice(1).join('/')));
   } else if (hash === 'projetos') {
     document.getElementById('sec-projetos').style.display = 'block';
-    document.querySelector('[data-route="projetos"]')?.classList.add('active');
+    setActiveNav('projetos');
     renderProjetosGRV();
   } else if (hash === 'criar') {
     document.getElementById('sec-criar').style.display = 'block';
-    document.querySelector('[data-route="criar"]')?.classList.add('active');
+    setActiveNav('criar');
     renderCriar();
   } else {
     document.getElementById('sec-carteira').style.display = 'block';
-    document.querySelector('[data-route="carteira"]')?.classList.add('active');
+    setActiveNav('carteira');
     renderCarteira();
   }
 }
 
 window.addEventListener('hashchange', route);
-window.addEventListener('DOMContentLoaded', () => { initData(); initConsultorSel(); route(); });
+window.addEventListener('DOMContentLoaded', () => {
+  initData(); initConsultorSel(); route();
+});
 
 // ═══════════════════════════════════════════════════════════
 // TOAST
@@ -1381,7 +2345,7 @@ function showToast(msg, duration) {
   const container = document.getElementById('toast-container');
   const toast = document.createElement('div');
   toast.className = 'toast';
-  toast.textContent = msg;
+  toast.innerHTML = msg;
   container.appendChild(toast);
   setTimeout(function() {
     toast.classList.add('toast-fade');
@@ -1393,10 +2357,107 @@ function showToast(msg, duration) {
 // TELA 1 — MINHA CARTEIRA
 // ═══════════════════════════════════════════════════════════
 const CARTEIRA_VIEW_KEY = 'grv_cs_view_carteira';
-let _carteira_view = localStorage.getItem(CARTEIRA_VIEW_KEY) || 'lista';
+let _carteira_view = (function(){const v=localStorage.getItem(CARTEIRA_VIEW_KEY);return(v==='feed'||v==='kanban')?v:'feed';})();
 let _filterStatus  = 'Todos';
 let _searchQuery   = '';
 let _carteira_jornada_collapsed = new Set();
+
+const STATUS_LABEL_MAP = {atrasado:'Atrasado',atencao:'Atenção',em_ordem:'Em ordem',inicio:'Início',cs_ativo:'CS Ativo'};
+function statusLabel(s) { return STATUS_LABEL_MAP[s] || s; }
+
+function avatarGradiente(nome) {
+  const paletas = [
+    ['#E05A1E','#ff8c5a'],['#2c7a7b','#4fd1c5'],['#553c9a','#9f7aea'],
+    ['#1a365d','#4a90d9'],['#276749','#68d391'],['#d69e2e','#f6e05e'],
+  ];
+  const [a, b] = paletas[(nome||'').charCodeAt(0) % paletas.length];
+  return 'linear-gradient(135deg,'+a+','+b+')';
+}
+
+function renderFeedCard(c, consultorId) {
+  const st      = c.status === 'cs_ativo' ? 'cs_ativo' : getStatusCliente(c, consultorId);
+  const meusPbs = (c.ativPlaybooks || []).filter(pb => pb.donoId === consultorId);
+  const prog    = calcProgresso(meusPbs);
+  const pb      = meusPbs[0];
+  const fase    = pb ? (pb.nome || pb.titulo || 'Playbook') : '—';
+  const csat    = c.csat ? 'CSAT ★ ' + c.csat : '';
+  const pColor  = st === 'atrasado' ? 'var(--red)' : st === 'atencao' ? 'var(--yellow)' : 'var(--green)';
+  const nomeCurto = c.id || c.projeto || '?';
+  return '<div class="feed-card" onclick="navigate(\'cliente/' + encodeURIComponent(c.id) + '\')">' +
+    '<div class="fc-stripe s-' + st + '"></div>' +
+    '<div class="fc-body">' +
+      '<div class="fc-avatar" style="background:' + avatarGradiente(nomeCurto) + '">' + nomeCurto[0].toUpperCase() + '</div>' +
+      '<div class="fc-info">' +
+        '<div class="fc-nome">' + nomeCurto + '</div>' +
+        '<div class="fc-meta">' + fase + ' · ' + prog + '%</div>' +
+      '</div>' +
+      '<div class="fc-right">' +
+        '<span class="status-badge b-' + st + '">' + statusLabel(st) + '</span>' +
+        (csat ? '<div class="fc-csat">' + csat + '</div>' : '') +
+        '<div class="fc-prog"><div class="fc-progbar" style="width:' + prog + '%;background:' + pColor + '"></div></div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function renderCarteiraFeed(clientes, cid) {
+  if (!clientes.length) return '<div style="padding:40px;text-align:center;color:var(--text3);font-size:13px">Nenhum cliente encontrado.</div>';
+  return '<div class="feed-wrap">' + clientes.map(c => renderFeedCard(c, cid)).join('') + '</div>';
+}
+
+const KANBAN_COLUNAS = ['1ª Reunião','Implantação','Evolução','Conclusão','CS Ativo'];
+
+function renderCarteiraKanban(clientes, consultorId) {
+  const stripeColor = {
+    atrasado:'var(--red)', atencao:'var(--yellow)',
+    em_ordem:'var(--green)', inicio:'var(--blue)', cs_ativo:'var(--primary)'
+  };
+
+  const cols = KANBAN_COLUNAS.map(function(col) {
+    const items = clientes.filter(function(c) { return getKanbanColuna(c, consultorId) === col; });
+    const cards = items.map(function(c) {
+      const meusPbs = (c.ativPlaybooks || []).filter(function(pb) { return pb.donoId === consultorId; });
+      const prog    = calcProgresso(meusPbs);
+      const pb      = meusPbs[0];
+      const st      = c.status === 'cs_ativo' ? 'cs_ativo' : getStatusCliente(c, consultorId);
+      const pColor  = stripeColor[st] || 'var(--green)';
+      const nomeCurto = c.id || c.projeto || '?';
+      return '<div class="ck-card" onclick="navigate(\'cliente/' + encodeURIComponent(c.id) + '\')">' +
+        '<div class="ck-stripe" style="background:' + pColor + '"></div>' +
+        '<div class="ck-nome">' + nomeCurto + '</div>' +
+        '<div class="ck-fase">' + (pb ? (pb.nome || pb.titulo || '—') : '—') + '</div>' +
+        '<div class="ck-foot">' +
+          '<span class="ck-pct" style="color:' + pColor + '">' + prog + '%</span>' +
+          '<span class="status-badge b-' + st + '">' + statusLabel(st) + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    return '<div class="ck-col">' +
+      '<div class="ck-col-head">' +
+        '<span class="ck-col-lbl">' + col + '</span>' +
+        '<span class="ck-col-cnt">' + items.length + '</span>' +
+      '</div>' +
+      (cards || '<div style="font-size:11px;color:var(--text4);padding:8px 0">Vazio</div>') +
+    '</div>';
+  }).join('');
+
+  return '<div class="ck-wrap">' + cols + '</div>';
+}
+
+function filtrarCarteira() {
+  const cid    = getConsultorAtivo();
+  let cls      = getMinhaCarteira(cid);
+  const busca  = (document.getElementById('carteira-busca')?.value || '').toLowerCase();
+  const filtro = document.getElementById('carteira-status')?.value || '';
+  if (busca)  cls = cls.filter(c => (c.id||'').toLowerCase().includes(busca) || (c.projeto||'').toLowerCase().includes(busca));
+  if (filtro) cls = cls.filter(c => {
+    const st = c.status === 'cs_ativo' ? 'cs_ativo' : getStatusCliente(c, cid);
+    return st === filtro;
+  });
+  const view = localStorage.getItem(CARTEIRA_VIEW_KEY) || 'feed';
+  const body = document.getElementById('carteira-body');
+  if (body) body.innerHTML = view === 'feed' ? renderCarteiraFeed(cls, cid) : renderCarteiraKanban(cls, cid);
+}
 
 function setCarteiraView(v) {
   _carteira_view = v;
@@ -1405,103 +2466,50 @@ function setCarteiraView(v) {
 }
 
 function renderCarteira() {
-  const ativo      = getConsultorAtivo();
-  const nomeAtivo  = getConsultores().find(c => c.id === ativo)?.nome || '';
-  const carteira   = getClientes().filter(c => c.consultorId === ativo);
-  const consultores = getConsultores();
+  const cid      = getConsultorAtivo();
+  const nomeAtivo = getConsultores().find(c => c.id === cid)?.nome || cid;
+  const clientes = getMinhaCarteira(cid);
+  const view     = _carteira_view;
+  const atr      = clientes.filter(c => c.status !== 'cs_ativo' && getStatusCliente(c, cid) === 'atrasado').length;
+  const sec      = document.getElementById('sec-carteira');
+  if (!sec) return;
 
-  const total     = carteira.length;
-  const emOrdem   = carteira.filter(c => getStatus(c) === 'Em ordem').length;
-  const atrasados = carteira.filter(c => getStatus(c) === 'Atrasado').length;
-  const pausados  = carteira.filter(c => ['Pausado','Interrompido','Cancelado'].includes(getStatus(c))).length;
-
-  const toggle = `
-    <div class="view-toggle">
-      <button class="vt-btn${_carteira_view==='lista'?' active':''}" onclick="setCarteiraView('lista')">☰ Lista</button>
-      <button class="vt-btn${_carteira_view==='jornada'?' active':''}" onclick="setCarteiraView('jornada')">⚡ Jornada</button>
-      <button class="vt-btn${_carteira_view==='kanban'?' active':''}" onclick="setCarteiraView('kanban')">⊞ Kanban</button>
-    </div>`;
-
-  const header = `
-    <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
-      <div>
-        <div class="page-title">Minha Carteira</div>
-        <div class="page-subtitle">Consultor: ${nomeAtivo} · ${total} cliente${total!==1?'s':''}</div>
-      </div>
-      ${toggle}
-    </div>
-    <div class="metric-grid">
-      <div class="metric-card mc-accent"><div class="mc-label">Total de clientes</div><div class="mc-value">${total}</div></div>
-      <div class="metric-card mc-green"><div class="mc-label">Em ordem</div><div class="mc-value">${emOrdem}</div></div>
-      <div class="metric-card mc-red"><div class="mc-label">Atrasados</div><div class="mc-value">${atrasados}</div></div>
-      <div class="metric-card mc-gray"><div class="mc-label">Pausados / Interrompidos</div><div class="mc-value">${pausados}</div></div>
-    </div>`;
-
-  const sec = document.getElementById('sec-carteira');
-
-  if (_carteira_view === 'lista') {
-    let filtered = carteira;
-    if (_filterStatus !== 'Todos') {
-      if (_filterStatus === 'Pausado')
-        filtered = filtered.filter(c => ['Pausado','Interrompido','Cancelado'].includes(getStatus(c)));
-      else
-        filtered = filtered.filter(c => getStatus(c) === _filterStatus);
-    }
-    if (_searchQuery)
-      filtered = filtered.filter(c => c.id.toLowerCase().includes(_searchQuery.toLowerCase()));
-
-    const body = filtered.length === 0
-      ? `<div class="empty-state">
-           <div class="es-icon">${carteira.length===0?'📋':'🔍'}</div>
-           <div class="es-text">${carteira.length===0?'Nenhum cliente nesta carteira.':'Nenhum cliente encontrado com este filtro.'}</div>
-         </div>`
-      : `<div class="table-wrap">
-           <table class="data-table">
-             <thead><tr>
-               <th>Cliente</th><th>Etapa</th><th>Status</th>
-               <th style="width:130px">Progresso</th><th>Próxima Ação</th><th>Prazo</th>
-             </tr></thead>
-             <tbody>
-               ${filtered.map(c => {
-                 const prog = getProgresso(c);
-                 const st   = getStatus(c);
-                 return `<tr onclick="navigate('cliente/${encodeURIComponent(c.id)}')">
-                   <td><div style="font-weight:600">${c.id}</div><div class="proj-id">${c.projeto}</div></td>
-                   <td>${getEtapaBadge(c.etapa)}</td>
-                   <td>${getStatusBadge(st)}</td>
-                   <td>
-                     <div style="display:flex;align-items:center;gap:8px">
-                       <div class="prog-wrap" style="flex:1"><div class="prog-fill" style="width:${prog}%"></div></div>
-                       <span style="font-size:11px;color:var(--text3);white-space:nowrap">${prog}%</span>
-                     </div>
-                   </td>
-                   <td style="color:var(--text2);font-size:12px;max-width:180px">${c.proximaAcao||'—'}</td>
-                   <td style="font-size:12px;color:${st==='Atrasado'?'var(--red)':'var(--text2)'}">${fmtDate(c.prazo)}</td>
-                 </tr>`;
-               }).join('')}
-             </tbody>
-           </table>
-         </div>`;
-
-    sec.innerHTML = header + `
-      <div class="search-row">
-        <div class="filter-tabs">
-          ${['Todos','Em ordem','Atrasado','Pausado'].map(s =>
-            `<button class="filter-tab${_filterStatus===s?' active':''}" onclick="setFilter('${s}')">${s}</button>`
-          ).join('')}
-        </div>
-        <input class="search-input" type="text" placeholder="Buscar cliente..." value="${_searchQuery}"
-          oninput="setSearch(this.value)">
-      </div>
-      ${body}`;
-
-  } else if (_carteira_view === 'jornada') {
-    sec.innerHTML = header + renderJornadaAccordion(carteira, consultores);
-
-  } else {
-    // kanban with DnD
-    sec.innerHTML = header + renderKanbanBoard(carteira, consultores, true);
-  }
+  sec.innerHTML =
+    '<div style="padding:20px 24px 0">' +
+      '<div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:2px">Minha Carteira</div>' +
+      '<div style="font-size:12px;color:var(--text3)">' + nomeAtivo + ' · ' + clientes.length + ' clientes' +
+        (atr ? ' · <span style="color:var(--red);font-weight:700">' + atr + ' atrasado' + (atr!==1?'s':'') + '</span>' : '') +
+      '</div>' +
+    '</div>' +
+    '<div style="padding:12px 24px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);flex-wrap:wrap">' +
+      '<div style="display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 12px;min-width:220px">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text4)" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>' +
+        '<input type="text" placeholder="Buscar cliente..." id="carteira-busca" oninput="filtrarCarteira()" ' +
+          'style="border:none;outline:none;font-size:12px;color:var(--text);width:100%;background:transparent"/>' +
+      '</div>' +
+      '<select id="carteira-status" onchange="filtrarCarteira()" ' +
+        'style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px;font-size:12px;color:var(--text2);background:var(--surface)">' +
+        '<option value="">Todos os status</option>' +
+        '<option value="atrasado">Atrasados</option>' +
+        '<option value="atencao">Atenção</option>' +
+        '<option value="em_ordem">Em ordem</option>' +
+        '<option value="inicio">Início</option>' +
+        '<option value="cs_ativo">CS Ativo</option>' +
+      '</select>' +
+      '<div class="view-toggle" style="margin-left:auto">' +
+        '<button class="vt-btn' + (view==='feed'?' active':'') + '" onclick="setCarteiraView(\'feed\')">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>' +
+          'Feed' +
+        '</button>' +
+        '<button class="vt-btn' + (view==='kanban'?' active':'') + '" onclick="setCarteiraView(\'kanban\')">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="13" rx="1"/><rect x="17" y="3" width="5" height="9" rx="1"/></svg>' +
+          'Kanban' +
+        '</button>' +
+      '</div>' +
+    '</div>' +
+    '<div id="carteira-body">' +
+      (view === 'feed' ? renderCarteiraFeed(clientes, cid) : renderCarteiraKanban(clientes, cid)) +
+    '</div>';
 }
 
 function setFilter(s) { _filterStatus = s; renderCarteira(); }
@@ -1700,10 +2708,15 @@ function renderProjetosGRV() {
     }
   }
 
-  const total     = todos.length;
-  const emOrdem   = todos.filter(c => getStatus(c) === 'Em ordem').length;
-  const atrasados = todos.filter(c => getStatus(c) === 'Atrasado').length;
-  const pausados  = todos.filter(c => ['Pausado','Interrompido','Cancelado'].includes(getStatus(c))).length;
+  const total      = todos.length;
+  const emOrdem    = todos.filter(c => getStatus(c) === 'Em ordem').length;
+  const atrasados  = todos.filter(c => getStatus(c) === 'Atrasado').length;
+  const pausados   = todos.filter(c => ['Pausado','Interrompido','Cancelado'].includes(getStatus(c))).length;
+  const csats      = todos.filter(c => c.csat).map(c => c.csat);
+  const csatMedio  = csats.length ? (csats.reduce(function(s,v){return s+v;}, 0) / csats.length).toFixed(1) : '—';
+  const atrNovo    = todos.filter(c => c.status !== 'cs_ativo' && getStatusCliente(c, c.csId) === 'atrasado').length;
+  const progressos = todos.map(c => calcProgresso(c.ativPlaybooks || []));
+  const progMedio  = progressos.length ? Math.round(progressos.reduce(function(s,v){return s+v;}, 0) / progressos.length) : 0;
 
   const toggle = `
     <div class="view-toggle">
@@ -1724,7 +2737,6 @@ function renderProjetosGRV() {
         ${toggle}
       </div>
       ${renderDashboardProjetos(dashClientes, consultores)}`;
-    animateKpis(dashKpis);
     initCharts(dashKpis, dashClientes, consultores);
     return;
   }
@@ -1799,10 +2811,10 @@ function renderProjetosGRV() {
       ${toggle}
     </div>
     <div class="metric-grid">
-      <div class="metric-card mc-accent"><div class="mc-label">Total de projetos</div><div class="mc-value">${total}</div></div>
-      <div class="metric-card mc-green"><div class="mc-label">Em ordem</div><div class="mc-value">${emOrdem}</div></div>
-      <div class="metric-card mc-red"><div class="mc-label">Atrasados</div><div class="mc-value">${atrasados}</div></div>
-      <div class="metric-card mc-gray"><div class="mc-label">Pausados / Interrompidos</div><div class="mc-value">${pausados}</div></div>
+      <div class="metric-card mc-accent"><div class="mc-label">Clientes ativos</div><div class="mc-value">${total}</div></div>
+      <div class="metric-card mc-green"><div class="mc-label">CSAT médio ★</div><div class="mc-value">${csatMedio}</div></div>
+      <div class="metric-card mc-red"><div class="mc-label">Em atraso</div><div class="mc-value">${atrNovo}</div></div>
+      <div class="metric-card mc-gray"><div class="mc-label">Progresso médio</div><div class="mc-value">${progMedio}%</div></div>
     </div>
     ${filterBar}
     ${content}`;
@@ -1811,21 +2823,92 @@ function renderProjetosGRV() {
 // ═══════════════════════════════════════════════════════════
 // TELA 3 — DETALHE DO CLIENTE
 // ═══════════════════════════════════════════════════════════
-let _open_fases = {};
+let _open_fases       = {};
+let _cliente_id_atual = null;
+let _cliente_aba      = '360';
+let _pb_expandidos    = {};
+let _pb_sel_id        = null;
+let _at_sel           = null;
+let _pb_form_open     = false;
+let _at_form_pb       = null;
 
 function renderCliente(id) {
-  const c   = getCliente(id);
   const sec = document.getElementById('sec-cliente');
+  const c   = getCliente(id);
 
   if (!c) {
     sec.innerHTML = `<div class="empty-state"><div class="es-icon">❓</div><div class="es-text">Cliente não encontrado.</div></div>`;
     return;
   }
 
-  const prog   = getProgresso(c);
-  const status = getStatus(c);
-  const dias   = getDiasNaEtapa(c);
-  const consul = getConsultores().find(x => x.id === c.consultorId)?.nome || c.consultorId;
+  if (id !== _cliente_id_atual) {
+    _cliente_id_atual = id;
+    _cliente_aba      = '360';
+    _pb_expandidos    = {};
+    _pb_sel_id        = (c.ativPlaybooks && c.ativPlaybooks.length > 0) ? c.ativPlaybooks[0].id : null;
+    _at_sel           = null;
+    _pb_form_open     = false;
+    _at_form_pb       = null;
+  }
+
+  // Header: avatar gradient por inicial
+  const _avatarGrads = [['#E05A1E','#ff8c5a'],['#3182ce','#63b3ed'],['#38a169','#68d391'],['#553c9a','#9f7aea'],['#d69e2e','#f6e05e'],['#e53e3e','#fc8181'],['#319795','#4fd1c5'],['#d53f8c','#f687b3']];
+  const _avatarIdx   = c.id.split('').reduce(function(h,ch){return ((h<<5)-h)+ch.charCodeAt(0);},0);
+  const _ag = _avatarGrads[Math.abs(_avatarIdx) % _avatarGrads.length];
+  const _letter = c.id.charAt(0).toUpperCase();
+  const _consulNome = getConsultores().find(function(x){return x.id===(c.csId||c.consultorId);})?.nome || c.csId || c.consultorId || '—';
+  const _stCS = typeof getStatusCliente === 'function' ? getStatusCliente(c, c.csId || c.consultorId || '') : null;
+  const _stLabels = {atrasado:'Atrasado',em_ordem:'Em ordem',atencao:'Atenção',inicio:'Início'};
+
+  const abaContent = _cliente_aba === '360'
+    ? renderAba360(c)
+    : _cliente_aba === 'atividades'
+    ? renderAbaAtividades(c)
+    : renderAbaNotas(c);
+
+  sec.innerHTML = `
+    <div class="dc-header">
+      <a class="dc-back" href="#carteira">←</a>
+      <div class="dc-avatar-lg" style="background:linear-gradient(135deg,${_ag[0]},${_ag[1]})">${_letter}</div>
+      <div class="dc-info">
+        <div class="dc-name">${c.id}</div>
+        <div class="dc-sub">${c.projeto ? c.projeto + ' · ' : ''}${_consulNome}</div>
+        <div class="dc-chips">
+          ${_stCS ? '<span class="chip-base chip-status-' + _stCS + '">' + (_stLabels[_stCS]||_stCS) + '</span>' : ''}
+          ${c.segmento ? '<span class="chip-base chip-seg">' + c.segmento + '</span>' : ''}
+          ${c.produto  ? '<span class="chip-base chip-prod">' + c.produto  + '</span>' : ''}
+        </div>
+      </div>
+    </div>
+
+    <div class="cliente-tabs">
+      <button class="cliente-tab${_cliente_aba==='360'?' active':''}" onclick="setClienteAba('360','${c.id}')">Visão 360°</button>
+      <button class="cliente-tab${_cliente_aba==='atividades'?' active':''}" onclick="setClienteAba('atividades','${c.id}')">Atividades</button>
+      <button class="cliente-tab${_cliente_aba==='notas'?' active':''}" onclick="setClienteAba('notas','${c.id}')">Notas</button>
+    </div>
+
+    ${abaContent}`;
+}
+
+function setClienteAba(aba, clienteId) {
+  _cliente_aba = aba;
+  renderCliente(clienteId);
+}
+
+function tempoComoCliente(dataInicio) {
+  if (!dataInicio) return '—';
+  const n = new Date(), i = new Date(dataInicio);
+  const meses = (n.getFullYear() - i.getFullYear()) * 12 + n.getMonth() - i.getMonth();
+  if (meses < 1)  return 'Menos de 1 mês';
+  if (meses < 12) return meses + (meses === 1 ? ' mês' : ' meses');
+  const a = Math.floor(meses / 12), m = meses % 12;
+  return a + (a === 1 ? ' ano' : ' anos') + (m ? ' e ' + m + (m === 1 ? ' mês' : ' meses') : '');
+}
+
+function renderAba360(c) {
+  const prog          = getProgresso(c);
+  const csNome        = getConsultores().find(x => x.id === c.csId)?.nome || '—';
+  const consultorNome = getConsultores().find(x => x.id === c.consultorId)?.nome || c.consultorId;
 
   const fasesHtml = c.fases.map((f, fi) => {
     const feitas = f.tarefas.filter(t => t.feita).length;
@@ -1849,14 +2932,6 @@ function renderCliente(id) {
     </div>`;
   }).join('');
 
-  const regsHtml = c.registros.length
-    ? c.registros.map(r => `
-      <div class="reg-item">
-        <div class="reg-meta"><strong>${r.autor}</strong> · ${fmtDateTime(r.data)}</div>
-        <div class="reg-text">${r.texto}</div>
-      </div>`).join('')
-    : `<div style="color:var(--text3);font-size:13px;padding:8px 0">Nenhum registro ainda.</div>`;
-
   const tlHtml = c.historicoEtapas.map(h => {
     const label = h.de
       ? `${h.de} → <strong style="color:var(--primary)">${h.para}</strong>`
@@ -1870,59 +2945,548 @@ function renderCliente(id) {
     </div>`;
   }).join('');
 
-  sec.innerHTML = `
-    <a class="back-link" href="#carteira">← Voltar à carteira</a>
-    <div class="detail-header">
-      <div class="dh-top">
-        <div>
-          <h2>${c.id}</h2>
-          <div class="dh-projeto">${c.projeto} · ${c.produto}</div>
-        </div>
-        <div class="dh-badges">
-          ${getEtapaBadge(c.etapa)}
-          ${getStatusBadge(status)}
-          <button class="btn btn-primary btn-sm" onclick="openModal('${c.id}')">Alterar Etapa</button>
-        </div>
+  return `
+    <div class="grid-360">
+      <div class="card-360">
+        <div class="c360-label">Segmento</div>
+        <div class="c360-value">${c.segmento || '—'}</div>
       </div>
-      <div class="dh-meta">
-        <div class="dh-meta-item"><span class="dh-meta-label">Consultor</span><span class="dh-meta-value">${consul}</span></div>
-        <div class="dh-meta-item"><span class="dh-meta-label">Início</span><span class="dh-meta-value">${fmtDate(c.dataInicio)}</span></div>
-        <div class="dh-meta-item">
-          <span class="dh-meta-label">Prazo</span>
-          <span class="dh-meta-value" style="${status==='Atrasado'?'color:var(--red)':''}">${fmtDate(c.prazo)}</span>
-        </div>
-        <div class="dh-meta-item"><span class="dh-meta-label">Dias na etapa</span><span class="dh-meta-value">${dias} dia${dias!==1?'s':''}</span></div>
+      <div class="card-360">
+        <div class="c360-label">CS Responsável</div>
+        <div class="c360-value">${csNome}</div>
+      </div>
+      <div class="card-360">
+        <div class="c360-label">Consultor Digital</div>
+        <div class="c360-value">${consultorNome}</div>
+      </div>
+      <div class="card-360">
+        <div class="c360-label">% Implantação</div>
+        <div class="c360-value">${prog}%</div>
+        <div class="c360-prog"><div class="c360-prog-fill" style="width:${prog}%"></div></div>
       </div>
     </div>
 
-    <div class="detail-layout">
-      <div>
-        <div class="card-block">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <div class="section-title" style="margin-bottom:0">Playbook</div>
-            <span id="prog-pct-${c.id}" style="font-size:15px;font-weight:700;color:var(--primary)">${prog}%</span>
-          </div>
-          <div class="prog-wrap" style="height:8px;margin-bottom:18px">
-            <div class="prog-fill" id="prog-bar-${c.id}" style="width:${prog}%"></div>
-          </div>
-          ${fasesHtml}
+    <div class="card-block">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="section-title" style="margin-bottom:0">Playbook de Implantação</div>
+        <span id="prog-pct-${c.id}" style="font-size:15px;font-weight:700;color:var(--primary)">${prog}%</span>
+      </div>
+      <div class="prog-wrap" style="height:8px;margin-bottom:12px">
+        <div class="prog-fill" id="prog-bar-${c.id}" style="width:${prog}%"></div>
+      </div>
+      <div style="margin-bottom:16px">
+        <a href="#" onclick="setClienteAba('atividades','${c.id}');return false;" style="font-size:12px;color:var(--primary);text-decoration:none;font-weight:600">Ver Atividades →</a>
+      </div>
+      ${fasesHtml}
+    </div>
+
+    <div class="card-block" style="margin-top:16px">
+      <div class="section-title">Histórico de etapas</div>
+      <div class="tl-wrap">${tlHtml}</div>
+    </div>
+
+    ${c.status === 'cs_ativo' ? `
+    <div style="background:var(--b-orange-bg);border:1px solid #fed7aa;border-radius:var(--radius);padding:14px 16px;margin-top:16px">
+      <div style="font-size:10px;font-weight:700;color:var(--text4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Histórico de ciclo de vida</div>
+      <div style="display:flex;gap:24px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:10px;color:var(--text3)">Início da implantação</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text)">${c.dataInicioImplantacao ? new Date(c.dataInicioImplantacao).toLocaleDateString('pt-BR') : '—'}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3)">Entrada no CS</div>
+          <div style="font-size:13px;font-weight:700;color:var(--primary)">${c.dataInicioCS ? new Date(c.dataInicioCS).toLocaleDateString('pt-BR') : '—'}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3)">Tempo como cliente</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text)">${tempoComoCliente(c.dataInicioImplantacao)}</div>
         </div>
       </div>
-      <div>
-        <div class="card-block">
-          <div class="section-title">Registros</div>
-          <div id="regs-${c.id}">${regsHtml}</div>
-          <div class="reg-form">
-            <textarea id="reg-input-${c.id}" placeholder="Adicionar anotação..."></textarea>
-            <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="addRegistro('${c.id}')">Salvar registro</button>
-          </div>
-        </div>
-        <div class="card-block" style="margin-top:16px">
-          <div class="section-title">Histórico de etapas</div>
-          <div class="tl-wrap">${tlHtml}</div>
-        </div>
-      </div>
+    </div>` : ''}`;
+}
+
+function renderAbaAtividades(c) {
+  const pbs  = c.ativPlaybooks || [];
+  const _hoje = new Date(); _hoje.setHours(0,0,0,0);
+
+  // Garante seleção válida
+  if (!_pb_sel_id || !pbs.find(function(p){return p.id===_pb_sel_id;})) {
+    _pb_sel_id = pbs.length > 0 ? pbs[0].id : null;
+  }
+  const selPb = pbs.find(function(p){return p.id===_pb_sel_id;}) || null;
+
+  // ── Coluna esquerda: lista de playbooks ──────────────
+  const pbCards = pbs.map(function(pb) {
+    const total   = (pb.atividades||[]).length;
+    const done    = (pb.atividades||[]).filter(function(a){return a.status==='concluida';}).length;
+    const venc    = (pb.atividades||[]).filter(function(a){
+      const dl = a.dataLimite ? new Date(a.dataLimite+'T00:00:00') : null;
+      return dl && dl < _hoje && a.status !== 'concluida';
+    }).length;
+    const pct     = total ? Math.round(done/total*100) : 0;
+    const isSel   = pb.id === _pb_sel_id;
+    return `<div class="at-pb-card${isSel?' sel':''}" onclick="selecionarPb('${pb.id}','${c.id}')">
+      <div class="at-pb-card-name">${pb.nome}</div>
+      <div class="at-pb-card-meta">${total} atividade${total!==1?'s':''} · ${done} concluída${done!==1?'s':''}${venc>0?' · <span style="color:var(--red);font-weight:700">'+venc+' vencida'+(venc>1?'s':'')+'</span>':''}</div>
+      <div class="at-pb-bar"><div class="at-pb-bar-fill${pct===100?' done':''}" style="width:${pct}%"></div></div>
     </div>`;
+  }).join('');
+
+  const newPbFormHtml = _pb_form_open
+    ? `<div class="pb-inline-form">
+        <input class="pb-inline-input" id="pb-nome-input" placeholder="Nome do playbook..." onkeydown="if(event.key==='Enter')criarAtivPlaybook('${c.id}')">
+        <button class="btn btn-primary btn-sm" onclick="criarAtivPlaybook('${c.id}')">Criar</button>
+        <button class="btn btn-sm" onclick="cancelarFormPlaybook('${c.id}')">✕</button>
+       </div>`
+    : `<button class="pb-add-btn" onclick="abrirFormPlaybook('${c.id}')">+ Novo Playbook</button>`;
+
+  const leftHtml = `
+    <div class="at-left-label">PLAYBOOKS</div>
+    ${pbCards}
+    ${!pbs.length ? '<div style="padding:20px;text-align:center;color:var(--text4);font-size:12px">Nenhum playbook ainda.</div>' : ''}
+    ${newPbFormHtml}`;
+
+  // ── Coluna direita: atividades do playbook selecionado ──
+  let rightHtml = '';
+  if (!selPb) {
+    rightHtml = `<div class="at-empty" style="height:300px"><div style="font-size:28px">📋</div><div>Selecione um playbook à esquerda.</div></div>`;
+  } else {
+    const stLbl = {concluida:'Concluída',atrasada:'Atrasada',pendente:'Pendente',em_andamento:'Em andamento'};
+    const ativs = selPb.atividades || [];
+
+    const rowsHtml = ativs.map(function(at) {
+      const done  = at.status === 'concluida';
+      const dl    = at.dataLimite ? new Date(at.dataLimite+'T00:00:00') : null;
+      const late  = dl && dl < _hoje && !done;
+      const diasR = dl ? Math.round((dl - _hoje)/864e5) : null;
+      const prox  = dl && !late && !done && diasR <= 7;
+      const st    = done ? 'concluida' : (late ? 'atrasada' : (at.status||'pendente'));
+      const resp  = at.responsavelId || selPb.donoId || '';
+      let slaTxt  = '';
+      if (late)      slaTxt = `<span style="font-size:9px;background:#FFF5F5;color:var(--red);border-radius:4px;padding:1px 5px;font-weight:700">${Math.abs(diasR)}d atrás</span>`;
+      else if (prox) slaTxt = `<span style="font-size:9px;background:#FFFFF0;color:var(--yellow);border-radius:4px;padding:1px 5px;font-weight:700">${diasR}d</span>`;
+      return `<div class="at-row-new" onclick="openAtividade('${c.id}','${selPb.id}','${at.id}')">
+        <div class="at-checkbox${done?' done':''}">${done?'✓':''}</div>
+        <span class="at-row-name${done?' done':''}">${at.nome}</span>
+        <div class="at-row-right">
+          ${slaTxt}
+          ${resp ? '<span class="at-row-resp">'+resp+'</span>' : ''}
+          <span class="at-status-${st}">${stLbl[st]||st}</span>
+        </div>
+      </div>`;
+    }).join('');
+
+    const addFormHtml = _at_form_pb === selPb.id
+      ? `<div class="pb-inline-form" style="padding:10px 20px;flex-shrink:0">
+          <input class="pb-inline-input" id="at-nome-input-${selPb.id}" placeholder="Nome da atividade..." onkeydown="if(event.key==='Enter')criarAtividade('${selPb.id}','${c.id}')" style="flex:1">
+          <input type="number" id="at-sla-input-${selPb.id}" value="15" min="1" max="365" style="width:52px;padding:6px 6px;border:1px solid var(--border);border-radius:6px;font-size:12px" title="Prazo em dias">
+          <span style="font-size:11px;color:var(--text3);white-space:nowrap">dias</span>
+          <button class="btn btn-primary btn-sm" onclick="criarAtividade('${selPb.id}','${c.id}')">Criar</button>
+          <button class="btn btn-sm" onclick="cancelarFormAtividade('${c.id}')">✕</button>
+         </div>` : '';
+
+    rightHtml = `
+      <div class="at-right-hd">
+        <div class="at-right-title">${selPb.nome}</div>
+        ${selPb.encerrado
+          ? '<span style="font-size:10px;padding:3px 8px;background:var(--border-2);color:var(--text3);border-radius:6px">Encerrado</span>'
+          : '<button class="btn btn-primary btn-sm" onclick="abrirFormAtividade(\''+selPb.id+'\',\''+c.id+'\')">+ Atividade</button>'}
+      </div>
+      ${rowsHtml}
+      ${addFormHtml}
+      ${!ativs.length && !addFormHtml ? '<div class="at-empty" style="height:200px"><div style="font-size:28px">📋</div><div>Nenhuma atividade.<br>Adicione a primeira acima.</div></div>' : ''}`;
+  }
+
+  return `<div class="at-cols">
+    <div class="at-left-col">${leftHtml}</div>
+    <div class="at-right-col">${rightHtml}</div>
+  </div>`;
+}
+
+function toggleAtivPlaybook(pbId, clienteId) {
+  _pb_expandidos[pbId] = !_pb_expandidos[pbId];
+  renderCliente(clienteId);
+}
+
+function selecionarAtividade(pbId, atId, clienteId) {
+  _pb_expandidos[pbId] = true;
+  _at_sel = atId;
+  renderCliente(clienteId);
+}
+
+function selecionarPb(pbId, clienteId) {
+  _pb_sel_id  = pbId;
+  _at_form_pb = null;
+  renderCliente(clienteId);
+}
+
+function abrirFormPlaybook(clienteId) {
+  _pb_form_open = true;
+  renderCliente(clienteId);
+}
+
+function cancelarFormPlaybook(clienteId) {
+  _pb_form_open = false;
+  renderCliente(clienteId);
+}
+
+function abrirFormAtividade(pbId, clienteId) {
+  _at_form_pb = pbId;
+  renderCliente(clienteId);
+}
+
+function cancelarFormAtividade(clienteId) {
+  _at_form_pb = null;
+  renderCliente(clienteId);
+}
+
+function criarAtivPlaybook(clienteId) {
+  const input = document.getElementById('pb-nome-input');
+  const nome  = input?.value?.trim();
+  if (!nome) return;
+  const c  = getCliente(clienteId);
+  const id = 'pb_' + Date.now();
+  c.ativPlaybooks = c.ativPlaybooks || [];
+  c.ativPlaybooks.push({id, nome, donoId: getConsultorAtivo(), criadoEm: new Date().toISOString(), atividades: []});
+  saveCliente(c);
+  _pb_form_open = false;
+  _pb_sel_id    = id;
+  renderCliente(clienteId);
+}
+
+function criarAtividade(pbId, clienteId) {
+  const input    = document.getElementById('at-nome-input-' + pbId);
+  const slaInput = document.getElementById('at-sla-input-' + pbId);
+  const nome     = input?.value?.trim();
+  if (!nome) return;
+  const c  = getCliente(clienteId);
+  const pb = (c.ativPlaybooks || []).find(p => p.id === pbId);
+  if (!pb) return;
+  const slasDias  = parseInt(slaInput?.value || '15', 10) || 15;
+  const hoje      = new Date();
+  const dl        = new Date(hoje); dl.setDate(dl.getDate() + slasDias);
+  const dataLimite = dl.toISOString().split('T')[0];
+  const criadoEm  = hoje.toISOString();
+  const id = 'at_' + Date.now();
+  pb.atividades.push({id, nome, slasDias, dataLimite, criadoEm, status:'pendente', registros: [], checklist: [], anotacoes: []});
+  saveCliente(c);
+  _at_form_pb = null;
+  renderCliente(clienteId);
+  openAtividade(clienteId, pbId, id);
+}
+
+function addRegistroAtividade(clienteId, pbId, atId) {
+  const ta    = document.getElementById('at-reg-input');
+  const texto = ta?.value?.trim();
+  if (!texto) return;
+  const c     = getCliente(clienteId);
+  const pb    = (c.ativPlaybooks || []).find(p => p.id === pbId);
+  if (!pb) return;
+  const at    = pb.atividades.find(a => a.id === atId);
+  if (!at) return;
+  const ativo = getConsultorAtivo();
+  const autor = getConsultores().find(x => x.id === ativo)?.nome || 'Consultor';
+  at.registros.unshift({id:'reg_'+Date.now(), autor, data: new Date().toISOString(), texto});
+  saveCliente(c);
+  renderCliente(clienteId);
+}
+
+// ═══════════════════════════════════════════════════════════
+// OVERLAY DE ATIVIDADE
+// ═══════════════════════════════════════════════════════════
+let _ov_cId = null, _ov_pbId = null, _ov_atId = null;
+
+function openAtividade(cId, pbId, atId) {
+  _ov_cId = cId; _ov_pbId = pbId; _ov_atId = atId;
+  const c  = getCliente(cId);
+  const pb = (c?.ativPlaybooks || []).find(p => p.id === pbId);
+  const at = (pb?.atividades || []).find(a => a.id === atId);
+  if (!at) return;
+
+  document.getElementById('ov-titulo').textContent = at.nome || at.titulo || '—';
+
+  const stBg  = {concluida:'var(--b-green-bg)',atrasada:'var(--b-red-bg)',pendente:'var(--border-2)',em_andamento:'var(--b-blue-bg)'};
+  const stClr = {concluida:'var(--green)',atrasada:'var(--red)',pendente:'var(--text3)',em_andamento:'var(--blue)'};
+  const stLbl = {concluida:'Concluída',atrasada:'Atrasada',pendente:'Pendente',em_andamento:'Em andamento'};
+  const resp  = at.responsavelId || pb.donoId || '?';
+  const st    = at.status || 'pendente';
+
+  document.getElementById('ov-meta').innerHTML =
+    '<span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)">' +
+      '<span style="width:20px;height:20px;border-radius:5px;background:linear-gradient(135deg,var(--primary),#ff8c5a);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff">' +
+        resp[0].toUpperCase() +
+      '</span>' +
+      resp +
+    '</span>' +
+    '<span class="status-badge" style="background:' + (stBg[st]||'var(--border-2)') + ';color:' + (stClr[st]||'var(--text3)') + '">' +
+      (stLbl[st]||st) +
+    '</span>';
+
+  // Datas de início e fim
+  const diInput = document.getElementById('ov-data-inicio');
+  const dfInput = document.getElementById('ov-data-fim');
+  if (diInput) diInput.value = at.dataInicio ? at.dataInicio.split('T')[0] : '';
+  if (dfInput) dfInput.value = at.dataLimite ? at.dataLimite.split('T')[0] : '';
+
+  // Botão Concluir
+  const btnC = document.getElementById('ov-btn-concluir');
+  if (btnC) {
+    if (at.status === 'concluida') {
+      btnC.textContent = '✓ Concluída';
+      btnC.classList.add('done');
+      btnC.onclick = null;
+    } else {
+      btnC.textContent = '✓ Marcar como Concluída';
+      btnC.classList.remove('done');
+      btnC.onclick = concluirAtividade;
+    }
+  }
+
+  const dlWrap = document.getElementById('ov-deadline-wrap');
+  const dlSpan = document.getElementById('ov-deadline');
+  if (dlWrap && dlSpan) {
+    if (at.dataLimite && at.status !== 'concluida') {
+      const hoje2 = new Date(); hoje2.setHours(0,0,0,0);
+      const dlDate = new Date(at.dataLimite + 'T00:00:00');
+      const diffMs = dlDate - hoje2;
+      const diffD  = Math.round(diffMs / 86400000);
+      const ddmm   = dlDate.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'});
+      if (diffD < 0) {
+        dlSpan.innerHTML = '<span style="color:var(--red)">⏰ Vencida há ' + Math.abs(diffD) + ' dia' + (Math.abs(diffD)!==1?'s':'') + ' · ' + ddmm + '</span>';
+      } else if (diffD === 0) {
+        dlSpan.innerHTML = '<span style="color:#d69e2e">⚠️ Vence hoje · ' + ddmm + '</span>';
+      } else if (diffD <= 7) {
+        dlSpan.innerHTML = '<span style="color:#d69e2e">⚠️ Vence em ' + diffD + ' dia' + (diffD!==1?'s':'') + ' · ' + ddmm + '</span>';
+      } else {
+        dlSpan.innerHTML = '<span style="color:var(--text3)">📅 Prazo: ' + ddmm + ' (' + diffD + ' dias)</span>';
+      }
+      dlWrap.style.display = '';
+    } else {
+      dlWrap.style.display = 'none';
+    }
+  }
+
+  document.querySelectorAll('.ov-tab').forEach(function(t, i) { t.classList.toggle('active', i === 0); });
+  renderOverlayTab('registro');
+  document.getElementById('ov-backdrop').classList.add('open');
+  document.getElementById('ov-panel').classList.add('open');
+}
+
+function closeAtividade() {
+  document.getElementById('ov-backdrop').classList.remove('open');
+  document.getElementById('ov-panel').classList.remove('open');
+  _ov_cId = _ov_pbId = _ov_atId = null;
+}
+
+function setOverlayTab(tab, el) {
+  document.querySelectorAll('.ov-tab').forEach(function(t) { t.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  renderOverlayTab(tab);
+}
+
+function renderOverlayTab(tab) {
+  const body = document.getElementById('ov-body');
+  if (!body) return;
+  if (tab === 'registro')  body.innerHTML = renderOvRegistro();
+  if (tab === 'checklist') body.innerHTML = renderOvChecklist();
+  if (tab === 'anotacao')  body.innerHTML = renderOvAnotacao();
+}
+
+function _getOvAt() {
+  const c  = getCliente(_ov_cId);
+  const pb = (c?.ativPlaybooks || []).find(p => p.id === _ov_pbId);
+  const at = (pb?.atividades || []).find(a => a.id === _ov_atId);
+  return { c, pb, at };
+}
+
+function renderOvRegistro() {
+  const { c, pb, at } = _getOvAt();
+  if (!at) return '';
+  const cid  = getConsultorAtivo();
+  const regs = at.registros || [];
+  const itens = regs.map(function(r) {
+    if (r.tipo === 'evento') {
+      return '<div class="ov-reg-event">' +
+        '<span class="ov-reg-dot" style="background:var(--green)"></span>' +
+        r.texto +
+        '<span style="margin-left:auto;font-size:10px;color:var(--text4)">' + (r.data || '') + '</span>' +
+      '</div>';
+    }
+    const d = r.data ? (typeof r.data === 'string' && r.data.includes('T')
+      ? new Date(r.data).toLocaleDateString('pt-BR') + ' · ' + new Date(r.data).getHours() + 'h' + String(new Date(r.data).getMinutes()).padStart(2,'0')
+      : r.data) : '';
+    return '<div class="ov-reg-item">' +
+      '<div class="ov-reg-iav" style="background:linear-gradient(135deg,var(--primary),#ff8c5a)">' + (r.autor||'?')[0].toUpperCase() + '</div>' +
+      '<div class="ov-reg-ibody">' +
+        '<div style="display:flex;justify-content:space-between">' +
+          '<div class="ov-reg-iwho">' + (r.autor||'—') + '</div>' +
+          '<div class="ov-reg-iwhen">' + d + '</div>' +
+        '</div>' +
+        '<div class="ov-reg-itext">' + (r.texto||'') + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  return '<div class="ov-reg-form">' +
+    '<div class="ov-reg-av">' + cid[0].toUpperCase() + '</div>' +
+    '<div class="ov-reg-wrap">' +
+      '<textarea class="ov-reg-ta" id="ov-reg-input" placeholder="Adicionar registro..."></textarea>' +
+      '<button class="ov-reg-send" onclick="addOvRegistro()">Registrar</button>' +
+    '</div>' +
+  '</div>' +
+  (itens || '<p style="font-size:12px;color:var(--text4);text-align:center;padding:20px">Nenhum registro ainda.</p>');
+}
+
+function addOvRegistro() {
+  const texto = document.getElementById('ov-reg-input')?.value?.trim();
+  if (!texto) return;
+  const { c, at } = _getOvAt();
+  if (!at) return;
+  if (!at.registros) at.registros = [];
+  const ativo = getConsultorAtivo();
+  const autor = getConsultores().find(x => x.id === ativo)?.nome || ativo;
+  at.registros.unshift({ id:'reg_'+Date.now(), autor, tipo:'manual', data: new Date().toISOString(), texto });
+  saveCliente(c);
+  renderOverlayTab('registro');
+}
+
+function saveOvDatas() {
+  const { c, at } = _getOvAt();
+  if (!at) return;
+  const di = document.getElementById('ov-data-inicio')?.value;
+  const df = document.getElementById('ov-data-fim')?.value;
+  if (di !== undefined) at.dataInicio  = di || null;
+  if (df !== undefined) at.dataLimite  = df || null;
+  saveCliente(c);
+  // Atualiza badge de deadline sem fechar o overlay
+  const dlWrap = document.getElementById('ov-deadline-wrap');
+  const dlSpan = document.getElementById('ov-deadline');
+  if (dlWrap && dlSpan) {
+    if (at.dataLimite && at.status !== 'concluida') {
+      const h = new Date(); h.setHours(0,0,0,0);
+      const d = new Date(at.dataLimite + 'T00:00:00');
+      const dd = Math.round((d - h) / 86400000);
+      const ddmm = d.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'});
+      if (dd < 0)      dlSpan.innerHTML = '<span style="color:var(--red)">⏰ Vencida há ' + Math.abs(dd) + ' dia' + (Math.abs(dd)!==1?'s':'') + ' · ' + ddmm + '</span>';
+      else if (dd===0) dlSpan.innerHTML = '<span style="color:#d69e2e">⚠️ Vence hoje · ' + ddmm + '</span>';
+      else if (dd<=7)  dlSpan.innerHTML = '<span style="color:#d69e2e">⚠️ Vence em ' + dd + ' dia' + (dd!==1?'s':'') + ' · ' + ddmm + '</span>';
+      else             dlSpan.innerHTML = '<span style="color:var(--text3)">📅 Prazo: ' + ddmm + ' (' + dd + ' dias)</span>';
+      dlWrap.style.display = '';
+    } else {
+      dlWrap.style.display = 'none';
+    }
+  }
+}
+
+function concluirAtividade() {
+  const { c, pb, at } = _getOvAt();
+  if (!at || at.status === 'concluida') return;
+  at.status = 'concluida';
+  at.dataConclusao = new Date().toISOString();
+  if (!at.registros) at.registros = [];
+  const ativo = getConsultorAtivo();
+  const cons  = getConsultores().find(function(x) { return x.id === ativo; });
+  const autor = cons?.nome || ativo;
+  at.registros.unshift({ id:'reg_'+Date.now(), tipo:'evento', texto: autor + ' marcou como Concluída', data: new Date().toISOString() });
+  saveCliente(c);
+  // Atualiza a tela de fundo (progresso do playbook)
+  if (typeof renderCliente === 'function') renderCliente(_ov_cId);
+  // Re-abre o overlay para refletir o novo estado
+  openAtividade(_ov_cId, _ov_pbId, _ov_atId);
+}
+
+function renderOvChecklist() {
+  const { c, at } = _getOvAt();
+  if (!at) return '';
+  const items = at.checklist || [];
+  const feitos = items.filter(function(i) { return i.done; }).length;
+  const pct    = items.length ? Math.round(feitos / items.length * 100) : 0;
+  const lista  = items.map(function(item, idx) {
+    return '<div class="ov-cl-item">' +
+      '<div class="ov-cl-check' + (item.done ? ' done' : '') + '" onclick="toggleOvChecklist(' + idx + ')">' + (item.done ? '✓' : '') + '</div>' +
+      '<span class="ov-cl-lbl' + (item.done ? ' done' : '') + '">' + item.texto + '</span>' +
+    '</div>';
+  }).join('');
+  return '<div style="font-size:11px;color:var(--text4);margin-bottom:8px">' + feitos + ' de ' + items.length + ' itens concluídos</div>' +
+    '<div style="width:100%;height:4px;background:var(--border);border-radius:2px;margin-bottom:16px;overflow:hidden">' +
+      '<div style="width:' + pct + '%;height:100%;background:var(--green);border-radius:2px"></div>' +
+    '</div>' +
+    lista +
+    '<div style="margin-top:10px;display:flex;gap:8px">' +
+      '<input id="ov-cl-novo" type="text" placeholder="Novo item..." ' +
+        'style="flex:1;border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:12px;outline:none" ' +
+        'onkeydown="if(event.key===\'Enter\')addOvChecklistItem()"/>' +
+      '<button onclick="addOvChecklistItem()" style="padding:7px 12px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer">+</button>' +
+    '</div>';
+}
+
+function toggleOvChecklist(idx) {
+  const { c, at } = _getOvAt();
+  if (!at?.checklist?.[idx]) return;
+  at.checklist[idx].done = !at.checklist[idx].done;
+  saveCliente(c);
+  renderOverlayTab('checklist');
+}
+
+function addOvChecklistItem() {
+  const input = document.getElementById('ov-cl-novo');
+  const texto = input?.value?.trim();
+  if (!texto) return;
+  const { c, at } = _getOvAt();
+  if (!at) return;
+  if (!at.checklist) at.checklist = [];
+  at.checklist.push({ id:'cl_'+Date.now(), texto, done:false });
+  saveCliente(c);
+  renderOverlayTab('checklist');
+}
+
+function renderOvAnotacao() {
+  const { c, at } = _getOvAt();
+  if (!at) return '';
+  const notas = (at.anotacoes || []).map(function(n) {
+    return '<div class="ov-ano-card">' +
+      '<div class="ov-ano-date">' + (n.data||'') + ' · ' + (n.autor||'') + '</div>' +
+      '<div class="ov-ano-text">' + (n.texto||'') + '</div>' +
+    '</div>';
+  }).join('');
+  return '<div class="ov-ano-form">' +
+    '<textarea class="ov-ano-ta" id="ov-ano-input" placeholder="Escreva uma anotação privada..."></textarea>' +
+    '<div style="text-align:right;margin-top:6px">' +
+      '<button onclick="addOvAnotacao()" style="padding:6px 14px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">Salvar</button>' +
+    '</div>' +
+  '</div>' +
+  (notas || '<p style="font-size:12px;color:var(--text4);text-align:center;padding:20px">Nenhuma anotação ainda.</p>');
+}
+
+function addOvAnotacao() {
+  const texto = document.getElementById('ov-ano-input')?.value?.trim();
+  if (!texto) return;
+  const { c, at } = _getOvAt();
+  if (!at) return;
+  if (!at.anotacoes) at.anotacoes = [];
+  const ativo = getConsultorAtivo();
+  const autor = getConsultores().find(x => x.id === ativo)?.nome || ativo;
+  at.anotacoes.unshift({ id:'ano_'+Date.now(), autor, data: new Date().toLocaleDateString('pt-BR'), texto });
+  saveCliente(c);
+  renderOverlayTab('anotacao');
+}
+
+function renderAbaNotas(c) {
+  const regsHtml = c.registros.length
+    ? c.registros.map(r => `
+      <div class="at-reg-item">
+        <div class="at-reg-meta">${r.autor} · ${fmtDateTime(r.data)}</div>
+        <div class="at-reg-text">${r.texto}</div>
+      </div>`).join('')
+    : `<div style="color:var(--text3);font-size:13px;padding:16px 0">Nenhuma nota ainda.</div>`;
+
+  return `<div class="card-block">
+    <div class="section-title">Notas</div>
+    <div id="regs-${c.id}">${regsHtml}</div>
+    <div class="reg-form at-write">
+      <textarea id="reg-input-${c.id}" placeholder="Adicionar anotação..." style="width:100%;min-height:90px;padding:10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;resize:vertical;box-sizing:border-box"></textarea>
+      <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="addRegistro('${c.id}')">Salvar nota</button>
+    </div>
+  </div>`;
 }
 
 function toggleFase(idx) {
@@ -1931,6 +3495,43 @@ function toggleFase(idx) {
   const chevs  = document.querySelectorAll('#sec-cliente .phase-chev');
   if (bodies[idx]) bodies[idx].classList.toggle('open');
   if (chevs[idx])  chevs[idx].classList.toggle('open');
+}
+
+function checkImplantacaoConcluida(clienteId) {
+  const c = getCliente(clienteId);
+  if (!c || c.status === 'cs_ativo') return;
+  const cid     = getConsultorAtivo();
+  const pbsImpl = (c.ativPlaybooks || []).filter(function(pb) { return pb.fase === 'implantacao' && pb.donoId === cid; });
+  if (!pbsImpl.length) return;
+  const todas = pbsImpl.flatMap(function(pb) { return pb.atividades || []; });
+  if (!todas.length || !todas.every(function(a) { return a.status === 'concluida'; })) return;
+
+  showToast(
+    '🎉 Implantação concluída! ' +
+    '<button onclick="confirmarCSAtivo(\'' + clienteId + '\')" ' +
+    'style="margin-left:8px;padding:3px 10px;background:#fff;color:var(--green);border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:11px">Mover para CS Ativo</button>',
+    7000
+  );
+}
+
+function confirmarCSAtivo(clienteId) {
+  const c = getCliente(clienteId);
+  if (!c) return;
+  c.status       = 'cs_ativo';
+  c.dataInicioCS = new Date().toISOString();
+  if (!c.historicoEtapas) c.historicoEtapas = [];
+  c.historicoEtapas.push({
+    etapa: 'cs_ativo', autor: getConsultorAtivo(),
+    data:  new Date().toISOString(), tipo: 'evento',
+    texto: 'Implantação encerrada — cliente movido para CS Ativo',
+  });
+  (c.ativPlaybooks || []).forEach(function(pb) {
+    if (pb.fase === 'implantacao') pb.encerrado = true;
+  });
+  saveCliente(c);
+  showToast('✅ ' + (c.id || clienteId) + ' agora está em CS Ativo!', 3000);
+  if (_cliente_id_atual === clienteId) renderCliente(clienteId);
+  else renderCarteira();
 }
 
 function checkTask(clienteId, faseIdx, tarefaId) {
@@ -1976,6 +3577,7 @@ function checkTask(clienteId, faseIdx, tarefaId) {
         }
       }
     }
+    checkImplantacaoConcluida(clienteId);
   }
 }
 
