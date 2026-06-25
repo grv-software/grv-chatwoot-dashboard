@@ -2279,61 +2279,35 @@ let _pb_form_open     = false;
 let _at_form_pb       = null;
 
 function renderCliente(id) {
-  const c   = getCliente(id);
   const sec = document.getElementById('sec-cliente');
+  const c   = getCliente(id);
 
   if (!c) {
     sec.innerHTML = `<div class="empty-state"><div class="es-icon">❓</div><div class="es-text">Cliente não encontrado.</div></div>`;
     return;
   }
 
-  const prog   = getProgresso(c);
+  if (id !== _cliente_id_atual) {
+    _cliente_id_atual = id;
+    _cliente_aba      = '360';
+    _pb_expandidos    = {};
+    _at_sel           = null;
+    _pb_form_open     = false;
+    _at_form_pb       = null;
+    if (c.ativPlaybooks && c.ativPlaybooks.length > 0) {
+      _pb_expandidos[c.ativPlaybooks[0].id] = true;
+    }
+  }
+
   const status = getStatus(c);
   const dias   = getDiasNaEtapa(c);
   const consul = getConsultores().find(x => x.id === c.consultorId)?.nome || c.consultorId;
 
-  const fasesHtml = c.fases.map((f, fi) => {
-    const feitas = f.tarefas.filter(t => t.feita).length;
-    const isOpen = _open_fases[fi] !== false;
-    return `<div class="phase-row">
-      <div class="phase-hdr" onclick="toggleFase(${fi})">
-        <div class="phase-hdr-left">
-          <span class="phase-name">${f.nome}</span>
-          <span class="phase-ct">${feitas}/${f.tarefas.length}</span>
-        </div>
-        <span class="phase-chev${isOpen?' open':''}">▶</span>
-      </div>
-      <div class="phase-body${isOpen?' open':''}">
-        ${f.tarefas.map(t => `
-          <div class="task-item${t.feita?' done':''}" id="ti_${t.id}">
-            <input type="checkbox" id="ck_${t.id}"${t.feita?' checked':''}
-              onchange="checkTask('${c.id}',${fi},'${t.id}')">
-            <label for="ck_${t.id}">${t.texto}</label>
-          </div>`).join('')}
-      </div>
-    </div>`;
-  }).join('');
-
-  const regsHtml = c.registros.length
-    ? c.registros.map(r => `
-      <div class="reg-item">
-        <div class="reg-meta"><strong>${r.autor}</strong> · ${fmtDateTime(r.data)}</div>
-        <div class="reg-text">${r.texto}</div>
-      </div>`).join('')
-    : `<div style="color:var(--text3);font-size:13px;padding:8px 0">Nenhum registro ainda.</div>`;
-
-  const tlHtml = c.historicoEtapas.map(h => {
-    const label = h.de
-      ? `${h.de} → <strong style="color:var(--primary)">${h.para}</strong>`
-      : `→ <strong style="color:var(--primary)">${h.para}</strong>`;
-    return `<div class="tl-item">
-      <div class="tl-dot"></div>
-      <div class="tl-body">
-        ${label}
-        <div class="tl-meta">${fmtDateTime(h.data)} · ${h.motivo}</div>
-      </div>
-    </div>`;
-  }).join('');
+  const abaContent = _cliente_aba === '360'
+    ? renderAba360(c)
+    : _cliente_aba === 'atividades'
+    ? renderAbaAtividades(c)
+    : renderAbaNotas(c);
 
   sec.innerHTML = `
     <a class="back-link" href="#carteira">← Voltar à carteira</a>
@@ -2360,33 +2334,98 @@ function renderCliente(id) {
       </div>
     </div>
 
-    <div class="detail-layout">
-      <div>
-        <div class="card-block">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <div class="section-title" style="margin-bottom:0">Playbook</div>
-            <span id="prog-pct-${c.id}" style="font-size:15px;font-weight:700;color:var(--primary)">${prog}%</span>
-          </div>
-          <div class="prog-wrap" style="height:8px;margin-bottom:18px">
-            <div class="prog-fill" id="prog-bar-${c.id}" style="width:${prog}%"></div>
-          </div>
-          ${fasesHtml}
+    <div class="cliente-tabs">
+      <button class="cliente-tab${_cliente_aba==='360'?' active':''}" onclick="setClienteAba('360','${c.id}')">Visão 360°</button>
+      <button class="cliente-tab${_cliente_aba==='atividades'?' active':''}" onclick="setClienteAba('atividades','${c.id}')">Atividades</button>
+      <button class="cliente-tab${_cliente_aba==='notas'?' active':''}" onclick="setClienteAba('notas','${c.id}')">Notas</button>
+    </div>
+
+    ${abaContent}`;
+}
+
+function setClienteAba(aba, clienteId) {
+  _cliente_aba = aba;
+  renderCliente(clienteId);
+}
+
+function renderAba360(c) {
+  const prog          = getProgresso(c);
+  const csNome        = getConsultores().find(x => x.id === c.csId)?.nome || '—';
+  const consultorNome = getConsultores().find(x => x.id === c.consultorId)?.nome || c.consultorId;
+
+  const fasesHtml = c.fases.map((f, fi) => {
+    const feitas = f.tarefas.filter(t => t.feita).length;
+    const isOpen = _open_fases[fi] !== false;
+    return `<div class="phase-row">
+      <div class="phase-hdr" onclick="toggleFase(${fi})">
+        <div class="phase-hdr-left">
+          <span class="phase-name">${f.nome}</span>
+          <span class="phase-ct">${feitas}/${f.tarefas.length}</span>
         </div>
+        <span class="phase-chev${isOpen?' open':''}">▶</span>
       </div>
-      <div>
-        <div class="card-block">
-          <div class="section-title">Registros</div>
-          <div id="regs-${c.id}">${regsHtml}</div>
-          <div class="reg-form">
-            <textarea id="reg-input-${c.id}" placeholder="Adicionar anotação..."></textarea>
-            <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="addRegistro('${c.id}')">Salvar registro</button>
-          </div>
-        </div>
-        <div class="card-block" style="margin-top:16px">
-          <div class="section-title">Histórico de etapas</div>
-          <div class="tl-wrap">${tlHtml}</div>
-        </div>
+      <div class="phase-body${isOpen?' open':''}">
+        ${f.tarefas.map(t => `
+          <div class="task-item${t.feita?' done':''}" id="ti_${t.id}">
+            <input type="checkbox" id="ck_${t.id}"${t.feita?' checked':''}
+              onchange="checkTask('${c.id}',${fi},'${t.id}')">
+            <label for="ck_${t.id}">${t.texto}</label>
+          </div>`).join('')}
       </div>
+    </div>`;
+  }).join('');
+
+  const tlHtml = c.historicoEtapas.map(h => {
+    const label = h.de
+      ? `${h.de} → <strong style="color:var(--primary)">${h.para}</strong>`
+      : `→ <strong style="color:var(--primary)">${h.para}</strong>`;
+    return `<div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-body">
+        ${label}
+        <div class="tl-meta">${fmtDateTime(h.data)} · ${h.motivo}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="grid-360">
+      <div class="card-360">
+        <div class="c360-label">Segmento</div>
+        <div class="c360-value">${c.segmento || '—'}</div>
+      </div>
+      <div class="card-360">
+        <div class="c360-label">CS Responsável</div>
+        <div class="c360-value">${csNome}</div>
+      </div>
+      <div class="card-360">
+        <div class="c360-label">Consultor Digital</div>
+        <div class="c360-value">${consultorNome}</div>
+      </div>
+      <div class="card-360">
+        <div class="c360-label">% Implantação</div>
+        <div class="c360-value">${prog}%</div>
+        <div class="c360-prog"><div class="c360-prog-fill" style="width:${prog}%"></div></div>
+      </div>
+    </div>
+
+    <div class="card-block">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="section-title" style="margin-bottom:0">Playbook de Implantação</div>
+        <span id="prog-pct-${c.id}" style="font-size:15px;font-weight:700;color:var(--primary)">${prog}%</span>
+      </div>
+      <div class="prog-wrap" style="height:8px;margin-bottom:12px">
+        <div class="prog-fill" id="prog-bar-${c.id}" style="width:${prog}%"></div>
+      </div>
+      <div style="margin-bottom:16px">
+        <a href="#" onclick="setClienteAba('atividades','${c.id}');return false;" style="font-size:12px;color:var(--primary);text-decoration:none;font-weight:600">Ver Atividades →</a>
+      </div>
+      ${fasesHtml}
+    </div>
+
+    <div class="card-block" style="margin-top:16px">
+      <div class="section-title">Histórico de etapas</div>
+      <div class="tl-wrap">${tlHtml}</div>
     </div>`;
 }
 
