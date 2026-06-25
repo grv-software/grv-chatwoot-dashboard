@@ -30,19 +30,19 @@ Cliente
   ├── dataInicioCS (null enquanto em implantação)
   ├── csat (média das avaliações)
   ├── Notas[] (registro livre, histórico)
-  └── Playbooks[]
+  └── ativPlaybooks[]            ← nome canônico; mantém compatibilidade com v3
         ├── id, titulo
         ├── donoId (consultor que criou/é responsável)
         ├── fase: 'implantacao' | 'cs'
         ├── progresso (calculado das atividades)
-        └── Atividades[]
+        └── atividades[]
               ├── id, titulo
               ├── responsavelId (pode ser diferente do dono do playbook)
               ├── status: 'pendente' | 'em_andamento' | 'concluida' | 'atrasada'
               ├── dataLimite
-              ├── Registros[]    ← log de atualizações (quem, quando, texto)
-              ├── Checklist[]    ← sub-itens com done:boolean
-              └── Anotacoes[]    ← notas privadas do responsável
+              ├── registros[]    ← log de atualizações (quem, quando, texto)
+              ├── checklist[]    ← sub-itens com done:boolean
+              └── anotacoes[]    ← notas privadas do responsável
 ```
 
 ### Regra de Minha Carteira
@@ -138,12 +138,31 @@ Clicar no card navega para o detalhe do cliente.
 
 #### 2b. View Kanban
 
-Colunas por fase do playbook de implantação:
-1. 1ª Reunião
-2. Implantação
-3. Evolução
-4. Conclusão
-5. CS Ativo *(clientes pós-implantação)*
+Colunas fixas (ordem fixa, da esquerda para a direita):
+
+| Coluna | Regra |
+|---|---|
+| 1ª Reunião | `status === 'em_implantacao'` e progresso < 15% |
+| Implantação | `status === 'em_implantacao'` e 15% ≤ progresso < 50% |
+| Evolução | `status === 'em_implantacao'` e 50% ≤ progresso < 85% |
+| Conclusão | `status === 'em_implantacao'` e progresso ≥ 85% |
+| CS Ativo | `status === 'cs_ativo'` |
+
+Progresso calculado sobre o `ativPlaybook` de fase `'implantacao'` cujo `donoId === consultorAtivo`. Se o consultor não tem playbook de implantação, usa o primeiro `ativPlaybook` disponível.
+
+```javascript
+function getKanbanColuna(cliente, consultorId) {
+  if (cliente.status === 'cs_ativo') return 'CS Ativo';
+  const pb = (cliente.ativPlaybooks || []).find(
+    p => p.fase === 'implantacao' && p.donoId === consultorId
+  ) || (cliente.ativPlaybooks || [])[0];
+  const prog = calcProgresso(pb);
+  if (prog < 15)  return '1ª Reunião';
+  if (prog < 50)  return 'Implantação';
+  if (prog < 85)  return 'Evolução';
+  return 'Conclusão';
+}
+```
 
 Card Kanban:
 - Stripe colorida no topo (3px, border-radius top)
@@ -330,3 +349,5 @@ Visão gerencial de toda a equipe.
 - [x] Auto-advance adaptado: conclusão do playbook implantação → toast → `cs_ativo`
 - [x] `historicoEtapas` preservado como fonte de eventos automáticos no Registro
 - [x] Migração do seed: `donoId`, `registros[]`, `checklist[]`, `anotacoes[]`
+- [x] Array canônico `ativPlaybooks[]` — consistente com v3, usado em todo o spec
+- [x] `getKanbanColuna()` definida com regra explícita por faixas de progresso
