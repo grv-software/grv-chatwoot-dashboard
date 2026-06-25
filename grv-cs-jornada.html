@@ -341,6 +341,56 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .ov-tab{padding:8px 14px;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s}
 .ov-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
 .ov-body{flex:1;overflow-y:auto;padding:16px}
+.ov-footer{padding:12px 16px;border-top:1px solid var(--border-2);flex-shrink:0;background:var(--surface)}
+.ov-btn-concluir{width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .15s}
+.ov-btn-concluir:hover{opacity:.88}
+.ov-btn-concluir.done{background:var(--border-2);color:var(--text3);cursor:default}
+.ov-dates-row{display:flex;gap:10px;padding:8px 0 4px}
+
+/* ── Novo header do cliente ────────────────────────── */
+.dc-header{display:flex;align-items:center;gap:16px;padding:20px 0 18px}
+.dc-back{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--text3);flex-shrink:0;text-decoration:none}
+.dc-back:hover{background:var(--bg)}
+.dc-avatar-lg{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;flex-shrink:0}
+.dc-info{flex:1;min-width:0}
+.dc-name{font-size:20px;font-weight:800;color:var(--text);line-height:1.2}
+.dc-sub{font-size:12px;color:var(--text3);margin-top:3px}
+.dc-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.chip-status-atrasado{background:#FFF5F5;color:var(--red)}
+.chip-status-em_ordem{background:#F0FFF4;color:var(--green)}
+.chip-status-atencao{background:#FFFFF0;color:var(--yellow)}
+.chip-status-inicio{background:#EBF8FF;color:var(--blue)}
+.chip-base{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.chip-seg{background:var(--border-2);color:var(--text2)}
+.chip-prod{background:#FFF3EE;color:var(--primary)}
+
+/* ── Atividades: duas colunas ──────────────────────── */
+.at-cols{display:grid;grid-template-columns:240px 1fr;min-height:480px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.at-left-col{border-right:1px solid var(--border);background:#fafbfc;padding:12px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:5px}
+.at-left-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text4);padding:0 6px 4px}
+.at-pb-card{padding:10px 12px;border-radius:9px;border:1.5px solid transparent;cursor:pointer;background:var(--surface);transition:all .12s}
+.at-pb-card:hover{border-color:var(--border)}
+.at-pb-card.sel{border-color:var(--primary);background:#FFF3EE;box-shadow:0 0 0 3px rgba(224,90,30,.08)}
+.at-pb-card-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.at-pb-card-meta{font-size:10px;color:var(--text4);margin-bottom:6px}
+.at-pb-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.at-pb-bar-fill{height:100%;border-radius:2px;background:var(--primary);transition:width .3s}
+.at-pb-bar-fill.done{background:var(--green)}
+.at-right-col{overflow-y:auto;background:var(--surface);display:flex;flex-direction:column}
+.at-right-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border-2);flex-shrink:0;gap:10px}
+.at-right-title{font-size:14px;font-weight:800;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.at-row-new{display:flex;align-items:center;gap:10px;padding:11px 20px;border-bottom:1px solid var(--border-2);cursor:pointer;transition:background .1s}
+.at-row-new:hover{background:var(--bg)}
+.at-checkbox{width:17px;height:17px;border-radius:4px;border:1.5px solid #cbd5e0;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;font-weight:800}
+.at-checkbox.done{background:var(--green);border-color:var(--green);color:#fff}
+.at-row-name{font-size:13px;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.at-row-name.done{text-decoration:line-through;color:var(--text4)}
+.at-row-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.at-row-resp{font-size:11px;color:var(--text4)}
+.at-status-concluida{font-size:10px;font-weight:700;color:var(--green)}
+.at-status-atrasada{font-size:10px;font-weight:700;color:var(--red)}
+.at-status-pendente{font-size:10px;font-weight:700;color:var(--text3)}
+.at-status-em_andamento{font-size:10px;font-weight:700;color:var(--blue)}
 /* registro */
 .ov-reg-form{display:flex;gap:8px;margin-bottom:16px}
 .ov-reg-av{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--primary),#ff8c5a);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;margin-top:2px}
@@ -538,6 +588,19 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
       <div class="ov-close" onclick="closeAtividade()">✕</div>
     </div>
     <div class="ov-meta" id="ov-meta"></div>
+    <div id="ov-deadline-wrap" style="display:none;padding:4px 0 0;font-size:11px;font-weight:600">
+      <span id="ov-deadline"></span>
+    </div>
+    <div class="ov-dates-row">
+      <div style="flex:1">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text4);margin-bottom:3px">Início</div>
+        <input type="date" id="ov-data-inicio" onchange="saveOvDatas()" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:11px;color:var(--text);background:var(--bg);outline:none;cursor:pointer">
+      </div>
+      <div style="flex:1">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text4);margin-bottom:3px">Meta (fim)</div>
+        <input type="date" id="ov-data-fim" onchange="saveOvDatas()" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:11px;color:var(--text);background:var(--bg);outline:none;cursor:pointer">
+      </div>
+    </div>
     <div class="ov-tabs">
       <div class="ov-tab active" onclick="setOverlayTab('registro',this)">Registro</div>
       <div class="ov-tab" onclick="setOverlayTab('checklist',this)">Checklist</div>
@@ -545,6 +608,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
     </div>
   </div>
   <div class="ov-body" id="ov-body"></div>
+  <div class="ov-footer">
+    <button class="ov-btn-concluir" id="ov-btn-concluir" onclick="concluirAtividade()">✓ Marcar como Concluída</button>
+  </div>
 </div>
 
 <!-- ── TOAST CONTAINER ──────────────────────────────────── -->
@@ -1179,19 +1245,246 @@ const SEED_CLIENTES = [
   },
 ];
 
-// Migrate SEED_CLIENTES in-place: add status, donoId, fase, responsavelId, checklist, anotacoes
+// ─── Enriquecimento do SEED para demonstração ─────────────────────────────
 (function migrateSeed() {
+  // CSAT por cliente (valores fixos para demo consistente)
+  var CSAT = {
+    'KMSIL':4.3,'RAS METAL':3.9,'AXONE':4.1,'AÇO ART':4.4,'ALPARGATAS CPS':4.8,
+    'FRAY':4.0,'FELIX INDUSTRIAL':3.7,'USIMAZA EMBRAER':4.6,'CAMPOSC':4.2,
+    'SOARES FERRAMENTARIA':4.5,'LIQUOS':4.8,'METALVALE':3.6,'SIMONSEN':4.3,
+    'MECATRON':4.1,'POLIMOLD':4.7,'ELETROTINS':3.8,'BORBOREMA':4.2,'RETALHOMAX':4.5,
+    'TORNEFER':3.9,'INDALPE':4.4,'ROTOFER':4.1,'AGROFLEX':4.6,'LAMIFER':4.3,
+    'PLASVALE':4.0,'LAMINEX':4.2,'COMPRESSEI':4.5,'NXTEC':4.7,'SENSORTEC':4.3,
+    'METATRON':4.1,'PLASTIMETAL':4.4,'IOTSYSTEM':4.8,'NXPRIME':4.2,'ROBOTIX':4.6,
+    'AUTOMIND':4.4,'USINAGEM3D':4.0,'FERROPLAST':3.8,'MAXPRESS':4.3,'FUNDIFER':3.5
+  };
+
+  // Clientes que já concluíram a implantação (entrou em CS)
+  var CS_ATIVO = {
+    'ALPARGATAS CPS':'2026-05-20','AUTOMIND':'2026-01-15','LAMINEX':'2026-02-10',
+    'RETALHOMAX':'2026-04-01','LAMIFER':'2026-04-20','CAMPOSC':'2025-12-15'
+  };
+
+  // Playbooks ricos para a carteira da Ana Paula (csId='ana-paula') + alguns outros
+  var RICH_PBS = {
+    // ── POLIMOLD (csId:'ana-paula') — ATRASADO ──────────────────────────────
+    'POLIMOLD': [{
+      id:'pb_poli1', nome:'Implantação CPS', fase:'implantacao', donoId:'ana-paula',
+      criadoEm:'2025-11-05T09:00:00', atividades:[
+        {id:'at_poli1',nome:'Reunião de kickoff',status:'concluida',responsavelId:'ana-paula',registros:[
+          {id:'rp1',autor:'Cristiano Santos',data:'2025-11-05T14:00:00',texto:'Kickoff com a diretoria. Escopo validado: módulos Compras e Produção. Alta expectativa do CEO.'},
+          {id:'rp2',autor:'Ana Paula Souza',data:'2025-11-06T09:00:00',texto:'Cronograma enviado ao cliente. Próxima etapa: levantamento de processos.'}
+        ],checklist:[{id:'cp1',texto:'Validar escopo com diretoria',done:true},{id:'cp2',texto:'Confirmar acesso ao sistema',done:true}],anotacoes:[]},
+        {id:'at_poli2',nome:'Levantamento e mapeamento de processos',status:'concluida',responsavelId:'cristiano',registros:[
+          {id:'rp3',autor:'Cristiano Santos',data:'2025-12-10T15:00:00',texto:'18 processos mapeados. Fluxo de aprovação tem 3 níveis hierárquicos — customização necessária.'}
+        ],checklist:[{id:'cp3',texto:'Mapear módulo Compras',done:true},{id:'cp4',texto:'Mapear módulo Produção',done:true},{id:'cp5',texto:'Mapear fluxo de aprovações',done:true}],anotacoes:[
+          {id:'ap1',autor:'Ana Paula Souza',data:'2025-12-10T16:00:00',texto:'Aprovação de compras acima de R$50k exige 2 assinaturas digitais — confirmar suporte no CPS.'}
+        ]},
+        {id:'at_poli3',nome:'Parametrização e configurações',status:'atrasada',dataLimite:'2026-06-10',responsavelId:'ana-paula',registros:[
+          {id:'rp4',autor:'Ana Paula Souza',data:'2026-01-15T10:00:00',texto:'Parametrização módulo Compras 60% concluída. Módulo Produção parado — cliente atrasou envio do plano de contas.'},
+          {id:'rp5',autor:'Ana Paula Souza',data:'2026-05-20T14:00:00',texto:'Seguimento: plano de contas chegou com inconsistências. Prazo comprometido. Escalei para o gestor de conta.'}
+        ],checklist:[{id:'cp6',texto:'Parametrizar módulo Compras',done:true},{id:'cp7',texto:'Parametrizar módulo Produção',done:false},{id:'cp8',texto:'Configurar aprovações multinível',done:false}],anotacoes:[
+          {id:'ap2',autor:'Ana Paula Souza',data:'2026-05-21T09:00:00',texto:'Risco alto. Cliente precisa resolver pendências internas antes que eu possa avançar.'}
+        ]},
+        {id:'at_poli4',nome:'Treinamento da equipe',status:'pendente',dataLimite:'2026-07-10',responsavelId:'ana-paula',registros:[],checklist:[{id:'cp9',texto:'Treinar equipe manhã',done:false},{id:'cp10',texto:'Treinar equipe tarde',done:false}],anotacoes:[]},
+        {id:'at_poli5',nome:'Go-live e validação final',status:'pendente',dataLimite:'2026-08-01',responsavelId:'ana-paula',registros:[],checklist:[],anotacoes:[]}
+      ]
+    }],
+    // ── FRAY (csId:'ana-paula') — EM ORDEM ─────────────────────────────────
+    'FRAY': [{
+      id:'pb_fray1', nome:'Implantação CPS', fase:'implantacao', donoId:'ana-paula',
+      criadoEm:'2026-03-29T09:00:00', atividades:[
+        {id:'at_fray1',nome:'1ª Reunião e kickoff',status:'concluida',responsavelId:'ana-paula',registros:[
+          {id:'rf1',autor:'Carlos Menezes',data:'2026-03-29T14:00:00',texto:'Kickoff realizado. Equipe de saúde com processos bem definidos. Acesso ao ambiente de homologação liberado.'},
+          {id:'rf2',autor:'Ana Paula Souza',data:'2026-03-30T10:00:00',texto:'Cronograma enviado. Próximo passo: levantamento de processos.'}
+        ],checklist:[{id:'cf1',texto:'Apresentar equipe GRV',done:true},{id:'cf2',texto:'Validar acesso ao sistema',done:true}],anotacoes:[]},
+        {id:'at_fray2',nome:'Levantamento de processos',status:'concluida',responsavelId:'carlos',registros:[
+          {id:'rf3',autor:'Carlos Menezes',data:'2026-04-10T15:00:00',texto:'14 processos mapeados. Fluxo de requisição de materiais é o principal gargalo a ser automatizado.'}
+        ],checklist:[{id:'cf3',texto:'Mapear requisições',done:true},{id:'cf4',texto:'Mapear compras',done:true},{id:'cf5',texto:'Documentar aprovações',done:true}],anotacoes:[
+          {id:'af1',autor:'Ana Paula Souza',data:'2026-04-10T16:30:00',texto:'Compras acima de R$30k precisam de 2 assinaturas digitais — checar suporte nativo no CPS.'}
+        ]},
+        {id:'at_fray3',nome:'Parametrização do sistema',status:'em_andamento',dataLimite:'2026-07-05',responsavelId:'ana-paula',registros:[
+          {id:'rf4',autor:'Ana Paula Souza',data:'2026-05-10T09:00:00',texto:'Módulo de Compras parametrizado e validado. Iniciando módulo de Almoxarifado esta semana.'}
+        ],checklist:[{id:'cf6',texto:'Parametrizar Compras',done:true},{id:'cf7',texto:'Parametrizar Almoxarifado',done:false},{id:'cf8',texto:'Configurar aprovações',done:false}],anotacoes:[]},
+        {id:'at_fray4',nome:'Treinamento da equipe',status:'pendente',dataLimite:'2026-07-20',responsavelId:'ana-paula',registros:[],checklist:[{id:'cf9',texto:'Treinamento módulo básico',done:false},{id:'cf10',texto:'Treinamento módulo avançado',done:false}],anotacoes:[]},
+        {id:'at_fray5',nome:'Go-live e validação final',status:'pendente',dataLimite:'2026-08-15',responsavelId:'ana-paula',registros:[],checklist:[],anotacoes:[]}
+      ]
+    }],
+    // ── SOARES FERRAMENTARIA (csId:'ana-paula') — INÍCIO ───────────────────
+    'SOARES FERRAMENTARIA': [{
+      id:'pb_soar1', nome:'Implantação CPS Industrial', fase:'implantacao', donoId:'ana-paula',
+      criadoEm:'2026-06-02T09:00:00', atividades:[
+        {id:'at_soar1',nome:'Kickoff e alinhamento inicial',status:'concluida',responsavelId:'ana-paula',registros:[
+          {id:'rs1',autor:'Maria Lima',data:'2026-06-02T14:00:00',texto:'Kickoff realizado com diretor industrial e equipe de TI. Escopo validado: Produção, Compras e Qualidade.'},
+          {id:'rs2',autor:'Ana Paula Souza',data:'2026-06-03T09:00:00',texto:'Acessos liberados. Cronograma enviado. Meta: go-live em setembro.'}
+        ],checklist:[{id:'cs1',texto:'Validar escopo',done:true},{id:'cs2',texto:'Liberar acessos',done:true}],anotacoes:[]},
+        {id:'at_soar2',nome:'Levantamento de processos produtivos',status:'pendente',dataLimite:'2026-07-15',responsavelId:'maria',registros:[],checklist:[{id:'cs3',texto:'Mapear linha de produção',done:false},{id:'cs4',texto:'Mapear controle de qualidade',done:false},{id:'cs5',texto:'Documentar não-conformidades',done:false}],anotacoes:[]},
+        {id:'at_soar3',nome:'Mapeamento de requisitos ERP',status:'pendente',dataLimite:'2026-07-25',responsavelId:'ana-paula',registros:[],checklist:[],anotacoes:[]},
+        {id:'at_soar4',nome:'Parametrização módulo Produção',status:'pendente',dataLimite:'2026-08-05',responsavelId:'ana-paula',registros:[],checklist:[],anotacoes:[]},
+        {id:'at_soar5',nome:'Parametrização módulo Compras',status:'pendente',dataLimite:'2026-08-15',responsavelId:'ana-paula',registros:[],checklist:[],anotacoes:[]},
+        {id:'at_soar6',nome:'Integração com ERP legado (Microsiga)',status:'pendente',dataLimite:'2026-08-25',responsavelId:'ana-paula',registros:[],checklist:[{id:'cs6',texto:'Mapear campos do ERP',done:false},{id:'cs7',texto:'Desenvolver conector',done:false}],anotacoes:[]},
+        {id:'at_soar7',nome:'Treinamento operadores',status:'pendente',dataLimite:'2026-09-01',responsavelId:'ana-paula',registros:[],checklist:[],anotacoes:[]},
+        {id:'at_soar8',nome:'Go-live e validação final',status:'pendente',dataLimite:'2026-09-05',responsavelId:'ana-paula',registros:[],checklist:[],anotacoes:[]}
+      ]
+    }],
+    // ── NXTEC (csId:'ana-paula') — ATENÇÃO ─────────────────────────────────
+    'NXTEC': [{
+      id:'pb_nxtec1', nome:'Implantação NX/IOT', fase:'implantacao', donoId:'ana-paula',
+      criadoEm:'2026-02-15T09:00:00', atividades:[
+        {id:'at_nxt1',nome:'Kickoff e levantamento de requisitos',status:'concluida',responsavelId:'ana-paula',registros:[
+          {id:'rn1',autor:'Silvia Costa',data:'2026-02-15T14:00:00',texto:'Kickoff realizado. Escopo: monitoramento de temperatura, vibração e consumo energético em 4 galpões.'},
+          {id:'rn2',autor:'Ana Paula Souza',data:'2026-02-16T09:00:00',texto:'Plano de instalação aprovado. 24 sensores necessários.'}
+        ],checklist:[{id:'cn1',texto:'Validar localização dos sensores',done:true},{id:'cn2',texto:'Confirmar infraestrutura de rede',done:true}],anotacoes:[]},
+        {id:'at_nxt2',nome:'Instalação e configuração dos sensores',status:'concluida',responsavelId:'silvia',registros:[
+          {id:'rn3',autor:'Silvia Costa',data:'2026-03-20T16:00:00',texto:'24 sensores instalados nos 4 galpões. Conectividade testada em 100% dos pontos. Dados na plataforma com latência < 1s.'}
+        ],checklist:[{id:'cn3',texto:'Galpão A',done:true},{id:'cn4',texto:'Galpão B',done:true},{id:'cn5',texto:'Galpões C e D',done:true}],anotacoes:[]},
+        {id:'at_nxt3',nome:'Configuração de dashboards e alertas',status:'concluida',responsavelId:'ana-paula',registros:[
+          {id:'rn4',autor:'Ana Paula Souza',data:'2026-04-25T10:00:00',texto:'8 KPIs operacionais configurados. Alertas de temperatura e vibração validados pelo gestor de manutenção.'}
+        ],checklist:[{id:'cn6',texto:'Dashboard de temperatura',done:true},{id:'cn7',texto:'Alertas críticos',done:true},{id:'cn8',texto:'Validar com gestor',done:true}],anotacoes:[]},
+        {id:'at_nxt4',nome:'Treinamento da equipe e go-live',status:'em_andamento',dataLimite:'2026-06-28',responsavelId:'ana-paula',registros:[
+          {id:'rn5',autor:'Ana Paula Souza',data:'2026-06-15T09:00:00',texto:'Treinamento turno manhã concluído — 8 operadores. Falta treinar turno tarde (6 operadores), agendado para dia 24.'}
+        ],checklist:[{id:'cn9',texto:'Treinar turno manhã',done:true},{id:'cn10',texto:'Treinar turno tarde',done:false},{id:'cn11',texto:'Documentar manual de operação',done:false}],anotacoes:[
+          {id:'an1',autor:'Ana Paula Souza',data:'2026-06-16T08:00:00',texto:'Prazo apertado mas factível. Treinamento dia 24, documentação até dia 27 — deve fechar no prazo.'}
+        ]}
+      ]
+    }],
+    // ── ROTOFER (csId:'ana-paula') — EM ORDEM ──────────────────────────────
+    'ROTOFER': [{
+      id:'pb_rot1', nome:'Implantação NX/IOT', fase:'implantacao', donoId:'ana-paula',
+      criadoEm:'2026-01-10T09:00:00', atividades:[
+        {id:'at_rot1',nome:'Kickoff e levantamento',status:'concluida',responsavelId:'ana-paula',registros:[
+          {id:'rr1',autor:'Felipe Alves',data:'2026-01-10T14:00:00',texto:'Kickoff com engenharia. 3 linhas de produção serão monitoradas. Gerente de fábrica muito animado.'}
+        ],checklist:[{id:'cr1',texto:'Validar topologia de rede',done:true}],anotacoes:[]},
+        {id:'at_rot2',nome:'Instalação sensores NX — linha 1',status:'concluida',responsavelId:'felipe',registros:[
+          {id:'rr2',autor:'Felipe Alves',data:'2026-02-05T16:00:00',texto:'Linha 1: 8 sensores NX instalados. Temperatura, vibração e corrente elétrica monitoradas em tempo real.'}
+        ],checklist:[{id:'cr2',texto:'Instalar sensores',done:true},{id:'cr3',texto:'Calibrar sensores',done:true}],anotacoes:[]},
+        {id:'at_rot3',nome:'Instalação sensores NX — linha 2',status:'concluida',responsavelId:'felipe',registros:[
+          {id:'rr3',autor:'Felipe Alves',data:'2026-03-18T15:00:00',texto:'Linha 2 concluída. 10 sensores. Detectada falha no motor 2B via alerta automático — manutenção preventiva antecipada.'}
+        ],checklist:[{id:'cr4',texto:'Instalar sensores',done:true},{id:'cr5',texto:'Testar alertas',done:true}],anotacoes:[]},
+        {id:'at_rot4',nome:'Instalação sensores NX — linha 3',status:'concluida',responsavelId:'felipe',registros:[
+          {id:'rr4',autor:'Felipe Alves',data:'2026-04-30T14:00:00',texto:'Linha 3 concluída. Total: 26 sensores nas 3 linhas. Cobertura de 100% dos ativos críticos.'}
+        ],checklist:[{id:'cr6',texto:'Instalar sensores',done:true}],anotacoes:[]},
+        {id:'at_rot5',nome:'Configuração de dashboards gerenciais',status:'em_andamento',dataLimite:'2026-07-15',responsavelId:'ana-paula',registros:[
+          {id:'rr5',autor:'Ana Paula Souza',data:'2026-06-10T09:00:00',texto:'Dashboard do gerente 80% pronto. Falta adicionar relatório de OEE e integrar com planilha de metas.'}
+        ],checklist:[{id:'cr7',texto:'Dashboard operacional',done:true},{id:'cr8',texto:'Relatório OEE',done:false},{id:'cr9',texto:'Integrar metas da fábrica',done:false}],anotacoes:[]},
+        {id:'at_rot6',nome:'Treinamento e go-live',status:'pendente',dataLimite:'2026-07-30',responsavelId:'ana-paula',registros:[],checklist:[{id:'cr10',texto:'Treinar operadores',done:false},{id:'cr11',texto:'Treinar supervisores',done:false},{id:'cr12',texto:'Go-live oficial',done:false}],anotacoes:[]}
+      ]
+    }],
+    // ── AUTOMIND (csId:'ana-paula') — CS ATIVO ─────────────────────────────
+    'AUTOMIND': [
+      {id:'pb_auto1', nome:'Implantação NX/IOT', fase:'implantacao', donoId:'ana-paula', encerrado:true,
+       criadoEm:'2025-05-01T09:00:00', atividades:[
+        {id:'at_auto1',nome:'Kickoff e levantamento',status:'concluida',responsavelId:'ana-paula',registros:[{id:'ra1',autor:'Severiano Rocha',data:'2025-05-05T10:00:00',texto:'Kickoff excelente. Escopo: monitoramento de 42 ativos críticos em toda a linha de produção.'}],checklist:[],anotacoes:[]},
+        {id:'at_auto2',nome:'Instalação dos sensores IoT',status:'concluida',responsavelId:'severiano',registros:[{id:'ra2',autor:'Severiano Rocha',data:'2025-07-20T14:00:00',texto:'42 sensores IoT instalados e calibrados. Cobertura total. Dados na plataforma com latência < 2s.'}],checklist:[],anotacoes:[]},
+        {id:'at_auto3',nome:'Configuração de dashboards e alertas',status:'concluida',responsavelId:'severiano',registros:[{id:'ra3',autor:'Severiano Rocha',data:'2025-09-15T10:00:00',texto:'18 dashboards configurados. Sistema de alertas com 3 níveis de criticidade operacional.'}],checklist:[],anotacoes:[]},
+        {id:'at_auto4',nome:'Treinamento e go-live',status:'concluida',responsavelId:'ana-paula',registros:[{id:'ra4',autor:'Ana Paula Souza',data:'2025-12-10T10:00:00',texto:'Treinamento concluído para 35 usuários. Go-live em 15/12/2025. CSAT pós-implantação: 4.8 ⭐'}],checklist:[],anotacoes:[]}
+      ]},
+      {id:'pb_auto2', nome:'CS NX/IOT — Revisão Contínua', fase:'cs', donoId:'ana-paula',
+       criadoEm:'2026-01-15T09:00:00', atividades:[
+        {id:'at_auto5',nome:'Review Q1 2026 — Adoção e uso',status:'concluida',responsavelId:'ana-paula',registros:[{id:'ra5',autor:'Ana Paula Souza',data:'2026-04-10T10:00:00',texto:'Review Q1 realizado. 96% dos alarmes registrados no sistema (meta 90%). 34 paradas não-planejadas evitadas. ROI estimado: R$280k. CSAT 4.4.'}],checklist:[{id:'ca1',texto:'Analisar métricas de uso',done:true},{id:'ca2',texto:'Relatório de ROI',done:true},{id:'ca3',texto:'Plano de ação Q2',done:true}],anotacoes:[]},
+        {id:'at_auto6',nome:'Review Q2 2026 — Proposta de expansão',status:'em_andamento',dataLimite:'2026-07-15',responsavelId:'ana-paula',registros:[{id:'ra6',autor:'Ana Paula Souza',data:'2026-06-15T14:00:00',texto:'Proposta de expansão para 2 novas linhas em elaboração. Reunião com diretor industrial agendada para 15/07.'}],checklist:[{id:'ca4',texto:'Relatório de uso Q2',done:true},{id:'ca5',texto:'Proposta de expansão',done:false},{id:'ca6',texto:'Apresentar ao diretor',done:false}],anotacoes:[]}
+      ]}
+    ],
+    // ── ROBOTIX — enricher atividades já existentes no seed ────────────────
+    'ROBOTIX': [{
+      id:'pb_rob1', nome:'Implantação NX/IOT', fase:'implantacao', donoId:'silvia',
+      criadoEm:'2026-04-05T09:00:00', atividades:[
+        {id:'at_rob1',nome:'1ª Reunião de engajamento',status:'concluida',responsavelId:'silvia',registros:[
+          {id:'reg_rob1',autor:'Severiano Rocha',data:'2026-04-05T14:00:00',texto:'Kickoff realizado com sucesso. Equipe técnica muito engajada. Cronograma de instalação dos sensores definido.'}
+        ],checklist:[{id:'rb1',texto:'Validar infraestrutura',done:true},{id:'rb2',texto:'Definir pontos de instalação',done:true}],anotacoes:[]},
+        {id:'at_rob2',nome:'Configuração de sensores IoT',status:'concluida',responsavelId:'severiano',registros:[
+          {id:'reg_rob2',autor:'Severiano Rocha',data:'2026-04-20T16:00:00',texto:'12 sensores instalados na linha de produção principal. Testes de conectividade OK. Dados chegando na plataforma.'}
+        ],checklist:[{id:'rb3',texto:'Instalar sensores linha 1',done:true},{id:'rb4',texto:'Calibrar e testar',done:true}],anotacoes:[]},
+        {id:'at_rob3',nome:'Configuração de dashboards operacionais',status:'em_andamento',dataLimite:'2026-07-10',responsavelId:'silvia',registros:[
+          {id:'reg_rob3',autor:'Silvia Costa',data:'2026-06-01T10:00:00',texto:'Dashboard principal 60% configurado. Aguardando validação de KPIs com o gerente de produção.'}
+        ],checklist:[{id:'rb5',texto:'Dashboard operacional',done:false},{id:'rb6',texto:'Configurar alertas',done:false},{id:'rb7',texto:'Validar com gerência',done:false}],anotacoes:[]},
+        {id:'at_rob4',nome:'Treinamento da equipe e go-live',status:'pendente',dataLimite:'2026-07-30',responsavelId:'silvia',registros:[],checklist:[{id:'rb8',texto:'Treinar operadores',done:false},{id:'rb9',texto:'Go-live oficial',done:false}],anotacoes:[]}
+      ]
+    }],
+    // ── KMSIL — enriquecer registros e checklist ────────────────────────────
+    'KMSIL': [{
+      id:'pb_k1', nome:'Implantação CPS', fase:'implantacao', donoId:'cristiano',
+      criadoEm:'2026-03-10T09:00:00', atividades:[
+        {id:'at_k1',nome:'1ª Reunião de engajamento',status:'concluida',responsavelId:'cristiano',registros:[
+          {id:'reg_k1',autor:'Ana Paula Souza',data:'2026-03-10T14:00:00',texto:'Kickoff realizado com equipe de TI. Alinhado acesso ao ambiente de homologação. Cliente da área de saúde — expectativa alta.'}
+        ],checklist:[{id:'kc1',texto:'Validar acesso ao sistema',done:true},{id:'kc2',texto:'Alinhar cronograma',done:true}],anotacoes:[]},
+        {id:'at_k2',nome:'Levantamento e parametrização',status:'em_andamento',dataLimite:'2026-07-20',responsavelId:'cristiano',registros:[
+          {id:'reg_k2',autor:'Ana Paula Souza',data:'2026-04-02T14:30:00',texto:'Parametrização inicial concluída. Aguardando validação de dados mestres pelo cliente.'}
+        ],checklist:[{id:'kc3',texto:'Mapear processos',done:true},{id:'kc4',texto:'Parametrizar módulo Compras',done:false},{id:'kc5',texto:'Validar com usuário-chave',done:false}],anotacoes:[]},
+        {id:'at_k3',nome:'Treinamento e go-live',status:'pendente',dataLimite:'2026-09-01',responsavelId:'cristiano',registros:[],checklist:[{id:'kc6',texto:'Treinar equipe',done:false},{id:'kc7',texto:'Go-live',done:false}],anotacoes:[]}
+      ]
+    }]
+  };
+
+  // Gerador de playbook genérico com SLA cumulativo desde o início do projeto
+  // SLA padrão por atividade: 7d kickoff, +15d levantamento, +30d param, +30d go-live
+  var SLA_NOMES = ['1ª Reunião e kickoff','Levantamento de processos','Parametrização e treinamento','Go-live e validação'];
+  var SLA_DIAS  = [7, 15, 30, 30];    // duração de cada atividade (dias)
+  var SLA_CUM   = [7, 22, 52, 82];    // prazo cumulativo desde o início do projeto
+
+  function addDias(dataStr, dias) {
+    var d = new Date(dataStr + 'T00:00:00');
+    d.setDate(d.getDate() + dias);
+    return d.toISOString().split('T')[0];
+  }
+
+  function makeGenericPb(c) {
+    var etapa = c.etapa || '1ª Reunião';
+    var pid   = 'pb_' + c.id.replace(/[^a-z0-9]/gi,'').toLowerCase() + '1';
+    var start = c.dataInicio || '2025-01-01';
+    var doneMap = {'1ª Reunião':[0,0,0,0],'Engajamento':[1,1,0,0],'Evolução':[1,1,1,0],'Conclusão':[1,1,1,1],'Pausado':[1,0,0,0],'Cancelado':[1,0,0,0]};
+    var done = doneMap[etapa] || [0,0,0,0];
+    var atividades = SLA_NOMES.map(function(nome, i) {
+      var dl  = addDias(start, SLA_CUM[i]);
+      var st  = done[i] ? 'concluida' : 'pendente';
+      return {id:'at_'+pid+'_'+i, nome:nome, status:st, responsavelId:c.csId,
+              slasDias:SLA_DIAS[i], dataLimite:dl, registros:[], checklist:[], anotacoes:[]};
+    });
+    return [{id:pid, nome:'Implantação '+(c.produto||'CPS'), fase:'implantacao', donoId:c.csId,
+             criadoEm:start+'T09:00:00', atividades:atividades}];
+  }
+
+  // Loop principal
   SEED_CLIENTES.forEach(function(c) {
-    if (!c.status) c.status = 'em_implantacao';
+    // Status e lifecycle
+    if (CS_ATIVO[c.id]) {
+      c.status = 'cs_ativo';
+      if (!c.dataInicioCS) c.dataInicioCS = CS_ATIVO[c.id];
+    } else {
+      if (!c.status) c.status = 'em_implantacao';
+    }
     if (!c.dataInicioImplantacao) c.dataInicioImplantacao = c.dataInicio || '2025-01-01';
-    if (c.dataInicioCS === undefined) c.dataInicioCS = null;
+    if (c.dataInicioCS === undefined && !CS_ATIVO[c.id]) c.dataInicioCS = null;
+
+    // CSAT
+    if (!c.csat && CSAT[c.id]) c.csat = CSAT[c.id];
+
+    // Playbooks — usa RICH_PBS se disponível, senão gera genérico
+    if (RICH_PBS[c.id]) {
+      c.ativPlaybooks = RICH_PBS[c.id];
+    } else if (!c.ativPlaybooks || !c.ativPlaybooks.length) {
+      c.ativPlaybooks = makeGenericPb(c);
+    }
+
+    // Normaliza campos de playbooks e atividades
     (c.ativPlaybooks || []).forEach(function(pb) {
       if (!pb.donoId) pb.donoId = c.csId;
       if (!pb.fase) pb.fase = 'implantacao';
+      if (c.status === 'cs_ativo' && pb.fase === 'implantacao' && !pb.encerrado) pb.encerrado = true;
       (pb.atividades || []).forEach(function(at) {
+        if (!at.id) at.id = 'at_' + pb.id + '_' + Math.abs(at.nome.length * 31 + (pb.id||'').length);
         if (!at.responsavelId) at.responsavelId = pb.donoId || c.csId;
         if (!at.checklist) at.checklist = [];
         if (!at.anotacoes) at.anotacoes = [];
+        if (!at.registros) at.registros = [];
+        if (!at.status) at.status = at.registros.length > 0 ? 'concluida' : 'pendente';
+        // SLA automático: se não tem dataLimite, calcula pela posição + data de início do pb
+        if (at.status !== 'concluida' && !at.dataLimite) {
+          var idx = pb.atividades.indexOf(at);
+          var cum = SLA_CUM[idx] !== undefined ? SLA_CUM[idx] : (SLA_CUM[SLA_CUM.length-1] + idx * 15);
+          at.dataLimite = addDias((pb.criadoEm || c.dataInicio || '2025-01-01').split('T')[0], cum);
+          at.slasDias   = SLA_DIAS[idx] || 15;
+        }
       });
     });
   });
@@ -1213,6 +1506,14 @@ const DB = {
 };
 
 function initData() {
+  // Versão dos dados — incrementar força re-seed para todos os usuários
+  var DATA_V = 'v4';
+  if (localStorage.getItem('grv_cs_v') !== DATA_V) {
+    localStorage.removeItem(DB.CLIENTES);
+    localStorage.removeItem(DB.CONSULTORES);
+    localStorage.removeItem(DB.PROJETOS);
+    localStorage.setItem('grv_cs_v', DATA_V);
+  }
   if (!localStorage.getItem(DB.CONSULTORES))
     localStorage.setItem(DB.CONSULTORES, JSON.stringify(SEED_CONSULTORES));
   if (!localStorage.getItem(DB.CLIENTES))
@@ -1233,9 +1534,11 @@ function initData() {
         if (!pb.donoId) { pb.donoId = c.csId; dirty = true; }
         if (!pb.fase) { pb.fase = 'implantacao'; dirty = true; }
         (pb.atividades || []).forEach(function(at) {
+          if (!at.id) { at.id = 'at_' + Math.random().toString(36).slice(2); dirty = true; }
           if (!at.responsavelId) { at.responsavelId = pb.donoId || c.csId; dirty = true; }
           if (!at.checklist) { at.checklist = []; dirty = true; }
           if (!at.anotacoes) { at.anotacoes = []; dirty = true; }
+          if (!at.registros) { at.registros = []; dirty = true; }
         });
       });
     });
@@ -2524,6 +2827,7 @@ let _open_fases       = {};
 let _cliente_id_atual = null;
 let _cliente_aba      = '360';
 let _pb_expandidos    = {};
+let _pb_sel_id        = null;
 let _at_sel           = null;
 let _pb_form_open     = false;
 let _at_form_pb       = null;
@@ -2541,17 +2845,20 @@ function renderCliente(id) {
     _cliente_id_atual = id;
     _cliente_aba      = '360';
     _pb_expandidos    = {};
+    _pb_sel_id        = (c.ativPlaybooks && c.ativPlaybooks.length > 0) ? c.ativPlaybooks[0].id : null;
     _at_sel           = null;
     _pb_form_open     = false;
     _at_form_pb       = null;
-    if (c.ativPlaybooks && c.ativPlaybooks.length > 0) {
-      _pb_expandidos[c.ativPlaybooks[0].id] = true;
-    }
   }
 
-  const status = getStatus(c);
-  const dias   = getDiasNaEtapa(c);
-  const consul = getConsultores().find(x => x.id === c.consultorId)?.nome || c.consultorId;
+  // Header: avatar gradient por inicial
+  const _avatarGrads = [['#E05A1E','#ff8c5a'],['#3182ce','#63b3ed'],['#38a169','#68d391'],['#553c9a','#9f7aea'],['#d69e2e','#f6e05e'],['#e53e3e','#fc8181'],['#319795','#4fd1c5'],['#d53f8c','#f687b3']];
+  const _avatarIdx   = c.id.split('').reduce(function(h,ch){return ((h<<5)-h)+ch.charCodeAt(0);},0);
+  const _ag = _avatarGrads[Math.abs(_avatarIdx) % _avatarGrads.length];
+  const _letter = c.id.charAt(0).toUpperCase();
+  const _consulNome = getConsultores().find(function(x){return x.id===(c.csId||c.consultorId);})?.nome || c.csId || c.consultorId || '—';
+  const _stCS = typeof getStatusCliente === 'function' ? getStatusCliente(c, c.csId || c.consultorId || '') : null;
+  const _stLabels = {atrasado:'Atrasado',em_ordem:'Em ordem',atencao:'Atenção',inicio:'Início'};
 
   const abaContent = _cliente_aba === '360'
     ? renderAba360(c)
@@ -2560,27 +2867,17 @@ function renderCliente(id) {
     : renderAbaNotas(c);
 
   sec.innerHTML = `
-    <a class="back-link" href="#carteira">← Voltar à carteira</a>
-    <div class="detail-header">
-      <div class="dh-top">
-        <div>
-          <h2>${c.id}</h2>
-          <div class="dh-projeto">${c.projeto} · ${c.produto}</div>
+    <div class="dc-header">
+      <a class="dc-back" href="#carteira">←</a>
+      <div class="dc-avatar-lg" style="background:linear-gradient(135deg,${_ag[0]},${_ag[1]})">${_letter}</div>
+      <div class="dc-info">
+        <div class="dc-name">${c.id}</div>
+        <div class="dc-sub">${c.projeto ? c.projeto + ' · ' : ''}${_consulNome}</div>
+        <div class="dc-chips">
+          ${_stCS ? '<span class="chip-base chip-status-' + _stCS + '">' + (_stLabels[_stCS]||_stCS) + '</span>' : ''}
+          ${c.segmento ? '<span class="chip-base chip-seg">' + c.segmento + '</span>' : ''}
+          ${c.produto  ? '<span class="chip-base chip-prod">' + c.produto  + '</span>' : ''}
         </div>
-        <div class="dh-badges">
-          ${getEtapaBadge(c.etapa)}
-          ${getStatusBadge(status)}
-          <button class="btn btn-primary btn-sm" onclick="openModal('${c.id}')">Alterar Etapa</button>
-        </div>
-      </div>
-      <div class="dh-meta">
-        <div class="dh-meta-item"><span class="dh-meta-label">Consultor</span><span class="dh-meta-value">${consul}</span></div>
-        <div class="dh-meta-item"><span class="dh-meta-label">Início</span><span class="dh-meta-value">${fmtDate(c.dataInicio)}</span></div>
-        <div class="dh-meta-item">
-          <span class="dh-meta-label">Prazo</span>
-          <span class="dh-meta-value" style="${status==='Atrasado'?'color:var(--red)':''}">${fmtDate(c.prazo)}</span>
-        </div>
-        <div class="dh-meta-item"><span class="dh-meta-label">Dias na etapa</span><span class="dh-meta-value">${dias} dia${dias!==1?'s':''}</span></div>
       </div>
     </div>
 
@@ -2709,7 +3006,31 @@ function renderAba360(c) {
 }
 
 function renderAbaAtividades(c) {
-  const pbs = c.ativPlaybooks || [];
+  const pbs  = c.ativPlaybooks || [];
+  const _hoje = new Date(); _hoje.setHours(0,0,0,0);
+
+  // Garante seleção válida
+  if (!_pb_sel_id || !pbs.find(function(p){return p.id===_pb_sel_id;})) {
+    _pb_sel_id = pbs.length > 0 ? pbs[0].id : null;
+  }
+  const selPb = pbs.find(function(p){return p.id===_pb_sel_id;}) || null;
+
+  // ── Coluna esquerda: lista de playbooks ──────────────
+  const pbCards = pbs.map(function(pb) {
+    const total   = (pb.atividades||[]).length;
+    const done    = (pb.atividades||[]).filter(function(a){return a.status==='concluida';}).length;
+    const venc    = (pb.atividades||[]).filter(function(a){
+      const dl = a.dataLimite ? new Date(a.dataLimite+'T00:00:00') : null;
+      return dl && dl < _hoje && a.status !== 'concluida';
+    }).length;
+    const pct     = total ? Math.round(done/total*100) : 0;
+    const isSel   = pb.id === _pb_sel_id;
+    return `<div class="at-pb-card${isSel?' sel':''}" onclick="selecionarPb('${pb.id}','${c.id}')">
+      <div class="at-pb-card-name">${pb.nome}</div>
+      <div class="at-pb-card-meta">${total} atividade${total!==1?'s':''} · ${done} concluída${done!==1?'s':''}${venc>0?' · <span style="color:var(--red);font-weight:700">'+venc+' vencida'+(venc>1?'s':'')+'</span>':''}</div>
+      <div class="at-pb-bar"><div class="at-pb-bar-fill${pct===100?' done':''}" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
 
   const newPbFormHtml = _pb_form_open
     ? `<div class="pb-inline-form">
@@ -2717,75 +3038,68 @@ function renderAbaAtividades(c) {
         <button class="btn btn-primary btn-sm" onclick="criarAtivPlaybook('${c.id}')">Criar</button>
         <button class="btn btn-sm" onclick="cancelarFormPlaybook('${c.id}')">✕</button>
        </div>`
-    : `<button class="pb-add-btn" onclick="abrirFormPlaybook('${c.id}')">+ Novo</button>`;
+    : `<button class="pb-add-btn" onclick="abrirFormPlaybook('${c.id}')">+ Novo Playbook</button>`;
 
-  const pbListHtml = pbs.map(pb => {
-    const expanded = _pb_expandidos[pb.id];
-    const atsHtml  = expanded ? pb.atividades.map(at => {
-      const hasRegs = at.registros && at.registros.length > 0;
-      const resp    = at.responsavelId || pb.donoId || '';
-      return `<div class="pb-item" onclick="openAtividade('${c.id}','${pb.id}','${at.id}')" style="display:flex;align-items:center;gap:6px;justify-content:space-between">
-        <span style="display:flex;align-items:center;gap:6px"><span>${hasRegs ? '●' : '○'}</span><span>${at.nome}</span></span>
-        ${resp ? `<span style="font-size:10px;color:var(--text4);flex-shrink:0">${resp}</span>` : ''}
-      </div>`;
-    }).join('') + (_at_form_pb === pb.id
-      ? `<div class="pb-inline-form">
-          <input class="pb-inline-input" id="at-nome-input-${pb.id}" placeholder="Nome da atividade..." onkeydown="if(event.key==='Enter')criarAtividade('${pb.id}','${c.id}')">
-          <button class="btn btn-primary btn-sm" onclick="criarAtividade('${pb.id}','${c.id}')">Criar</button>
-          <button class="btn btn-sm" onclick="cancelarFormAtividade('${c.id}')">✕</button>
-         </div>`
-      : (pb.encerrado
-          ? `<span style="font-size:10px;padding:3px 8px;background:var(--border-2);color:var(--text3);border-radius:6px;margin:4px 0;display:inline-block">Encerrado</span>`
-          : `<button class="pb-add-btn" onclick="abrirFormAtividade('${pb.id}','${c.id}')">+ Atividade</button>`)) : '';
+  const leftHtml = `
+    <div class="at-left-label">PLAYBOOKS</div>
+    ${pbCards}
+    ${!pbs.length ? '<div style="padding:20px;text-align:center;color:var(--text4);font-size:12px">Nenhum playbook ainda.</div>' : ''}
+    ${newPbFormHtml}`;
 
-    return `<div>
-      <div class="pb-title-row" onclick="toggleAtivPlaybook('${pb.id}','${c.id}')">
-        <span>📋</span>
-        <span>${pb.nome}</span>
-        <span class="pb-chev">${expanded ? '▾' : '▸'}</span>
-      </div>
-      ${atsHtml}
-    </div>`;
-  }).join('');
-
-  let panelHtml;
-  if (!_at_sel) {
-    panelHtml = `<div class="at-empty">
-      <div style="font-size:32px">📝</div>
-      <div>Selecione uma atividade<br>para registrar reunião,<br>decisão ou detalhe.</div>
-    </div>`;
+  // ── Coluna direita: atividades do playbook selecionado ──
+  let rightHtml = '';
+  if (!selPb) {
+    rightHtml = `<div class="at-empty" style="height:300px"><div style="font-size:28px">📋</div><div>Selecione um playbook à esquerda.</div></div>`;
   } else {
-    let foundAt = null, foundPbId = null;
-    for (const pb of pbs) {
-      const at = pb.atividades.find(a => a.id === _at_sel);
-      if (at) { foundAt = at; foundPbId = pb.id; break; }
-    }
-    if (!foundAt) {
-      panelHtml = `<div class="at-empty"><div>Atividade não encontrada.</div></div>`;
-    } else {
-      const regsHtml = foundAt.registros.length
-        ? foundAt.registros.map(r => `
-          <div class="at-reg-item">
-            <div class="at-reg-meta">${r.autor} · ${fmtDateTime(r.data)}</div>
-            <div class="at-reg-text">${r.texto}</div>
-          </div>`).join('')
-        : '';
-      panelHtml = `
-        <div class="at-title">${foundAt.nome}</div>
-        ${regsHtml}
-        <div class="at-write">
-          <textarea id="at-reg-input" placeholder="Registrar reunião, decisão ou detalhe..." style="width:100%;min-height:90px;padding:10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;resize:vertical;box-sizing:border-box"></textarea>
-          <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="addRegistroAtividade('${c.id}','${foundPbId}','${foundAt.id}')">Salvar registro</button>
-        </div>`;
-    }
+    const stLbl = {concluida:'Concluída',atrasada:'Atrasada',pendente:'Pendente',em_andamento:'Em andamento'};
+    const ativs = selPb.atividades || [];
+
+    const rowsHtml = ativs.map(function(at) {
+      const done  = at.status === 'concluida';
+      const dl    = at.dataLimite ? new Date(at.dataLimite+'T00:00:00') : null;
+      const late  = dl && dl < _hoje && !done;
+      const diasR = dl ? Math.round((dl - _hoje)/864e5) : null;
+      const prox  = dl && !late && !done && diasR <= 7;
+      const st    = done ? 'concluida' : (late ? 'atrasada' : (at.status||'pendente'));
+      const resp  = at.responsavelId || selPb.donoId || '';
+      let slaTxt  = '';
+      if (late)      slaTxt = `<span style="font-size:9px;background:#FFF5F5;color:var(--red);border-radius:4px;padding:1px 5px;font-weight:700">${Math.abs(diasR)}d atrás</span>`;
+      else if (prox) slaTxt = `<span style="font-size:9px;background:#FFFFF0;color:var(--yellow);border-radius:4px;padding:1px 5px;font-weight:700">${diasR}d</span>`;
+      return `<div class="at-row-new" onclick="openAtividade('${c.id}','${selPb.id}','${at.id}')">
+        <div class="at-checkbox${done?' done':''}">${done?'✓':''}</div>
+        <span class="at-row-name${done?' done':''}">${at.nome}</span>
+        <div class="at-row-right">
+          ${slaTxt}
+          ${resp ? '<span class="at-row-resp">'+resp+'</span>' : ''}
+          <span class="at-status-${st}">${stLbl[st]||st}</span>
+        </div>
+      </div>`;
+    }).join('');
+
+    const addFormHtml = _at_form_pb === selPb.id
+      ? `<div class="pb-inline-form" style="padding:10px 20px;flex-shrink:0">
+          <input class="pb-inline-input" id="at-nome-input-${selPb.id}" placeholder="Nome da atividade..." onkeydown="if(event.key==='Enter')criarAtividade('${selPb.id}','${c.id}')" style="flex:1">
+          <input type="number" id="at-sla-input-${selPb.id}" value="15" min="1" max="365" style="width:52px;padding:6px 6px;border:1px solid var(--border);border-radius:6px;font-size:12px" title="Prazo em dias">
+          <span style="font-size:11px;color:var(--text3);white-space:nowrap">dias</span>
+          <button class="btn btn-primary btn-sm" onclick="criarAtividade('${selPb.id}','${c.id}')">Criar</button>
+          <button class="btn btn-sm" onclick="cancelarFormAtividade('${c.id}')">✕</button>
+         </div>` : '';
+
+    rightHtml = `
+      <div class="at-right-hd">
+        <div class="at-right-title">${selPb.nome}</div>
+        ${selPb.encerrado
+          ? '<span style="font-size:10px;padding:3px 8px;background:var(--border-2);color:var(--text3);border-radius:6px">Encerrado</span>'
+          : '<button class="btn btn-primary btn-sm" onclick="abrirFormAtividade(\''+selPb.id+'\',\''+c.id+'\')">+ Atividade</button>'}
+      </div>
+      ${rowsHtml}
+      ${addFormHtml}
+      ${!ativs.length && !addFormHtml ? '<div class="at-empty" style="height:200px"><div style="font-size:28px">📋</div><div>Nenhuma atividade.<br>Adicione a primeira acima.</div></div>' : ''}`;
   }
 
-  return `<div class="pb-layout">
-    <div class="pb-sidebar">
-      ${newPbFormHtml}
-      ${pbListHtml}
-    </div>
-    <div class="pb-panel">${panelHtml}</div>
+  return `<div class="at-cols">
+    <div class="at-left-col">${leftHtml}</div>
+    <div class="at-right-col">${rightHtml}</div>
   </div>`;
 }
 
@@ -2797,6 +3111,12 @@ function toggleAtivPlaybook(pbId, clienteId) {
 function selecionarAtividade(pbId, atId, clienteId) {
   _pb_expandidos[pbId] = true;
   _at_sel = atId;
+  renderCliente(clienteId);
+}
+
+function selecionarPb(pbId, clienteId) {
+  _pb_sel_id  = pbId;
+  _at_form_pb = null;
   renderCliente(clienteId);
 }
 
@@ -2827,26 +3147,32 @@ function criarAtivPlaybook(clienteId) {
   const c  = getCliente(clienteId);
   const id = 'pb_' + Date.now();
   c.ativPlaybooks = c.ativPlaybooks || [];
-  c.ativPlaybooks.push({id, nome, criadoEm: new Date().toISOString(), atividades: []});
+  c.ativPlaybooks.push({id, nome, donoId: getConsultorAtivo(), criadoEm: new Date().toISOString(), atividades: []});
   saveCliente(c);
-  _pb_form_open      = false;
-  _pb_expandidos[id] = true;
+  _pb_form_open = false;
+  _pb_sel_id    = id;
   renderCliente(clienteId);
 }
 
 function criarAtividade(pbId, clienteId) {
-  const input = document.getElementById('at-nome-input-' + pbId);
-  const nome  = input?.value?.trim();
+  const input    = document.getElementById('at-nome-input-' + pbId);
+  const slaInput = document.getElementById('at-sla-input-' + pbId);
+  const nome     = input?.value?.trim();
   if (!nome) return;
   const c  = getCliente(clienteId);
   const pb = (c.ativPlaybooks || []).find(p => p.id === pbId);
   if (!pb) return;
+  const slasDias  = parseInt(slaInput?.value || '15', 10) || 15;
+  const hoje      = new Date();
+  const dl        = new Date(hoje); dl.setDate(dl.getDate() + slasDias);
+  const dataLimite = dl.toISOString().split('T')[0];
+  const criadoEm  = hoje.toISOString();
   const id = 'at_' + Date.now();
-  pb.atividades.push({id, nome, registros: []});
+  pb.atividades.push({id, nome, slasDias, dataLimite, criadoEm, status:'pendente', registros: [], checklist: [], anotacoes: []});
   saveCliente(c);
   _at_form_pb = null;
-  _at_sel     = id;
   renderCliente(clienteId);
+  openAtividade(clienteId, pbId, id);
 }
 
 function addRegistroAtividade(clienteId, pbId, atId) {
@@ -2895,6 +3221,50 @@ function openAtividade(cId, pbId, atId) {
     '<span class="status-badge" style="background:' + (stBg[st]||'var(--border-2)') + ';color:' + (stClr[st]||'var(--text3)') + '">' +
       (stLbl[st]||st) +
     '</span>';
+
+  // Datas de início e fim
+  const diInput = document.getElementById('ov-data-inicio');
+  const dfInput = document.getElementById('ov-data-fim');
+  if (diInput) diInput.value = at.dataInicio ? at.dataInicio.split('T')[0] : '';
+  if (dfInput) dfInput.value = at.dataLimite ? at.dataLimite.split('T')[0] : '';
+
+  // Botão Concluir
+  const btnC = document.getElementById('ov-btn-concluir');
+  if (btnC) {
+    if (at.status === 'concluida') {
+      btnC.textContent = '✓ Concluída';
+      btnC.classList.add('done');
+      btnC.onclick = null;
+    } else {
+      btnC.textContent = '✓ Marcar como Concluída';
+      btnC.classList.remove('done');
+      btnC.onclick = concluirAtividade;
+    }
+  }
+
+  const dlWrap = document.getElementById('ov-deadline-wrap');
+  const dlSpan = document.getElementById('ov-deadline');
+  if (dlWrap && dlSpan) {
+    if (at.dataLimite && at.status !== 'concluida') {
+      const hoje2 = new Date(); hoje2.setHours(0,0,0,0);
+      const dlDate = new Date(at.dataLimite + 'T00:00:00');
+      const diffMs = dlDate - hoje2;
+      const diffD  = Math.round(diffMs / 86400000);
+      const ddmm   = dlDate.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'});
+      if (diffD < 0) {
+        dlSpan.innerHTML = '<span style="color:var(--red)">⏰ Vencida há ' + Math.abs(diffD) + ' dia' + (Math.abs(diffD)!==1?'s':'') + ' · ' + ddmm + '</span>';
+      } else if (diffD === 0) {
+        dlSpan.innerHTML = '<span style="color:#d69e2e">⚠️ Vence hoje · ' + ddmm + '</span>';
+      } else if (diffD <= 7) {
+        dlSpan.innerHTML = '<span style="color:#d69e2e">⚠️ Vence em ' + diffD + ' dia' + (diffD!==1?'s':'') + ' · ' + ddmm + '</span>';
+      } else {
+        dlSpan.innerHTML = '<span style="color:var(--text3)">📅 Prazo: ' + ddmm + ' (' + diffD + ' dias)</span>';
+      }
+      dlWrap.style.display = '';
+    } else {
+      dlWrap.style.display = 'none';
+    }
+  }
 
   document.querySelectorAll('.ov-tab').forEach(function(t, i) { t.classList.toggle('active', i === 0); });
   renderOverlayTab('registro');
@@ -2977,6 +3347,51 @@ function addOvRegistro() {
   at.registros.unshift({ id:'reg_'+Date.now(), autor, tipo:'manual', data: new Date().toISOString(), texto });
   saveCliente(c);
   renderOverlayTab('registro');
+}
+
+function saveOvDatas() {
+  const { c, at } = _getOvAt();
+  if (!at) return;
+  const di = document.getElementById('ov-data-inicio')?.value;
+  const df = document.getElementById('ov-data-fim')?.value;
+  if (di !== undefined) at.dataInicio  = di || null;
+  if (df !== undefined) at.dataLimite  = df || null;
+  saveCliente(c);
+  // Atualiza badge de deadline sem fechar o overlay
+  const dlWrap = document.getElementById('ov-deadline-wrap');
+  const dlSpan = document.getElementById('ov-deadline');
+  if (dlWrap && dlSpan) {
+    if (at.dataLimite && at.status !== 'concluida') {
+      const h = new Date(); h.setHours(0,0,0,0);
+      const d = new Date(at.dataLimite + 'T00:00:00');
+      const dd = Math.round((d - h) / 86400000);
+      const ddmm = d.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'});
+      if (dd < 0)      dlSpan.innerHTML = '<span style="color:var(--red)">⏰ Vencida há ' + Math.abs(dd) + ' dia' + (Math.abs(dd)!==1?'s':'') + ' · ' + ddmm + '</span>';
+      else if (dd===0) dlSpan.innerHTML = '<span style="color:#d69e2e">⚠️ Vence hoje · ' + ddmm + '</span>';
+      else if (dd<=7)  dlSpan.innerHTML = '<span style="color:#d69e2e">⚠️ Vence em ' + dd + ' dia' + (dd!==1?'s':'') + ' · ' + ddmm + '</span>';
+      else             dlSpan.innerHTML = '<span style="color:var(--text3)">📅 Prazo: ' + ddmm + ' (' + dd + ' dias)</span>';
+      dlWrap.style.display = '';
+    } else {
+      dlWrap.style.display = 'none';
+    }
+  }
+}
+
+function concluirAtividade() {
+  const { c, pb, at } = _getOvAt();
+  if (!at || at.status === 'concluida') return;
+  at.status = 'concluida';
+  at.dataConclusao = new Date().toISOString();
+  if (!at.registros) at.registros = [];
+  const ativo = getConsultorAtivo();
+  const cons  = getConsultores().find(function(x) { return x.id === ativo; });
+  const autor = cons?.nome || ativo;
+  at.registros.unshift({ id:'reg_'+Date.now(), tipo:'evento', texto: autor + ' marcou como Concluída', data: new Date().toISOString() });
+  saveCliente(c);
+  // Atualiza a tela de fundo (progresso do playbook)
+  if (typeof renderCliente === 'function') renderCliente(_ov_cId);
+  // Re-abre o overlay para refletir o novo estado
+  openAtividade(_ov_cId, _ov_pbId, _ov_atId);
 }
 
 function renderOvChecklist() {
