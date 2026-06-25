@@ -2429,6 +2429,116 @@ function renderAba360(c) {
     </div>`;
 }
 
+function renderAbaAtividades(c) {
+  const pbs = c.ativPlaybooks || [];
+
+  const newPbFormHtml = _pb_form_open
+    ? `<div class="pb-inline-form">
+        <input class="pb-inline-input" id="pb-nome-input" placeholder="Nome do playbook..." onkeydown="if(event.key==='Enter')criarAtivPlaybook('${c.id}')">
+        <button class="btn btn-primary btn-sm" onclick="criarAtivPlaybook('${c.id}')">Criar</button>
+        <button class="btn btn-sm" onclick="cancelarFormPlaybook('${c.id}')">✕</button>
+       </div>`
+    : `<button class="pb-add-btn" onclick="abrirFormPlaybook('${c.id}')">+ Novo</button>`;
+
+  const pbListHtml = pbs.map(pb => {
+    const expanded = _pb_expandidos[pb.id];
+    const atsHtml  = expanded ? pb.atividades.map(at => {
+      const hasRegs = at.registros && at.registros.length > 0;
+      const active  = _at_sel === at.id;
+      return `<div class="pb-item${active?' active':''}" onclick="selecionarAtividade('${pb.id}','${at.id}','${c.id}')">
+        <span>${hasRegs ? '●' : '○'}</span>
+        <span>${at.nome}</span>
+      </div>`;
+    }).join('') + (_at_form_pb === pb.id
+      ? `<div class="pb-inline-form">
+          <input class="pb-inline-input" id="at-nome-input-${pb.id}" placeholder="Nome da atividade..." onkeydown="if(event.key==='Enter')criarAtividade('${pb.id}','${c.id}')">
+          <button class="btn btn-primary btn-sm" onclick="criarAtividade('${pb.id}','${c.id}')">Criar</button>
+          <button class="btn btn-sm" onclick="cancelarFormAtividade('${c.id}')">✕</button>
+         </div>`
+      : `<button class="pb-add-btn" onclick="abrirFormAtividade('${pb.id}','${c.id}')">+ Atividade</button>`) : '';
+
+    return `<div>
+      <div class="pb-title-row" onclick="toggleAtivPlaybook('${pb.id}','${c.id}')">
+        <span>📋</span>
+        <span>${pb.nome}</span>
+        <span class="pb-chev">${expanded ? '▾' : '▸'}</span>
+      </div>
+      ${atsHtml}
+    </div>`;
+  }).join('');
+
+  let panelHtml;
+  if (!_at_sel) {
+    panelHtml = `<div class="at-empty">
+      <div style="font-size:32px">📝</div>
+      <div>Selecione uma atividade<br>para registrar reunião,<br>decisão ou detalhe.</div>
+    </div>`;
+  } else {
+    let foundAt = null, foundPbId = null;
+    for (const pb of pbs) {
+      const at = pb.atividades.find(a => a.id === _at_sel);
+      if (at) { foundAt = at; foundPbId = pb.id; break; }
+    }
+    if (!foundAt) {
+      panelHtml = `<div class="at-empty"><div>Atividade não encontrada.</div></div>`;
+    } else {
+      const regsHtml = foundAt.registros.length
+        ? foundAt.registros.map(r => `
+          <div class="at-reg-item">
+            <div class="at-reg-meta">${r.autor} · ${fmtDateTime(r.data)}</div>
+            <div class="at-reg-text">${r.texto}</div>
+          </div>`).join('')
+        : '';
+      panelHtml = `
+        <div class="at-title">${foundAt.nome}</div>
+        ${regsHtml}
+        <div class="at-write">
+          <textarea id="at-reg-input" placeholder="Registrar reunião, decisão ou detalhe..." style="width:100%;min-height:90px;padding:10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;resize:vertical;box-sizing:border-box"></textarea>
+          <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="addRegistroAtividade('${c.id}','${foundPbId}','${foundAt.id}')">Salvar registro</button>
+        </div>`;
+    }
+  }
+
+  return `<div class="pb-layout">
+    <div class="pb-sidebar">
+      ${newPbFormHtml}
+      ${pbListHtml}
+    </div>
+    <div class="pb-panel">${panelHtml}</div>
+  </div>`;
+}
+
+function toggleAtivPlaybook(pbId, clienteId) {
+  _pb_expandidos[pbId] = !_pb_expandidos[pbId];
+  renderCliente(clienteId);
+}
+
+function selecionarAtividade(pbId, atId, clienteId) {
+  _pb_expandidos[pbId] = true;
+  _at_sel = atId;
+  renderCliente(clienteId);
+}
+
+function abrirFormPlaybook(clienteId) {
+  _pb_form_open = true;
+  renderCliente(clienteId);
+}
+
+function cancelarFormPlaybook(clienteId) {
+  _pb_form_open = false;
+  renderCliente(clienteId);
+}
+
+function abrirFormAtividade(pbId, clienteId) {
+  _at_form_pb = pbId;
+  renderCliente(clienteId);
+}
+
+function cancelarFormAtividade(clienteId) {
+  _at_form_pb = null;
+  renderCliente(clienteId);
+}
+
 function toggleFase(idx) {
   _open_fases[idx] = (_open_fases[idx] === false) ? true : false;
   const bodies = document.querySelectorAll('#sec-cliente .phase-body');
