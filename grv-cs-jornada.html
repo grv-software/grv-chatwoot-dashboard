@@ -2539,6 +2539,70 @@ function cancelarFormAtividade(clienteId) {
   renderCliente(clienteId);
 }
 
+function criarAtivPlaybook(clienteId) {
+  const input = document.getElementById('pb-nome-input');
+  const nome  = input?.value?.trim();
+  if (!nome) return;
+  const c  = getCliente(clienteId);
+  const id = 'pb_' + Date.now();
+  c.ativPlaybooks = c.ativPlaybooks || [];
+  c.ativPlaybooks.push({id, nome, criadoEm: new Date().toISOString(), atividades: []});
+  saveCliente(c);
+  _pb_form_open      = false;
+  _pb_expandidos[id] = true;
+  renderCliente(clienteId);
+}
+
+function criarAtividade(pbId, clienteId) {
+  const input = document.getElementById('at-nome-input-' + pbId);
+  const nome  = input?.value?.trim();
+  if (!nome) return;
+  const c  = getCliente(clienteId);
+  const pb = (c.ativPlaybooks || []).find(p => p.id === pbId);
+  if (!pb) return;
+  const id = 'at_' + Date.now();
+  pb.atividades.push({id, nome, registros: []});
+  saveCliente(c);
+  _at_form_pb = null;
+  _at_sel     = id;
+  renderCliente(clienteId);
+}
+
+function addRegistroAtividade(clienteId, pbId, atId) {
+  const ta    = document.getElementById('at-reg-input');
+  const texto = ta?.value?.trim();
+  if (!texto) return;
+  const c     = getCliente(clienteId);
+  const pb    = (c.ativPlaybooks || []).find(p => p.id === pbId);
+  if (!pb) return;
+  const at    = pb.atividades.find(a => a.id === atId);
+  if (!at) return;
+  const ativo = getConsultorAtivo();
+  const autor = getConsultores().find(x => x.id === ativo)?.nome || 'Consultor';
+  at.registros.unshift({id:'reg_'+Date.now(), autor, data: new Date().toISOString(), texto});
+  saveCliente(c);
+  renderCliente(clienteId);
+}
+
+function renderAbaNotas(c) {
+  const regsHtml = c.registros.length
+    ? c.registros.map(r => `
+      <div class="at-reg-item">
+        <div class="at-reg-meta">${r.autor} · ${fmtDateTime(r.data)}</div>
+        <div class="at-reg-text">${r.texto}</div>
+      </div>`).join('')
+    : `<div style="color:var(--text3);font-size:13px;padding:16px 0">Nenhuma nota ainda.</div>`;
+
+  return `<div class="card-block">
+    <div class="section-title">Notas</div>
+    <div id="regs-${c.id}">${regsHtml}</div>
+    <div class="reg-form at-write">
+      <textarea id="reg-input-${c.id}" placeholder="Adicionar anotação..." style="width:100%;min-height:90px;padding:10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;resize:vertical;box-sizing:border-box"></textarea>
+      <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="addRegistro('${c.id}')">Salvar nota</button>
+    </div>
+  </div>`;
+}
+
 function toggleFase(idx) {
   _open_fases[idx] = (_open_fases[idx] === false) ? true : false;
   const bodies = document.querySelectorAll('#sec-cliente .phase-body');
