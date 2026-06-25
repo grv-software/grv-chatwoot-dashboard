@@ -55,9 +55,7 @@ let _pb_form_open     = false; // true quando form "+ Novo Atividade-Playbook" e
 let _at_form_pb       = null;  // id do ativPlaybook com form de nova atividade aberto
 ```
 
-**Reset ao navegar:** No início de `renderCliente(id)`, se `id !== _cliente_id_atual`, resetar todos os 5 estados acima e atribuir `_cliente_id_atual = id`. Após o reset, auto-expandir o primeiro `ativPlaybook` do cliente se existir (`_pb_expandidos[c.ativPlaybooks[0].id] = true`).
-
-**Variáveis CSS verificadas:** `--text2: #4a5568` e `--surface: #ffffff` existem no arquivo. O CSS novo pode usá-las sem adaptação.
+**Reset ao navegar:** No início de `renderCliente(id)`, se `id !== _cliente_id_atual`, resetar todos os 5 estados acima e atribuir `_cliente_id_atual = id`.
 
 Re-render via `renderCliente(id)` ao mudar aba, selecionar atividade ou criar itens.
 
@@ -168,7 +166,7 @@ Severiano Rocha · 15/02/2026 · 14:30
 - Separador `border-bottom: 1px solid var(--border)` entre registros
 - Textarea (`id="at-reg-input"`) + botão "Salvar registro" ao final
 - Salvar chama `addRegistroAtividade(clienteId, pbId, atId)`: lê textarea, valida não vazio, prepende `{id: 'reg_'+Date.now(), autor: consultorNome, data: ISO, texto}` ao array `atividade.registros`, limpa textarea, re-renderiza
-- `consultorNome`: obtido via `getConsultores().find(x => x.id === getConsultorAtivo())?.nome || 'Consultor'`. `getConsultorAtivo()` lê `localStorage.getItem('grv_cs_consultor_ativo')` e já existe no arquivo.
+- `consultorNome`: nome do consultor ativo no contexto (usar `_consultor_ativo` se existir, senão o `c.consultorId` resolvido via SEED_CONSULTORES)
 
 ### Modelo de Dados — ativPlaybooks
 
@@ -305,15 +303,10 @@ if (id !== _cliente_id_atual) {
   _at_sel           = null;
   _pb_form_open     = false;
   _at_form_pb       = null;
-  // auto-expandir o primeiro ativPlaybook se existir
-  const c0 = getCliente(id);
-  if (c0 && c0.ativPlaybooks && c0.ativPlaybooks.length > 0) {
-    _pb_expandidos[c0.ativPlaybooks[0].id] = true;
-  }
 }
 ```
 
-Garante que ao abrir um novo cliente, o usuário começa sempre na Visão 360° com estado limpo e, na aba Atividades, o primeiro playbook já aparece expandido.
+Garante que ao abrir um novo cliente, o usuário começa sempre na Visão 360° com estado limpo.
 
 ---
 
