@@ -559,9 +559,17 @@ function mkFases(checks) {
 
 const SEED_CLIENTES = [
   {
-    id:'KMSIL', projeto:'SAGP-00036', produto:'CPS', consultorId:'ana-paula',
+    id:'KMSIL', projeto:'SAGP-00036', produto:'CPS', consultorId:'ana-paula', segmento:'Saúde', csId:'cristiano',
     etapa:'Engajamento', dataInicio:'2026-03-05', prazo:'2026-09-30',
     proximaAcao:'Acompanhar uso do módulo Compras',
+    ativPlaybooks:[
+      {id:'pb_k1',nome:'Implantação CPS',criadoEm:'2026-03-10T09:00:00',atividades:[
+        {id:'at_k1',nome:'1ª Reunião de engajamento',registros:[
+          {id:'reg_k1',autor:'Ana Paula Souza',data:'2026-03-10T14:00:00',texto:'Kickoff realizado com equipe de TI. Alinhado acesso ao ambiente de homologação.'}
+        ]},
+        {id:'at_k2',nome:'2ª Reunião de engajamento',registros:[]}
+      ]}
+    ],
     fases: mkFases([1,1,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[
       {id:'r2',autor:'Ana Paula Souza',data:'2026-04-02T14:30:00',texto:'Parametrização inicial concluída. Aguardando validação de dados.'},
@@ -573,9 +581,23 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'RAS METAL', projeto:'SAGP-00091', produto:'CPS', consultorId:'ana-paula',
+    id:'RAS METAL', projeto:'SAGP-00091', produto:'CPS', consultorId:'ana-paula', segmento:'Indústria', csId:'felipe',
     etapa:'Evolução', dataInicio:'2026-01-30', prazo:'2026-05-11',
     proximaAcao:'Resolver pendência de importação de dados',
+    ativPlaybooks:[
+      {id:'pb_r1',nome:'Implantação CPS',criadoEm:'2026-02-01T09:00:00',atividades:[
+        {id:'at_r1',nome:'1ª Reunião de engajamento',registros:[
+          {id:'reg_r1',autor:'Ana Paula Souza',data:'2026-02-01T14:00:00',texto:'Kickoff realizado. Cliente com dificuldades de acesso ao sistema legado.'},
+          {id:'reg_r2',autor:'Ana Paula Souza',data:'2026-02-08T10:30:00',texto:'Follow-up: acesso ao sistema legado resolvido. Importação de dados agendada.'}
+        ]},
+        {id:'at_r2',nome:'2ª Reunião de evolução',registros:[
+          {id:'reg_r3',autor:'Ana Paula Souza',data:'2026-03-15T15:00:00',texto:'Parametrização do módulo Compras concluída. Aguardando validação do cliente.'}
+        ]}
+      ]},
+      {id:'pb_r2',nome:'Visita técnica',criadoEm:'2026-03-20T09:00:00',atividades:[
+        {id:'at_r3',nome:'Visita de campo',registros:[]}
+      ]}
+    ],
     fases: mkFases([1,1,1,1, 1,0,1,1, 1,0,0,0, 0,0,0,0]),
     registros:[
       {id:'r1',autor:'Ana Paula Souza',data:'2026-02-10T11:00:00',texto:'Cliente com dificuldades na importação do sistema legado.'},
@@ -587,9 +609,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'AXONE', projeto:'SAGP-00059', produto:'CPS', consultorId:'ana-paula',
+    id:'AXONE', projeto:'SAGP-00059', produto:'CPS', consultorId:'ana-paula', segmento:'Serviços', csId:'silvia',
     etapa:'Engajamento', dataInicio:'2026-03-10', prazo:'2026-08-02',
     proximaAcao:'Agendamento de treinamento avançado',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,0, 1,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[
       {id:'r1',autor:'Ana Paula Souza',data:'2026-03-20T09:00:00',texto:'Kickoff realizado. Pendente acesso ao SAG para dois usuários.'},
@@ -600,9 +623,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'AÇO ART', projeto:'SAGP-00068', produto:'CPS', consultorId:'ana-paula',
+    id:'AÇO ART', projeto:'SAGP-00068', produto:'CPS', consultorId:'ana-paula', segmento:'Indústria', csId:'carlos',
     etapa:'Pausado', dataInicio:'2025-12-02', prazo:null,
     proximaAcao:'Aguardar retorno do cliente',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[
       {id:'r1',autor:'Ana Paula Souza',data:'2026-02-15T10:00:00',texto:'Cliente solicitou pausa por mudança interna na gestão.'},
@@ -614,9 +638,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'ALPARGATAS CPS', projeto:'SAGP-00128', produto:'CPS/IOT', consultorId:'ana-paula',
+    id:'ALPARGATAS CPS', projeto:'SAGP-00128', produto:'CPS/IOT', consultorId:'ana-paula', segmento:'Indústria', csId:'maria',
     etapa:'Conclusão', dataInicio:'2026-04-28', prazo:'2026-11-06',
     proximaAcao:'Validar entrega final com diretoria',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,1,1,1, 0,0,0,0]),
     registros:[
       {id:'r1',autor:'Ana Paula Souza',data:'2026-05-10T14:00:00',texto:'Projeto em fase final. Reunião com diretoria agendada para próxima semana.'},
@@ -629,17 +654,19 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'FRAY', projeto:'SAGP-00039', produto:'CPS', consultorId:'carlos',
+    id:'FRAY', projeto:'SAGP-00039', produto:'CPS', consultorId:'carlos', segmento:'Saúde', csId:'ana-paula',
     etapa:'1ª Reunião', dataInicio:'2026-03-29', prazo:'2026-09-21',
     proximaAcao:'Agendar reunião de kickoff',
+    ativPlaybooks:[],
     fases: mkFases([0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[{de:null,para:'1ª Reunião',data:'2026-03-29T09:00:00',motivo:'Início do projeto'}],
   },
   {
-    id:'FELIX INDUSTRIAL', projeto:'SAGP-00092', produto:'CPS', consultorId:'carlos',
+    id:'FELIX INDUSTRIAL', projeto:'SAGP-00092', produto:'CPS', consultorId:'carlos', segmento:'Indústria', csId:'severiano',
     etapa:'1ª Reunião', dataInicio:'2026-01-14', prazo:'2026-09-29',
     proximaAcao:'Confirmar data de kickoff com o cliente',
+    ativPlaybooks:[],
     fases: mkFases([1,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[
       {id:'r1',autor:'Carlos Menezes',data:'2026-01-20T09:00:00',texto:'Apresentação inicial realizada. Aguardando agenda para kickoff.'},
@@ -647,17 +674,19 @@ const SEED_CLIENTES = [
     historicoEtapas:[{de:null,para:'1ª Reunião',data:'2026-01-14T09:00:00',motivo:'Início do projeto'}],
   },
   {
-    id:'USIMAZA EMBRAER', projeto:'SAGP-00058', produto:'CPS', consultorId:'carlos',
+    id:'USIMAZA EMBRAER', projeto:'SAGP-00058', produto:'CPS', consultorId:'carlos', segmento:'Indústria', csId:'silvia',
     etapa:'1ª Reunião', dataInicio:'2026-03-30', prazo:'2026-09-17',
     proximaAcao:'Primeira reunião de alinhamento',
+    ativPlaybooks:[],
     fases: mkFases([0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[{de:null,para:'1ª Reunião',data:'2026-03-30T09:00:00',motivo:'Início do projeto'}],
   },
   {
-    id:'CAMPOSC', projeto:'SAGP-00038', produto:'CPS', consultorId:'carlos',
+    id:'CAMPOSC', projeto:'SAGP-00038', produto:'CPS', consultorId:'carlos', segmento:'Agronegócio', csId:'carlos',
     etapa:'Pausado', dataInicio:'2025-12-16', prazo:null,
     proximaAcao:'Aguardar definição de novo responsável',
+    ativPlaybooks:[],
     fases: mkFases([1,1,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[
       {id:'r1',autor:'Carlos Menezes',data:'2026-01-08T10:00:00',texto:'Responsável pelo projeto saiu da empresa. Projeto pausado até nova indicação.'},
@@ -668,17 +697,19 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'SOARES FERRAMENTARIA', projeto:'SAGP-00131', produto:'CPS', consultorId:'maria',
+    id:'SOARES FERRAMENTARIA', projeto:'SAGP-00131', produto:'CPS', consultorId:'maria', segmento:'Indústria', csId:'ana-paula',
     etapa:'1ª Reunião', dataInicio:'2026-06-02', prazo:'2026-09-09',
     proximaAcao:'Agendar kickoff com equipe do cliente',
+    ativPlaybooks:[],
     fases: mkFases([0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[{de:null,para:'1ª Reunião',data:'2026-06-02T09:00:00',motivo:'Início do projeto'}],
   },
   {
-    id:'LIQUOS', projeto:'SAGP-00093', produto:'CPS', consultorId:'maria',
+    id:'LIQUOS', projeto:'SAGP-00093', produto:'CPS', consultorId:'maria', segmento:'Saúde', csId:'cristiano',
     etapa:'Evolução', dataInicio:'2026-01-30', prazo:'2026-09-09',
     proximaAcao:'Checkpoint de progresso mensal',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,0,0,0, 0,0,0,0]),
     registros:[
       {id:'r1',autor:'Maria Lima',data:'2026-04-15T10:00:00',texto:'Evolução andando bem. Cliente muito engajado com a plataforma.'},
@@ -691,9 +722,10 @@ const SEED_CLIENTES = [
   },
   // ── Cristiano Santos ──────────────────────────────────────
   {
-    id:'METALVALE', projeto:'SAGP-00101', produto:'CPS', consultorId:'cristiano',
+    id:'METALVALE', projeto:'SAGP-00101', produto:'CPS', consultorId:'cristiano', segmento:'Indústria', csId:'felipe',
     etapa:'Evolução', dataInicio:'2026-02-10', prazo:'2026-12-15',
     proximaAcao:'Checkpoint mensal de evolução',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -703,9 +735,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'SIMONSEN', projeto:'SAGP-00102', produto:'CPS', consultorId:'cristiano',
+    id:'SIMONSEN', projeto:'SAGP-00102', produto:'CPS', consultorId:'cristiano', segmento:'Varejo', csId:'maria',
     etapa:'Evolução', dataInicio:'2025-10-01', prazo:'2026-03-31',
     proximaAcao:'Retomar agenda com gerência do cliente',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,1,0,0, 0,0,0,0]),
     registros:[{id:'r1',autor:'Cristiano Santos',data:'2026-04-01T10:00:00',texto:'Prazo expirado. Aguardando retomada com nova data.'}],
     historicoEtapas:[
@@ -715,9 +748,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'MECATRON', projeto:'SAGP-00103', produto:'CPS', consultorId:'cristiano',
+    id:'MECATRON', projeto:'SAGP-00103', produto:'CPS', consultorId:'cristiano', segmento:'Indústria', csId:'severiano',
     etapa:'Engajamento', dataInicio:'2025-09-15', prazo:'2026-01-31',
     proximaAcao:'Escalar para gestão comercial',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -726,9 +760,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'POLIMOLD', projeto:'SAGP-00104', produto:'CPS', consultorId:'cristiano',
+    id:'POLIMOLD', projeto:'SAGP-00104', produto:'CPS', consultorId:'cristiano', segmento:'Indústria', csId:'ana-paula',
     etapa:'Engajamento', dataInicio:'2025-11-01', prazo:'2026-04-30',
     proximaAcao:'Agendar reunião de alinhamento urgente',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -737,9 +772,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'ELETROTINS', projeto:'SAGP-00105', produto:'CPS', consultorId:'cristiano',
+    id:'ELETROTINS', projeto:'SAGP-00105', produto:'CPS', consultorId:'cristiano', segmento:'Indústria', csId:'carlos',
     etapa:'Pausado', dataInicio:'2025-08-01', prazo:null,
     proximaAcao:'Aguardar reestruturação interna do cliente',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -748,9 +784,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'BORBOREMA', projeto:'SAGP-00106', produto:'CPS', consultorId:'cristiano',
+    id:'BORBOREMA', projeto:'SAGP-00106', produto:'CPS', consultorId:'cristiano', segmento:'Varejo', csId:'felipe',
     etapa:'Pausado', dataInicio:'2025-07-15', prazo:null,
     proximaAcao:'Confirmar data de retomada',
+    ativPlaybooks:[],
     fases: mkFases([1,1,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -759,9 +796,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'RETALHOMAX', projeto:'SAGP-00107', produto:'CPS', consultorId:'cristiano',
+    id:'RETALHOMAX', projeto:'SAGP-00107', produto:'CPS', consultorId:'cristiano', segmento:'Varejo', csId:'silvia',
     etapa:'Conclusão', dataInicio:'2025-06-01', prazo:'2026-06-30',
     proximaAcao:'Encerramento formal com NPS',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1]),
     registros:[],
     historicoEtapas:[
@@ -772,18 +810,20 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'TORNEFER', projeto:'SAGP-00108', produto:'CPS', consultorId:'cristiano',
+    id:'TORNEFER', projeto:'SAGP-00108', produto:'CPS', consultorId:'cristiano', segmento:'Indústria', csId:'maria',
     etapa:'1ª Reunião', dataInicio:'2026-06-01', prazo:'2026-12-20',
     proximaAcao:'Agendar kickoff com equipe técnica',
+    ativPlaybooks:[],
     fases: mkFases([0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[{de:null,para:'1ª Reunião',data:'2026-06-01T09:00:00',motivo:'Início do projeto'}],
   },
   // ── Felipe Alves ──────────────────────────────────────────
   {
-    id:'INDALPE', projeto:'SAGP-00111', produto:'CPS', consultorId:'felipe',
+    id:'INDALPE', projeto:'SAGP-00111', produto:'CPS', consultorId:'felipe', segmento:'Saúde', csId:'cristiano',
     etapa:'Engajamento', dataInicio:'2026-03-15', prazo:'2026-10-30',
     proximaAcao:'Treinamento módulo Vendas',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -792,9 +832,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'ROTOFER', projeto:'SAGP-00112', produto:'NX/IOT', consultorId:'felipe',
+    id:'ROTOFER', projeto:'SAGP-00112', produto:'NX/IOT', consultorId:'felipe', segmento:'Indústria', csId:'ana-paula',
     etapa:'Evolução', dataInicio:'2026-01-10', prazo:'2026-07-31',
     proximaAcao:'Validação de sensores NX linha 3',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,1,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -804,9 +845,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'AGROFLEX', projeto:'SAGP-00113', produto:'NX/IOT', consultorId:'felipe',
+    id:'AGROFLEX', projeto:'SAGP-00113', produto:'NX/IOT', consultorId:'felipe', segmento:'Agronegócio', csId:'carlos',
     etapa:'Engajamento', dataInicio:'2025-10-20', prazo:'2026-03-15',
     proximaAcao:'Resolver problema de integração IOT',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -815,9 +857,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'LAMIFER', projeto:'SAGP-00114', produto:'CPS', consultorId:'felipe',
+    id:'LAMIFER', projeto:'SAGP-00114', produto:'CPS', consultorId:'felipe', segmento:'Indústria', csId:'severiano',
     etapa:'Evolução', dataInicio:'2025-12-01', prazo:'2026-05-01',
     proximaAcao:'Retomada após troca de TI no cliente',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -827,9 +870,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'PLASVALE', projeto:'SAGP-00115', produto:'CPS', consultorId:'felipe',
+    id:'PLASVALE', projeto:'SAGP-00115', produto:'CPS', consultorId:'felipe', segmento:'Saúde', csId:'felipe',
     etapa:'Pausado', dataInicio:'2025-09-01', prazo:null,
     proximaAcao:'Aguardar liberação de budget 2026',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -838,9 +882,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'LAMINEX', projeto:'SAGP-00116', produto:'NX/IOT', consultorId:'felipe',
+    id:'LAMINEX', projeto:'SAGP-00116', produto:'NX/IOT', consultorId:'felipe', segmento:'Serviços', csId:'silvia',
     etapa:'Conclusão', dataInicio:'2025-04-01', prazo:'2026-06-30',
     proximaAcao:'Encerramento formal e NPS',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1]),
     registros:[],
     historicoEtapas:[
@@ -851,18 +896,20 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'COMPRESSEI', projeto:'SAGP-00117', produto:'CPS', consultorId:'felipe',
+    id:'COMPRESSEI', projeto:'SAGP-00117', produto:'CPS', consultorId:'felipe', segmento:'Indústria', csId:'maria',
     etapa:'1ª Reunião', dataInicio:'2026-05-20', prazo:'2026-11-30',
     proximaAcao:'Kick-off agendado para próxima semana',
+    ativPlaybooks:[],
     fases: mkFases([0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[{de:null,para:'1ª Reunião',data:'2026-05-20T09:00:00',motivo:'Início do projeto'}],
   },
   // ── Silvia Costa ──────────────────────────────────────────
   {
-    id:'NXTEC', projeto:'SAGP-00121', produto:'NX/IOT', consultorId:'silvia',
+    id:'NXTEC', projeto:'SAGP-00121', produto:'NX/IOT', consultorId:'silvia', segmento:'Serviços', csId:'ana-paula',
     etapa:'Engajamento', dataInicio:'2026-02-15', prazo:'2026-10-15',
     proximaAcao:'Configuração de dashboards NX com operadores',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -871,9 +918,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'SENSORTEC', projeto:'SAGP-00122', produto:'NX/IOT', consultorId:'silvia',
+    id:'SENSORTEC', projeto:'SAGP-00122', produto:'NX/IOT', consultorId:'silvia', segmento:'Serviços', csId:'cristiano',
     etapa:'Evolução', dataInicio:'2025-11-01', prazo:'2026-08-31',
     proximaAcao:'Calibração de sensores linha 2',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,1,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -883,9 +931,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'METATRON', projeto:'SAGP-00123', produto:'NX/IOT', consultorId:'silvia',
+    id:'METATRON', projeto:'SAGP-00123', produto:'NX/IOT', consultorId:'silvia', segmento:'Indústria', csId:'carlos',
     etapa:'Engajamento', dataInicio:'2025-10-01', prazo:'2026-03-01',
     proximaAcao:'Reunião de alinhamento urgente — prazo vencido',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -894,9 +943,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'PLASTIMETAL', projeto:'SAGP-00124', produto:'NX/IOT', consultorId:'silvia',
+    id:'PLASTIMETAL', projeto:'SAGP-00124', produto:'NX/IOT', consultorId:'silvia', segmento:'Indústria', csId:'severiano',
     etapa:'Evolução', dataInicio:'2025-09-01', prazo:'2026-02-28',
     proximaAcao:'Escalar dificuldades técnicas para coordenação',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -906,9 +956,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'IOTSYSTEM', projeto:'SAGP-00125', produto:'NX/IOT', consultorId:'silvia',
+    id:'IOTSYSTEM', projeto:'SAGP-00125', produto:'NX/IOT', consultorId:'silvia', segmento:'Serviços', csId:'felipe',
     etapa:'Pausado', dataInicio:'2025-07-01', prazo:null,
     proximaAcao:'Aguardar resolução técnica do cliente',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -918,9 +969,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'NXPRIME', projeto:'SAGP-00126', produto:'NX/IOT', consultorId:'silvia',
+    id:'NXPRIME', projeto:'SAGP-00126', produto:'NX/IOT', consultorId:'silvia', segmento:'Serviços', csId:'maria',
     etapa:'Conclusão', dataInicio:'2025-03-01', prazo:'2026-05-31',
     proximaAcao:'NPS e documentação de encerramento',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1]),
     registros:[],
     historicoEtapas:[
@@ -932,9 +984,20 @@ const SEED_CLIENTES = [
   },
   // ── Severiano Rocha ───────────────────────────────────────
   {
-    id:'ROBOTIX', projeto:'SAGP-00131', produto:'NX/IOT', consultorId:'severiano',
+    id:'ROBOTIX', projeto:'SAGP-00131', produto:'NX/IOT', consultorId:'severiano', segmento:'Serviços', csId:'silvia',
     etapa:'Engajamento', dataInicio:'2026-01-20', prazo:'2026-11-30',
     proximaAcao:'Integração com sistemas legados ERP',
+    ativPlaybooks:[
+      {id:'pb_rob1',nome:'Implantação NX/IOT',criadoEm:'2026-04-05T09:00:00',atividades:[
+        {id:'at_rob1',nome:'1ª Reunião de engajamento',registros:[
+          {id:'reg_rob1',autor:'Severiano Rocha',data:'2026-04-05T14:00:00',texto:'Kickoff realizado com sucesso. Equipe técnica bem engajada. Cronograma de instalação dos sensores definido.'}
+        ]},
+        {id:'at_rob2',nome:'Configuração de sensores',registros:[
+          {id:'reg_rob2',autor:'Severiano Rocha',data:'2026-04-20T16:00:00',texto:'12 sensores instalados na linha de produção principal. Testes de conectividade OK.'}
+        ]},
+        {id:'at_rob3',nome:'Treinamento de usuários',registros:[]}
+      ]}
+    ],
     fases: mkFases([1,1,1,1, 1,1,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -943,9 +1006,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'AUTOMIND', projeto:'SAGP-00132', produto:'NX/IOT', consultorId:'severiano',
+    id:'AUTOMIND', projeto:'SAGP-00132', produto:'NX/IOT', consultorId:'severiano', segmento:'Serviços', csId:'ana-paula',
     etapa:'Evolução', dataInicio:'2026-02-01', prazo:'2026-09-30',
     proximaAcao:'Treinamento avançado de operadores',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -955,9 +1019,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'USINAGEM3D', projeto:'SAGP-00133', produto:'NX/IOT', consultorId:'severiano',
+    id:'USINAGEM3D', projeto:'SAGP-00133', produto:'NX/IOT', consultorId:'severiano', segmento:'Indústria', csId:'cristiano',
     etapa:'Evolução', dataInicio:'2025-08-01', prazo:'2026-01-31',
     proximaAcao:'Resolver falha de comunicação NX — urgente',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,1,1,1, 1,1,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -967,9 +1032,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'FERROPLAST', projeto:'SAGP-00134', produto:'NX/IOT', consultorId:'severiano',
+    id:'FERROPLAST', projeto:'SAGP-00134', produto:'NX/IOT', consultorId:'severiano', segmento:'Indústria', csId:'carlos',
     etapa:'Engajamento', dataInicio:'2025-11-15', prazo:'2026-05-15',
     proximaAcao:'Retomada após férias coletivas na fábrica',
+    ativPlaybooks:[],
     fases: mkFases([1,1,1,1, 1,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -978,9 +1044,10 @@ const SEED_CLIENTES = [
     ],
   },
   {
-    id:'MAXPRESS', projeto:'SAGP-00135', produto:'NX/IOT', consultorId:'severiano',
+    id:'MAXPRESS', projeto:'SAGP-00135', produto:'NX/IOT', consultorId:'severiano', segmento:'Indústria', csId:'felipe',
     etapa:'Pausado', dataInicio:'2025-06-01', prazo:null,
     proximaAcao:'Confirmar retomada 2º semestre 2026',
+    ativPlaybooks:[],
     fases: mkFases([1,1,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
@@ -991,9 +1058,10 @@ const SEED_CLIENTES = [
   },
   // ── Cancelado (Carlos) ────────────────────────────────────
   {
-    id:'FUNDIFER', projeto:'SAGP-00141', produto:'CPS', consultorId:'carlos',
+    id:'FUNDIFER', projeto:'SAGP-00141', produto:'CPS', consultorId:'carlos', segmento:'Indústria', csId:'severiano',
     etapa:'Cancelado', dataInicio:'2025-05-01', prazo:null,
     proximaAcao:'',
+    ativPlaybooks:[],
     fases: mkFases([1,1,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]),
     registros:[],
     historicoEtapas:[
