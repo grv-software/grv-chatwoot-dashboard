@@ -9,6 +9,10 @@
 
 O sistema atual tem telas parecidas, muito carregadas de blocos quadrados e navegação pouco intuitiva. O objetivo é tornar o app fluido, moderno e fácil de usar — mantendo toda a funcionalidade existente, com visual alinhado ao SAG (Sistema de Atendimento GRV).
 
+### Sequenciamento
+
+Esta spec **depende de v3 (abas 360°/Atividades/Notas) estar concluída**. Não interrompe v3 — estende sua estrutura de dados. O plano de implementação deve ser executado após o merge de v3.
+
 ---
 
 ## Modelo de Dados Consolidado
@@ -47,9 +51,50 @@ Cliente
 
 Atividades delegadas a ele (mas cujo playbook é de outro) aparecem em notificações/filtros, não em Minha Carteira.
 
-### Transição Implantação → CS
+**Migração do seed:** Os 38 clientes do `SEED_CLIENTES` não têm `donoId` nos playbooks. O task de migração deve popular `playbook.donoId = cliente.csId` para todos os playbooks existentes, e inicializar `registros: []`, `checklist: []`, `anotacoes: []` em cada atividade.
 
-Manual: o consultor marca o playbook de implantação como concluído. O sistema atualiza `status` do cliente para `cs_ativo` e registra `dataInicioCS`. O histórico da implantação permanece visível na aba Atividades e na Visão 360°.
+### Regras de Status do Cliente
+
+Calculado a partir dos playbooks de implantação do consultor logado:
+
+| Status | Stripe | Badge | Regra |
+|---|---|---|---|
+| `inicio` | azul `#3182ce` | "Início" | progresso < 15% |
+| `em_ordem` | verde `#38a169` | "Em ordem" | sem atividades atrasadas e nenhum prazo em ≤7 dias |
+| `atencao` | amarelo `#d69e2e` | "Atenção" | alguma atividade com `dataLimite` entre hoje e +7 dias, sem atraso real |
+| `atrasado` | vermelho `#e53e3e` | "Atrasado" | alguma atividade com `dataLimite < hoje` e `status !== 'concluida'` |
+
+Função `getStatusCliente(cliente, consultorId)`:
+```javascript
+function getStatusCliente(cliente, consultorId) {
+  const meusPbs = (cliente.ativPlaybooks || [])
+    .filter(pb => pb.donoId === consultorId);
+  const atividades = meusPbs.flatMap(pb => pb.atividades || []);
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const em7dias = new Date(hoje); em7dias.setDate(em7dias.getDate() + 7);
+  const pendentes = atividades.filter(a => a.status !== 'concluida');
+  if (pendentes.some(a => a.dataLimite && new Date(a.dataLimite) < hoje))
+    return 'atrasado';
+  if (pendentes.some(a => a.dataLimite && new Date(a.dataLimite) <= em7dias))
+    return 'atencao';
+  const progresso = calcProgresso(meusPbs);
+  if (progresso < 15) return 'inicio';
+  return 'em_ordem';
+}
+```
+
+### Transição Implantação → CS (auto-advance adaptado)
+
+**Trigger:** última atividade do playbook de implantação marcada como `concluida`.
+
+**Comportamento:**
+1. Sistema detecta que todas as atividades do playbook de fase `'implantacao'` estão `concluida`
+2. Exibe toast: *"Implantação concluída! Mover cliente para CS Ativo?"* com botão [Confirmar]
+3. Ao confirmar: `cliente.status = 'cs_ativo'`, `cliente.dataInicioCS = new Date().toISOString()`
+4. O evento é adicionado como registro automático no historial: *"Implantação encerrada — cliente movido para CS Ativo"*
+5. O playbook de implantação permanece visível com badge "Encerrado" (read-only)
+
+O `historicoEtapas` existente é preservado como fonte dos eventos automáticos que aparecem no feed do Registro de cada atividade.
 
 ---
 
@@ -275,3 +320,13 @@ Visão gerencial de toda a equipe.
 - Notificações push para atividades delegadas
 - Comentários em atividades de outros consultores
 - Filtros avançados na tabela de consultores
+
+---
+
+## Checklist de Correções Aplicadas (revisão técnica)
+
+- [x] Sequenciamento explícito: executa após v3
+- [x] `getStatusCliente()` com regra completa para "Atenção" (≤7 dias) e "Início" (<15%)
+- [x] Auto-advance adaptado: conclusão do playbook implantação → toast → `cs_ativo`
+- [x] `historicoEtapas` preservado como fonte de eventos automáticos no Registro
+- [x] Migração do seed: `donoId`, `registros[]`, `checklist[]`, `anotacoes[]`
