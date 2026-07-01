@@ -3258,6 +3258,8 @@ let _pb_sel_id        = null;
 let _at_sel           = null;
 let _pb_form_open     = false;
 let _at_form_pb       = null;
+let _pb_menu_open     = false;
+let _pb_menu_id       = null;
 
 function renderCliente(id) {
   const sec = document.getElementById('sec-cliente');
@@ -3432,6 +3434,69 @@ function renderAba360(c) {
     </div>` : ''}`;
 }
 
+function togglePbMenu(evt, pbId, clienteId) {
+  if (evt) evt.stopPropagation();
+  const willOpen = !_pb_menu_open || _pb_menu_id !== pbId;
+  if (_pb_menu_id && _pb_menu_id !== pbId) {
+    const old = document.getElementById('pbmenu-' + _pb_menu_id);
+    if (old) old.style.display = 'none';
+  }
+  _pb_menu_id   = pbId;
+  _pb_menu_open = willOpen;
+  const dd = document.getElementById('pbmenu-' + pbId);
+  if (dd) dd.style.display = willOpen ? 'block' : 'none';
+}
+
+function closePbMenu() {
+  if (_pb_menu_id) {
+    const old = document.getElementById('pbmenu-' + _pb_menu_id);
+    if (old) old.style.display = 'none';
+  }
+  _pb_menu_open = false;
+  _pb_menu_id   = null;
+}
+
+function pausarPlaybook(pbId, clienteId) {
+  closePbMenu();
+  const c  = getCliente(clienteId);
+  const pb = (c?.ativPlaybooks||[]).find(function(p){ return p.id === pbId; });
+  if (!pb) return;
+  pb.status = 'pausado';
+  saveCliente(c);
+  renderCliente(clienteId);
+  showToast('Playbook pausado', 2500);
+}
+
+function reativarPlaybook(pbId, clienteId) {
+  closePbMenu();
+  const c  = getCliente(clienteId);
+  const pb = (c?.ativPlaybooks||[]).find(function(p){ return p.id === pbId; });
+  if (!pb) return;
+  pb.status = 'ativo';
+  saveCliente(c);
+  renderCliente(clienteId);
+  showToast('Playbook reativado', 2500);
+}
+
+function cancelarPlaybook(pbId, clienteId) {
+  closePbMenu();
+  showConfirm(
+    'Cancelar playbook',
+    'O playbook ficará visível no histórico do cliente como leitura. Atividades não aparecerão em Vencimentos.',
+    'Cancelar playbook',
+    function() {
+      const c  = getCliente(clienteId);
+      const pb = (c?.ativPlaybooks||[]).find(function(p){ return p.id === pbId; });
+      if (!pb) return;
+      pb.status = 'cancelado';
+      saveCliente(c);
+      updateVencBadge();
+      renderCliente(clienteId);
+      showToast('Playbook cancelado', 2500);
+    }
+  );
+}
+
 function renderAbaAtividades(c) {
   const pbs  = c.ativPlaybooks || [];
   const _hoje = new Date(); _hoje.setHours(0,0,0,0);
@@ -3452,10 +3517,18 @@ function renderAbaAtividades(c) {
     }).length;
     const pct     = total ? Math.round(done/total*100) : 0;
     const isSel   = pb.id === _pb_sel_id;
+    const pbSt    = pb.status || 'ativo';
     const actBtns = isSel
-      ? `<div style="display:flex;gap:3px;flex-shrink:0">
-          <button class="pb-card-act" title="Renomear" onclick="event.stopPropagation();renomearPlaybook('${pb.id}','${c.id}')">✎</button>
-          <button class="pb-card-act del" title="Excluir" onclick="event.stopPropagation();excluirPlaybook('${pb.id}','${c.id}')">×</button>
+      ? `<div style="position:relative;display:inline-block;flex-shrink:0">
+          <button class="pb-card-act" title="Opções" onclick="event.stopPropagation();togglePbMenu(event,'${pb.id}','${c.id}')">···</button>
+          <div id="pbmenu-${pb.id}" class="ov-dropdown" style="display:none;min-width:175px">
+            <button class="ov-dropdown-item" onclick="closePbMenu();renomearPlaybook('${pb.id}','${c.id}')">✎ Renomear</button>
+            ${pbSt === 'ativo'      ? `<button class="ov-dropdown-item" onclick="pausarPlaybook('${pb.id}','${c.id}')">⏸ Pausar</button>` : ''}
+            ${pbSt !== 'ativo'     ? `<button class="ov-dropdown-item" onclick="reativarPlaybook('${pb.id}','${c.id}')">▶ Reativar</button>` : ''}
+            ${pbSt !== 'cancelado' ? `<button class="ov-dropdown-item" onclick="cancelarPlaybook('${pb.id}','${c.id}')">✕ Cancelar</button>` : ''}
+            <div class="ov-dropdown-divider"></div>
+            <button class="ov-dropdown-item danger" onclick="closePbMenu();excluirPlaybook('${pb.id}','${c.id}')">🗑 Excluir</button>
+          </div>
         </div>` : '';
     return `<div class="at-pb-card${isSel?' sel':''}" onclick="selecionarPb('${pb.id}','${c.id}')">
       <div style="display:flex;align-items:flex-start;gap:4px;margin-bottom:2px">
@@ -3912,6 +3985,10 @@ document.addEventListener('click', function(e) {
     const dd  = document.getElementById('ov-dropdown');
     const btn = document.querySelector('.ov-menu-btn');
     if (dd && !dd.contains(e.target) && btn && !btn.contains(e.target)) closeOvMenu();
+  }
+  if (_pb_menu_open && _pb_menu_id) {
+    const dd  = document.getElementById('pbmenu-' + _pb_menu_id);
+    if (dd && !dd.contains(e.target)) closePbMenu();
   }
 });
 
