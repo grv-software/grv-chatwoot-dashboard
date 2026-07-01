@@ -3517,7 +3517,14 @@ function renderAbaAtividades(c) {
     }).length;
     const pct     = total ? Math.round(done/total*100) : 0;
     const isSel   = pb.id === _pb_sel_id;
-    const pbSt    = pb.status || 'ativo';
+    const pbSt          = pb.status || 'ativo';
+    const pbStatusBadge = pbSt === 'pausado'
+      ? '<span style="font-size:10px;font-weight:700;color:var(--primary);background:#FFF3EE;padding:1px 5px;border-radius:4px;margin-left:4px">⏸</span>'
+      : pbSt === 'cancelado'
+      ? '<span style="font-size:10px;font-weight:700;color:var(--text3);background:var(--border-2);padding:1px 5px;border-radius:4px;margin-left:4px">✕</span>'
+      : '';
+    const cardBorderStyle = pbSt === 'pausado' ? 'border:2px dashed var(--primary)' : '';
+    const cardOpacity     = pbSt === 'cancelado' ? 'opacity:0.6' : '';
     const actBtns = isSel
       ? `<div style="position:relative;display:inline-block;flex-shrink:0">
           <button class="pb-card-act" title="Opções" onclick="event.stopPropagation();togglePbMenu(event,'${pb.id}','${c.id}')">···</button>
@@ -3530,9 +3537,9 @@ function renderAbaAtividades(c) {
             <button class="ov-dropdown-item danger" onclick="closePbMenu();excluirPlaybook('${pb.id}','${c.id}')">🗑 Excluir</button>
           </div>
         </div>` : '';
-    return `<div class="at-pb-card${isSel?' sel':''}" onclick="selecionarPb('${pb.id}','${c.id}')">
+    return `<div class="at-pb-card${isSel?' sel':''}" style="${cardBorderStyle};${cardOpacity}" onclick="selecionarPb('${pb.id}','${c.id}')">
       <div style="display:flex;align-items:flex-start;gap:4px;margin-bottom:2px">
-        <div class="at-pb-card-name" style="flex:1">${pb.nome}</div>
+        <div class="at-pb-card-name" style="flex:1">${pb.nome}${pbStatusBadge}</div>
         ${actBtns}
       </div>
       <div class="at-pb-card-meta">${total} atividade${total!==1?'s':''} · ${done} concluída${done!==1?'s':''}${venc>0?' · <span style="color:var(--red);font-weight:700">'+venc+' vencida'+(venc>1?'s':'')+'</span>':''}</div>
@@ -3596,7 +3603,9 @@ function renderAbaAtividades(c) {
     rightHtml = `
       <div class="at-right-hd">
         <div class="at-right-title">${selPb.nome}</div>
-        ${selPb.encerrado
+        ${(selPb.status||'ativo') === 'cancelado'
+          ? '<span style="font-size:10px;padding:3px 8px;background:var(--border-2);color:var(--text3);border-radius:6px">✕ Cancelado</span>'
+          : selPb.encerrado
           ? '<span style="font-size:10px;padding:3px 8px;background:var(--border-2);color:var(--text3);border-radius:6px">Encerrado</span>'
           : '<button class="btn btn-primary btn-sm" onclick="abrirFormAtividade(\''+selPb.id+'\',\''+c.id+'\')">+ Atividade</button>'}
       </div>
@@ -3760,6 +3769,7 @@ function openAtividade(cId, pbId, atId) {
   _ov_cId = cId; _ov_pbId = pbId; _ov_atId = atId;
   const c  = getCliente(cId);
   const pb = (c?.ativPlaybooks || []).find(p => p.id === pbId);
+  if ((pb?.status || 'ativo') === 'cancelado') return;
   const at = (pb?.atividades || []).find(a => a.id === atId);
   if (!at) return;
 
