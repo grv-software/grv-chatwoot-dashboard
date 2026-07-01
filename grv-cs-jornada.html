@@ -2648,16 +2648,22 @@ function renderVencimentos() {
   const hoje_lst  = todos.filter(function(v){return v.diff===0;});
 
   function mkRow(v, stripeClr, diasBg, diasClr) {
-    const diasTxt = v.diff===0 ? 'Vence hoje' : Math.abs(v.diff)+'d atrás';
-    const resp    = v.at.responsavelId || v.pb.donoId || '';
-    const respNome= resp ? (getConsultores().find(x=>x.id===resp)?.nome || resp) : '—';
-    const nome    = v.cliente.id;
+    const diasTxt     = v.diff===0 ? 'Vence hoje' : Math.abs(v.diff)+'d atrás';
+    const resp        = v.at.responsavelId || v.pb.donoId || '';
+    const respNome    = resp ? (getConsultores().find(x=>x.id===resp)?.nome || resp) : '—';
+    const nome        = v.cliente.id;
+    const clienteLink = '<a href="#cliente/' + encodeURIComponent(v.clienteId) + '" ' +
+      'onclick="event.stopPropagation()" ' +
+      'style="color:var(--primary);font-weight:600;text-decoration:none">' + nome + '</a>';
+    const pauseBadge  = (v.pb.status === 'pausado')
+      ? '<span style="background:#FFF3EE;color:var(--primary);font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:4px">⏸ Pausado</span>'
+      : '';
     return '<div class="venc-row">' +
       '<div class="venc-stripe" style="background:'+stripeClr+'"></div>' +
       '<div class="venc-avatar" style="background:'+avatarGradiente(nome)+'">'+nome[0].toUpperCase()+'</div>' +
       '<div class="venc-info">' +
         '<div class="venc-nome">'+(v.at.nome||'—')+'</div>' +
-        '<div class="venc-meta">'+nome+' · '+(v.pb.nome||'Playbook')+' · <b style="color:var(--text2)">'+respNome+'</b></div>' +
+        '<div class="venc-meta">'+clienteLink+' · '+(v.pb.nome||'Playbook')+pauseBadge+' · <b style="color:var(--text2)">'+respNome+'</b></div>' +
       '</div>' +
       '<div class="venc-right">' +
         '<span class="venc-dias" style="background:'+diasBg+';color:'+diasClr+'">'+diasTxt+'</span>' +
