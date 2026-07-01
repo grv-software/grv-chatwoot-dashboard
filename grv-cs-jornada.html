@@ -166,7 +166,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .vg-headline{font-size:36px;font-weight:800;line-height:1;letter-spacing:-1.5px;margin-bottom:8px}
 .vg-caption{font-size:13px;color:rgba(255,255,255,.45)}
 .vg-saude-badge{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:24px;border:1px solid;font-size:12px;font-weight:700;letter-spacing:.02em;flex-shrink:0;backdrop-filter:blur(4px)}
-.vg-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.07)}
+.vg-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.07)}
 .vg-kpi{padding:0 20px;border-right:1px solid rgba(255,255,255,.07)}
 .vg-kpi:first-child{padding-left:0}
 .vg-kpi:last-child{border-right:none;padding-right:0}
@@ -475,9 +475,60 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 
 /* ── TOAST ───────────────────────────────────────────────── */
 #toast-container{position:fixed;bottom:24px;right:24px;z-index:1100;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none}
-.toast{background:var(--primary);color:#fff;padding:12px 20px;border-radius:var(--radius);font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(224,90,30,.35);animation:toast-in .2s ease;max-width:320px}
+.toast{background:var(--primary);color:#fff;padding:12px 20px;border-radius:var(--radius);font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(224,90,30,.35);animation:toast-in .2s ease;max-width:340px;pointer-events:auto}
 .toast-fade{opacity:0;transition:opacity .3s ease}
 @keyframes toast-in{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+.toast-undo-btn{background:rgba(255,255,255,.25);border:none;border-radius:5px;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;cursor:pointer;margin-left:8px;font-family:inherit}
+.toast-undo-btn:hover{background:rgba(255,255,255,.4)}
+
+/* ── SIDEBAR BADGE ───────────────────────────────────────── */
+.nav-badge{min-width:18px;height:18px;border-radius:9px;background:var(--red);color:#fff;font-size:10px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;padding:0 4px;margin-left:auto;flex-shrink:0}
+.nav-badge.hidden{display:none}
+
+/* ── OVERLAY MENU ─────────────────────────────────────────── */
+.ov-menu-btn{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--text3);flex-shrink:0;letter-spacing:1px}
+.ov-menu-btn:hover{background:var(--border-2)}
+.ov-dropdown{position:absolute;top:calc(100% + 2px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 4px 20px rgba(0,0,0,.12);min-width:190px;z-index:400;overflow:hidden}
+.ov-dropdown-item{display:flex;align-items:center;gap:8px;padding:9px 14px;font-size:12px;color:var(--text);cursor:pointer;border:none;background:none;width:100%;text-align:left;font-family:inherit;transition:background .1s}
+.ov-dropdown-item:hover{background:var(--bg)}
+.ov-dropdown-item.danger{color:var(--red)}
+.ov-dropdown-item.danger:hover{background:var(--b-red-bg)}
+.ov-dropdown-divider{height:1px;background:var(--border-2);margin:3px 0}
+
+/* ── PLAYBOOK CARD ACTIONS ───────────────────────────────── */
+.pb-card-act{width:20px;height:20px;border:none;border-radius:4px;background:rgba(224,90,30,.12);color:var(--primary);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;line-height:1}
+.pb-card-act:hover{background:rgba(224,90,30,.22)}
+.pb-card-act.del{background:var(--b-red-bg);color:var(--red)}
+.pb-card-act.del:hover{background:#fecaca;color:var(--red)}
+
+/* ── CONFIRM DIALOG ──────────────────────────────────────── */
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:600}
+.confirm-overlay.hidden{display:none}
+.confirm-box{background:var(--surface);border-radius:12px;padding:24px;width:360px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,.22)}
+.confirm-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px}
+.confirm-body{font-size:13px;color:var(--text2);line-height:1.55;margin-bottom:20px}
+.confirm-footer{display:flex;gap:8px;justify-content:flex-end}
+.btn-danger{background:var(--red);color:#fff;border:none}
+.btn-danger:hover{opacity:.88}
+
+/* ── VENCIMENTOS ─────────────────────────────────────────── */
+.venc-wrap{padding:0 24px 32px}
+.venc-group{margin-bottom:28px}
+.venc-group-label{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--text3);padding-bottom:10px;border-bottom:2px solid var(--border);margin-bottom:10px}
+.venc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.venc-row{display:flex;align-items:center;gap:12px;padding:11px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;transition:border-color .12s;position:relative;overflow:hidden}
+.venc-row:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(224,90,30,.07)}
+.venc-stripe{position:absolute;left:0;top:0;bottom:0;width:3px}
+.venc-avatar{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0}
+.venc-info{flex:1;min-width:0}
+.venc-nome{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.venc-meta{font-size:11px;color:var(--text3)}
+.venc-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.venc-dias{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap}
+.venc-btn-ok{padding:5px 11px;background:var(--green);color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
+.venc-btn-ok:hover{opacity:.88}
+.venc-btn-ir{padding:5px 9px;background:var(--surface);border:1px solid var(--border);border-radius:7px;font-size:11px;color:var(--text2);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:4px;font-weight:600}
+.venc-btn-ir:hover{border-color:var(--primary);color:var(--primary)}
 
 /* ── Abas do cliente ─────────────────────────────── */
 .cliente-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:24px}
@@ -538,6 +589,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
       Minha Carteira
     </div>
+    <div class="nav-item" id="nav-vencimentos" data-route="vencimentos" onclick="navigate('vencimentos')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      Vencimentos
+      <span class="nav-badge hidden" id="nav-venc-badge">0</span>
+    </div>
     <div class="nav-item" id="nav-criar" data-route="criar" onclick="navigate('criar')">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
       Criar Playbook
@@ -557,10 +613,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 <!-- ── CONTENT ───────────────────────────────────────────── -->
 <main class="content">
   <div class="content-inner">
-    <section id="sec-projetos" class="sec" style="display:none"></section>
-    <section id="sec-carteira" class="sec" style="display:none"></section>
-    <section id="sec-cliente"  class="sec" style="display:none"></section>
-    <section id="sec-criar"    class="sec" style="display:none"></section>
+    <section id="sec-projetos"    class="sec" style="display:none"></section>
+    <section id="sec-carteira"    class="sec" style="display:none"></section>
+    <section id="sec-cliente"     class="sec" style="display:none"></section>
+    <section id="sec-criar"       class="sec" style="display:none"></section>
+    <section id="sec-vencimentos" class="sec" style="display:none"></section>
   </div>
 </main>
 
@@ -583,9 +640,20 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 <div class="ov-backdrop" id="ov-backdrop" onclick="closeAtividade()"></div>
 <div class="ov-panel" id="ov-panel">
   <div class="ov-hd">
-    <div class="ov-hd-top">
+    <div class="ov-hd-top" style="position:relative">
       <div class="ov-title" id="ov-titulo">Atividade</div>
-      <div class="ov-close" onclick="closeAtividade()">✕</div>
+      <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+        <div class="ov-menu-btn" onclick="toggleOvMenu(event)" title="Mais opções">···</div>
+        <div class="ov-close" onclick="closeAtividade()">✕</div>
+      </div>
+      <div class="ov-dropdown" id="ov-dropdown" style="display:none">
+        <button class="ov-dropdown-item" onclick="editarNomeAtiv()">✎ Editar nome</button>
+        <button class="ov-dropdown-item" onclick="alterarRespAtiv()">👤 Alterar responsável</button>
+        <button class="ov-dropdown-item" onclick="alterarPrazoAtiv()">📅 Alterar prazo</button>
+        <button class="ov-dropdown-item" id="ov-btn-reabrir" style="display:none" onclick="reabrirAtividade()">↩ Reabrir</button>
+        <div class="ov-dropdown-divider"></div>
+        <button class="ov-dropdown-item danger" onclick="excluirAtividade()">🗑 Excluir atividade</button>
+      </div>
     </div>
     <div class="ov-meta" id="ov-meta"></div>
     <div id="ov-deadline-wrap" style="display:none;padding:4px 0 0;font-size:11px;font-weight:600">
@@ -615,6 +683,18 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 
 <!-- ── TOAST CONTAINER ──────────────────────────────────── -->
 <div id="toast-container"></div>
+
+<!-- ── CONFIRM DIALOG ───────────────────────────────────── -->
+<div class="confirm-overlay hidden" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirm-title">Confirmar</div>
+    <div class="confirm-body" id="confirm-body"></div>
+    <div class="confirm-footer">
+      <button class="btn btn-secondary" onclick="cancelConfirm()">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-ok-btn" onclick="doConfirm()">Excluir</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ═══════════════════════════════════════════════════════════
@@ -1533,6 +1613,7 @@ function initData() {
       (c.ativPlaybooks || []).forEach(function(pb) {
         if (!pb.donoId) { pb.donoId = c.csId; dirty = true; }
         if (!pb.fase) { pb.fase = 'implantacao'; dirty = true; }
+        if (!pb.status) { pb.status = 'ativo'; dirty = true; }
         (pb.atividades || []).forEach(function(at) {
           if (!at.id) { at.id = 'at_' + Math.random().toString(36).slice(2); dirty = true; }
           if (!at.responsavelId) { at.responsavelId = pb.donoId || c.csId; dirty = true; }
@@ -2056,6 +2137,15 @@ function renderVisaoGeral(kpis, clientes, consultores) {
           <div class="vg-kpi-l">Pausados</div>
           <div class="vg-kpi-pct">${pct(kpis.pausado)}% do total</div>
         </div>
+        ${(() => {
+          const sla = calcSlaCompliance(clientes);
+          const clr = sla===null ? 'rgba(255,255,255,.3)' : sla>=80 ? '#22c55e' : sla>=60 ? '#eab308' : '#ef4444';
+          return `<div class="vg-kpi" style="border-right:none">
+            <div class="vg-kpi-n" style="color:${clr}">${sla!==null?sla+'%':'—'}</div>
+            <div class="vg-kpi-l">SLA no Prazo</div>
+            <div class="vg-kpi-pct">concluídas a tempo</div>
+          </div>`;
+        })()}
       </div>
       <div class="vg-bar">
         ${segs.map(s => `<div class="vg-bar-seg" style="flex:${s.n};background:${s.cor}" title="${s.label}: ${s.n} (${pct(s.n)}%)"></div>`).join('')}
@@ -2222,6 +2312,7 @@ function renderDashboardProjetos(clientes, consultores) {
       <option value="">Todos consultores</option>
       ${consultores.map(c => `<option value="${c.id}"${c.id===_proj_consultor?' selected':''}>${c.nome}</option>`).join('')}
     </select>
+    <button onclick="exportarProjetosCSV()" class="btn btn-secondary btn-sm" style="margin-left:auto">⬇ Exportar CSV</button>
   </div>`;
 
   if (clientes.length === 0) {
@@ -2312,6 +2403,7 @@ function navigate(hash) { location.hash = hash; }
 function route() {
   const hash = location.hash.replace('#','') || 'carteira';
   document.querySelectorAll('.sec').forEach(s => s.style.display = 'none');
+  updateVencBadge();
 
   if (hash.startsWith('cliente/')) {
     document.getElementById('sec-cliente').style.display = 'block';
@@ -2321,6 +2413,10 @@ function route() {
     document.getElementById('sec-projetos').style.display = 'block';
     setActiveNav('projetos');
     renderProjetosGRV();
+  } else if (hash === 'vencimentos') {
+    document.getElementById('sec-vencimentos').style.display = 'block';
+    setActiveNav('vencimentos');
+    renderVencimentos();
   } else if (hash === 'criar') {
     document.getElementById('sec-criar').style.display = 'block';
     setActiveNav('criar');
@@ -2351,6 +2447,289 @@ function showToast(msg, duration) {
     toast.classList.add('toast-fade');
     setTimeout(function() { toast.remove(); }, 320);
   }, duration);
+}
+
+// ═══════════════════════════════════════════════════════════
+// SLA + CSV EXPORT
+// ═══════════════════════════════════════════════════════════
+function calcSlaCompliance(clientes) {
+  let total = 0, onTime = 0;
+  (clientes || []).forEach(function(c) {
+    (c.ativPlaybooks||[]).forEach(function(pb) {
+      (pb.atividades||[]).forEach(function(at) {
+        if (!at.dataLimite) return;
+        total++;
+        if (at.status === 'concluida') {
+          const dl = new Date(at.dataLimite + 'T23:59:59');
+          const dc = at.dataConclusao ? new Date(at.dataConclusao) : null;
+          if (dc && dc <= dl) onTime++;
+        }
+      });
+    });
+  });
+  return total > 0 ? Math.round(onTime / total * 100) : null;
+}
+
+function exportarCSV(rows, filename) {
+  const csv = rows.map(function(r) {
+    return r.map(function(v) {
+      return '"' + String(v===null||v===undefined?'':v).replace(/"/g,'""') + '"';
+    }).join(',');
+  }).join('\r\n');
+  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportarVencimentosCSV() {
+  const todos = getTodasVencidas();
+  if (!todos.length) { showToast('Nenhum vencimento para exportar', 2500); return; }
+  const rows = [['Cliente','Projeto','Atividade','Playbook','Responsável','Dias Vencido','Data Limite']];
+  todos.forEach(function(v) {
+    const respId   = v.at.responsavelId || v.pb.donoId || '';
+    const respNome = getConsultores().find(function(x){return x.id===respId;})?.nome || respId;
+    const diasTxt  = v.diff===0 ? 'Vence hoje' : Math.abs(v.diff)+'d atrás';
+    rows.push([v.cliente.id, v.cliente.projeto||'', v.at.nome||'', v.pb.nome||'', respNome, diasTxt, v.at.dataLimite||'']);
+  });
+  exportarCSV(rows, 'grv-vencimentos-'+new Date().toISOString().split('T')[0]+'.csv');
+  showToast('CSV exportado — '+todos.length+' atividades', 2500);
+}
+
+function exportarProjetosCSV() {
+  const clientes = getClientes();
+  if (!clientes.length) { showToast('Nenhum projeto para exportar', 2500); return; }
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const rows  = [['ID','Projeto','Produto','Consultor','Etapa','Status','Progresso %','CSAT','Atividades','Concluídas','Vencidas','SLA %']];
+  clientes.forEach(function(c) {
+    const pbs   = c.ativPlaybooks || [];
+    const ativs = pbs.flatMap(function(pb){return pb.atividades||[];});
+    const total = ativs.length;
+    const done  = ativs.filter(function(a){return a.status==='concluida';}).length;
+    const venc  = ativs.filter(function(a){
+      if (a.status==='concluida'||!a.dataLimite) return false;
+      return new Date(a.dataLimite+'T00:00:00')<hoje;
+    }).length;
+    const cons  = getConsultores().find(function(x){return x.id===c.consultorId;})?.nome||c.consultorId||'';
+    const sla   = calcSlaCompliance([c]);
+    const stCons = getConsultorAtivo();
+    rows.push([c.id, c.projeto||'', c.produto||'', cons, c.etapa||'', getStatusCliente(c, stCons)||'',
+      calcProgresso(pbs)+'%', c.csat||'', total, done, venc, sla!==null?sla+'%':'—']);
+  });
+  exportarCSV(rows, 'grv-projetos-'+new Date().toISOString().split('T')[0]+'.csv');
+  showToast('CSV exportado — '+clientes.length+' clientes', 2500);
+}
+
+// ═══════════════════════════════════════════════════════════
+// CONFIRM DIALOG
+// ═══════════════════════════════════════════════════════════
+let _confirm_cb = null;
+function showConfirm(title, body, okLabel, onConfirm) {
+  _confirm_cb = onConfirm;
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-body').textContent  = body;
+  const okBtn = document.getElementById('confirm-ok-btn');
+  if (okBtn) okBtn.textContent = okLabel || 'Excluir';
+  document.getElementById('confirm-overlay').classList.remove('hidden');
+}
+function doConfirm() {
+  document.getElementById('confirm-overlay').classList.add('hidden');
+  if (_confirm_cb) { _confirm_cb(); _confirm_cb = null; }
+}
+function cancelConfirm() {
+  document.getElementById('confirm-overlay').classList.add('hidden');
+  _confirm_cb = null;
+}
+
+// ═══════════════════════════════════════════════════════════
+// VENCIMENTOS
+// ═══════════════════════════════════════════════════════════
+function getTodasVencidas() {
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const result = [];
+  getClientes().forEach(function(c) {
+    (c.ativPlaybooks || []).forEach(function(pb) {
+      if ((pb.status || 'ativo') === 'cancelado') return;
+      (pb.atividades || []).forEach(function(at) {
+        if (at.status === 'concluida') return;
+        if (!at.dataLimite) return;
+        const dl = new Date(at.dataLimite + 'T00:00:00');
+        const diff = Math.round((dl - hoje) / 86400000);
+        if (diff <= 0) {
+          result.push({ clienteId:c.id, pbId:pb.id, atId:at.id, at, pb, cliente:c, diff });
+        }
+      });
+    });
+  });
+  return result;
+}
+
+function updateVencBadge() {
+  const count = getTodasVencidas().length;
+  const badge = document.getElementById('nav-venc-badge');
+  if (!badge) return;
+  badge.textContent = count > 99 ? '99+' : String(count);
+  badge.classList.toggle('hidden', count === 0);
+}
+
+let _venc_filter_cons = 'todos';
+
+function renderVencimentos() {
+  const sec = document.getElementById('sec-vencimentos');
+  if (!sec) return;
+  const allVenc = getTodasVencidas();
+  const todos   = _venc_filter_cons === 'todos' ? allVenc
+    : allVenc.filter(function(v){ return (v.at.responsavelId || v.pb.donoId) === _venc_filter_cons; });
+
+  const consOpts = '<option value="todos">Todos os consultores</option>' +
+    getConsultores().map(function(con) {
+      return '<option value="'+con.id+'"'+(con.id===_venc_filter_cons?' selected':'')+'>'+con.nome+'</option>';
+    }).join('');
+  const filterBar = '<div style="margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">' +
+    '<select onchange="_venc_filter_cons=this.value;renderVencimentos()" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);outline:none;background:var(--surface);cursor:pointer">' + consOpts + '</select>' +
+    '<span style="font-size:12px;color:var(--text3)">' + todos.length + ' de ' + allVenc.length + ' vencimento' + (allVenc.length!==1?'s':'') + '</span>' +
+    '<button onclick="exportarVencimentosCSV()" class="btn btn-secondary btn-sm" style="margin-left:auto">⬇ Exportar CSV</button>' +
+    '</div>';
+
+  if (!allVenc.length) {
+    sec.innerHTML = '<div class="content-inner"><div class="page-header"><h1 class="page-title">Vencimentos</h1></div>' +
+      '<div class="empty-state"><div class="es-icon">✅</div>' +
+      '<div class="es-text" style="font-weight:700;color:var(--green);font-size:16px">Tudo em dia!</div>' +
+      '<div style="font-size:13px;color:var(--text3);margin-top:4px">Nenhuma atividade vencida.</div>' +
+      '<div style="margin-top:20px"><a class="btn btn-primary" href="#carteira">Ver Minha Carteira</a></div></div></div>';
+    return;
+  }
+
+  const criticos  = todos.filter(function(v){return v.diff<-15;}).sort(function(a,b){return a.diff-b.diff;});
+  const atrasados = todos.filter(function(v){return v.diff<0&&v.diff>=-15;}).sort(function(a,b){return a.diff-b.diff;});
+  const hoje_lst  = todos.filter(function(v){return v.diff===0;});
+
+  function mkRow(v, stripeClr, diasBg, diasClr) {
+    const diasTxt = v.diff===0 ? 'Vence hoje' : Math.abs(v.diff)+'d atrás';
+    const resp    = v.at.responsavelId || v.pb.donoId || '';
+    const respNome= resp ? (getConsultores().find(x=>x.id===resp)?.nome || resp) : '—';
+    const nome    = v.cliente.id;
+    return '<div class="venc-row">' +
+      '<div class="venc-stripe" style="background:'+stripeClr+'"></div>' +
+      '<div class="venc-avatar" style="background:'+avatarGradiente(nome)+'">'+nome[0].toUpperCase()+'</div>' +
+      '<div class="venc-info">' +
+        '<div class="venc-nome">'+(v.at.nome||'—')+'</div>' +
+        '<div class="venc-meta">'+nome+' · '+(v.pb.nome||'Playbook')+' · <b style="color:var(--text2)">'+respNome+'</b></div>' +
+      '</div>' +
+      '<div class="venc-right">' +
+        '<span class="venc-dias" style="background:'+diasBg+';color:'+diasClr+'">'+diasTxt+'</span>' +
+        '<button class="venc-btn-ok" onclick="concluirVenc(event,\''+v.clienteId+'\',\''+v.pbId+'\',\''+v.atId+'\')">✓ Concluir</button>' +
+        '<div style="position:relative;display:inline-block">' +
+          '<button class="venc-btn-ir" onclick="toggleVencMenu(event,\''+v.clienteId+'\',\''+v.pbId+'\',\''+v.atId+'\',\''+encodeURIComponent(v.at.dataLimite||'')+'\',\''+resp+'\')">···</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderGroup(items, label, stripeClr, dotClr, diasBg, diasClr) {
+    if (!items.length) return '';
+    return '<div class="venc-group">' +
+      '<div class="venc-group-label"><span class="venc-dot" style="background:'+dotClr+'"></span>'+label+' ('+items.length+')</div>' +
+      items.map(function(v){return mkRow(v,stripeClr,diasBg,diasClr);}).join('') +
+      '</div>';
+  }
+
+  const noResults = !todos.length
+    ? '<div style="padding:32px;text-align:center;color:var(--text3);font-size:13px">Nenhum vencimento para este consultor.</div>' : '';
+
+  sec.innerHTML = '<div class="content-inner">' +
+    '<div class="page-header"><h1 class="page-title">Vencimentos</h1>' +
+    '<p class="page-subtitle">Atividades com prazo vencido ou vencendo hoje</p></div>' +
+    '<div class="venc-wrap">' + filterBar + noResults +
+      renderGroup(criticos,  'Crítico',    'var(--red)',    'var(--red)',    '#FFF5F5', 'var(--red)') +
+      renderGroup(atrasados, 'Atrasado',   'var(--primary)','var(--primary)','#FFF3EE', '#b7430e') +
+      renderGroup(hoje_lst,  'Vence hoje', 'var(--yellow)', 'var(--yellow)', '#FFFFF0', '#92701e') +
+    '</div></div>';
+}
+
+function toggleVencMenu(evt, clienteId, pbId, atId, dlEnc, respId) {
+  evt.stopPropagation();
+  document.querySelectorAll('.venc-popup').forEach(function(el){el.remove();});
+  const btn = evt.currentTarget;
+  const wrap = btn.parentElement;
+  const dlVal = decodeURIComponent(dlEnc);
+  const consOpts = getConsultores().map(function(con) {
+    return '<option value="'+con.id+'"'+(con.id===respId?' selected':'')+'>'+con.nome+'</option>';
+  }).join('');
+  const popup = document.createElement('div');
+  popup.className = 'venc-popup ov-dropdown';
+  popup.style.cssText = 'position:absolute;right:0;top:calc(100% + 4px);z-index:500;min-width:230px';
+  popup.innerHTML =
+    '<div style="padding:8px 14px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text4)">Opções</div>' +
+    '<div style="padding:4px 14px 8px">' +
+      '<div style="font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:600">Estender prazo</div>' +
+      '<input type="date" value="'+dlVal+'" style="width:100%;border:1px solid var(--primary);border-radius:7px;padding:5px 8px;font-size:12px;outline:none;cursor:pointer" ' +
+        'onchange="salvarNovoPrazoVenc(\''+clienteId+'\',\''+pbId+'\',\''+atId+'\',this.value)">' +
+    '</div>' +
+    '<div class="ov-dropdown-divider"></div>' +
+    '<div style="padding:6px 14px 10px">' +
+      '<div style="font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:600">Reatribuir para</div>' +
+      '<select style="width:100%;border:1px solid var(--border);border-radius:7px;padding:5px 8px;font-size:12px;font-family:inherit;outline:none" ' +
+        'onchange="reatribuirVenc(\''+clienteId+'\',\''+pbId+'\',\''+atId+'\',this.value)">' +
+        consOpts +
+      '</select>' +
+    '</div>' +
+    '<div class="ov-dropdown-divider"></div>' +
+    '<a class="ov-dropdown-item" href="#cliente/'+encodeURIComponent(clienteId)+'">📋 Abrir cliente</a>';
+  wrap.appendChild(popup);
+  setTimeout(function() {
+    document.addEventListener('click', function close(e) {
+      if (!popup.contains(e.target) && !btn.contains(e.target)) {
+        popup.remove();
+        document.removeEventListener('click', close);
+      }
+    });
+  }, 0);
+}
+
+function salvarNovoPrazoVenc(clienteId, pbId, atId, novaData) {
+  if (!novaData) return;
+  const c  = getCliente(clienteId);
+  const pb = (c?.ativPlaybooks||[]).find(p=>p.id===pbId);
+  const at = (pb?.atividades||[]).find(a=>a.id===atId);
+  if (!at) return;
+  at.dataLimite = novaData;
+  saveCliente(c);
+  document.querySelectorAll('.venc-popup').forEach(function(el){el.remove();});
+  updateVencBadge();
+  renderVencimentos();
+  showToast('Prazo atualizado para ' + novaData.split('-').reverse().join('/'), 3000);
+}
+
+function reatribuirVenc(clienteId, pbId, atId, consId) {
+  const c  = getCliente(clienteId);
+  const pb = (c?.ativPlaybooks||[]).find(p=>p.id===pbId);
+  const at = (pb?.atividades||[]).find(a=>a.id===atId);
+  if (!at) return;
+  at.responsavelId = consId;
+  saveCliente(c);
+  renderVencimentos();
+  showToast('Atividade reatribuída', 2500);
+}
+
+function concluirVenc(evt, clienteId, pbId, atId) {
+  evt.stopPropagation();
+  const c  = getCliente(clienteId);
+  const pb = (c?.ativPlaybooks||[]).find(p=>p.id===pbId);
+  const at = (pb?.atividades||[]).find(a=>a.id===atId);
+  if (!at || at.status==='concluida') return;
+  at.status = 'concluida';
+  at.dataConclusao = new Date().toISOString();
+  if (!at.registros) at.registros = [];
+  const ativo = getConsultorAtivo();
+  const autor = getConsultores().find(x=>x.id===ativo)?.nome || ativo;
+  at.registros.unshift({id:'reg_'+Date.now(),tipo:'evento',texto:autor+' marcou como Concluída (via Vencimentos)',data:new Date().toISOString()});
+  saveCliente(c);
+  updateVencBadge();
+  renderVencimentos();
+  showToast('Atividade concluída!', 3000);
+  checkImplantacaoConcluida(clienteId);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -3025,8 +3404,16 @@ function renderAbaAtividades(c) {
     }).length;
     const pct     = total ? Math.round(done/total*100) : 0;
     const isSel   = pb.id === _pb_sel_id;
+    const actBtns = isSel
+      ? `<div style="display:flex;gap:3px;flex-shrink:0">
+          <button class="pb-card-act" title="Renomear" onclick="event.stopPropagation();renomearPlaybook('${pb.id}','${c.id}')">✎</button>
+          <button class="pb-card-act del" title="Excluir" onclick="event.stopPropagation();excluirPlaybook('${pb.id}','${c.id}')">×</button>
+        </div>` : '';
     return `<div class="at-pb-card${isSel?' sel':''}" onclick="selecionarPb('${pb.id}','${c.id}')">
-      <div class="at-pb-card-name">${pb.nome}</div>
+      <div style="display:flex;align-items:flex-start;gap:4px;margin-bottom:2px">
+        <div class="at-pb-card-name" style="flex:1">${pb.nome}</div>
+        ${actBtns}
+      </div>
       <div class="at-pb-card-meta">${total} atividade${total!==1?'s':''} · ${done} concluída${done!==1?'s':''}${venc>0?' · <span style="color:var(--red);font-weight:700">'+venc+' vencida'+(venc>1?'s':'')+'</span>':''}</div>
       <div class="at-pb-bar"><div class="at-pb-bar-fill${pct===100?' done':''}" style="width:${pct}%"></div></div>
     </div>`;
@@ -3154,6 +3541,58 @@ function criarAtivPlaybook(clienteId) {
   renderCliente(clienteId);
 }
 
+function excluirPlaybook(pbId, clienteId) {
+  const c  = getCliente(clienteId);
+  const pb = (c?.ativPlaybooks||[]).find(p=>p.id===pbId);
+  if (!pb) return;
+  const n = (pb.atividades||[]).length;
+  showConfirm(
+    'Excluir playbook?',
+    '"' + pb.nome + '" e ' + (n>0 ? n+' atividade'+(n!==1?'s':'')+' serão removidos permanentemente.' : 'ele será removido permanentemente.'),
+    'Excluir',
+    function() {
+      const c2 = getCliente(clienteId);
+      c2.ativPlaybooks = (c2.ativPlaybooks||[]).filter(p=>p.id!==pbId);
+      if (_pb_sel_id === pbId) _pb_sel_id = null;
+      saveCliente(c2);
+      updateVencBadge();
+      renderCliente(clienteId);
+      showToast('Playbook excluído', 3000);
+    }
+  );
+}
+
+function renomearPlaybook(pbId, clienteId) {
+  const card = document.querySelector('.at-pb-card.sel');
+  if (!card) return;
+  const nameEl = card.querySelector('.at-pb-card-name');
+  if (!nameEl) return;
+  const atual = nameEl.textContent;
+  nameEl.innerHTML = '<input id="pb-edit-nome" style="width:100%;border:1px solid var(--primary);border-radius:4px;padding:2px 5px;font-size:12px;font-weight:700;font-family:inherit;outline:none;background:#fff" value="' + atual.replace(/"/g,'&quot;') + '">';
+  const inp = document.getElementById('pb-edit-nome');
+  if (inp) {
+    inp.focus(); inp.select();
+    inp.onclick = function(e){e.stopPropagation();};
+    inp.onkeydown = function(e){
+      if (e.key==='Enter'){e.preventDefault();savePbNome(pbId,clienteId);}
+      if (e.key==='Escape'){nameEl.textContent=atual;}
+    };
+    inp.onblur = function(){ savePbNome(pbId, clienteId); };
+  }
+}
+
+function savePbNome(pbId, clienteId) {
+  const inp = document.getElementById('pb-edit-nome');
+  if (!inp) return;
+  const novo = inp.value.trim();
+  if (!novo) { renderCliente(clienteId); return; }
+  const c  = getCliente(clienteId);
+  const pb = (c?.ativPlaybooks||[]).find(p=>p.id===pbId);
+  if (pb) pb.nome = novo;
+  saveCliente(c);
+  renderCliente(clienteId);
+}
+
 function criarAtividade(pbId, clienteId) {
   const input    = document.getElementById('at-nome-input-' + pbId);
   const slaInput = document.getElementById('at-sla-input-' + pbId);
@@ -3265,6 +3704,13 @@ function openAtividade(cId, pbId, atId) {
       dlWrap.style.display = 'none';
     }
   }
+
+  // Reabrir button — visible only for concluded activities
+  const btnReabrir = document.getElementById('ov-btn-reabrir');
+  if (btnReabrir) btnReabrir.style.display = at.status === 'concluida' ? '' : 'none';
+
+  // Close menu if was open
+  closeOvMenu();
 
   document.querySelectorAll('.ov-tab').forEach(function(t, i) { t.classList.toggle('active', i === 0); });
   renderOverlayTab('registro');
@@ -3388,10 +3834,170 @@ function concluirAtividade() {
   const autor = cons?.nome || ativo;
   at.registros.unshift({ id:'reg_'+Date.now(), tipo:'evento', texto: autor + ' marcou como Concluída', data: new Date().toISOString() });
   saveCliente(c);
-  // Atualiza a tela de fundo (progresso do playbook)
+  updateVencBadge();
   if (typeof renderCliente === 'function') renderCliente(_ov_cId);
-  // Re-abre o overlay para refletir o novo estado
   openAtividade(_ov_cId, _ov_pbId, _ov_atId);
+  checkImplantacaoConcluida(_ov_cId);
+}
+
+// ═══════════════════════════════════════════════════════════
+// OVERLAY CRUD — atividade
+// ═══════════════════════════════════════════════════════════
+let _ov_menu_open = false;
+
+function toggleOvMenu(evt) {
+  if (evt) evt.stopPropagation();
+  _ov_menu_open = !_ov_menu_open;
+  const dd = document.getElementById('ov-dropdown');
+  if (dd) dd.style.display = _ov_menu_open ? 'block' : 'none';
+}
+
+function closeOvMenu() {
+  _ov_menu_open = false;
+  const dd = document.getElementById('ov-dropdown');
+  if (dd) dd.style.display = 'none';
+}
+
+// Close overlay menu when clicking anywhere outside it
+document.addEventListener('click', function(e) {
+  if (_ov_menu_open) {
+    const dd  = document.getElementById('ov-dropdown');
+    const btn = document.querySelector('.ov-menu-btn');
+    if (dd && !dd.contains(e.target) && btn && !btn.contains(e.target)) closeOvMenu();
+  }
+});
+
+function editarNomeAtiv() {
+  closeOvMenu();
+  const titleEl = document.getElementById('ov-titulo');
+  if (!titleEl) return;
+  const { at } = _getOvAt();
+  const atual = at?.nome || titleEl.textContent;
+  titleEl.innerHTML = '<input id="ov-edit-nome" style="width:100%;border:1px solid var(--primary);border-radius:6px;padding:4px 8px;font-size:14px;font-weight:800;font-family:inherit;outline:none;background:#fff" value="' + atual.replace(/"/g,'&quot;') + '">';
+  const inp = document.getElementById('ov-edit-nome');
+  if (inp) {
+    inp.focus(); inp.select();
+    inp.onkeydown = function(e){
+      if (e.key==='Enter'){e.preventDefault();saveNomeAtiv();}
+      if (e.key==='Escape'){cancelEditNome();}
+    };
+    inp.onblur = saveNomeAtiv;
+  }
+}
+
+function saveNomeAtiv() {
+  const inp = document.getElementById('ov-edit-nome');
+  if (!inp) return;
+  const novo = inp.value.trim();
+  if (!novo) { cancelEditNome(); return; }
+  const { c, at } = _getOvAt();
+  if (!at) return;
+  at.nome = novo;
+  saveCliente(c);
+  const titleEl = document.getElementById('ov-titulo');
+  if (titleEl) titleEl.textContent = novo;
+  if (typeof renderCliente === 'function' && _ov_cId) renderCliente(_ov_cId);
+}
+
+function cancelEditNome() {
+  const { at } = _getOvAt();
+  const titleEl = document.getElementById('ov-titulo');
+  if (titleEl && at) titleEl.textContent = at.nome || at.titulo || '—';
+}
+
+function alterarRespAtiv() {
+  closeOvMenu();
+  const metaEl = document.getElementById('ov-meta');
+  if (!metaEl) return;
+  const { pb, at } = _getOvAt();
+  if (!at) return;
+  const atual = at.responsavelId || pb?.donoId || '';
+  const opts  = getConsultores().map(function(con) {
+    return '<option value="'+con.id+'"'+(con.id===atual?' selected':'')+'>'+con.nome+'</option>';
+  }).join('');
+  metaEl.innerHTML = '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">' +
+    '<span style="font-size:11px;color:var(--text2)">Responsável:</span>' +
+    '<select id="ov-resp-sel" style="border:1px solid var(--primary);border-radius:6px;padding:3px 6px;font-size:11px;font-family:inherit;outline:none">'+opts+'</select>' +
+    '<button onclick="saveRespAtiv()" style="padding:3px 10px;background:var(--primary);color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">OK</button>' +
+    '<button onclick="openAtividade(_ov_cId,_ov_pbId,_ov_atId)" style="padding:3px 8px;background:var(--border-2);color:var(--text2);border:none;border-radius:5px;font-size:11px;cursor:pointer">✕</button>' +
+    '</div>';
+}
+
+function saveRespAtiv() {
+  const sel = document.getElementById('ov-resp-sel');
+  if (!sel) return;
+  const { c, at } = _getOvAt();
+  if (!at) return;
+  at.responsavelId = sel.value;
+  saveCliente(c);
+  if (typeof renderCliente === 'function' && _ov_cId) renderCliente(_ov_cId);
+  openAtividade(_ov_cId, _ov_pbId, _ov_atId);
+  showToast('Responsável atualizado', 2500);
+}
+
+function alterarPrazoAtiv() {
+  closeOvMenu();
+  const df = document.getElementById('ov-data-fim');
+  if (df) { df.focus(); df.showPicker && df.showPicker(); }
+}
+
+function reabrirAtividade() {
+  closeOvMenu();
+  const { c, at } = _getOvAt();
+  if (!at || at.status !== 'concluida') return;
+  at.status = 'pendente';
+  delete at.dataConclusao;
+  if (!at.registros) at.registros = [];
+  const ativo = getConsultorAtivo();
+  const autor = getConsultores().find(x=>x.id===ativo)?.nome || ativo;
+  at.registros.unshift({id:'reg_'+Date.now(),tipo:'evento',texto:autor+' reabriu a atividade',data:new Date().toISOString()});
+  saveCliente(c);
+  updateVencBadge();
+  if (typeof renderCliente === 'function' && _ov_cId) renderCliente(_ov_cId);
+  openAtividade(_ov_cId, _ov_pbId, _ov_atId);
+  showToast('Atividade reaberta', 2500);
+}
+
+function excluirAtividade() {
+  closeOvMenu();
+  const { at } = _getOvAt();
+  if (!at) return;
+  const cId = _ov_cId, pbId = _ov_pbId, atId = _ov_atId;
+  const nome = at.nome || at.titulo || 'esta atividade';
+  showConfirm(
+    'Excluir atividade?',
+    '"' + nome + '" e todo o histórico serão removidos permanentemente.',
+    'Excluir',
+    function() {
+      const c2  = getCliente(cId);
+      const pb2 = (c2?.ativPlaybooks||[]).find(p=>p.id===pbId);
+      if (!pb2) return;
+      const backup = JSON.parse(JSON.stringify(pb2.atividades||[]));
+      pb2.atividades = (pb2.atividades||[]).filter(a=>a.id!==atId);
+      saveCliente(c2);
+      window._excluir_backup = { cId, pbId, backup };
+      closeAtividade();
+      updateVencBadge();
+      if (typeof renderCliente === 'function') renderCliente(cId);
+      showToast(
+        'Atividade excluída <button class="toast-undo-btn" onclick="undoExcluirAtiv(\''+cId+'\',\''+pbId+'\')">Desfazer</button>',
+        5000
+      );
+    }
+  );
+}
+
+function undoExcluirAtiv(cId, pbId) {
+  if (!window._excluir_backup || window._excluir_backup.cId !== cId) return;
+  const c  = getCliente(cId);
+  const pb = (c?.ativPlaybooks||[]).find(p=>p.id===pbId);
+  if (!pb) return;
+  pb.atividades = window._excluir_backup.backup;
+  saveCliente(c);
+  window._excluir_backup = null;
+  updateVencBadge();
+  if (typeof renderCliente === 'function') renderCliente(cId);
+  showToast('Atividade restaurada!', 3000);
 }
 
 function renderOvChecklist() {
@@ -3501,9 +4107,11 @@ function checkImplantacaoConcluida(clienteId) {
   const c = getCliente(clienteId);
   if (!c || c.status === 'cs_ativo') return;
   const cid     = getConsultorAtivo();
-  const pbsImpl = (c.ativPlaybooks || []).filter(function(pb) { return pb.fase === 'implantacao' && pb.donoId === cid; });
-  if (!pbsImpl.length) return;
-  const todas = pbsImpl.flatMap(function(pb) { return pb.atividades || []; });
+  const mesPbs  = (c.ativPlaybooks || []).filter(function(pb) { return pb.donoId === cid; });
+  const pbsImpl = mesPbs.filter(function(pb) { return pb.fase === 'implantacao'; });
+  const pbsAlvo = pbsImpl.length ? pbsImpl : mesPbs;
+  if (!pbsAlvo.length) return;
+  const todas = pbsAlvo.flatMap(function(pb) { return pb.atividades || []; });
   if (!todas.length || !todas.every(function(a) { return a.status === 'concluida'; })) return;
 
   showToast(
