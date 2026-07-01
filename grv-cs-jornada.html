@@ -2573,21 +2573,63 @@ function updateVencBadge() {
   badge.classList.toggle('hidden', count === 0);
 }
 
-let _venc_filter_cons = 'todos';
+let _venc_filter_cons    = 'todos';
+let _venc_filter_urgency = 'todos';
+let _venc_filter_etapa   = 'todos';
+let _venc_filter_produto = 'todos';
+let _venc_filter_busca   = '';
 
 function renderVencimentos() {
   const sec = document.getElementById('sec-vencimentos');
   if (!sec) return;
   const allVenc = getTodasVencidas();
-  const todos   = _venc_filter_cons === 'todos' ? allVenc
-    : allVenc.filter(function(v){ return (v.at.responsavelId || v.pb.donoId) === _venc_filter_cons; });
+
+  let todos = allVenc.slice();
+  if (_venc_filter_cons !== 'todos')
+    todos = todos.filter(function(v){ return (v.at.responsavelId || v.pb.donoId) === _venc_filter_cons; });
+  if (_venc_filter_urgency === 'critico')  todos = todos.filter(function(v){ return v.diff < -15; });
+  if (_venc_filter_urgency === 'atrasado') todos = todos.filter(function(v){ return v.diff < 0 && v.diff >= -15; });
+  if (_venc_filter_urgency === 'hoje')     todos = todos.filter(function(v){ return v.diff === 0; });
+  if (_venc_filter_etapa !== 'todos')      todos = todos.filter(function(v){ return (v.cliente.status||'em_implantacao') === _venc_filter_etapa; });
+  if (_venc_filter_produto !== 'todos')    todos = todos.filter(function(v){ return (v.cliente.produto||'') === _venc_filter_produto; });
+  if (_venc_filter_busca.trim())           todos = todos.filter(function(v){ return v.cliente.id.toLowerCase().includes(_venc_filter_busca.trim().toLowerCase()); });
 
   const consOpts = '<option value="todos">Todos os consultores</option>' +
     getConsultores().map(function(con) {
       return '<option value="'+con.id+'"'+(con.id===_venc_filter_cons?' selected':'')+'>'+con.nome+'</option>';
     }).join('');
-  const filterBar = '<div style="margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">' +
-    '<select onchange="_venc_filter_cons=this.value;renderVencimentos()" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);outline:none;background:var(--surface);cursor:pointer">' + consOpts + '</select>' +
+
+  const produtosUnicos = allVenc
+    .map(function(v){ return v.cliente.produto||''; })
+    .filter(function(p,i,a){ return p && a.indexOf(p)===i; })
+    .sort();
+  const prodOpts = '<option value="todos">Todos os produtos</option>' +
+    produtosUnicos.map(function(p){
+      return '<option value="'+p+'"'+(_venc_filter_produto===p?' selected':'')+'>'+p+'</option>';
+    }).join('');
+
+  const selStyle = 'padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);outline:none;background:var(--surface);cursor:pointer';
+
+  const filterBar =
+    '<div style="margin-bottom:20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
+    '<input id="venc-busca" type="text" placeholder="Buscar cliente..." value="' + _venc_filter_busca.replace(/"/g,'&quot;') + '" ' +
+      'oninput="_venc_filter_busca=this.value;renderVencimentos();setTimeout(function(){var el=document.getElementById(\'venc-busca\');if(el){el.focus();el.setSelectionRange(_venc_filter_busca.length,_venc_filter_busca.length);}},0)" ' +
+      'style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;outline:none;min-width:150px">' +
+    '<select onchange="_venc_filter_cons=this.value;renderVencimentos()" style="'+selStyle+'">' + consOpts + '</select>' +
+    '<select onchange="_venc_filter_urgency=this.value;renderVencimentos()" style="'+selStyle+'">' +
+      '<option value="todos"'+(_venc_filter_urgency==='todos'?' selected':'')+'>Todas urgências</option>' +
+      '<option value="critico"'+(_venc_filter_urgency==='critico'?' selected':'')+'>⚠ Crítico (&gt;15d)</option>' +
+      '<option value="atrasado"'+(_venc_filter_urgency==='atrasado'?' selected':'')+'>Atrasado (1–15d)</option>' +
+      '<option value="hoje"'+(_venc_filter_urgency==='hoje'?' selected':'')+'>Vence hoje</option>' +
+    '</select>' +
+    '<select onchange="_venc_filter_etapa=this.value;renderVencimentos()" style="'+selStyle+'">' +
+      '<option value="todos"'+(_venc_filter_etapa==='todos'?' selected':'')+'>Todas etapas</option>' +
+      '<option value="em_implantacao"'+(_venc_filter_etapa==='em_implantacao'?' selected':'')+'>Implantação</option>' +
+      '<option value="cs_ativo"'+(_venc_filter_etapa==='cs_ativo'?' selected':'')+'>CS Ativo</option>' +
+    '</select>' +
+    (produtosUnicos.length
+      ? '<select onchange="_venc_filter_produto=this.value;renderVencimentos()" style="'+selStyle+'">' + prodOpts + '</select>'
+      : '') +
     '<span style="font-size:12px;color:var(--text3)">' + todos.length + ' de ' + allVenc.length + ' vencimento' + (allVenc.length!==1?'s':'') + '</span>' +
     '<button onclick="exportarVencimentosCSV()" class="btn btn-secondary btn-sm" style="margin-left:auto">⬇ Exportar CSV</button>' +
     '</div>';
