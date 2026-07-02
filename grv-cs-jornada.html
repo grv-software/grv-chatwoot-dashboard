@@ -2658,7 +2658,7 @@ function renderVencimentos() {
     const pauseBadge  = (v.pb.status === 'pausado')
       ? '<span style="background:#FFF3EE;color:var(--primary);font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:4px">⏸ Pausado</span>'
       : '';
-    return '<div class="venc-row" style="cursor:pointer" onclick="navigate(\'cliente/'+encodeURIComponent(v.clienteId)+'\')">' +
+    return '<div class="venc-row" style="cursor:pointer" onclick="navegarParaAtividades(\''+v.clienteId+'\',\''+v.pbId+'\')">' +
       '<div class="venc-stripe" style="background:'+stripeClr+'"></div>' +
       '<div class="venc-avatar" style="background:'+avatarGradiente(nome)+'">'+nome[0].toUpperCase()+'</div>' +
       '<div class="venc-info">' +
@@ -3322,6 +3322,13 @@ function renderCliente(id) {
 function setClienteAba(aba, clienteId) {
   _cliente_aba = aba;
   renderCliente(clienteId);
+}
+
+function navegarParaAtividades(clienteId, pbId) {
+  _cliente_id_atual = clienteId;
+  _cliente_aba      = 'atividades';
+  _pb_sel_id        = pbId || null;
+  navigate('cliente/' + encodeURIComponent(clienteId));
 }
 
 function tempoComoCliente(dataInicio) {
