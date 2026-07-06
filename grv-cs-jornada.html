@@ -1622,6 +1622,11 @@ function initData() {
           if (!at.registros) { at.registros = []; dirty = true; }
         });
       });
+      if (!c.csatRespostas) {
+        c.csatRespostas = c.csat ? [{ id:'csat_m', score: c.csat, data: c.dataInicioCS||c.dataInicio||'2025-01-01', obs:'' }] : [];
+        dirty = true;
+      }
+      if (!c.npsRespostas) { c.npsRespostas = []; dirty = true; }
     });
     if (dirty) localStorage.setItem(DB.CLIENTES, JSON.stringify(clientes));
   })();
@@ -1661,6 +1666,67 @@ function calcProgresso(pbOrArray) {
   const ats = pbs.flatMap(pb => pb.atividades || []);
   if (!ats.length) return 0;
   return Math.round(ats.filter(a => a.status === 'concluida').length / ats.length * 100);
+}
+
+function calcCsatAtual(cliente) {
+  var resps = (cliente.csatRespostas||[]).slice(-3);
+  if (!resps.length) return cliente.csat || null;
+  return Math.round(resps.reduce(function(s,r){ return s+r.score; },0)/resps.length*10)/10;
+}
+
+function registrarCsat(clienteId, score, obs, data) {
+  var c = getCliente(clienteId);
+  if (!c || !score) return;
+  if (!c.csatRespostas) c.csatRespostas = [];
+  c.csatRespostas.push({ id:'csat_'+Date.now(), score: parseFloat(score), data: data, obs: obs||'' });
+  c.csat = calcCsatAtual(c);
+  saveCliente(c);
+  _cliente_aba = '360';
+  renderCliente(clienteId);
+}
+
+function cancelarFormCsat(clienteId) {
+  _cliente_aba = '360';
+  renderCliente(clienteId);
+}
+
+function calcNps(cliente) {
+  var resps = cliente.npsRespostas || [];
+  if (!resps.length) return null;
+  var prom = resps.filter(function(r){ return r.score >= 9; }).length;
+  var detr = resps.filter(function(r){ return r.score <= 6; }).length;
+  return Math.round((prom - detr) / resps.length * 100);
+}
+
+function hsColor(score) {
+  return score === null ? 'var(--text4)' : score >= 75 ? '#22c55e' : score >= 50 ? '#eab308' : '#ef4444';
+}
+
+function calcHealthScore(cliente) {
+  var sla  = calcSlaCompliance([cliente]);
+  var csat = calcCsatAtual(cliente);
+  var prog = calcProgresso(cliente.ativPlaybooks || []);
+  var dias = getDiasUltimoContato(cliente);
+  var sSla  = sla  !== null ? sla  / 100 * 30 : 15;
+  var sCsat = csat !== null ? csat / 5   * 30 : 15;
+  var sProg = prog / 100 * 25;
+  var sCont = dias === null ? 7.5 : dias === 0 ? 15 : dias <= 7 ? 12 : dias <= 14 ? 8 : dias <= 30 ? 4 : 0;
+  return Math.round(sSla + sCsat + sProg + sCont);
+}
+
+function registrarNps(clienteId, score, comentario, data) {
+  var c = getCliente(clienteId);
+  if (!c || score === '' || score === null || score === undefined) return;
+  if (!c.npsRespostas) c.npsRespostas = [];
+  c.npsRespostas.push({ id:'nps_'+Date.now(), score: parseInt(score,10), data: data, comentario: comentario||'' });
+  saveCliente(c);
+  _cliente_aba = '360';
+  renderCliente(clienteId);
+}
+
+function cancelarFormNps(clienteId) {
+  _cliente_aba = '360';
+  renderCliente(clienteId);
 }
 
 function getDiasUltimoContato(cliente) {
@@ -2160,11 +2226,17 @@ function renderVisaoGeral(kpis, clientes, consultores) {
         ${(() => {
           const sla = calcSlaCompliance(clientes);
           const clr = sla===null ? 'rgba(255,255,255,.3)' : sla>=80 ? '#22c55e' : sla>=60 ? '#eab308' : '#ef4444';
-          return `<div class="vg-kpi" style="border-right:none">
+          return `<div class="vg-kpi">
             <div class="vg-kpi-n" style="color:${clr}">${sla!==null?sla+'%':'—'}</div>
             <div class="vg-kpi-l">SLA no Prazo</div>
             <div class="vg-kpi-pct">concluídas a tempo</div>
           </div>`;
+        })()}
+        ${(() => {
+          const scores = clientes.map(calcHealthScore).filter(function(s){ return s !== null; });
+          const med = scores.length ? Math.round(scores.reduce(function(a,b){return a+b;},0)/scores.length) : null;
+          const clr = hsColor(med);
+          return '<div class="vg-kpi" style="border-right:none"><div class="vg-kpi-n" style="color:'+clr+'">'+(med!==null?med:'—')+'</div><div class="vg-kpi-l">Health Médio</div><div class="vg-kpi-pct">score 0–100</div></div>';
         })()}
       </div>
       <div class="vg-bar">
@@ -2832,6 +2904,9 @@ function renderFeedCard(c, consultorId) {
   const ltBadge = (ltDias !== null && ltDias > 14)
     ? '<div style="font-size:10px;font-weight:700;color:' + (ltDias >= 30 ? '#ef4444' : '#eab308') + ';margin-top:3px">' + ltDias + 'd sem contato</div>'
     : '';
+  const hs  = calcHealthScore(c);
+  const hsC = hsColor(hs);
+  const hsCircle = '<div style="width:36px;height:36px;border-radius:50%;border:2.5px solid ' + hsC + ';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:' + hsC + ';flex-shrink:0;margin-bottom:4px">' + hs + '</div>';
   const pColor  = st === 'atrasado' ? 'var(--red)' : st === 'atencao' ? 'var(--yellow)' : 'var(--green)';
   const nomeCurto = c.id || c.projeto || '?';
   return '<div class="feed-card" onclick="navigate(\'cliente/' + encodeURIComponent(c.id) + '\')">' +
@@ -2843,6 +2918,7 @@ function renderFeedCard(c, consultorId) {
         '<div class="fc-meta">' + fase + ' · ' + prog + '%</div>' +
       '</div>' +
       '<div class="fc-right">' +
+        hsCircle +
         '<span class="status-badge b-' + st + '">' + statusLabel(st) + '</span>' +
         ltBadge +
         (csat ? '<div class="fc-csat">' + csat + '</div>' : '') +
@@ -3331,6 +3407,7 @@ function renderCliente(id) {
           ${_stCS ? '<span class="chip-base chip-status-' + _stCS + '">' + (_stLabels[_stCS]||_stCS) + '</span>' : ''}
           ${c.segmento ? '<span class="chip-base chip-seg">' + c.segmento + '</span>' : ''}
           ${c.produto  ? '<span class="chip-base chip-prod">' + c.produto  + '</span>' : ''}
+          ${(() => { var hs = calcHealthScore(c); if (hs === null) return ''; var clr = hsColor(hs); return '<span style="font-size:11px;font-weight:800;color:'+clr+';background:'+clr+'1a;padding:2px 8px;border-radius:12px;border:1px solid '+clr+'55">Health '+hs+'</span>'; })()}
         </div>
         ${(() => { var lt = getDiasUltimoContato(c); return lt !== null ? '<div style="font-size:11px;color:' + (lt===0?'#22c55e':lt<=7?'var(--text3)':lt<=14?'#eab308':'#ef4444') + ';margin-top:4px">Último contato: ' + (lt===0?'hoje':'há '+lt+' dia'+(lt===1?'':'s')) + '</div>' : ''; })()}
       </div>
@@ -3464,7 +3541,100 @@ function renderAba360(c) {
           <div style="font-size:13px;font-weight:700;color:var(--text)">${tempoComoCliente(c.dataInicioImplantacao)}</div>
         </div>
       </div>
-    </div>` : ''}`;
+    </div>` : ''}
+
+    <div class="card-block" style="margin-top:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="section-title" style="margin-bottom:0">Satisfação (CSAT)</div>
+        ${(() => {
+          const cs = calcCsatAtual(c);
+          if (cs === null) return '';
+          const clr = cs>=4?'#22c55e':cs>=3?'#eab308':'#ef4444';
+          return '<span style="font-size:22px;font-weight:800;color:'+clr+'">'+cs+' <span style="font-size:12px;color:var(--text3)">/ 5</span></span>';
+        })()}
+      </div>
+      ${(c.csatRespostas||[]).length === 0
+        ? '<p style="font-size:12px;color:var(--text3);margin:0 0 12px">Nenhuma pesquisa registrada ainda.</p>'
+        : '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">' +
+          (c.csatRespostas||[]).slice().reverse().map(function(r){
+            const clr = r.score>=4?'#22c55e':r.score>=3?'#eab308':'#ef4444';
+            return '<div style="display:flex;align-items:center;gap:10px;padding:6px 8px;background:var(--b-surface);border-radius:6px;font-size:12px">'
+              + '<span style="font-weight:800;color:'+clr+';min-width:20px">'+r.score+'</span>'
+              + '<span style="color:var(--text3)">'+new Date(r.data).toLocaleDateString('pt-BR')+'</span>'
+              + (r.obs ? '<span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.obs+'</span>' : '')
+              + '</div>';
+          }).join('') + '</div>'
+      }
+      <div id="csat-form-${c.id}" style="display:none;background:var(--b-surface);border-radius:8px;padding:12px;margin-bottom:8px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Score (1–5)</label>
+            <input id="csat-score-${c.id}" type="number" min="1" max="5" step="0.5" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Data</label>
+            <input id="csat-data-${c.id}" type="date" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
+          </div>
+        </div>
+        <div style="margin-bottom:10px">
+          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Observação (opcional)</label>
+          <input id="csat-obs-${c.id}" type="text" placeholder="Ex: cliente satisfeito com onboarding" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
+        </div>
+        <div style="display:flex;gap:8px">
+          <button onclick="registrarCsat('${c.id}',document.getElementById('csat-score-${c.id}').value,document.getElementById('csat-obs-${c.id}').value,document.getElementById('csat-data-${c.id}').value)" style="flex:1;padding:7px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Salvar</button>
+          <button onclick="cancelarFormCsat('${c.id}')" style="padding:7px 14px;background:transparent;color:var(--text3);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer">Cancelar</button>
+        </div>
+      </div>
+      <button onclick="document.getElementById('csat-form-${c.id}').style.display='block';var d=document.getElementById('csat-data-${c.id}');if(d)d.value=new Date().toISOString().slice(0,10)" style="font-size:12px;color:var(--primary);background:transparent;border:1px solid var(--primary);border-radius:6px;padding:5px 12px;cursor:pointer;font-weight:600">+ Registrar CSAT</button>
+    </div>
+
+    <div class="card-block" style="margin-top:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="section-title" style="margin-bottom:0">Net Promoter Score (NPS)</div>
+        ${(() => {
+          const nps = calcNps(c);
+          if (nps === null) return '';
+          const clr = nps>=50?'#22c55e':nps>=0?'#eab308':'#ef4444';
+          const lbl = nps>=50?'Excelente':nps>=0?'Bom':'Crítico';
+          return '<span style="font-size:22px;font-weight:800;color:'+clr+'">'+nps+' <span style="font-size:12px;color:var(--text3)">'+lbl+'</span></span>';
+        })()}
+      </div>
+      ${(c.npsRespostas||[]).length === 0
+        ? '<p style="font-size:12px;color:var(--text3);margin:0 0 12px">Nenhuma resposta registrada ainda.</p>'
+        : '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">' +
+          (c.npsRespostas||[]).slice().reverse().map(function(r){
+            const clr = r.score>=9?'#22c55e':r.score>=7?'var(--text3)':'#ef4444';
+            const tipo = r.score>=9?'Promotor':r.score>=7?'Neutro':'Detrator';
+            return '<div style="display:flex;align-items:center;gap:10px;padding:6px 8px;background:var(--b-surface);border-radius:6px;font-size:12px">'
+              + '<span style="font-weight:800;color:'+clr+';min-width:24px">'+r.score+'</span>'
+              + '<span style="color:'+clr+';font-size:10px;font-weight:700">'+tipo+'</span>'
+              + '<span style="color:var(--text3)">'+new Date(r.data).toLocaleDateString('pt-BR')+'</span>'
+              + (r.comentario ? '<span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.comentario+'</span>' : '')
+              + '</div>';
+          }).join('') + '</div>'
+      }
+      <div id="nps-form-${c.id}" style="display:none;background:var(--b-surface);border-radius:8px;padding:12px;margin-bottom:8px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Score NPS (0–10)</label>
+            <input id="nps-score-${c.id}" type="number" min="0" max="10" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Data</label>
+            <input id="nps-data-${c.id}" type="date" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
+          </div>
+        </div>
+        <div style="margin-bottom:10px">
+          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Comentário (opcional)</label>
+          <input id="nps-com-${c.id}" type="text" placeholder="Ex: indicaria para outros" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
+        </div>
+        <div style="display:flex;gap:8px">
+          <button onclick="registrarNps('${c.id}',document.getElementById('nps-score-${c.id}').value,document.getElementById('nps-com-${c.id}').value,document.getElementById('nps-data-${c.id}').value)" style="flex:1;padding:7px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Salvar</button>
+          <button onclick="cancelarFormNps('${c.id}')" style="padding:7px 14px;background:transparent;color:var(--text3);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer">Cancelar</button>
+        </div>
+      </div>
+      <button onclick="document.getElementById('nps-form-${c.id}').style.display='block';var d=document.getElementById('nps-data-${c.id}');if(d)d.value=new Date().toISOString().slice(0,10)" style="font-size:12px;color:var(--primary);background:transparent;border:1px solid var(--primary);border-radius:6px;padding:5px 12px;cursor:pointer;font-weight:600">+ Registrar NPS</button>
+    </div>`;
 }
 
 function togglePbMenu(evt, pbId, clienteId) {
