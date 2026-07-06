@@ -2040,13 +2040,15 @@ function chartConsulConfig(data) {
 }
 
 function computeAlertas(kpis, clientes) {
+  const cfg       = getAlertasConfig();
   const alertas   = [];
   const backlog   = computeBacklog(clientes);
   const pctAtr    = kpis.total ? kpis.atrasado / kpis.total : 0;
   const pctPaus   = kpis.total ? kpis.pausado  / kpis.total : 0;
-  if (pctAtr > 0.15) alertas.push({ sev:'critico',
+  const limAtr    = cfg.pctAtrasadoCritico / 100;
+  if (pctAtr > limAtr) alertas.push({ sev:'critico',
     titulo:'Portfólio atrasado: ' + Math.round(pctAtr*100) + '% (' + kpis.atrasado + '/' + kpis.total + ' projetos)',
-    acao:'Acima de 15% — escalar para gestão' });
+    acao:'Acima de ' + cfg.pctAtrasadoCritico + '% — escalar para gestão' });
   if (backlog.total > 500) alertas.push({ sev:'critico',
     titulo:'Backlog em dias atrasados: ' + fmtMilhares(backlog.total) + ' dias acumulados',
     acao:'Ação imediata de vazão necessária' });
@@ -2059,12 +2061,18 @@ function computeAlertas(kpis, clientes) {
   if (backlog.media > 90) alertas.push({ sev:'atencao',
     titulo:'Média de atraso: ' + backlog.media + ' dias por projeto atrasado',
     acao:'Confirmar plano de recuperação com consultores' });
-  const semContato30 = (clientes || []).filter(function(c) {
-    var d = getDiasUltimoContato(c); return d !== null && d > 30;
+  const semContato = (clientes || []).filter(function(c) {
+    var d = getDiasUltimoContato(c); return d !== null && d > cfg.diasSemContato;
   });
-  if (semContato30.length > 0) alertas.push({ sev:'atencao',
-    titulo: semContato30.length + ' cliente(s) sem contato há mais de 30 dias',
-    acao: 'Agendar touchpoint: ' + semContato30.slice(0,3).map(function(c){ return c.id; }).join(', ') + (semContato30.length > 3 ? ' e outros...' : '') });
+  if (semContato.length > 0) alertas.push({ sev:'atencao',
+    titulo: semContato.length + ' cliente(s) sem contato há mais de ' + cfg.diasSemContato + ' dias',
+    acao: 'Agendar touchpoint: ' + semContato.slice(0,3).map(function(c){ return c.id; }).join(', ') + (semContato.length > 3 ? ' e outros...' : '') });
+  const healthBaixo = (clientes || []).filter(function(c) {
+    var h = calcHealthScore(c); return h !== null && h < cfg.healthMinimo;
+  });
+  if (healthBaixo.length > 0) alertas.push({ sev: healthBaixo.length > 3 ? 'critico' : 'atencao',
+    titulo: healthBaixo.length + ' cliente(s) com Health Score abaixo de ' + cfg.healthMinimo,
+    acao: 'Verificar: ' + healthBaixo.slice(0,3).map(function(c){ return c.id + ' (' + calcHealthScore(c) + ')'; }).join(', ') + (healthBaixo.length > 3 ? ' e outros...' : '') });
   return alertas;
 }
 
@@ -2192,7 +2200,7 @@ function initCharts(kpis, clientes, consultores) {
   if (get('ch-gauge-nx'))  _dashCharts.gaugeNX  = new Chart(get('ch-gauge-nx'), chartGaugeConfig(computeAtivacao(clientes,'NX').pct));
 }
 
-function renderVisaoGeral(kpis, clientes, consultores) {
+function renderVisaoGeral(kpis, clientes, consultores, periodoLabel) {
   const ativos   = kpis.total - kpis.cancelado;
   const nConsul  = consultores.filter(c => clientes.some(cl => cl.consultorId === c.id)).length;
   const produtos = [...new Set(clientes.map(c => c.produto.split('/')[0]))].filter(Boolean).join(' · ');
@@ -2215,7 +2223,7 @@ function renderVisaoGeral(kpis, clientes, consultores) {
       <div class="vg-glow"></div>
       <div class="vg-header">
         <div>
-          <div class="vg-eyebrow">GRV · Gestão de Implantação</div>
+          <div class="vg-eyebrow">GRV · Gestão de Implantação${periodoLabel && periodoLabel !== 'Todo o período' ? ' · <span style="color:rgba(255,255,255,.55)">'+periodoLabel+'</span>' : ''}</div>
           <div class="vg-headline">${ativos} projetos ativos</div>
           <div class="vg-caption">${nConsul} consultor${nConsul!==1?'es':''} · ${produtos}${kpis.cancelado ? ` · ${kpis.cancelado} cancelados` : ''}</div>
         </div>
@@ -2315,7 +2323,34 @@ function renderZona1(kpis, clientes) {
           </div>
         </div>
         <div class="dash-card" style="margin:0">
-          <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Top Alertas</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Top Alertas</div>
+            <button onclick="toggleCfgAlertas()" title="Configurar thresholds" style="font-size:11px;color:var(--text3);background:transparent;border:1px solid var(--border);border-radius:5px;padding:2px 8px;cursor:pointer">⚙ Configurar</button>
+          </div>
+          ${(() => {
+            const cfg = getAlertasConfig();
+            return `<div id="cfg-alertas-panel" style="display:none;background:var(--b-surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px">
+              <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">Thresholds de alerta</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+                <div>
+                  <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Dias sem contato</label>
+                  <input id="cfg-dias-contato" type="number" min="1" max="365" value="${cfg.diasSemContato}" style="width:100%;padding:5px 7px;background:var(--b-bg);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:13px;box-sizing:border-box">
+                </div>
+                <div>
+                  <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">% atrasados crítico</label>
+                  <input id="cfg-pct-atrasado" type="number" min="1" max="100" value="${cfg.pctAtrasadoCritico}" style="width:100%;padding:5px 7px;background:var(--b-bg);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:13px;box-sizing:border-box">
+                </div>
+                <div>
+                  <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Health Score mín.</label>
+                  <input id="cfg-health-min" type="number" min="0" max="100" value="${cfg.healthMinimo}" style="width:100%;padding:5px 7px;background:var(--b-bg);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:13px;box-sizing:border-box">
+                </div>
+              </div>
+              <div style="display:flex;gap:8px">
+                <button onclick="salvarCfgAlertas()" style="flex:1;padding:6px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Salvar</button>
+                <button onclick="toggleCfgAlertas()" style="padding:6px 12px;background:transparent;color:var(--text3);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer">Cancelar</button>
+              </div>
+            </div>`;
+          })()}
           ${top3.length === 0
             ? `<div style="color:#38a169;font-size:13px;font-weight:600">✅ Sem alertas críticos</div>`
             : `<div class="alerts-compact">${top3.map(a => `
@@ -2424,20 +2459,32 @@ function renderDashboardProjetos(clientes, consultores) {
   Object.values(_dashCharts).forEach(ch => { try{ ch.destroy(); }catch(e){} });
   _dashCharts = {};
 
+  const periodoOpts = [
+    { v:'todos', l:'Todo o período' },
+    { v:'30d',   l:'Últimos 30 dias' },
+    { v:'90d',   l:'Últimos 90 dias' },
+    { v:'ano',   l:'Este ano' },
+  ];
   const filterBar = `<div class="dash-filter-bar">
     <select onchange="setProjConsultor(this.value)">
       <option value="">Todos consultores</option>
       ${consultores.map(c => `<option value="${c.id}"${c.id===_proj_consultor?' selected':''}>${c.nome}</option>`).join('')}
     </select>
+    <select onchange="setVgPeriodo(this.value)">
+      ${periodoOpts.map(o => `<option value="${o.v}"${o.v===_vg_periodo?' selected':''}>${o.l}</option>`).join('')}
+    </select>
     <button onclick="exportarProjetosCSV()" class="btn btn-secondary btn-sm" style="margin-left:auto">⬇ Exportar CSV</button>
   </div>`;
 
-  if (clientes.length === 0) {
-    return filterBar + `<div class="empty-state"><div class="es-icon">📊</div><div class="es-text">Nenhum projeto encontrado para este consultor.</div></div>`;
+  const clientesFiltrados = filtrarClientesPorPeriodo(clientes, _vg_periodo);
+  const periodoLabel = periodoOpts.find(function(o){ return o.v === _vg_periodo; });
+
+  if (clientesFiltrados.length === 0) {
+    return filterBar + `<div class="empty-state"><div class="es-icon">📊</div><div class="es-text">Nenhum projeto encontrado para este período.</div></div>`;
   }
 
-  const kpis = computeDashboardKPIs(clientes);
-  return filterBar + renderVisaoGeral(kpis, clientes, consultores) + renderZona1(kpis, clientes) + renderZona2(kpis, clientes, consultores) + renderZona3(kpis, clientes);
+  const kpis = computeDashboardKPIs(clientesFiltrados);
+  return filterBar + renderVisaoGeral(kpis, clientesFiltrados, consultores, periodoLabel ? periodoLabel.l : '') + renderZona1(kpis, clientesFiltrados) + renderZona2(kpis, clientesFiltrados, consultores) + renderZona3(kpis, clientesFiltrados);
 }
 
 function getDiasNaEtapa(c) {
@@ -3250,6 +3297,7 @@ let _proj_consultor = '';
 let _proj_etapa     = '';
 let _proj_status    = '';
 let _proj_kpi_filter = '';
+let _vg_periodo      = 'todos';
 let _dashCharts     = {};
 
 function setProjetosView(v) {
@@ -3261,6 +3309,47 @@ function setProjetosView(v) {
 function setProjConsultor(v) { _proj_consultor = v; renderProjetosGRV(); }
 function setProjEtapa(v)     { _proj_etapa = v; _proj_kpi_filter = ''; renderProjetosGRV(); }
 function setProjStatus(v)    { _proj_status = v; _proj_kpi_filter = ''; renderProjetosGRV(); }
+function setVgPeriodo(v)     { _vg_periodo = v; renderProjetosGRV(); }
+
+function filtrarClientesPorPeriodo(clientes, periodo) {
+  if (periodo === 'todos') return clientes;
+  var hoje = new Date(); hoje.setHours(0,0,0,0);
+  var inicio;
+  if (periodo === '30d')  { inicio = new Date(hoje - 30*86400000); }
+  else if (periodo === '90d')  { inicio = new Date(hoje - 90*86400000); }
+  else if (periodo === 'ano')  { inicio = new Date(hoje.getFullYear(), 0, 1); }
+  else return clientes;
+  return clientes.filter(function(c) {
+    var d = c.dataInicioCS || c.dataInicio;
+    if (!d) return false;
+    return new Date(d) >= inicio;
+  });
+}
+
+var _ALERTAS_CFG_KEY = 'grv_alertas_cfg';
+function getAlertasConfig() {
+  try {
+    var raw = localStorage.getItem(_ALERTAS_CFG_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return { diasSemContato: 30, pctAtrasadoCritico: 15, healthMinimo: 50 };
+}
+function saveAlertasConfig(cfg) {
+  localStorage.setItem(_ALERTAS_CFG_KEY, JSON.stringify(cfg));
+}
+function salvarCfgAlertas() {
+  var d = parseInt(document.getElementById('cfg-dias-contato').value) || 30;
+  var p = parseInt(document.getElementById('cfg-pct-atrasado').value) || 15;
+  var h = parseInt(document.getElementById('cfg-health-min').value) || 50;
+  saveAlertasConfig({ diasSemContato: Math.max(1,d), pctAtrasadoCritico: Math.max(1,Math.min(100,p)), healthMinimo: Math.max(0,Math.min(100,h)) });
+  document.getElementById('cfg-alertas-panel').style.display = 'none';
+  renderProjetosGRV();
+}
+function toggleCfgAlertas() {
+  var el = document.getElementById('cfg-alertas-panel');
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
 
 function drillKpi(statusDash) {
   _proj_view = 'lista';
