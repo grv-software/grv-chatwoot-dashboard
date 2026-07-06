@@ -166,7 +166,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .vg-headline{font-size:36px;font-weight:800;line-height:1;letter-spacing:-1.5px;margin-bottom:8px}
 .vg-caption{font-size:13px;color:rgba(255,255,255,.45)}
 .vg-saude-badge{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:24px;border:1px solid;font-size:12px;font-weight:700;letter-spacing:.02em;flex-shrink:0;backdrop-filter:blur(4px)}
-.vg-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.07)}
+.vg-kpis{display:grid;grid-template-columns:repeat(7,1fr);gap:0;margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.07)}
 .vg-kpi{padding:0 20px;border-right:1px solid rgba(255,255,255,.07)}
 .vg-kpi:first-child{padding-left:0}
 .vg-kpi:last-child{border-right:none;padding-right:0}
@@ -3448,28 +3448,6 @@ function renderAba360(c) {
   const prog          = getProgresso(c);
   const csNome        = getConsultores().find(x => x.id === c.csId)?.nome || '—';
   const consultorNome = getConsultores().find(x => x.id === c.consultorId)?.nome || c.consultorId;
-
-  const fasesHtml = c.fases.map((f, fi) => {
-    const feitas = f.tarefas.filter(t => t.feita).length;
-    const isOpen = _open_fases[fi] !== false;
-    return `<div class="phase-row">
-      <div class="phase-hdr" onclick="toggleFase(${fi})">
-        <div class="phase-hdr-left">
-          <span class="phase-name">${f.nome}</span>
-          <span class="phase-ct">${feitas}/${f.tarefas.length}</span>
-        </div>
-        <span class="phase-chev${isOpen?' open':''}">▶</span>
-      </div>
-      <div class="phase-body${isOpen?' open':''}">
-        ${f.tarefas.map(t => `
-          <div class="task-item${t.feita?' done':''}" id="ti_${t.id}">
-            <input type="checkbox" id="ck_${t.id}"${t.feita?' checked':''}
-              onchange="checkTask('${c.id}',${fi},'${t.id}')">
-            <label for="ck_${t.id}">${t.texto}</label>
-          </div>`).join('')}
-      </div>
-    </div>`;
-  }).join('');
 
   const tlHtml = c.historicoEtapas.map(h => {
     const label = h.de
