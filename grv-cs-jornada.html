@@ -2679,7 +2679,7 @@ function exportarVencimentosCSV() {
   if (!todos.length) { showToast('Nenhum vencimento para exportar', 2500); return; }
   const rows = [['Cliente','Projeto','Atividade','Playbook','Responsável','Dias Vencido','Data Limite']];
   todos.forEach(function(v) {
-    const respId   = v.at.responsavelId || v.pb.donoId || '';
+    const respId   = resolverResponsavel(v.at, v.pb, v.cliente);
     const respNome = getConsultores().find(function(x){return x.id===respId;})?.nome || respId;
     const diasTxt  = v.diff===0 ? 'Vence hoje' : Math.abs(v.diff)+'d atrás';
     rows.push([v.cliente.id, v.cliente.projeto||'', v.at.nome||'', v.pb.nome||'', respNome, diasTxt, v.at.dataLimite||'']);
@@ -2794,7 +2794,7 @@ function renderVencimentos() {
 
   let todos = allVenc.slice();
   if (_venc_filter_cons !== 'todos')
-    todos = todos.filter(function(v){ return (v.at.responsavelId || v.pb.donoId) === _venc_filter_cons; });
+    todos = todos.filter(function(v){ return resolverResponsavel(v.at, v.pb, v.cliente) === _venc_filter_cons; });
   if (_venc_filter_urgency === 'critico')  todos = todos.filter(function(v){ return v.diff < -15; });
   if (_venc_filter_urgency === 'atrasado') todos = todos.filter(function(v){ return v.diff < 0 && v.diff >= -15; });
   if (_venc_filter_urgency === 'hoje')     todos = todos.filter(function(v){ return v.diff === 0; });
@@ -2863,8 +2863,15 @@ function renderVencimentos() {
 
   function mkRow(v, stripeClr, diasBg, diasClr) {
     const diasTxt     = v.diff===0 ? 'Vence hoje' : v.diff > 0 ? 'em '+v.diff+'d' : Math.abs(v.diff)+'d atrás';
-    const resp        = v.at.responsavelId || v.pb.donoId || '';
-    const respNome    = resp ? (getConsultores().find(x=>x.id===resp)?.nome || resp) : '—';
+    const respExplicito = v.at.responsavelId;
+    const resp          = resolverResponsavel(v.at, v.pb, v.cliente);
+    const respCon       = getConsultores().find(function(x){ return x.id === resp; });
+    const respNome      = respCon ? respCon.nome : (resp || '—');
+    const respSufixo    = !respExplicito && v.pb.donoId && v.pb.donoId === resp
+      ? ' <span style="font-size:9px;color:var(--text3)">(pb)</span>'
+      : !respExplicito && !v.pb.donoId
+      ? ' <span style="font-size:9px;color:var(--text3)">(cliente)</span>'
+      : '';
     const nome        = v.cliente.id;
     const clienteLink = '<a href="#cliente/' + encodeURIComponent(v.clienteId) + '" ' +
       'onclick="event.stopPropagation()" ' +
@@ -2877,7 +2884,7 @@ function renderVencimentos() {
       '<div class="venc-avatar" style="background:'+avatarGradiente(nome)+'">'+nome[0].toUpperCase()+'</div>' +
       '<div class="venc-info">' +
         '<div class="venc-nome">'+(v.at.nome||'—')+'</div>' +
-        '<div class="venc-meta">'+clienteLink+' · '+(v.pb.nome||'Playbook')+pauseBadge+' · <b style="color:var(--text2)">'+respNome+'</b></div>' +
+        '<div class="venc-meta">'+clienteLink+' · '+(v.pb.nome||'Playbook')+pauseBadge+' · <b style="color:var(--text2)">'+respNome+'</b>'+respSufixo+'</div>' +
       '</div>' +
       '<div class="venc-right">' +
         '<span class="venc-dias" style="background:'+diasBg+';color:'+diasClr+'">'+diasTxt+'</span>' +
