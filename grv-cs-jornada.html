@@ -1754,6 +1754,10 @@ function cancelarFormContato(clienteId) {
   renderCliente(clienteId);
 }
 
+function resolverResponsavel(at, pb, cliente) {
+  return (at && at.responsavelId) || (pb && pb.donoId) || (cliente && cliente.consultorId) || '';
+}
+
 function getDiasUltimoContato(cliente) {
   var hoje = new Date(); hoje.setHours(0,0,0,0);
   var ultima = null;
@@ -2752,7 +2756,7 @@ function updateVencBadge() {
   badge.classList.toggle('hidden', count === 0);
 }
 
-let _venc_filter_cons    = 'todos';
+let _venc_filter_cons    = getConsultorAtivo();
 let _venc_filter_urgency = 'todos';
 let _venc_filter_etapa   = 'todos';
 let _venc_filter_produto = 'todos';
