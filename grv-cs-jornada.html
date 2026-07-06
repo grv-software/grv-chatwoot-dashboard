@@ -1627,6 +1627,7 @@ function initData() {
         dirty = true;
       }
       if (!c.npsRespostas) { c.npsRespostas = []; dirty = true; }
+      if (!c.contatos) { c.contatos = []; dirty = true; }
     });
     if (dirty) localStorage.setItem(DB.CLIENTES, JSON.stringify(clientes));
   })();
@@ -1725,6 +1726,30 @@ function registrarNps(clienteId, score, comentario, data) {
 }
 
 function cancelarFormNps(clienteId) {
+  _cliente_aba = '360';
+  renderCliente(clienteId);
+}
+
+function adicionarContato(clienteId, nome, cargo, email, whatsapp) {
+  var c = getCliente(clienteId);
+  if (!c || !nome.trim()) return;
+  if (!c.contatos) c.contatos = [];
+  c.contatos.push({ id:'ct_'+Date.now(), nome:nome.trim(), cargo:cargo.trim(), email:email.trim(), whatsapp:whatsapp.trim() });
+  saveCliente(c);
+  _cliente_aba = '360';
+  renderCliente(clienteId);
+}
+
+function removerContato(clienteId, contatoId) {
+  var c = getCliente(clienteId);
+  if (!c) return;
+  c.contatos = (c.contatos||[]).filter(function(ct){ return ct.id !== contatoId; });
+  saveCliente(c);
+  _cliente_aba = '360';
+  renderCliente(clienteId);
+}
+
+function cancelarFormContato(clienteId) {
   _cliente_aba = '360';
   renderCliente(clienteId);
 }
@@ -2593,21 +2618,35 @@ function exportarProjetosCSV() {
   const clientes = getClientes();
   if (!clientes.length) { showToast('Nenhum projeto para exportar', 2500); return; }
   const hoje = new Date(); hoje.setHours(0,0,0,0);
-  const rows  = [['ID','Projeto','Produto','Consultor','Etapa','Status','Progresso %','CSAT','Atividades','Concluídas','Vencidas','SLA %']];
+  const stCons = getConsultorAtivo();
+  const rows = [['ID','Projeto','Segmento','Produto','Consultor','Etapa','Status',
+    'Health Score','CSAT','NPS','Último Contato (dias)',
+    'Progresso %','Atividades','Concluídas','Vencidas','SLA %']];
   clientes.forEach(function(c) {
     const pbs   = c.ativPlaybooks || [];
-    const ativs = pbs.flatMap(function(pb){return pb.atividades||[];});
+    const ativs = pbs.flatMap(function(pb){ return pb.atividades||[]; });
     const total = ativs.length;
-    const done  = ativs.filter(function(a){return a.status==='concluida';}).length;
+    const done  = ativs.filter(function(a){ return a.status==='concluida'; }).length;
     const venc  = ativs.filter(function(a){
       if (a.status==='concluida'||!a.dataLimite) return false;
-      return new Date(a.dataLimite+'T00:00:00')<hoje;
+      return new Date(a.dataLimite+'T00:00:00') < hoje;
     }).length;
-    const cons  = getConsultores().find(function(x){return x.id===c.consultorId;})?.nome||c.consultorId||'';
+    const cons  = getConsultores().find(function(x){ return x.id===c.consultorId; })?.nome || c.consultorId || '';
     const sla   = calcSlaCompliance([c]);
-    const stCons = getConsultorAtivo();
-    rows.push([c.id, c.projeto||'', c.produto||'', cons, c.etapa||'', getStatusCliente(c, stCons)||'',
-      calcProgresso(pbs)+'%', c.csat||'', total, done, venc, sla!==null?sla+'%':'—']);
+    const hs    = calcHealthScore(c);
+    const csat  = calcCsatAtual(c);
+    const nps   = calcNps(c);
+    const lt    = getDiasUltimoContato(c);
+    rows.push([
+      c.id, c.projeto||'', c.segmento||'', c.produto||'', cons,
+      c.etapa||'', getStatusCliente(c, stCons)||'',
+      hs !== null ? hs : '—',
+      csat !== null ? csat : '—',
+      nps !== null ? nps : '—',
+      lt !== null ? lt : '—',
+      calcProgresso(pbs)+'%', total, done, venc,
+      sla !== null ? sla+'%' : '—'
+    ]);
   });
   exportarCSV(rows, 'grv-projetos-'+new Date().toISOString().split('T')[0]+'.csv');
   showToast('CSV exportado — '+clientes.length+' clientes', 2500);
@@ -2637,7 +2676,8 @@ function cancelConfirm() {
 // ═══════════════════════════════════════════════════════════
 // VENCIMENTOS
 // ═══════════════════════════════════════════════════════════
-function getTodasVencidas() {
+function getTodasVencidas(maxDiasFuturos) {
+  maxDiasFuturos = (maxDiasFuturos === undefined) ? 0 : maxDiasFuturos;
   const hoje = new Date(); hoje.setHours(0,0,0,0);
   const result = [];
   getClientes().forEach(function(c) {
@@ -2648,7 +2688,7 @@ function getTodasVencidas() {
         if (!at.dataLimite) return;
         const dl = new Date(at.dataLimite + 'T00:00:00');
         const diff = Math.round((dl - hoje) / 86400000);
-        if (diff <= 0) {
+        if (diff <= maxDiasFuturos) {
           result.push({ clienteId:c.id, pbId:pb.id, atId:at.id, at, pb, cliente:c, diff });
         }
       });
@@ -2669,12 +2709,14 @@ let _venc_filter_cons    = 'todos';
 let _venc_filter_urgency = 'todos';
 let _venc_filter_etapa   = 'todos';
 let _venc_filter_produto = 'todos';
-let _venc_filter_busca   = '';
+let _venc_filter_busca      = '';
+let _venc_filter_horizonte  = 'vencidas';
 
 function renderVencimentos() {
   const sec = document.getElementById('sec-vencimentos');
   if (!sec) return;
-  const allVenc = getTodasVencidas();
+  const _horizDias = _venc_filter_horizonte==='proximos30' ? 30 : _venc_filter_horizonte==='proximos7' ? 7 : 0;
+  const allVenc = getTodasVencidas(_horizDias);
 
   let todos = allVenc.slice();
   if (_venc_filter_cons !== 'todos')
@@ -2708,6 +2750,11 @@ function renderVencimentos() {
       'oninput="_venc_filter_busca=this.value;renderVencimentos();setTimeout(function(){var el=document.getElementById(\'venc-busca\');if(el){el.focus();el.setSelectionRange(_venc_filter_busca.length,_venc_filter_busca.length);}},0)" ' +
       'style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;outline:none;min-width:150px">' +
     '<select onchange="_venc_filter_cons=this.value;renderVencimentos()" style="'+selStyle+'">' + consOpts + '</select>' +
+    '<select onchange="_venc_filter_horizonte=this.value;renderVencimentos()" style="'+selStyle+'">' +
+      '<option value="vencidas"'+(_venc_filter_horizonte==='vencidas'?' selected':'')+'>Vencidas</option>' +
+      '<option value="proximos7"'+(_venc_filter_horizonte==='proximos7'?' selected':'')+'>+ Próximos 7 dias</option>' +
+      '<option value="proximos30"'+(_venc_filter_horizonte==='proximos30'?' selected':'')+'>+ Próximos 30 dias</option>' +
+    '</select>' +
     '<select onchange="_venc_filter_urgency=this.value;renderVencimentos()" style="'+selStyle+'">' +
       '<option value="todos"'+(_venc_filter_urgency==='todos'?' selected':'')+'>Todas urgências</option>' +
       '<option value="critico"'+(_venc_filter_urgency==='critico'?' selected':'')+'>⚠ Crítico (&gt;15d)</option>' +
@@ -2738,9 +2785,10 @@ function renderVencimentos() {
   const criticos  = todos.filter(function(v){return v.diff<-15;}).sort(function(a,b){return a.diff-b.diff;});
   const atrasados = todos.filter(function(v){return v.diff<0&&v.diff>=-15;}).sort(function(a,b){return a.diff-b.diff;});
   const hoje_lst  = todos.filter(function(v){return v.diff===0;});
+  const proximas  = todos.filter(function(v){return v.diff>0;}).sort(function(a,b){return a.diff-b.diff;});
 
   function mkRow(v, stripeClr, diasBg, diasClr) {
-    const diasTxt     = v.diff===0 ? 'Vence hoje' : Math.abs(v.diff)+'d atrás';
+    const diasTxt     = v.diff===0 ? 'Vence hoje' : v.diff > 0 ? 'em '+v.diff+'d' : Math.abs(v.diff)+'d atrás';
     const resp        = v.at.responsavelId || v.pb.donoId || '';
     const respNome    = resp ? (getConsultores().find(x=>x.id===resp)?.nome || resp) : '—';
     const nome        = v.cliente.id;
@@ -2782,9 +2830,10 @@ function renderVencimentos() {
     '<div class="page-header"><h1 class="page-title">Vencimentos</h1>' +
     '<p class="page-subtitle">Atividades com prazo vencido ou vencendo hoje</p></div>' +
     '<div class="venc-wrap">' + filterBar + noResults +
-      renderGroup(criticos,  'Crítico',    'var(--red)',    'var(--red)',    '#FFF5F5', 'var(--red)') +
-      renderGroup(atrasados, 'Atrasado',   'var(--primary)','var(--primary)','#FFF3EE', '#b7430e') +
-      renderGroup(hoje_lst,  'Vence hoje', 'var(--yellow)', 'var(--yellow)', '#FFFFF0', '#92701e') +
+      renderGroup(criticos,  'Crítico',        'var(--red)',    'var(--red)',    '#FFF5F5', 'var(--red)') +
+      renderGroup(atrasados, 'Atrasado',       'var(--primary)','var(--primary)','#FFF3EE', '#b7430e') +
+      renderGroup(hoje_lst,  'Vence hoje',     'var(--yellow)', 'var(--yellow)', '#FFFFF0', '#92701e') +
+      renderGroup(proximas,  'Próximas',       'var(--green)',  'var(--green)',  '#F0FFF4', '#16803c') +
     '</div></div>';
 }
 
@@ -3506,6 +3555,57 @@ function renderAba360(c) {
         </div>
       </div>
     </div>` : ''}
+
+    <div class="card-block" style="margin-top:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="section-title" style="margin-bottom:0">Contatos do Cliente</div>
+        <span style="font-size:12px;color:var(--text3)">${(c.contatos||[]).length} contato${(c.contatos||[]).length!==1?'s':''}</span>
+      </div>
+      ${(c.contatos||[]).length === 0
+        ? '<p style="font-size:12px;color:var(--text3);margin:0 0 12px">Nenhum contato cadastrado ainda.</p>'
+        : '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">' +
+          (c.contatos||[]).map(function(ct){
+            return '<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:10px 12px;background:var(--b-surface);border-radius:8px;gap:12px">'
+              + '<div style="flex:1;min-width:0">'
+                + '<div style="font-size:13px;font-weight:700;color:var(--text)">' + ct.nome + '</div>'
+                + (ct.cargo ? '<div style="font-size:11px;color:var(--text3);margin-top:1px">' + ct.cargo + '</div>' : '')
+                + '<div style="display:flex;gap:12px;margin-top:6px;flex-wrap:wrap">'
+                  + (ct.email ? '<a href="mailto:'+ct.email+'" style="font-size:11px;color:var(--primary);text-decoration:none">✉ '+ct.email+'</a>' : '')
+                  + (ct.whatsapp ? '<a href="https://wa.me/'+ct.whatsapp.replace(/\D/g,'')+'" target="_blank" style="font-size:11px;color:#22c55e;text-decoration:none">📱 '+ct.whatsapp+'</a>' : '')
+                + '</div>'
+              + '</div>'
+              + '<button onclick="removerContato(\''+c.id+'\',\''+ct.id+'\')" title="Remover contato" style="flex-shrink:0;padding:3px 8px;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--text3);font-size:11px;cursor:pointer">✕</button>'
+            + '</div>';
+          }).join('') + '</div>'
+      }
+      <div id="ct-form-${c.id}" style="display:none;background:var(--b-surface);border-radius:8px;padding:12px;margin-bottom:8px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Nome *</label>
+            <input id="ct-nome-${c.id}" type="text" placeholder="Ex: João Silva" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Cargo</label>
+            <input id="ct-cargo-${c.id}" type="text" placeholder="Ex: Gerente de TI" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">E-mail</label>
+            <input id="ct-email-${c.id}" type="email" placeholder="joao@empresa.com" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">WhatsApp</label>
+            <input id="ct-wpp-${c.id}" type="text" placeholder="(11) 99999-9999" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button onclick="adicionarContato('${c.id}',document.getElementById('ct-nome-${c.id}').value,document.getElementById('ct-cargo-${c.id}').value,document.getElementById('ct-email-${c.id}').value,document.getElementById('ct-wpp-${c.id}').value)" style="flex:1;padding:7px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Salvar contato</button>
+          <button onclick="cancelarFormContato('${c.id}')" style="padding:7px 14px;background:transparent;color:var(--text3);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer">Cancelar</button>
+        </div>
+      </div>
+      <button onclick="document.getElementById('ct-form-${c.id}').style.display='block'" style="font-size:12px;color:var(--primary);background:transparent;border:1px solid var(--primary);border-radius:6px;padding:5px 12px;cursor:pointer;font-weight:600">+ Adicionar contato</button>
+    </div>
 
     <div class="card-block" style="margin-top:16px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
