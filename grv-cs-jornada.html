@@ -3968,7 +3968,24 @@ function renderAbaAtividades(c) {
         <span class="at-row-name${done?' done':''}">${at.nome}</span>
         <div class="at-row-right">
           ${slaTxt}
-          ${resp ? '<span class="at-row-resp">'+resp+'</span>' : ''}
+          ${(() => {
+            var respExplicito = at.responsavelId;
+            var respHerdado   = selPb.donoId || c.consultorId || '';
+            var respId        = respExplicito || respHerdado;
+            var respNome      = respId ? ((getConsultores().find(function(x){return x.id===respId;})||{}).nome||respId).split(' ')[0] : '—';
+            var isHerdado     = !respExplicito;
+            var opts = '<option value="">↩ Herdar</option>' +
+              getConsultores().map(function(con){
+                return '<option value="'+con.id+'"'+(con.id===respId&&!isHerdado?' selected':'')+'>'+con.nome+'</option>';
+              }).join('');
+            var borderStyle = isHerdado
+              ? 'border:1px dashed rgba(255,255,255,.15);color:rgba(240,242,248,.4)'
+              : 'border:1px solid rgba(255,255,255,.15);color:rgba(240,242,248,.7)';
+            return '<select onchange="setResponsavelAtividade(\''+c.id+'\',\''+selPb.id+'\',\''+at.id+'\',this.value)" onclick="event.stopPropagation()" '
+              + 'style="font-size:10px;font-weight:600;padding:2px 5px;background:var(--b-surface);'+borderStyle+';border-radius:5px;cursor:pointer;max-width:90px" '
+              + 'title="'+(isHerdado?'Herdado do playbook':'Responsável explícito')+'">'
+              + opts + '</select>';
+          })()}
           <span class="at-status-${st}">${stLbl[st]||st}</span>
         </div>
       </div>`;
