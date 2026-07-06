@@ -1754,6 +1754,29 @@ function cancelarFormContato(clienteId) {
   renderCliente(clienteId);
 }
 
+function setDonoPlaybook(clienteId, pbId, consultorId) {
+  var c = getCliente(clienteId);
+  if (!c) return;
+  var pb = (c.ativPlaybooks || []).find(function(p) { return p.id === pbId; });
+  if (!pb) return;
+  pb.donoId = consultorId;
+  saveCliente(c);
+  renderCliente(clienteId);
+}
+
+function setResponsavelAtividade(clienteId, pbId, atId, consultorId) {
+  var c = getCliente(clienteId);
+  if (!c) return;
+  var pb = (c.ativPlaybooks || []).find(function(p) { return p.id === pbId; });
+  if (!pb) return;
+  var at = (pb.atividades || []).find(function(a) { return a.id === atId; });
+  if (!at) return;
+  if (consultorId === '') { delete at.responsavelId; }
+  else { at.responsavelId = consultorId; }
+  saveCliente(c);
+  renderCliente(clienteId);
+}
+
 function resolverResponsavel(at, pb, cliente) {
   return (at && at.responsavelId) || (pb && pb.donoId) || (cliente && cliente.consultorId) || '';
 }
@@ -3960,9 +3983,23 @@ function renderAbaAtividades(c) {
           <button class="btn btn-sm" onclick="cancelarFormAtividade('${c.id}')">✕</button>
          </div>` : '';
 
+    const donoAtual = selPb.donoId || c.consultorId || '';
+    const donoOpts  = getConsultores().map(function(con) {
+      return '<option value="'+con.id+'"'+(con.id===donoAtual?' selected':'')+'>'+con.nome+'</option>';
+    }).join('');
+
     rightHtml = `
       <div class="at-right-hd">
-        <div class="at-right-title">${selPb.nome}</div>
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+          <div class="at-right-title" style="flex:1">${selPb.nome}</div>
+          <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
+            <span style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Dono</span>
+            <select onchange="setDonoPlaybook('${c.id}','${selPb.id}',this.value)"
+              style="font-size:11px;font-weight:600;padding:3px 6px;background:var(--b-surface);border:1px solid var(--border);border-radius:5px;color:var(--text);cursor:pointer;max-width:130px">
+              ${donoOpts}
+            </select>
+          </div>
+        </div>
         ${(selPb.status||'ativo') === 'cancelado'
           ? '<span style="font-size:10px;padding:3px 8px;background:var(--border-2);color:var(--text3);border-radius:6px">✕ Cancelado</span>'
           : selPb.encerrado
