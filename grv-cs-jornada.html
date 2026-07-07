@@ -5189,6 +5189,13 @@ function renderCriar() {
             </select>
           </div>
           <div class="form-group">
+            <label>CS Responsável <span style="font-size:10px;color:var(--text3);font-weight:400">(opcional)</span></label>
+            <select id="f-cs">
+              <option value="">— Definir depois —</option>
+              ${consultores.map(c => `<option value="${c.id}">${c.nome}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group">
             <label>Etapa inicial</label>
             <select id="f-etapa">
               ${ETAPAS.map(e => `<option value="${e}">${ETAPA_META[e].emoji} ${e}</option>`).join('')}
@@ -5330,8 +5337,9 @@ function salvarPlaybook() {
   errEl.style.display = 'none';
 
   const dataInicio = inicio || new Date().toISOString().split('T')[0];
+  const csIdVal = document.getElementById('f-cs')?.value || '';
   const novo = {
-    id, projeto, produto, consultorId: consul, etapa,
+    id, projeto, produto, consultorId: consul, csId: csIdVal || undefined, etapa,
     dataInicio, prazo,
     proximaAcao: acao || '',
     fases: _bFases.map(f => ({nome:f.nome, tarefas:f.tarefas.map(t => ({...t, feita:false}))})),
