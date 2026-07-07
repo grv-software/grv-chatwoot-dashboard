@@ -34,29 +34,43 @@
   --shadow: 0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.05);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(--bg);color:var(--text);display:flex;flex-direction:column;min-height:100vh}
 
-/* ── SIDEBAR ─────────────────────────────────────────────── */
-.sidebar{width:210px;min-height:100vh;background:var(--sidebar-bg);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;border-right:1px solid var(--border)}
-.sb-logo{padding:18px 16px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-2)}
-.sb-logo-icon{width:32px;height:32px;flex-shrink:0}
-.sb-logo-text{color:var(--text);font-weight:700;font-size:12px;line-height:1.2}
+/* ── TOPNAV ─────────────────────────────────────────────── */
+.sidebar{width:100%;height:48px;background:var(--sidebar-bg);display:flex;flex-direction:row;align-items:center;flex-shrink:0;position:sticky;top:0;z-index:200;overflow:visible;border-bottom:1px solid var(--border);box-shadow:0 1px 6px rgba(0,0,0,.05);padding:0 20px;gap:0}
+.sb-logo{padding:0 16px 0 0;height:100%;display:flex;align-items:center;gap:9px;border-right:1px solid var(--border);margin-right:12px;flex-shrink:0}
+.sb-logo-icon{width:26px;height:26px;flex-shrink:0}
+.sb-logo-text{color:var(--text);font-weight:700;font-size:11px;line-height:1.2}
 .sb-logo-text span{display:block;font-weight:400;font-size:9px;color:var(--text4)}
-.sb-nav{padding:10px;flex:1;display:flex;flex-direction:column;gap:1px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-sm);color:var(--text2);cursor:pointer;font-size:12px;font-weight:500;transition:background .12s,color .12s;text-decoration:none;margin-bottom:1px}
-.nav-item:hover{background:#f7f8fa;color:var(--text)}
-.nav-item.active{background:var(--b-orange-bg);color:var(--primary);font-weight:700}
-.nav-icon{width:16px;height:16px;flex-shrink:0;opacity:.45}
+.sb-nav{padding:0;flex:1;height:100%;display:flex;flex-direction:row;gap:0;align-items:center}
+.nav-item{display:flex;align-items:center;gap:6px;padding:0 14px;height:100%;position:relative;border-radius:0;color:var(--text3);cursor:pointer;font-size:12.5px;font-weight:500;transition:color .15s;text-decoration:none;margin-bottom:0;white-space:nowrap}
+.nav-item:hover{background:none;color:var(--text)}
+.nav-item.active{background:none;color:var(--primary);font-weight:600}
+.nav-item.active::after{content:'';position:absolute;bottom:0;left:14px;right:14px;height:2px;background:var(--primary);border-radius:2px 2px 0 0}
+.nav-icon{width:14px;height:14px;flex-shrink:0;opacity:.5}
 .nav-item.active .nav-icon{opacity:1}
-.sb-footer{padding:12px 14px;border-top:1px solid var(--border-2)}
-.sb-footer-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text4);margin-bottom:5px;font-weight:700}
-.sb-consul-val{display:flex;align-items:center;gap:8px;background:#f7f8fa;border-radius:var(--radius-sm);padding:7px 10px}
-.sb-avatar{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--primary),#ff8c5a);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0}
+.nav-item:hover .nav-icon{opacity:.75}
+.nav-group{position:relative;height:100%;display:flex;align-items:center}
+.nav-group:hover .nav-dropdown{display:flex}
+.nav-dropdown{display:none;position:absolute;top:100%;left:0;background:var(--sidebar-bg);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 4px 16px rgba(0,0,0,.12);padding:6px 0;flex-direction:column;min-width:200px;z-index:300}
+.nav-drop-header{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text4);padding:6px 16px 4px}
+.nav-drop-divider{height:1px;background:var(--border);margin:4px 0}
+.nav-drop-item{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;cursor:pointer;font-size:12.5px;color:var(--text2);transition:background .1s;border-left:2px solid transparent;white-space:nowrap}
+.nav-drop-item:hover{background:var(--bg-hover,rgba(0,0,0,.04))}
+.nav-drop-item.active{color:var(--primary);border-left-color:var(--primary);padding-left:14px;font-weight:600;background:rgba(255,107,53,.05)}
+.nav-drop-badge{font-size:10px;color:var(--text3);font-weight:600;background:var(--bg);padding:1px 7px;border-radius:8px;border:1px solid var(--border);margin-left:12px}
+.nav-drop-item.active .nav-drop-badge{background:rgba(255,107,53,.08);color:var(--primary);border-color:rgba(255,107,53,.3)}
+.nav-proj-subbadge{font-size:10px;color:var(--text3);font-weight:500;margin-left:4px}
+.sb-footer{padding:0 0 0 16px;border-left:1px solid var(--border);margin-left:auto;height:100%;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.sb-footer-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text4);font-weight:700;white-space:nowrap}
+.sb-consul-val{display:flex;align-items:center;gap:7px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 10px 4px 6px;cursor:pointer;transition:border-color .15s}
+.sb-consul-val:hover{border-color:var(--primary)}
+.sb-avatar{width:22px;height:22px;border-radius:5px;background:linear-gradient(135deg,var(--primary),#ff8c5a);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0}
 .sb-cname{font-size:11px;color:var(--text);font-weight:600}
 
 /* ── CONTENT ─────────────────────────────────────────────── */
-.content{flex:1;min-height:100vh}
-.content-inner{padding:28px;max-width:1200px}
+.content{flex:1;min-height:0}
+.content-inner{padding:20px 24px;max-width:none}
 .page-header{margin-bottom:24px}
 .page-title{font-size:20px;font-weight:700;color:var(--text)}
 .page-subtitle{font-size:13px;color:var(--text3);margin-top:2px}
@@ -581,9 +595,26 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
     <div class="sb-logo-text">GRV Software <span>CS · Jornada do Cliente</span></div>
   </div>
   <nav class="sb-nav">
-    <div class="nav-item" id="nav-projetos" data-route="projetos" onclick="navigate('projetos')">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
-      Projetos GRV
+    <div class="nav-group" id="nav-projetos-group">
+      <div class="nav-item" id="nav-projetos" data-route="projetos" onclick="navigate('projetos')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+        Projetos GRV
+        <span id="nav-proj-subbadge" class="nav-proj-subbadge"></span>
+        <svg style="width:10px;height:10px;margin-left:3px;opacity:.4;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="nav-dropdown" id="proj-dropdown">
+        <div class="nav-drop-header">PROJETOS GRV</div>
+        <div class="nav-drop-divider"></div>
+        <div class="nav-drop-item" id="drop-portfolio" onclick="setProjetosTab('portfolio')">
+          Portfólio <span class="nav-drop-badge" id="drop-portfolio-badge"></span>
+        </div>
+        <div class="nav-drop-item" id="drop-implantacao" onclick="setProjetosTab('implantacao')">
+          Implantação <span class="nav-drop-badge" id="drop-implantacao-badge"></span>
+        </div>
+        <div class="nav-drop-item" id="drop-customer" onclick="setProjetosTab('customer')">
+          Customer <span class="nav-drop-badge" id="drop-customer-badge"></span>
+        </div>
+      </div>
     </div>
     <div class="nav-item" id="nav-carteira" data-route="carteira" onclick="navigate('carteira')">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
@@ -600,7 +631,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
     </div>
   </nav>
   <div class="sb-footer">
-    <div class="sb-footer-lbl">Consultor ativo</div>
+    <div class="sb-footer-lbl">Consultor</div>
     <div class="sb-consul-val" title="Trocar consultor" onclick="document.getElementById('consultor-sel-hidden').click()">
       <div class="sb-avatar" id="sb-avatar">?</div>
       <div class="sb-cname" id="sb-nome">—</div>
