@@ -3435,6 +3435,125 @@ function drillKpi(statusDash) {
   renderProjetosGRV();
 }
 
+function renderPortfolio() {
+  const todos       = getClientes();
+  const consultores = getConsultores();
+  const sec         = document.getElementById('sec-projetos');
+
+  const nImpl = todos.filter(function(c){ return c.status !== 'cs_ativo'; }).length;
+  const nCs   = todos.filter(function(c){ return c.status === 'cs_ativo'; }).length;
+
+  let filtered = todos;
+  if (_proj_consultor) filtered = filtered.filter(function(c){ return c.consultorId === _proj_consultor; });
+  if (_proj_view !== 'dashboard') {
+    if (_proj_kpi_filter) filtered = filtered.filter(function(c){ return getStatusDash(c) === _proj_kpi_filter; });
+    else {
+      if (_proj_etapa)  filtered = filtered.filter(function(c){ return c.etapa === _proj_etapa; });
+      if (_proj_status) filtered = filtered.filter(function(c){ return getStatus(c) === _proj_status; });
+    }
+  }
+
+  const toggle = `
+    <div class="view-toggle">
+      <button class="vt-btn${_proj_view==='dashboard'?' active':''}" onclick="setProjetosView('dashboard')">📊 Dashboard</button>
+      <button class="vt-btn${_proj_view==='lista'?' active':''}" onclick="setProjetosView('lista')">☰ Lista</button>
+      <button class="vt-btn${_proj_view==='kanban'?' active':''}" onclick="setProjetosView('kanban')">⊞ Kanban</button>
+    </div>`;
+
+  if (_proj_view === 'dashboard') {
+    const dashClientes = _proj_consultor ? todos.filter(function(c){ return c.consultorId === _proj_consultor; }) : todos;
+    const dashKpis     = computeDashboardKPIs(dashClientes);
+    sec.innerHTML = `
+      <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+        <div>
+          <div class="page-title">Projetos GRV — Portfólio</div>
+          <div class="page-subtitle">Visão estratégica do portfólio · ${todos.length} total · ${nImpl} em implantação · ${nCs} em CS</div>
+        </div>
+        ${toggle}
+      </div>
+      ${renderDashboardProjetos(dashClientes, consultores)}`;
+    initCharts(dashKpis, dashClientes, consultores);
+    return;
+  }
+
+  const kpiPill = _proj_kpi_filter
+    ? `<span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#E05A1E22;border:1px solid #E05A1E66;border-radius:20px;font-size:12px;color:#E05A1E;font-weight:600">
+        Filtro: ${_proj_kpi_filter}
+        <span onclick="drillKpi('')" style="cursor:pointer;font-size:14px;line-height:1" title="Limpar filtro">×</span>
+       </span>` : '';
+
+  const filterBar = `
+    <div class="filter-bar">
+      <select onchange="setProjConsultor(this.value)">
+        <option value="">Todos consultores</option>
+        ${consultores.map(function(c){ return '<option value="'+c.id+'"'+(c.id===_proj_consultor?' selected':'')+'>'+c.nome+'</option>'; }).join('')}
+      </select>
+      ${_proj_kpi_filter ? kpiPill : `
+      <select onchange="setProjEtapa(this.value)">
+        <option value="">Todas etapas</option>
+        ${ETAPAS.map(function(e){ return '<option value="'+e+'"'+(e===_proj_etapa?' selected':'')+'>'+ETAPA_META[e].emoji+' '+e+'</option>'; }).join('')}
+      </select>
+      <select onchange="setProjStatus(this.value)">
+        <option value="">Todos status</option>
+        ${Object.keys(STATUS_COLOR).map(function(s){ return '<option value="'+s+'"'+(s===_proj_status?' selected':'')+'>'+s+'</option>'; }).join('')}
+      </select>`}
+    </div>`;
+
+  let content;
+  if (_proj_view === 'lista') {
+    content = filtered.length === 0
+      ? `<div class="empty-state"><div class="es-icon">🔍</div><div class="es-text">Nenhum projeto encontrado com este filtro.</div></div>`
+      : `<div class="table-wrap">
+           <table class="data-table">
+             <thead><tr>
+               <th>Cliente</th><th>Consultor</th><th>Etapa</th><th>Status</th>
+               <th style="width:130px">Progresso</th><th>Prazo</th>
+             </tr></thead>
+             <tbody>
+               ${filtered.map(function(c) {
+                 var prog   = getProgresso(c);
+                 var st     = getStatus(c);
+                 var consul = (consultores.find(function(x){ return x.id === c.consultorId; }) || {}).nome || c.consultorId;
+                 return '<tr onclick="navigate(\'cliente/'+encodeURIComponent(c.id)+'\')">'
+                   + '<td><div style="font-weight:600">'+c.id+'</div><div class="proj-id">'+c.projeto+'</div></td>'
+                   + '<td style="font-size:12px;color:var(--text2)">'+consul+'</td>'
+                   + '<td>'+getEtapaBadge(c.etapa)+'</td>'
+                   + '<td>'+getStatusBadge(st)+'</td>'
+                   + '<td><div style="display:flex;align-items:center;gap:8px"><div class="prog-wrap" style="flex:1"><div class="prog-fill" style="width:'+prog+'%"></div></div><span style="font-size:11px;color:var(--text3);white-space:nowrap">'+prog+'%</span></div></td>'
+                   + '<td style="font-size:12px;color:'+(st==='Atrasado'?'var(--red)':'var(--text2)')+'">'+fmtDate(c.prazo)+'</td>'
+                   + '</tr>';
+               }).join('')}
+             </tbody>
+           </table>
+         </div>`;
+  } else {
+    content = renderKanbanBoard(filtered, consultores, false);
+  }
+
+  const csats     = todos.filter(function(c){ return c.csat; }).map(function(c){ return c.csat; });
+  const csatMedio = csats.length ? (csats.reduce(function(s,v){return s+v;},0)/csats.length).toFixed(1) : '—';
+  const atrNovo   = todos.filter(function(c){ return c.status !== 'cs_ativo' && getStatus(c) === 'Atrasado'; }).length;
+  const progressos = todos.map(function(c){ return calcProgresso(c.ativPlaybooks || []); });
+  const progMedio  = progressos.length ? Math.round(progressos.reduce(function(s,v){return s+v;},0)/progressos.length) : 0;
+
+  sec.innerHTML = `
+    <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+      <div>
+        <div class="page-title">Projetos GRV — Portfólio</div>
+        <div class="page-subtitle">Todos os projetos · ${todos.length} total · ${nImpl} em implantação · ${nCs} em CS</div>
+      </div>
+      ${toggle}
+    </div>
+    <div class="metric-grid">
+      <div class="metric-card mc-accent"><div class="mc-label">Total de projetos</div><div class="mc-value">${todos.length}</div></div>
+      <div class="metric-card mc-green"><div class="mc-label">CSAT médio ★</div><div class="mc-value">${csatMedio}</div></div>
+      <div class="metric-card mc-red"><div class="mc-label">Em atraso</div><div class="mc-value">${atrNovo}</div></div>
+      <div class="metric-card mc-gray"><div class="mc-label">Progresso médio</div><div class="mc-value">${progMedio}%</div></div>
+    </div>
+    ${filterBar}
+    ${content}`;
+}
+
 function renderProjetosGRV() {
   const todos = getClientes();
   const nImpl = todos.filter(function(c){ return c.status !== 'cs_ativo'; }).length;
