@@ -3435,6 +3435,93 @@ function drillKpi(statusDash) {
   renderProjetosGRV();
 }
 
+function renderImplantacao() {
+  const todos       = getClientes().filter(function(c){ return c.status !== 'cs_ativo'; });
+  const consultores = getConsultores();
+  const sec         = document.getElementById('sec-projetos');
+
+  let filtered = todos;
+  if (_proj_consultor) filtered = filtered.filter(function(c){ return c.consultorId === _proj_consultor; });
+  if (_proj_etapa)     filtered = filtered.filter(function(c){ return c.etapa === _proj_etapa; });
+  if (_proj_status)    filtered = filtered.filter(function(c){ return getStatus(c) === _proj_status; });
+
+  const nTotal     = todos.length;
+  const nNoPrazo   = todos.filter(function(c){ return getStatus(c) !== 'Atrasado'; }).length;
+  const nAtrasados = nTotal - nNoPrazo;
+  const progressos = todos.map(function(c){ return getProgresso(c); });
+  const progMedio  = progressos.length ? Math.round(progressos.reduce(function(s,v){return s+v;},0)/progressos.length) : 0;
+
+  const toggle = `
+    <div class="view-toggle">
+      <button class="vt-btn${_proj_view==='lista'||_proj_view==='dashboard'?' active':''}" onclick="setProjetosView('lista')">☰ Lista</button>
+      <button class="vt-btn${_proj_view==='kanban'?' active':''}" onclick="setProjetosView('kanban')">⊞ Kanban</button>
+    </div>`;
+
+  const filterBar = `
+    <div class="filter-bar">
+      <select onchange="setProjConsultor(this.value)">
+        <option value="">Todos consultores</option>
+        ${consultores.map(function(c){ return '<option value="'+c.id+'"'+(c.id===_proj_consultor?' selected':'')+'>'+c.nome+'</option>'; }).join('')}
+      </select>
+      <select onchange="setProjEtapa(this.value)">
+        <option value="">Todas etapas</option>
+        ${ETAPAS.map(function(e){ return '<option value="'+e+'"'+(e===_proj_etapa?' selected':'')+'>'+ETAPA_META[e].emoji+' '+e+'</option>'; }).join('')}
+      </select>
+      <select onchange="setProjStatus(this.value)">
+        <option value="">Todos status</option>
+        ${Object.keys(STATUS_COLOR).map(function(s){ return '<option value="'+s+'"'+(s===_proj_status?' selected':'')+'>'+s+'</option>'; }).join('')}
+      </select>
+    </div>`;
+
+  let content;
+  if (_proj_view === 'kanban') {
+    content = renderKanbanBoard(filtered, consultores, false);
+  } else {
+    content = filtered.length === 0
+      ? `<div class="empty-state"><div class="es-icon">🔍</div><div class="es-text">Nenhum projeto em implantação encontrado.</div></div>`
+      : `<div class="table-wrap">
+           <table class="data-table">
+             <thead><tr>
+               <th>Cliente</th><th>Consultor Digital</th><th>Etapa</th>
+               <th style="width:130px">Progresso</th><th>Prazo</th><th>Status</th>
+             </tr></thead>
+             <tbody>
+               ${filtered.map(function(c) {
+                 var prog   = getProgresso(c);
+                 var st     = getStatus(c);
+                 var consul = (consultores.find(function(x){ return x.id === c.consultorId; }) || {}).nome || c.consultorId;
+                 return '<tr onclick="navigate(\'cliente/'+encodeURIComponent(c.id)+'\')">'
+                   + '<td><div style="font-weight:600">'+c.id+'</div><div class="proj-id">'+c.projeto+'</div></td>'
+                   + '<td style="font-size:12px;color:var(--text2)">'+consul+'</td>'
+                   + '<td>'+getEtapaBadge(c.etapa)+'</td>'
+                   + '<td><div style="display:flex;align-items:center;gap:8px"><div class="prog-wrap" style="flex:1"><div class="prog-fill" style="width:'+prog+'%"></div></div><span style="font-size:11px;color:var(--text3);white-space:nowrap">'+prog+'%</span></div></td>'
+                   + '<td style="font-size:12px;color:'+(st==='Atrasado'?'var(--red)':'var(--text2)')+'">'+fmtDate(c.prazo)+'</td>'
+                   + '<td>'+getStatusBadge(st)+'</td>'
+                   + '</tr>';
+               }).join('')}
+             </tbody>
+           </table>
+         </div>`;
+  }
+
+  sec.innerHTML = `
+    <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+      <div>
+        <div class="page-title">Projetos GRV — Implantação</div>
+        <div class="page-subtitle">Clientes em processo de implantação · ${nTotal} total</div>
+      </div>
+      ${toggle}
+    </div>
+    <div class="metric-grid">
+      <div class="metric-card mc-accent"><div class="mc-label">Em Implantação</div><div class="mc-value">${nTotal}</div></div>
+      <div class="metric-card mc-green"><div class="mc-label">No Prazo</div><div class="mc-value">${nNoPrazo}</div></div>
+      <div class="metric-card mc-red"><div class="mc-label">Atrasados</div><div class="mc-value">${nAtrasados}</div></div>
+      <div class="metric-card mc-gray"><div class="mc-label">Progresso Médio</div><div class="mc-value">${progMedio}%</div></div>
+    </div>
+    ${filterBar}
+    ${content}`;
+}
+
 function renderPortfolio() {
   const todos       = getClientes();
   const consultores = getConsultores();
