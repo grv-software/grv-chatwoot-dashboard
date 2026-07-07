@@ -3435,6 +3435,91 @@ function drillKpi(statusDash) {
   renderProjetosGRV();
 }
 
+function renderCustomer() {
+  const todos       = getClientes().filter(function(c){ return c.status === 'cs_ativo'; });
+  const consultores = getConsultores();
+  const sec         = document.getElementById('sec-projetos');
+
+  let filtered = todos;
+  if (_proj_consultor) filtered = filtered.filter(function(c){
+    return (c.csId || c.consultorId) === _proj_consultor;
+  });
+
+  // Ordenar por health score crescente — menor health = maior risco = topo
+  filtered = filtered.slice().sort(function(a, b){
+    return calcHealthScore(a) - calcHealthScore(b);
+  });
+
+  const nTotal      = todos.length;
+  const healthAll   = todos.map(function(c){ return calcHealthScore(c); });
+  const healthMedio = healthAll.length
+    ? Math.round(healthAll.reduce(function(s,v){return s+v;},0)/healthAll.length) : 0;
+  const csatAll     = todos.map(function(c){ return calcCsatAtual(c); }).filter(function(v){ return v !== null; });
+  const csatMedio   = csatAll.length ? (csatAll.reduce(function(s,v){return s+v;},0)/csatAll.length).toFixed(1) : '—';
+  const semContato  = todos.filter(function(c){ return getDiasUltimoContato(c) > 30; }).length;
+
+  const filterBar = `
+    <div class="filter-bar">
+      <select onchange="setProjConsultor(this.value)">
+        <option value="">Todos CS</option>
+        ${consultores.map(function(con){
+          return '<option value="'+con.id+'"'+(con.id===_proj_consultor?' selected':'')+'>'+con.nome+'</option>';
+        }).join('')}
+      </select>
+    </div>`;
+
+  function healthPill(score) {
+    var color = score >= 70 ? 'var(--green)' : score >= 40 ? '#f59e0b' : 'var(--red)';
+    return '<span style="font-size:13px;font-weight:700;color:'+color+'">'+score+'</span>';
+  }
+
+  var rows = filtered.map(function(c) {
+    var health = calcHealthScore(c);
+    var csat   = calcCsatAtual(c);
+    var dias   = getDiasUltimoContato(c);
+    var csNome = (consultores.find(function(x){ return x.id === (c.csId||''); }) || {}).nome || (c.csId ? c.csId : '—');
+    var diasCell = dias > 30
+      ? '<span style="color:var(--red);font-weight:600">'+dias+'d</span>'
+      : '<span style="color:var(--text2)">'+dias+'d</span>';
+    return '<tr onclick="navigate(\'cliente/'+encodeURIComponent(c.id)+'\')">'
+      + '<td><div style="font-weight:600">'+c.id+'</div><div class="proj-id">'+(c.segmento||c.produto||c.projeto||'')+'</div></td>'
+      + '<td style="font-size:12px;color:var(--text2)">'+csNome+'</td>'
+      + '<td>'+healthPill(health)+'</td>'
+      + '<td style="font-size:12px">'+(csat !== null ? '★ '+csat : '—')+'</td>'
+      + '<td>'+diasCell+'</td>'
+      + '<td style="font-size:12px;color:var(--text2)">'+(c.proximaAcao||'—')+'</td>'
+      + '</tr>';
+  }).join('');
+
+  var tableHtml = filtered.length === 0
+    ? `<div class="empty-state"><div class="es-icon">⭐</div><div class="es-text">Nenhum cliente em Customer Success encontrado.</div></div>`
+    : `<div class="table-wrap">
+         <table class="data-table">
+           <thead><tr>
+             <th>Cliente</th><th>CS Responsável</th><th>Health Score</th>
+             <th>CSAT</th><th>Último Contato</th><th>Próxima Ação</th>
+           </tr></thead>
+           <tbody>${rows}</tbody>
+         </table>
+       </div>`;
+
+  sec.innerHTML = `
+    <div class="page-header">
+      <div>
+        <div class="page-title">Projetos GRV — Customer</div>
+        <div class="page-subtitle">Clientes em Customer Success · ${nTotal} total · ordenados por risco (menor health primeiro)</div>
+      </div>
+    </div>
+    <div class="metric-grid">
+      <div class="metric-card mc-accent"><div class="mc-label">Em Customer</div><div class="mc-value">${nTotal}</div></div>
+      <div class="metric-card mc-green"><div class="mc-label">Health Médio</div><div class="mc-value">${healthMedio}</div></div>
+      <div class="metric-card mc-green"><div class="mc-label">CSAT Médio ★</div><div class="mc-value">${csatMedio}</div></div>
+      <div class="metric-card mc-red"><div class="mc-label">Sem Contato +30d</div><div class="mc-value">${semContato}</div></div>
+    </div>
+    ${filterBar}
+    ${tableHtml}`;
+}
+
 function renderImplantacao() {
   const todos       = getClientes().filter(function(c){ return c.status !== 'cs_ativo'; });
   const consultores = getConsultores();
