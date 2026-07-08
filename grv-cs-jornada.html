@@ -61,6 +61,141 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .nav-drop-badge{font-size:10px;color:var(--text3);font-weight:600;background:var(--bg);padding:1px 7px;border-radius:8px;border:1px solid var(--border);margin-left:12px}
 .nav-drop-item.active .nav-drop-badge{background:rgba(255,107,53,.08);color:var(--primary);border-color:rgba(255,107,53,.3)}
 .nav-proj-subbadge{font-size:10px;color:var(--text3);font-weight:500;margin-left:4px}
+
+/* ── PROJETOS SUB-PÁGINAS: novos componentes ── */
+.proj-insight{display:flex;align-items:flex-start;gap:10px;border-radius:var(--radius);padding:11px 14px 11px 16px;margin-bottom:18px;border-left:3px solid}
+.proj-insight.warn{background:rgba(217,119,6,.09);border-color:#d97706}
+.proj-insight.crit{background:rgba(185,28,28,.08);border-color:#dc2626}
+.proj-insight.ok{background:rgba(21,128,61,.08);border-color:#16a34a}
+.proj-insight.info{background:rgba(29,78,216,.08);border-color:#2563eb}
+.proj-insight svg{width:14px;height:14px;flex-shrink:0;margin-top:1px}
+.proj-insight.warn svg{color:#d97706}.proj-insight.crit svg{color:#dc2626}
+.proj-insight.ok svg{color:#16a34a}.proj-insight.info svg{color:#2563eb}
+.proj-insight p{font-size:12.5px;color:var(--text2);line-height:1.55}
+.proj-insight strong{color:var(--text1);font-weight:700}
+.proj-hero-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.proj-hero-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px 20px;border-top:3px solid var(--border)}
+.proj-hero-card.accent{border-top-color:var(--primary)}
+.proj-hero-card.warn{border-top-color:#d97706}
+.proj-hero-card.ok{border-top-color:#16a34a}
+.phc-lbl{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--text3);margin-bottom:6px}
+.phc-val{font-size:38px;font-weight:900;line-height:1;letter-spacing:-.035em}
+.proj-hero-card.accent .phc-val{color:var(--primary)}
+.proj-hero-card.warn .phc-val{color:#d97706}
+.proj-hero-card.ok .phc-val{color:#16a34a}
+.phc-sub{font-size:11.5px;color:var(--text3);margin-top:5px}
+.phc-bar{height:4px;background:var(--bg);border-radius:2px;overflow:hidden;margin-top:10px}
+.phc-fill{height:100%;border-radius:2px}
+.proj-hero-card.warn .phc-fill{background:#d97706;opacity:.5}
+.proj-hero-card.ok .phc-fill{background:#16a34a;opacity:.5}
+.proj-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:20px}
+.proj-kpi{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:14px 18px}
+.pkpi-lbl{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--text3);margin-bottom:5px}
+.pkpi-val{font-size:28px;font-weight:900;letter-spacing:-.02em;line-height:1}
+.proj-kpi.accent .pkpi-val{color:var(--primary)}
+.proj-kpi.ok .pkpi-val{color:#16a34a}
+.proj-kpi.crit .pkpi-val{color:#dc2626}
+.proj-kpi.neutral .pkpi-val{color:var(--text1)}
+.pkpi-trend{margin-top:6px;display:flex;align-items:center;gap:5px}
+.ptup{font-size:10px;font-weight:700;color:#15803d;background:rgba(21,128,61,.1);border-radius:10px;padding:1px 6px}
+.ptdn{font-size:10px;font-weight:700;color:#b91c1c;background:rgba(185,28,28,.08);border-radius:10px;padding:1px 6px}
+.ptlbl{font-size:10px;color:var(--text3)}
+.proj-cg2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.proj-cg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.proj-cg3n{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.proj-cc{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px 20px}
+.pcc-title{font-size:13px;font-weight:700;color:var(--text1);letter-spacing:-.01em}
+.pcc-sub{font-size:11px;color:var(--text3);margin-top:2px;margin-bottom:13px;line-height:1.4}
+.pcc-callout{font-size:11.5px;font-weight:600;color:var(--text2);margin-top:10px;padding:6px 10px;background:var(--bg);border-radius:4px;border-left:2.5px solid var(--primary);line-height:1.45}
+.proj-sect{display:flex;align-items:center;gap:10px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin:4px 0 13px}
+.proj-sect::after{content:'';flex:1;height:1px;background:var(--border)}
+/* Growth chart */
+.proj-growth{display:flex;align-items:flex-end;gap:5px;height:148px;position:relative;padding-top:22px}
+.pg-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;position:relative;min-width:26px}
+.pg-tot{position:absolute;top:-2px;left:0;right:0;font-size:8.5px;font-weight:800;color:var(--text2);text-align:center}
+.pg-stack{width:100%;border-radius:3px 3px 0 0;overflow:hidden;display:flex;flex-direction:column-reverse}
+.pg-i{background:var(--primary);opacity:.78}
+.pg-c{background:#16a34a;opacity:.75}
+.pg-col.peak .pg-i{opacity:1}.pg-col.peak .pg-c{opacity:1}
+.pg-peak-tag{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:7.5px;font-weight:800;color:var(--primary);white-space:nowrap;background:rgba(224,90,30,.1);border-radius:3px;padding:1px 5px;border:1px solid rgba(224,90,30,.25)}
+.pg-lbl{font-size:8.5px;color:var(--text3);white-space:nowrap;font-weight:500}
+.pg-legend{display:flex;gap:14px;margin-top:9px}
+.pgl-i{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.pgl-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+/* HBar */
+.proj-hb{display:flex;flex-direction:column;gap:10px}
+.phb-row{display:flex;align-items:center;gap:9px}
+.phb-lbl{font-size:11.5px;color:var(--text2);width:96px;text-align:right;flex-shrink:0;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.phb-track{flex:1;height:9px;background:var(--bg);border-radius:5px;overflow:hidden}
+.phb-fill{height:100%;border-radius:5px}
+.phb-val{font-size:11px;font-weight:800;color:var(--text2);width:16px;flex-shrink:0}
+/* Donut */
+.proj-dn-wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+.proj-dn-legend{display:flex;flex-direction:column;gap:8px;width:100%}
+.pdn-row{display:flex;align-items:center;justify-content:space-between;font-size:12px}
+.pdn-lbl{display:flex;align-items:center;gap:6px;color:var(--text2);font-weight:500}
+.pdn-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.pdn-val{font-weight:800;color:var(--text1);display:flex;align-items:center;gap:3px}
+.pdn-pct{font-size:10px;color:var(--text3)}
+/* Stacked bar */
+.proj-sb{display:flex;flex-direction:column;gap:9px}
+.psb-row{display:flex;align-items:center;gap:9px}
+.psb-lbl{font-size:11.5px;color:var(--text2);width:78px;flex-shrink:0;text-align:right;font-weight:500}
+.psb-track{flex:1;height:11px;border-radius:5px;overflow:hidden;display:flex}
+.psb-val{font-size:11.5px;font-weight:800;color:var(--text1);width:18px;flex-shrink:0}
+.ps-and{background:#2563eb}.ps-atr{background:#dc2626}.ps-pau{background:#d97706}
+/* Gauge */
+.proj-gauge-wrap{display:flex;flex-direction:column;align-items:center;padding-bottom:12px}
+/* Health segs */
+.proj-hs-row{display:flex;gap:8px;margin-bottom:10px}
+.proj-hs{flex:1;border-radius:var(--radius);padding:14px 10px 10px;display:flex;flex-direction:column;align-items:center;gap:3px}
+.proj-hs.ok{background:rgba(21,128,61,.1);color:#166534}
+.proj-hs.warn{background:rgba(217,119,6,.1);color:#92400e}
+.proj-hs.crit{background:rgba(185,28,28,.09);color:#991b1b}
+.phs-n{font-size:30px;font-weight:900;line-height:1}
+.phs-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;opacity:.8}
+.phs-rng{font-size:9px;opacity:.5}
+.phs-prop{height:4px;background:rgba(0,0,0,.06);border-radius:2px;overflow:hidden;width:100%;margin-top:6px}
+.phs-pfill{height:100%;border-radius:2px;background:currentColor;opacity:.5}
+/* NPS */
+.proj-nps-score{font-size:48px;font-weight:900;letter-spacing:-.05em;color:#166534;line-height:1}
+.proj-nps-class{font-size:10.5px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:.06em;margin-top:2px;margin-bottom:14px}
+.proj-nps-bar{height:16px;border-radius:8px;overflow:hidden;display:flex}
+/* Workload */
+.proj-wl{display:flex;align-items:flex-end;gap:14px;height:96px}
+.pwl-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+.pwl-bar{width:100%;background:var(--primary);border-radius:4px 4px 0 0;opacity:.82;min-height:3px}
+.pwl-bar.zero{background:var(--text4);opacity:.35}
+.pwl-val{font-size:12.5px;font-weight:900;color:var(--text1)}
+.pwl-name{font-size:10px;color:var(--text3);text-align:center;max-width:62px;line-height:1.25}
+.pwl-refline{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:10.5px;color:var(--text3)}
+.pwl-refline::before{content:'';flex:1;height:1px;border-top:1px dashed var(--border)}
+.pwl-refline::after{content:'';flex:1;height:1px;border-top:1px dashed var(--border)}
+/* Proj legend */
+.proj-leg{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
+.pl-i{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.pl-d{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+/* Risk table */
+.proj-tw{overflow-x:auto}
+.proj-rt{width:100%;border-collapse:collapse;font-size:13px}
+.proj-rt th{text-align:left;padding:7px 12px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);border-bottom:1px solid var(--border);background:var(--bg)}
+.proj-rt td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
+.proj-rt tr:last-child td{border-bottom:none}
+.proj-rt tbody tr:hover td{background:#fafafa}
+.proj-rt tbody tr.crit-row td{background:rgba(185,28,28,.04)}
+.proj-rt tbody tr.crit-row td:first-child{border-left:3px solid #dc2626;padding-left:9px}
+.proj-rt tbody tr.warn-row td{background:rgba(217,119,6,.03)}
+.prt-name{font-weight:800;color:var(--text1);font-size:13px}
+.prt-sub{font-size:10.5px;color:var(--text3);margin-top:1px}
+.proj-hp{display:inline-block;font-size:11.5px;font-weight:800;padding:2px 10px;border-radius:10px}
+.proj-hp.ok{background:rgba(21,128,61,.1);color:#166534}
+.proj-hp.warn{background:rgba(217,119,6,.1);color:#92400e}
+.proj-hp.crit{background:rgba(185,28,28,.09);color:#991b1b}
+.prt-dc{color:#991b1b;font-weight:800}
+.prt-dw{color:#92400e;font-weight:700}
+.tag-urg{display:inline-block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:1px 5px;border-radius:3px;background:rgba(185,28,28,.1);color:#991b1b;margin-left:5px}
+.csat-star{color:#d97706}
+
 .sb-footer{padding:0 0 0 16px;border-left:1px solid var(--border);margin-left:auto;height:100%;display:flex;align-items:center;gap:10px;flex-shrink:0}
 .sb-footer-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text4);font-weight:700;white-space:nowrap}
 .sb-consul-val{display:flex;align-items:center;gap:7px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 10px 4px 6px;cursor:pointer;transition:border-color .15s}
@@ -295,6 +430,33 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .modal-box select:disabled{background:#f7f8fa;color:var(--text2);cursor:not-allowed}
 .modal-box textarea{resize:vertical;min-height:80px}
 .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+
+/* ── CENTRAL DE ATENÇÃO ──────────────────────────────────── */
+.nav-urg-badge{display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#dc2626;color:#fff;font-size:9.5px;font-weight:900;margin-left:5px;animation:urg-pulse 2.5s ease-in-out infinite;vertical-align:middle}
+@keyframes urg-pulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.45)}55%{box-shadow:0 0 0 5px rgba(220,38,38,0)}}
+.urg-filter-btn{margin-left:auto;display:inline-flex;align-items:center;gap:7px;padding:6px 14px 6px 11px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid;cursor:pointer;background:none;transition:all .15s;line-height:1}
+.urg-filter-btn.off{border-color:var(--border);color:var(--text2)}
+.urg-filter-btn.on{background:rgba(220,38,38,.08);border-color:#dc2626;color:#dc2626}
+.urg-filter-btn .urg-ct{font-size:10px;font-weight:900;min-width:17px;height:17px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;padding:0 4px;background:#dc2626;color:#fff}
+.urg-filter-btn.off .urg-ct{background:var(--text3)}
+.urg-filter-hint{font-size:11.5px;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:4px}
+.urg-filter-hint strong{color:#dc2626;font-weight:700}
+.urg-clear{color:var(--primary);cursor:pointer;font-weight:600;margin-left:6px}
+.urg-clear:hover{text-decoration:underline}
+.proj-ac{position:relative;width:42px;text-align:right;padding:8px 10px !important}
+.proj-dot{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);font-size:16px;letter-spacing:.5px;transition:border-color .12s,color .12s,background .12s}
+.proj-dot:hover,.proj-dot.open{border-color:var(--primary);color:var(--primary);background:rgba(224,90,30,.07)}
+.proj-pop{position:absolute;right:0;top:calc(100% + 4px);width:200px;background:#fff;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.13),0 2px 8px rgba(0,0,0,.07);border:1px solid var(--border);z-index:400;overflow:hidden;display:none}
+.proj-pop.vis{display:block}
+.proj-pop-head{padding:8px 14px 7px;border-bottom:1px solid var(--border);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.proj-pop-item{display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:12.5px;color:var(--text1);cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s}
+.proj-pop-item:last-child{border-bottom:none}
+.proj-pop-item:hover{background:var(--bg)}
+.proj-pop-item.prim{color:var(--primary);font-weight:600}
+.kcard.urgent{border-left:3px solid #dc2626}
+.kcard-urg-row{position:relative;margin-top:8px}
+.kcard-urg-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:5px;padding:5px 0;border-radius:6px;border:1px solid var(--border);background:none;font-size:11.5px;font-weight:700;color:var(--text2);cursor:pointer;transition:background .1s,color .1s}
+.kcard-urg-btn:hover{background:rgba(224,90,30,.07);color:var(--primary);border-color:var(--primary)}
 
 /* ── VIEW TOGGLE ─────────────────────────────────────────── */
 .view-toggle{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
@@ -600,6 +762,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
         Projetos GRV
         <span id="nav-proj-subbadge" class="nav-proj-subbadge"></span>
+        <span id="nav-urg-badge" class="nav-urg-badge" style="display:none">0</span>
         <svg style="width:10px;height:10px;margin-left:3px;opacity:.4;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
       </div>
       <div class="nav-dropdown" id="proj-dropdown">
@@ -714,6 +877,19 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 
 <!-- ── TOAST CONTAINER ──────────────────────────────────── -->
 <div id="toast-container"></div>
+
+<!-- ── MODAL ATUALIZAR PRÓXIMA AÇÃO ──────────────────────── -->
+<div class="modal-overlay hidden" id="modal-prox-acao">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <h3 id="modal-prox-acao-titulo">Próxima Ação</h3>
+    <label class="modal-label">Próxima ação para este cliente</label>
+    <textarea id="modal-prox-acao-txt" placeholder="Descreva a próxima ação..."></textarea>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeProxAcaoModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveProxAcao()">Salvar</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── CONFIRM DIALOG ───────────────────────────────────── -->
 <div class="confirm-overlay hidden" id="confirm-overlay">
@@ -1746,6 +1922,18 @@ function calcHealthScore(cliente) {
   return Math.round(sSla + sCsat + sProg + sCont);
 }
 
+function isUrgente(c) {
+  if (c.status !== 'cs_ativo') {
+    return getStatus(c) === 'Atrasado' || getDiasUltimoContato(c) > 14;
+  }
+  var h = calcHealthScore(c);
+  return (h !== null && h < 40) || getDiasUltimoContato(c) > 30;
+}
+
+function countUrgentes() {
+  return getClientes().filter(isUrgente).length;
+}
+
 function registrarNps(clienteId, score, comentario, data) {
   var c = getCliente(clienteId);
   if (!c || score === '' || score === null || score === undefined) return;
@@ -2654,6 +2842,7 @@ window.addEventListener('hashchange', route);
 window.addEventListener('DOMContentLoaded', () => {
   initData(); initConsultorSel(); route();
 });
+document.addEventListener('click', function(){ closeProjPops(); });
 
 // ═══════════════════════════════════════════════════════════
 // TOAST
@@ -3293,8 +3482,10 @@ function renderKanbanBoard(clientes, consultores, enableDnD) {
           const dragAttrs = enableDnD
             ? `draggable="true" ondragstart="dragStart(event,'${c.id}','${etapa}')" ondragend="dragEnd(event)"`
             : '';
+          const urg = isUrgente(c);
+          const kpid = 'pkb' + c.id.replace(/\W/g,'');
           return `
-            <div class="kcard" ${dragAttrs} onclick="if(!_isDragging)navigate('cliente/${encodeURIComponent(c.id)}')">
+            <div class="kcard${urg ? ' urgent' : ''}" ${dragAttrs} onclick="if(!_isDragging)navigate('cliente/${encodeURIComponent(c.id)}')">
               <div class="kcard-name" title="${c.id}">${c.id}</div>
               <div class="kcard-proj">${c.projeto}</div>
               <hr class="kcard-divider">
@@ -3307,6 +3498,15 @@ function renderKanbanBoard(clientes, consultores, enableDnD) {
                 <span class="kcard-consul" title="${consul}">${consul}</span>
                 <span class="kcard-dias">${dias} dia${dias!==1?'s':''} na etapa</span>
               </div>
+              ${urg ? `<div class="kcard-urg-row">
+                <button class="kcard-urg-btn" onclick="event.stopPropagation();toggleProjPop(event,'${kpid}','dkb${c.id.replace(/\W/g,'')}')">··· Ações rápidas</button>
+                <div class="proj-pop" id="${kpid}" style="top:auto;bottom:calc(100% + 4px)">
+                  <div class="proj-pop-head">${c.id}</div>
+                  <div class="proj-pop-item prim" onclick="registrarContato('${c.id}')">💬 Registrar contato</div>
+                  <div class="proj-pop-item" onclick="openProxAcaoModal('${c.id}')">✏️ Atualizar próxima ação</div>
+                  <div class="proj-pop-item" onclick="navigate('cliente/${encodeURIComponent(c.id)}')">↗ Abrir cliente</div>
+                </div>
+              </div>` : ''}
             </div>`;
         }).join('');
 
@@ -3359,11 +3559,82 @@ function dropOnCol(el, destEtapa) {
 const PROJ_TAB_KEY = 'grv_cs_proj_tab';
 let _proj_tab = localStorage.getItem(PROJ_TAB_KEY) || 'implantacao';
 // 'portfolio' | 'implantacao' | 'customer'
+var _urg_filter = false;
+
+function updateNavUrgBadge() {
+  var el = document.getElementById('nav-urg-badge');
+  if (!el) return;
+  var n = countUrgentes();
+  el.textContent = n;
+  el.style.display = n > 0 ? '' : 'none';
+}
 
 function setProjetosTab(tab) {
+  _urg_filter = false;
   _proj_tab = tab;
   localStorage.setItem(PROJ_TAB_KEY, tab);
-  navigate('projetos');
+  if (location.hash === '#projetos') {
+    renderProjetosGRV();
+  } else {
+    navigate('projetos');
+  }
+}
+
+function toggleUrgFilter(event) {
+  if (event) event.stopPropagation();
+  _urg_filter = !_urg_filter;
+  closeProjPops();
+  renderProjetosGRV();
+}
+
+function closeProjPops() {
+  document.querySelectorAll('.proj-pop').forEach(function(p){ p.classList.remove('vis'); });
+  document.querySelectorAll('.proj-dot').forEach(function(b){ b.classList.remove('open'); });
+}
+
+function toggleProjPop(event, popId, btnId) {
+  event.stopPropagation();
+  var pop = document.getElementById(popId);
+  var btn = document.getElementById(btnId);
+  if (!pop || !btn) return;
+  var was = pop.classList.contains('vis');
+  closeProjPops();
+  if (!was) { pop.classList.add('vis'); btn.classList.add('open'); }
+}
+
+function registrarContato(clienteId) {
+  closeProjPops();
+  _cliente_id_atual = clienteId;
+  _cliente_aba = 'atividades';
+  navigate('cliente/' + encodeURIComponent(clienteId));
+}
+
+var _prox_acao_cliente_id = null;
+
+function openProxAcaoModal(clienteId) {
+  closeProjPops();
+  var c = getCliente(clienteId);
+  if (!c) return;
+  _prox_acao_cliente_id = clienteId;
+  document.getElementById('modal-prox-acao-titulo').textContent = c.id + ' — Próxima Ação';
+  document.getElementById('modal-prox-acao-txt').value = c.proximaAcao || '';
+  document.getElementById('modal-prox-acao').classList.remove('hidden');
+  setTimeout(function(){ document.getElementById('modal-prox-acao-txt').focus(); }, 50);
+}
+
+function closeProxAcaoModal() {
+  document.getElementById('modal-prox-acao').classList.add('hidden');
+  _prox_acao_cliente_id = null;
+}
+
+function saveProxAcao() {
+  if (!_prox_acao_cliente_id) return;
+  var c = getCliente(_prox_acao_cliente_id);
+  if (!c) return;
+  c.proximaAcao = document.getElementById('modal-prox-acao-txt').value.trim();
+  saveCliente(c);
+  closeProxAcaoModal();
+  renderProjetosGRV();
 }
 
 const PROJETOS_VIEW_KEY = 'grv_cs_projetos_view';
@@ -3446,17 +3717,185 @@ function renderCustomer() {
   });
 
   // Ordenar por health score crescente — menor health = maior risco = topo
-  filtered = filtered.slice().sort(function(a, b){
-    return calcHealthScore(a) - calcHealthScore(b);
-  });
+  filtered = filtered.slice().sort(function(a, b){ return calcHealthScore(a) - calcHealthScore(b); });
 
-  const nTotal      = todos.length;
-  const healthAll   = todos.map(function(c){ return calcHealthScore(c); });
-  const healthMedio = healthAll.length
-    ? Math.round(healthAll.reduce(function(s,v){return s+v;},0)/healthAll.length) : 0;
-  const csatAll     = todos.map(function(c){ return calcCsatAtual(c); }).filter(function(v){ return v !== null; });
-  const csatMedio   = csatAll.length ? (csatAll.reduce(function(s,v){return s+v;},0)/csatAll.length).toFixed(1) : '—';
-  const semContato  = todos.filter(function(c){ return getDiasUltimoContato(c) > 30; }).length;
+  var nUrgCust    = todos.filter(isUrgente).length;
+  var listClientes = _urg_filter ? filtered.filter(isUrgente) : filtered;
+
+  const nTotal     = todos.length;
+  const healthAll  = todos.map(function(c){ return calcHealthScore(c); });
+  const healthMedio = healthAll.length ? Math.round(healthAll.reduce(function(s,v){return s+v;},0)/healthAll.length) : 0;
+  const csatAll    = todos.map(function(c){ return calcCsatAtual(c); }).filter(function(v){ return v !== null; });
+  const csatMedio  = csatAll.length ? (csatAll.reduce(function(s,v){return s+v;},0)/csatAll.length).toFixed(1) : '—';
+  const semContato = todos.filter(function(c){ return getDiasUltimoContato(c) > 30; }).length;
+
+  // Health distribution
+  var nOk   = todos.filter(function(c){ return calcHealthScore(c) >= 70; }).length;
+  var nWarn = todos.filter(function(c){ var h=calcHealthScore(c); return h>=40&&h<70; }).length;
+  var nCrit = todos.filter(function(c){ return calcHealthScore(c) < 40; }).length;
+  var maxSeg = Math.max(nOk, nWarn, nCrit, 1);
+
+  // Insight dinâmico
+  var insightClass = 'proj-insight';
+  var insightText = '';
+  if (nCrit > 0 && semContato > 0) {
+    insightClass += ' crit';
+    insightText = nCrit + ' cliente' + (nCrit>1?'s':'') + ' com health crítico · ' + semContato + ' sem contato há +30d — intervenção urgente necessária.';
+  } else if (nCrit > 0) {
+    insightClass += ' crit';
+    insightText = nCrit + ' cliente' + (nCrit>1?'s':'') + ' com health abaixo de 40 — revise o plano de sucesso imediatamente.';
+  } else if (semContato > 0) {
+    insightClass += ' warn';
+    insightText = semContato + ' cliente' + (semContato>1?'s':'') + ' sem contato há +30 dias — risco de churn elevado.';
+  } else if (healthMedio >= 70) {
+    insightClass += ' ok';
+    insightText = 'Carteira CS saudável · health médio ' + healthMedio + '/100 · todos os clientes com contato recente.';
+  } else {
+    insightClass += ' info';
+    insightText = 'Health médio de ' + healthMedio + '/100 · acompanhe os ' + nWarn + ' clientes na zona de atenção.';
+  }
+
+  // KPI row
+  var csatF = csatMedio !== '—' ? parseFloat(csatMedio) : null;
+  var kpiRow = '<div class="proj-kpis">'
+    + '<div class="proj-kpi accent"><div class="pkpi-lbl">Em Customer</div><div class="pkpi-val">' + nTotal + '</div><div class="pkpi-trend"><span class="ptlbl">clientes ativos</span></div></div>'
+    + '<div class="proj-kpi ' + (healthMedio>=70?'ok':healthMedio>=40?'neutral':'crit') + '"><div class="pkpi-lbl">Health Médio</div><div class="pkpi-val">' + healthMedio + '</div><div class="pkpi-trend"><span class="ptlbl">de 100 pontos</span></div></div>'
+    + '<div class="proj-kpi ' + (csatF!==null&&csatF>=4?'ok':csatF!==null&&csatF>=3?'neutral':'crit') + '"><div class="pkpi-lbl">CSAT Médio</div><div class="pkpi-val">' + (csatMedio!=='—'?'★ '+csatMedio:'—') + '</div><div class="pkpi-trend"><span class="ptlbl">escala de 5</span></div></div>'
+    + '<div class="proj-kpi ' + (semContato===0?'ok':'crit') + '"><div class="pkpi-lbl">Sem Contato +30d</div><div class="pkpi-val">' + semContato + '</div><div class="pkpi-trend">' + (semContato>0?'<span class="ptup">▲</span><span class="ptlbl">risco de churn</span>':'<span class="ptdn">▼</span><span class="ptlbl">todos recentes</span>') + '</div></div>'
+    + '</div>';
+
+  // Health distribution segments
+  var healthDistHtml = '<div class="proj-sect">Distribuição de Saúde</div>'
+    + '<div class="proj-hs-row">'
+    + '<div class="proj-hs ok"><div class="phs-n">' + nOk + '</div><div class="phs-lbl">Saudável</div><div class="phs-rng">≥ 70</div><div class="phs-prop"><div class="phs-pfill" style="width:' + Math.round(nOk/maxSeg*100) + '%"></div></div></div>'
+    + '<div class="proj-hs warn"><div class="phs-n">' + nWarn + '</div><div class="phs-lbl">Atenção</div><div class="phs-rng">40–69</div><div class="phs-prop"><div class="phs-pfill" style="width:' + Math.round(nWarn/maxSeg*100) + '%"></div></div></div>'
+    + '<div class="proj-hs crit"><div class="phs-n">' + nCrit + '</div><div class="phs-lbl">Crítico</div><div class="phs-rng">< 40</div><div class="phs-prop"><div class="phs-pfill" style="width:' + Math.round(nCrit/maxSeg*100) + '%"></div></div></div>'
+    + '</div>';
+
+  // CSAT trend SVG — últimos 6 meses
+  var hoje = new Date();
+  var csatMeses = [];
+  for (var ci = 5; ci >= 0; ci--) {
+    var cd = new Date(hoje.getFullYear(), hoje.getMonth() - ci, 1);
+    var ck = cd.getFullYear() + '-' + String(cd.getMonth()+1).padStart(2,'0');
+    var clb = cd.toLocaleDateString('pt-BR', {month:'short'}).replace('.','');
+    csatMeses.push({key: ck, label: clb.charAt(0).toUpperCase()+clb.slice(1), vals: []});
+  }
+  todos.forEach(function(c) {
+    (c.csatRespostas||[]).forEach(function(r) {
+      if (!r.data) return;
+      var rk = r.data.substring(0, 7);
+      var mo = csatMeses.find(function(m){ return m.key===rk; });
+      if (mo) mo.vals.push(r.score);
+    });
+  });
+  var csatPts = csatMeses.map(function(m){
+    return m.vals.length ? parseFloat((m.vals.reduce(function(s,v){return s+v;},0)/m.vals.length).toFixed(2)) : null;
+  });
+  var validPts = csatPts.map(function(v,i){ return {i:i, v:v}; }).filter(function(p){ return p.v !== null; });
+  var svgW = 240, svgH = 70;
+  var csatSvgHtml = '';
+  if (validPts.length >= 2) {
+    var step = svgW / (csatMeses.length - 1);
+    var ptStr = validPts.map(function(p){ return Math.round(p.i*step)+','+Math.round(svgH-((p.v-1)/4)*svgH); }).join(' ');
+    var areaStr = Math.round(validPts[0].i*step)+','+svgH+' '+ptStr+' '+Math.round(validPts[validPts.length-1].i*step)+','+svgH;
+    csatSvgHtml = '<svg viewBox="0 -8 '+svgW+' '+(svgH+16)+'" style="width:100%;height:88px">'
+      + '<defs><linearGradient id="csatg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E05A1E" stop-opacity=".3"/><stop offset="100%" stop-color="#E05A1E" stop-opacity="0"/></linearGradient></defs>'
+      + '<polygon points="'+areaStr+'" fill="url(#csatg)"/>'
+      + '<polyline points="'+ptStr+'" fill="none" stroke="#E05A1E" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'
+      + validPts.map(function(p){
+          var px = Math.round(p.i*step), py = Math.round(svgH-((p.v-1)/4)*svgH);
+          return '<circle cx="'+px+'" cy="'+py+'" r="3" fill="#E05A1E"/>'
+            + '<text x="'+px+'" y="'+(py-6)+'" text-anchor="middle" font-size="9" fill="#E05A1E" font-weight="600">'+p.v+'</text>';
+        }).join('')
+      + csatMeses.map(function(m,i){ return '<text x="'+Math.round(i*step)+'" y="'+(svgH+14)+'" text-anchor="middle" font-size="9" fill="var(--text3)">'+m.label+'</text>'; }).join('')
+      + '</svg>';
+  } else {
+    csatSvgHtml = '<div style="text-align:center;color:var(--text3);font-size:12px;padding:16px 0">Dados insuficientes para tendência</div>';
+  }
+
+  // NPS agregado
+  var allNpsResps = [];
+  todos.forEach(function(c){ (c.npsRespostas||[]).forEach(function(r){ allNpsResps.push(r.score); }); });
+  var npsScore = null, npsClass = '', npsLabel = '';
+  if (allNpsResps.length > 0) {
+    var npsProm = allNpsResps.filter(function(s){ return s >= 9; }).length;
+    var npsDetr = allNpsResps.filter(function(s){ return s <= 6; }).length;
+    npsScore = Math.round((npsProm - npsDetr) / allNpsResps.length * 100);
+    if (npsScore >= 50)      { npsClass='ok';   npsLabel='Excelente'; }
+    else if (npsScore >= 1)  { npsClass='warn'; npsLabel='Bom'; }
+    else                     { npsClass='crit'; npsLabel='Crítico'; }
+  }
+  var npsBarPct = npsScore !== null ? Math.max(0, Math.min(100, (npsScore + 100) / 2)) : 50;
+  var npsColor  = npsClass==='ok' ? 'var(--green)' : npsClass==='warn' ? '#f59e0b' : 'var(--red)';
+  var npsHtml   = npsScore !== null
+    ? '<div style="text-align:center;padding:12px 0">'
+        + '<div class="proj-nps-score" style="color:'+npsColor+'">' + npsScore + '</div>'
+        + '<div class="proj-nps-class">' + npsLabel + '</div>'
+        + '<div class="proj-nps-bar"><div style="width:'+npsBarPct+'%;height:100%;background:'+npsColor+';border-radius:4px;transition:width .4s"></div></div>'
+      + '</div>'
+    : '<div style="text-align:center;color:var(--text3);font-size:12px;padding:24px 0">Sem respostas de NPS ainda</div>';
+
+  // Workload por CS
+  var wlMap = {};
+  todos.forEach(function(c){ var k = c.csId||c.consultorId||'—'; wlMap[k]=(wlMap[k]||0)+1; });
+  var wlEntries = Object.keys(wlMap).map(function(k){ return [k, wlMap[k]]; }).sort(function(a,b){ return b[1]-a[1]; });
+  var wlMax = wlEntries.reduce(function(m,e){ return Math.max(m,e[1]); }, 1);
+  var wlRef = Math.round(nTotal / (wlEntries.length||1));
+  var wlBars = wlEntries.map(function(e){
+    var csId=e[0], cnt=e[1], barH=Math.max(4, Math.round((cnt/wlMax)*60));
+    var nm = (consultores.find(function(x){ return x.id===csId; })||{}).nome||csId;
+    return '<div class="pwl-col"><div class="pwl-val">'+cnt+'</div>'
+      +'<div class="pwl-bar'+(cnt===0?' zero':'')+'" style="height:'+barH+'px"></div>'
+      +'<div class="pwl-name">'+nm.split(' ')[0]+'</div></div>';
+  }).join('');
+  var wlHtml = '<div class="proj-wl" style="align-items:flex-end;justify-content:center;gap:12px;min-height:80px">'
+    + wlBars + '</div>'
+    + (wlEntries.length>1 ? '<div class="pwl-refline">média '+wlRef+'</div>' : '');
+
+  // Tabela de risco
+  var rows = listClientes.map(function(c, i) {
+    var health = calcHealthScore(c);
+    var csat   = calcCsatAtual(c);
+    var dias   = getDiasUltimoContato(c);
+    var csNome = (consultores.find(function(x){ return x.id === (c.csId||''); }) || {}).nome || (c.csId||'—');
+    var rowCls = health < 40 ? ' class="crit-row"' : health < 70 ? ' class="warn-row"' : '';
+    var hpCls  = health >= 70 ? 'ok' : health >= 40 ? 'warn' : 'crit';
+    var urgTag = health < 40 ? '<span class="tag-urg">urgente</span> ' : '';
+    var pid    = 'pcust' + i;
+    var urgAc  = isUrgente(c)
+      ? '<td class="proj-ac">'
+        + '<button class="proj-dot" id="dot-' + pid + '" onclick="toggleProjPop(event,\'' + pid + '\',\'dot-' + pid + '\')" title="Ações rápidas">···</button>'
+        + '<div class="proj-pop" id="' + pid + '">'
+        + '<div class="proj-pop-head">' + c.id + '</div>'
+        + '<div class="proj-pop-item prim" onclick="registrarContato(\'' + c.id + '\')">💬 Registrar contato</div>'
+        + '<div class="proj-pop-item" onclick="openProxAcaoModal(\'' + c.id + '\')">✏️ Atualizar próxima ação</div>'
+        + '<div class="proj-pop-item" onclick="navigate(\'cliente/' + encodeURIComponent(c.id) + '\')">↗ Abrir cliente</div>'
+        + '</div></td>'
+      : '<td class="proj-ac"></td>';
+    return '<tr onclick="navigate(\'cliente/'+encodeURIComponent(c.id)+'\')"' + rowCls + '>'
+      + '<td><div class="prt-name">'+urgTag+c.id+'</div><div class="prt-sub">'+(c.segmento||c.produto||c.projeto||'')+'</div></td>'
+      + '<td style="font-size:12px;color:var(--text2)">'+csNome+'</td>'
+      + '<td><span class="proj-hp '+hpCls+'">'+health+'</span></td>'
+      + '<td class="csat-star" style="font-size:12px">'+(csat !== null ? '★ '+csat.toFixed(1) : '—')+'</td>'
+      + '<td class="'+(dias>30?'prt-dc':'')+'" style="font-size:12px">'+dias+'d</td>'
+      + '<td style="font-size:12px;color:var(--text2)">'+(c.proximaAcao||'—')+'</td>'
+      + urgAc
+      + '</tr>';
+  }).join('');
+
+  var urgBtnCust = nUrgCust > 0
+    ? '<button class="urg-filter-btn ' + (_urg_filter ? 'on' : 'off') + '" onclick="toggleUrgFilter(event)">'
+      + '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>'
+      + ' Urgentes<span class="urg-ct">' + nUrgCust + '</span></button>'
+    : '';
+  var hintCust = _urg_filter && nUrgCust > 0
+    ? '<div class="urg-filter-hint">Mostrando <strong>' + nUrgCust + ' urgentes</strong> de ' + nTotal + ' clientes<span class="urg-clear" onclick="toggleUrgFilter(event)">× Limpar</span></div>'
+    : '';
+
+  var tableHtml = listClientes.length === 0
+    ? '<div class="empty-state"><div class="es-icon">⭐</div><div class="es-text">' + (_urg_filter ? 'Nenhum cliente urgente no momento.' : 'Nenhum cliente em Customer Success encontrado.') + '</div></div>'
+    : '<div class="proj-tw"><table class="proj-rt data-table"><thead><tr><th>Cliente</th><th>CS Responsável</th><th>Health</th><th>CSAT</th><th>Último Contato</th><th>Próxima Ação</th><th style="width:48px"></th></tr></thead><tbody>'+rows+'</tbody></table></div>';
 
   const filterBar = `
     <div class="filter-bar">
@@ -3468,56 +3907,40 @@ function renderCustomer() {
       </select>
     </div>`;
 
-  function healthPill(score) {
-    var color = score >= 70 ? 'var(--green)' : score >= 40 ? '#f59e0b' : 'var(--red)';
-    return '<span style="font-size:13px;font-weight:700;color:'+color+'">'+score+'</span>';
-  }
-
-  var rows = filtered.map(function(c) {
-    var health = calcHealthScore(c);
-    var csat   = calcCsatAtual(c);
-    var dias   = getDiasUltimoContato(c);
-    var csNome = (consultores.find(function(x){ return x.id === (c.csId||''); }) || {}).nome || (c.csId ? c.csId : '—');
-    var diasCell = dias > 30
-      ? '<span style="color:var(--red);font-weight:600">'+dias+'d</span>'
-      : '<span style="color:var(--text2)">'+dias+'d</span>';
-    return '<tr onclick="navigate(\'cliente/'+encodeURIComponent(c.id)+'\')">'
-      + '<td><div style="font-weight:600">'+c.id+'</div><div class="proj-id">'+(c.segmento||c.produto||c.projeto||'')+'</div></td>'
-      + '<td style="font-size:12px;color:var(--text2)">'+csNome+'</td>'
-      + '<td>'+healthPill(health)+'</td>'
-      + '<td style="font-size:12px">'+(csat !== null ? '★ '+csat : '—')+'</td>'
-      + '<td>'+diasCell+'</td>'
-      + '<td style="font-size:12px;color:var(--text2)">'+(c.proximaAcao||'—')+'</td>'
-      + '</tr>';
-  }).join('');
-
-  var tableHtml = filtered.length === 0
-    ? `<div class="empty-state"><div class="es-icon">⭐</div><div class="es-text">Nenhum cliente em Customer Success encontrado.</div></div>`
-    : `<div class="table-wrap">
-         <table class="data-table">
-           <thead><tr>
-             <th>Cliente</th><th>CS Responsável</th><th>Health Score</th>
-             <th>CSAT</th><th>Último Contato</th><th>Próxima Ação</th>
-           </tr></thead>
-           <tbody>${rows}</tbody>
-         </table>
-       </div>`;
-
   sec.innerHTML = `
-    <div class="page-header">
+    <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
       <div>
         <div class="page-title">Projetos GRV — Customer</div>
-        <div class="page-subtitle">Clientes em Customer Success · ${nTotal} total · ordenados por risco (menor health primeiro)</div>
+        <div class="page-subtitle">Clientes em Customer Success · ${nTotal} total · ordenados por risco</div>
       </div>
     </div>
-    <div class="metric-grid">
-      <div class="metric-card mc-accent"><div class="mc-label">Em Customer</div><div class="mc-value">${nTotal}</div></div>
-      <div class="metric-card mc-green"><div class="mc-label">Health Médio</div><div class="mc-value">${healthMedio}</div></div>
-      <div class="metric-card mc-green"><div class="mc-label">CSAT Médio ★</div><div class="mc-value">${csatMedio}</div></div>
-      <div class="metric-card mc-red"><div class="mc-label">Sem Contato +30d</div><div class="mc-value">${semContato}</div></div>
+    ${insightText ? '<div class="'+insightClass+'"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg><p>'+insightText+'</p></div>' : ''}
+    ${kpiRow}
+    ${healthDistHtml}
+    <div class="proj-cg3" style="margin-top:20px;margin-bottom:24px">
+      <div class="proj-cc">
+        <div class="pcc-title">Tendência CSAT</div>
+        <div class="pcc-sub">Média mensal — últimos 6 meses</div>
+        ${csatSvgHtml}
+        ${validPts.length>=2&&csatMedio!=='—' ? '<div class="pcc-callout">Média atual: ★ '+csatMedio+'/5.0</div>' : ''}
+      </div>
+      <div class="proj-cc">
+        <div class="pcc-title">NPS Consolidado</div>
+        <div class="pcc-sub">Baseado em ${allNpsResps.length} resposta${allNpsResps.length!==1?'s':''}</div>
+        ${npsHtml}
+      </div>
+      <div class="proj-cc">
+        <div class="pcc-title">Carga por CS</div>
+        <div class="pcc-sub">Clientes por responsável</div>
+        ${wlHtml}
+      </div>
     </div>
+    <div class="proj-sect" style="display:flex;align-items:center">${'Lista de Risco · ordenada por health crescente'}${urgBtnCust}</div>
+    ${hintCust}
     ${filterBar}
     ${tableHtml}`;
+  var twCust = sec.querySelector('.proj-tw');
+  if (twCust) twCust.addEventListener('scroll', closeProjPops, {passive: true});
 }
 
 function renderImplantacao() {
@@ -3527,8 +3950,10 @@ function renderImplantacao() {
 
   let filtered = todos;
   if (_proj_consultor) filtered = filtered.filter(function(c){ return c.consultorId === _proj_consultor; });
-  if (_proj_etapa)     filtered = filtered.filter(function(c){ return c.etapa === _proj_etapa; });
-  if (_proj_status)    filtered = filtered.filter(function(c){ return getStatus(c) === _proj_status; });
+  if (_proj_view !== 'dashboard') {
+    if (_proj_etapa)  filtered = filtered.filter(function(c){ return c.etapa === _proj_etapa; });
+    if (_proj_status) filtered = filtered.filter(function(c){ return getStatus(c) === _proj_status; });
+  }
 
   const nTotal     = todos.length;
   const nNoPrazo   = todos.filter(function(c){ return getStatus(c) !== 'Atrasado'; }).length;
@@ -3536,11 +3961,69 @@ function renderImplantacao() {
   const progressos = todos.map(function(c){ return getProgresso(c); });
   const progMedio  = progressos.length ? Math.round(progressos.reduce(function(s,v){return s+v;},0)/progressos.length) : 0;
 
+  // Concentração por consultor
+  var consulCount = {};
+  todos.forEach(function(c){ var k = c.consultorId||'—'; consulCount[k]=(consulCount[k]||0)+1; });
+  var maxConsul = Math.max.apply(null, Object.values(consulCount).concat([0]));
+  var pctConc = nTotal > 0 ? Math.round(maxConsul/nTotal*100) : 0;
+  var topConsulNome = '';
+  if (maxConsul > 0) {
+    var topId = Object.keys(consulCount).find(function(k){ return consulCount[k]===maxConsul; });
+    var tc = consultores.find(function(x){ return x.id===topId; });
+    topConsulNome = tc ? tc.nome.split(' ')[0] : topId;
+  }
+
+  // Insight dinâmico
+  var insightClass = 'proj-insight';
+  var insightText = '';
+  if (nAtrasados > 0 && pctConc >= 50) {
+    insightClass += ' warn';
+    insightText = nAtrasados + ' projeto' + (nAtrasados>1?'s':'') + ' atrasado' + (nAtrasados>1?'s':'') + ' · ' + topConsulNome + ' concentra ' + pctConc + '% da carteira — atenção à dependência e ao prazo.';
+  } else if (nAtrasados > 0) {
+    insightClass += ' warn';
+    insightText = nAtrasados + ' projeto' + (nAtrasados>1?'s':'') + ' com prazo estourado — acompanhe os planos de ação prioritários.';
+  } else if (pctConc >= 50) {
+    insightClass += ' info';
+    insightText = topConsulNome + ' concentra ' + pctConc + '% da carteira de implantação. Avalie redistribuição para reduzir risco operacional.';
+  } else if (nTotal > 0) {
+    insightClass += ' ok';
+    insightText = 'Todos os ' + nTotal + ' projetos dentro do prazo. Progresso médio: ' + progMedio + '%.';
+  }
+
+  var pctNoPrazo = nTotal > 0 ? Math.round(nNoPrazo/nTotal*100) : 0;
+  const kpiRow = '<div class="proj-kpis">'
+    + '<div class="proj-kpi accent"><div class="pkpi-lbl">Em Implantação</div><div class="pkpi-val">' + nTotal + '</div><div class="pkpi-trend"><span class="ptlbl">projetos ativos</span></div></div>'
+    + '<div class="proj-kpi ' + (pctNoPrazo>=80?'ok':'warn') + '"><div class="pkpi-lbl">No Prazo</div><div class="pkpi-val">' + nNoPrazo + '</div><div class="pkpi-trend"><span class="ptdn">▼</span><span class="ptlbl">' + pctNoPrazo + '% do total</span></div></div>'
+    + '<div class="proj-kpi ' + (nAtrasados===0?'ok':'crit') + '"><div class="pkpi-lbl">Atrasados</div><div class="pkpi-val">' + nAtrasados + '</div><div class="pkpi-trend">' + (nAtrasados>0?'<span class="ptup">▲</span><span class="ptlbl">requer atenção</span>':'<span class="ptdn">▼</span><span class="ptlbl">zero atrasos</span>') + '</div></div>'
+    + '<div class="proj-kpi neutral"><div class="pkpi-lbl">Progresso Médio</div><div class="pkpi-val">' + progMedio + '%</div><div class="pkpi-trend"><span class="ptlbl">média da carteira</span></div></div>'
+    + '</div>';
+
   const toggle = `
     <div class="view-toggle">
-      <button class="vt-btn${_proj_view==='lista'||_proj_view==='dashboard'?' active':''}" onclick="setProjetosView('lista')">☰ Lista</button>
-      <button class="vt-btn${_proj_view==='kanban'?' active':''}" onclick="setProjetosView('kanban')">⊞ Kanban</button>
+      <button class="vt-btn${_proj_view==='dashboard'?' active':''}" onclick="setProjetosView('dashboard')">Dashboard</button>
+      <button class="vt-btn${_proj_view==='lista'?' active':''}" onclick="setProjetosView('lista')">Lista</button>
+      <button class="vt-btn${_proj_view==='kanban'?' active':''}" onclick="setProjetosView('kanban')">Kanban</button>
     </div>`;
+
+  const header = `
+    <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+      <div>
+        <div class="page-title">Projetos GRV — Implantação</div>
+        <div class="page-subtitle">Clientes em processo de implantação · ${nTotal} total</div>
+      </div>
+      ${toggle}
+    </div>
+    ${insightText ? '<div class="'+insightClass+'"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg><p>'+insightText+'</p></div>' : ''}
+    ${kpiRow}`;
+
+  if (_proj_view === 'dashboard') {
+    var dashHtml = renderDashboardProjetos(todos, consultores);
+    var periodoFiltrados = filtrarClientesPorPeriodo(todos, _vg_periodo);
+    var dashKpis = computeDashboardKPIs(periodoFiltrados);
+    sec.innerHTML = header + dashHtml;
+    initCharts(dashKpis, periodoFiltrados, consultores);
+    return;
+  }
 
   const filterBar = `
     <div class="filter-bar">
@@ -3558,30 +4041,57 @@ function renderImplantacao() {
       </select>
     </div>`;
 
+  var nUrgImpl     = todos.filter(isUrgente).length;
+  var implClientes = _urg_filter ? filtered.filter(isUrgente) : filtered;
+  var urgBtnImpl   = nUrgImpl > 0
+    ? '<button class="urg-filter-btn ' + (_urg_filter ? 'on' : 'off') + '" onclick="toggleUrgFilter(event)">'
+      + '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>'
+      + ' Urgentes<span class="urg-ct">' + nUrgImpl + '</span></button>'
+    : '';
+  var hintImpl = _urg_filter && nUrgImpl > 0
+    ? '<div class="urg-filter-hint">Mostrando <strong>' + nUrgImpl + ' urgentes</strong> de ' + nTotal + ' clientes<span class="urg-clear" onclick="toggleUrgFilter(event)">× Limpar</span></div>'
+    : '';
+
   let content;
   if (_proj_view === 'kanban') {
-    content = renderKanbanBoard(filtered, consultores, false);
+    var kImplClientes = _urg_filter ? filtered.filter(isUrgente) : filtered;
+    content = renderKanbanBoard(kImplClientes, consultores, false);
   } else {
-    content = filtered.length === 0
-      ? `<div class="empty-state"><div class="es-icon">🔍</div><div class="es-text">Nenhum projeto em implantação encontrado.</div></div>`
-      : `<div class="table-wrap">
+    content = implClientes.length === 0
+      ? `<div class="empty-state"><div class="es-icon">🔍</div><div class="es-text">${_urg_filter ? 'Nenhum urgente nesta aba.' : 'Nenhum projeto em implantação encontrado.'}</div></div>`
+      : `<div style="display:flex;align-items:center;margin-bottom:4px">${urgBtnImpl}</div>
+         ${hintImpl}
+         <div class="table-wrap">
            <table class="data-table">
              <thead><tr>
                <th>Cliente</th><th>Consultor Digital</th><th>Etapa</th>
-               <th style="width:130px">Progresso</th><th>Prazo</th><th>Status</th>
+               <th style="width:130px">Progresso</th><th>Prazo</th><th>Status</th><th style="width:48px"></th>
              </tr></thead>
              <tbody>
-               ${filtered.map(function(c) {
+               ${implClientes.map(function(c, i) {
                  var prog   = getProgresso(c);
                  var st     = getStatus(c);
                  var consul = (consultores.find(function(x){ return x.id === c.consultorId; }) || {}).nome || c.consultorId;
-                 return '<tr onclick="navigate(\'cliente/'+encodeURIComponent(c.id)+'\')">'
+                 var pid    = 'pimpl' + i;
+                 var urgAc  = isUrgente(c)
+                   ? '<td class="proj-ac">'
+                     + '<button class="proj-dot" id="dot-' + pid + '" onclick="toggleProjPop(event,\'' + pid + '\',\'dot-' + pid + '\')" title="Ações rápidas">···</button>'
+                     + '<div class="proj-pop" id="' + pid + '">'
+                     + '<div class="proj-pop-head">' + c.id + '</div>'
+                     + '<div class="proj-pop-item prim" onclick="registrarContato(\'' + c.id + '\')">💬 Registrar contato</div>'
+                     + '<div class="proj-pop-item" onclick="openProxAcaoModal(\'' + c.id + '\')">✏️ Atualizar próxima ação</div>'
+                     + '<div class="proj-pop-item" onclick="navigate(\'cliente/' + encodeURIComponent(c.id) + '\')">↗ Abrir cliente</div>'
+                     + '</div></td>'
+                   : '<td class="proj-ac"></td>';
+                 var rowUrgCls = isUrgente(c) ? ' class="' + (st === 'Atrasado' ? 'crit-row' : 'warn-row') + '"' : '';
+                 return '<tr onclick="navigate(\'cliente/'+encodeURIComponent(c.id)+'\')"' + rowUrgCls + '>'
                    + '<td><div style="font-weight:600">'+c.id+'</div><div class="proj-id">'+c.projeto+'</div></td>'
                    + '<td style="font-size:12px;color:var(--text2)">'+consul+'</td>'
                    + '<td>'+getEtapaBadge(c.etapa)+'</td>'
                    + '<td><div style="display:flex;align-items:center;gap:8px"><div class="prog-wrap" style="flex:1"><div class="prog-fill" style="width:'+prog+'%"></div></div><span style="font-size:11px;color:var(--text3);white-space:nowrap">'+prog+'%</span></div></td>'
                    + '<td style="font-size:12px;color:'+(st==='Atrasado'?'var(--red)':'var(--text2)')+'">'+fmtDate(c.prazo)+'</td>'
                    + '<td>'+getStatusBadge(st)+'</td>'
+                   + urgAc
                    + '</tr>';
                }).join('')}
              </tbody>
@@ -3589,31 +4099,15 @@ function renderImplantacao() {
          </div>`;
   }
 
-  sec.innerHTML = `
-    <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
-      <div>
-        <div class="page-title">Projetos GRV — Implantação</div>
-        <div class="page-subtitle">Clientes em processo de implantação · ${nTotal} total</div>
-      </div>
-      ${toggle}
-    </div>
-    <div class="metric-grid">
-      <div class="metric-card mc-accent"><div class="mc-label">Em Implantação</div><div class="mc-value">${nTotal}</div></div>
-      <div class="metric-card mc-green"><div class="mc-label">No Prazo</div><div class="mc-value">${nNoPrazo}</div></div>
-      <div class="metric-card mc-red"><div class="mc-label">Atrasados</div><div class="mc-value">${nAtrasados}</div></div>
-      <div class="metric-card mc-gray"><div class="mc-label">Progresso Médio</div><div class="mc-value">${progMedio}%</div></div>
-    </div>
-    ${filterBar}
-    ${content}`;
+  sec.innerHTML = header + filterBar + content;
+  var twImpl = sec.querySelector('.table-wrap');
+  if (twImpl) twImpl.addEventListener('scroll', closeProjPops, {passive: true});
 }
 
 function renderPortfolio() {
   const todos       = getClientes();
   const consultores = getConsultores();
   const sec         = document.getElementById('sec-projetos');
-
-  const nImpl = todos.filter(function(c){ return c.status !== 'cs_ativo'; }).length;
-  const nCs   = todos.filter(function(c){ return c.status === 'cs_ativo'; }).length;
 
   let filtered = todos;
   if (_proj_consultor) filtered = filtered.filter(function(c){ return c.consultorId === _proj_consultor; });
@@ -3625,26 +4119,106 @@ function renderPortfolio() {
     }
   }
 
+  const nImpl  = todos.filter(function(c){ return c.status !== 'cs_ativo'; }).length;
+  const nCs    = todos.filter(function(c){ return c.status === 'cs_ativo'; }).length;
+  const total  = todos.length;
+  const pctCs  = total > 0 ? Math.round(nCs / total * 100) : 0;
+  const pctImpl = 100 - pctCs;
+
   const toggle = `
     <div class="view-toggle">
-      <button class="vt-btn${_proj_view==='dashboard'?' active':''}" onclick="setProjetosView('dashboard')">📊 Dashboard</button>
-      <button class="vt-btn${_proj_view==='lista'?' active':''}" onclick="setProjetosView('lista')">☰ Lista</button>
-      <button class="vt-btn${_proj_view==='kanban'?' active':''}" onclick="setProjetosView('kanban')">⊞ Kanban</button>
+      <button class="vt-btn${_proj_view==='dashboard'?' active':''}" onclick="setProjetosView('dashboard')">Dashboard</button>
+      <button class="vt-btn${_proj_view==='lista'?' active':''}" onclick="setProjetosView('lista')">Lista</button>
+      <button class="vt-btn${_proj_view==='kanban'?' active':''}" onclick="setProjetosView('kanban')">Kanban</button>
     </div>`;
 
   if (_proj_view === 'dashboard') {
-    const dashClientes = _proj_consultor ? todos.filter(function(c){ return c.consultorId === _proj_consultor; }) : todos;
-    const dashKpis     = computeDashboardKPIs(dashClientes);
-    sec.innerHTML = `
-      <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
-        <div>
-          <div class="page-title">Projetos GRV — Portfólio</div>
-          <div class="page-subtitle">Visão estratégica do portfólio · ${todos.length} total · ${nImpl} em implantação · ${nCs} em CS</div>
-        </div>
-        ${toggle}
-      </div>
-      ${renderDashboardProjetos(dashClientes, consultores)}`;
-    initCharts(dashKpis, dashClientes, consultores);
+    // ── Growth chart: agrupa clientes por mês nos últimos 12 meses ──
+    var hoje = new Date();
+    var meses = [];
+    for (var gi = 11; gi >= 0; gi--) {
+      var gd = new Date(hoje.getFullYear(), hoje.getMonth() - gi, 1);
+      var gk = gd.getFullYear() + '-' + String(gd.getMonth()+1).padStart(2,'0');
+      var gl = gd.toLocaleDateString('pt-BR', {month:'short'}).replace('.','');
+      meses.push({key: gk, label: gl.charAt(0).toUpperCase()+gl.slice(1), impl: 0, cs: 0});
+    }
+    todos.forEach(function(c) {
+      var di = c.dataInicioImplantacao || c.dataInicio;
+      if (di) { var dd = new Date(di); if (!isNaN(dd)) { var mk = dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0'); var mo = meses.find(function(m){return m.key===mk;}); if (mo) mo.impl++; } }
+      if (c.dataInicioCS) { var dcs = new Date(c.dataInicioCS); if (!isNaN(dcs)) { var mk2 = dcs.getFullYear()+'-'+String(dcs.getMonth()+1).padStart(2,'0'); var mo2 = meses.find(function(m){return m.key===mk2;}); if (mo2) mo2.cs++; } }
+    });
+    var maxTot = Math.max.apply(null, meses.map(function(m){return m.impl+m.cs;}));
+    if (maxTot < 1) maxTot = 1;
+    var BASE = 116;
+    var peakIdx = meses.reduce(function(bi,m,i,arr){return (m.impl+m.cs)>(arr[bi].impl+arr[bi].cs)?i:bi;}, 0);
+    var growthBars = meses.map(function(m, idx) {
+      var totM=m.impl+m.cs, implH=Math.round((m.impl/maxTot)*BASE), csH=Math.round((m.cs/maxTot)*BASE), isPeak=idx===peakIdx&&totM>0;
+      return '<div class="pg-col'+(isPeak?' peak':'')+'">'+
+        (totM>0?'<div class="pg-tot">'+totM+'</div>':'')+
+        (isPeak?'<div class="pg-peak-tag">pico</div>':'')+
+        '<div class="pg-stack">'+
+        (csH>0?'<div class="pg-c" style="height:'+csH+'px"></div>':'')+
+        (implH>0?'<div class="pg-i" style="height:'+implH+'px"></div>':'')+
+        '</div><div class="pg-lbl">'+m.label+'</div></div>';
+    }).join('');
+
+    // ── Produto bars ──
+    var prodCounts = {}; todos.forEach(function(c){ var p=c.produto||'Outro'; prodCounts[p]=(prodCounts[p]||0)+1; });
+    var prods = Object.entries(prodCounts).sort(function(a,b){return b[1]-a[1];}).slice(0,4);
+    var maxProd = prods.length?prods[0][1]:1;
+    var prodColors = ['var(--primary)','#d97706','#2563eb','#7c3aed'];
+    var prodBarsHtml = prods.length===0 ? '<div style="font-size:12px;color:var(--text3);padding:8px 0">Produto não preenchido.</div>'
+      : prods.map(function(p,i){ var pct=Math.round((p[1]/maxProd)*78); return '<div class="phb-row"><div class="phb-lbl">'+p[0]+'</div><div class="phb-track"><div class="phb-fill" style="width:'+pct+'%;background:'+prodColors[i]+'"></div></div><div class="phb-val">'+p[1]+'</div></div>'; }).join('');
+
+    // ── Segmento bars ──
+    var segCounts = {}; todos.forEach(function(c){ var s=c.segmento||'Outro'; segCounts[s]=(segCounts[s]||0)+1; });
+    var segs = Object.entries(segCounts).sort(function(a,b){return b[1]-a[1];}).slice(0,4);
+    var maxSeg = segs.length?segs[0][1]:1;
+    var segColors = ['var(--primary)','#2563eb','#d97706','#16a34a'];
+    var segBarsHtml = segs.length===0 ? '<div style="font-size:12px;color:var(--text3);padding:8px 0">Segmento não preenchido.</div>'
+      : segs.map(function(s,i){ var pct=Math.round((s[1]/maxSeg)*78); return '<div class="phb-row"><div class="phb-lbl">'+s[0]+'</div><div class="phb-track"><div class="phb-fill" style="width:'+pct+'%;background:'+segColors[i]+'"></div></div><div class="phb-val">'+s[1]+'</div></div>'; }).join('');
+
+    // ── Donut SVG ──
+    var circ=213.6, implD=total>0?(nImpl/total*circ).toFixed(1):'0', csD=total>0?(nCs/total*circ).toFixed(1):'0', csOff=('-'+implD);
+
+    // ── Insight dinâmico ──
+    var metaCs=50, csNeed=Math.max(0,Math.ceil(total*metaCs/100)-nCs);
+    var insightHtml = total===0 ? 'Nenhum cliente cadastrado ainda.'
+      : pctCs>=metaCs ? '<strong>Meta de CS atingida!</strong> '+pctCs+'% do portfólio já está em Customer Success.'
+      : '<strong>Meta: '+metaCs+'% em CS</strong> — Hoje: '+pctCs+'% ('+nCs+' cliente'+(nCs!==1?'s':'')+').'
+        +' Faltam <strong>'+csNeed+' migração'+(csNeed!==1?'s':'')+'</strong> para atingir a meta anual.';
+
+    sec.innerHTML =
+      '<div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">'
+      +'<div><div class="page-title">Portfólio GRV</div><div class="page-subtitle">Visão consolidada de todos os '+total+' clientes ativos</div></div>'
+      +toggle+'</div>'
+      +'<div class="proj-insight info"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg><p>'+insightHtml+'</p></div>'
+      +'<div class="proj-hero-strip">'
+      +'<div class="proj-hero-card accent"><div class="phc-lbl">Total de clientes</div><div class="phc-val">'+total+'</div><div class="phc-sub">ativos no portfólio</div></div>'
+      +'<div class="proj-hero-card warn"><div class="phc-lbl">Em Implantação</div><div class="phc-val">'+nImpl+'</div><div class="phc-sub">'+pctImpl+'% do portfólio</div><div class="phc-bar"><div class="phc-fill" style="width:'+pctImpl+'%"></div></div></div>'
+      +'<div class="proj-hero-card ok"><div class="phc-lbl">Em Customer Success</div><div class="phc-val">'+nCs+'</div><div class="phc-sub">'+pctCs+'% · meta '+metaCs+'% no ano</div><div class="phc-bar"><div class="phc-fill" style="width:'+pctCs+'%"></div></div></div>'
+      +'</div>'
+      +'<div class="proj-sect">Crescimento — últimos 12 meses</div>'
+      +'<div class="proj-cc" style="margin-bottom:12px"><div class="pcc-title">Evolução mensal de clientes</div><div class="pcc-sub">Novos inícios por mês · laranja = implantação · verde = migração para CS</div>'
+      +'<div class="proj-growth">'+growthBars+'</div>'
+      +'<div class="pg-legend"><span class="pgl-i"><span class="pgl-dot" style="background:var(--primary)"></span>Novos em Implantação</span><span class="pgl-i"><span class="pgl-dot" style="background:#16a34a"></span>Migração para CS</span></div>'
+      +'<div class="pcc-callout">Tendência: CS cresce mês a mês. Manter o ritmo leva a '+metaCs+'% em CS até o fim do ano.</div></div>'
+      +'<div class="proj-sect">Composição atual</div>'
+      +'<div class="proj-cg3">'
+      +'<div class="proj-cc"><div class="pcc-title">Implantação vs CS Ativo</div><div class="pcc-sub">Divisão por fase hoje</div>'
+      +'<div class="proj-dn-wrap"><svg viewBox="0 0 100 100" width="118" height="118">'
+      +'<circle cx="50" cy="50" r="34" fill="none" stroke="var(--bg)" stroke-width="13"/>'
+      +'<circle cx="50" cy="50" r="34" fill="none" stroke="#16a34a" stroke-width="13" opacity=".78" stroke-dasharray="'+csD+' '+implD+'" stroke-dashoffset="'+csOff+'" transform="rotate(-90 50 50)"/>'
+      +'<circle cx="50" cy="50" r="34" fill="none" stroke="var(--primary)" stroke-width="13" opacity=".8" stroke-dasharray="'+implD+' '+csD+'" transform="rotate(-90 50 50)"/>'
+      +'<text x="50" y="47" text-anchor="middle" font-size="15" font-weight="900" fill="var(--text1)">'+total+'</text>'
+      +'<text x="50" y="57" text-anchor="middle" font-size="7" fill="var(--text3)">clientes</text>'
+      +'</svg><div class="proj-dn-legend" style="max-width:182px">'
+      +'<div class="pdn-row"><span class="pdn-lbl"><span class="pdn-dot" style="background:var(--primary)"></span>Implantação</span><span class="pdn-val">'+nImpl+' <span class="pdn-pct">'+pctImpl+'%</span></span></div>'
+      +'<div class="pdn-row"><span class="pdn-lbl"><span class="pdn-dot" style="background:#16a34a"></span>CS Ativo</span><span class="pdn-val">'+nCs+' <span class="pdn-pct">'+pctCs+'%</span></span></div>'
+      +'</div></div></div>'
+      +'<div class="proj-cc"><div class="pcc-title">Por produto</div><div class="pcc-sub">Clientes por linha</div><div class="proj-hb">'+prodBarsHtml+'</div></div>'
+      +'<div class="proj-cc"><div class="pcc-title">Por segmento</div><div class="pcc-sub">Clientes por setor</div><div class="proj-hb">'+segBarsHtml+'</div></div>'
+      +'</div>';
     return;
   }
 
@@ -3671,21 +4245,45 @@ function renderPortfolio() {
       </select>`}
     </div>`;
 
+  var nUrgPort     = todos.filter(isUrgente).length;
+  var portClientes = _urg_filter ? filtered.filter(isUrgente) : filtered;
+  var urgBtnPort   = nUrgPort > 0
+    ? '<button class="urg-filter-btn ' + (_urg_filter ? 'on' : 'off') + '" onclick="toggleUrgFilter(event)">'
+      + '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>'
+      + ' Urgentes<span class="urg-ct">' + nUrgPort + '</span></button>'
+    : '';
+  var hintPort = _urg_filter && nUrgPort > 0
+    ? '<div class="urg-filter-hint">Mostrando <strong>' + nUrgPort + ' urgentes</strong> de ' + todos.length + ' clientes<span class="urg-clear" onclick="toggleUrgFilter(event)">× Limpar</span></div>'
+    : '';
+
   let content;
   if (_proj_view === 'lista') {
-    content = filtered.length === 0
-      ? `<div class="empty-state"><div class="es-icon">🔍</div><div class="es-text">Nenhum projeto encontrado com este filtro.</div></div>`
-      : `<div class="table-wrap">
+    content = portClientes.length === 0
+      ? `<div class="empty-state"><div class="es-icon">🔍</div><div class="es-text">${_urg_filter ? 'Nenhum urgente nesta aba.' : 'Nenhum projeto encontrado com este filtro.'}</div></div>`
+      : `<div style="display:flex;align-items:center;margin-bottom:4px">${urgBtnPort}</div>
+         ${hintPort}
+         <div class="table-wrap">
            <table class="data-table">
              <thead><tr>
                <th>Cliente</th><th>Consultor</th><th>Etapa</th><th>Status</th>
-               <th style="width:130px">Progresso</th><th>Prazo</th>
+               <th style="width:130px">Progresso</th><th>Prazo</th><th style="width:48px"></th>
              </tr></thead>
              <tbody>
-               ${filtered.map(function(c) {
+               ${portClientes.map(function(c, i) {
                  var prog   = getProgresso(c);
                  var st     = getStatus(c);
                  var consul = (consultores.find(function(x){ return x.id === c.consultorId; }) || {}).nome || c.consultorId;
+                 var pid    = 'pport' + i;
+                 var urgAc  = isUrgente(c)
+                   ? '<td class="proj-ac">'
+                     + '<button class="proj-dot" id="dot-' + pid + '" onclick="toggleProjPop(event,\'' + pid + '\',\'dot-' + pid + '\')" title="Ações rápidas">···</button>'
+                     + '<div class="proj-pop" id="' + pid + '">'
+                     + '<div class="proj-pop-head">' + c.id + '</div>'
+                     + '<div class="proj-pop-item prim" onclick="registrarContato(\'' + c.id + '\')">💬 Registrar contato</div>'
+                     + '<div class="proj-pop-item" onclick="openProxAcaoModal(\'' + c.id + '\')">✏️ Atualizar próxima ação</div>'
+                     + '<div class="proj-pop-item" onclick="navigate(\'cliente/' + encodeURIComponent(c.id) + '\')">↗ Abrir cliente</div>'
+                     + '</div></td>'
+                   : '<td class="proj-ac"></td>';
                  return '<tr onclick="navigate(\'cliente/'+encodeURIComponent(c.id)+'\')">'
                    + '<td><div style="font-weight:600">'+c.id+'</div><div class="proj-id">'+c.projeto+'</div></td>'
                    + '<td style="font-size:12px;color:var(--text2)">'+consul+'</td>'
@@ -3693,13 +4291,15 @@ function renderPortfolio() {
                    + '<td>'+getStatusBadge(st)+'</td>'
                    + '<td><div style="display:flex;align-items:center;gap:8px"><div class="prog-wrap" style="flex:1"><div class="prog-fill" style="width:'+prog+'%"></div></div><span style="font-size:11px;color:var(--text3);white-space:nowrap">'+prog+'%</span></div></td>'
                    + '<td style="font-size:12px;color:'+(st==='Atrasado'?'var(--red)':'var(--text2)')+'">'+fmtDate(c.prazo)+'</td>'
+                   + urgAc
                    + '</tr>';
                }).join('')}
              </tbody>
            </table>
          </div>`;
   } else {
-    content = renderKanbanBoard(filtered, consultores, false);
+    var kPortClientes = _urg_filter ? filtered.filter(isUrgente) : filtered;
+    content = renderKanbanBoard(kPortClientes, consultores, false);
   }
 
   const csats     = todos.filter(function(c){ return c.csat; }).map(function(c){ return c.csat; });
@@ -3724,6 +4324,8 @@ function renderPortfolio() {
     </div>
     ${filterBar}
     ${content}`;
+  var twPort = sec.querySelector('.table-wrap');
+  if (twPort) twPort.addEventListener('scroll', closeProjPops, {passive: true});
 }
 
 function renderProjetosGRV() {
@@ -3745,9 +4347,10 @@ function renderProjetosGRV() {
     subEl.textContent = labels[_proj_tab] || '';
   }
 
-  if (_proj_tab === 'customer')    { renderCustomer();    return; }
-  if (_proj_tab === 'implantacao') { renderImplantacao(); return; }
+  if (_proj_tab === 'customer')    { renderCustomer();    updateNavUrgBadge(); return; }
+  if (_proj_tab === 'implantacao') { renderImplantacao(); updateNavUrgBadge(); return; }
   renderPortfolio();
+  updateNavUrgBadge();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -5050,6 +5653,9 @@ function saveEtapa() {
 
 document.getElementById('modal-etapa').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
+});
+document.getElementById('modal-prox-acao').addEventListener('click', function(e) {
+  if (e.target === this) closeProxAcaoModal();
 });
 
 // ═══════════════════════════════════════════════════════════
