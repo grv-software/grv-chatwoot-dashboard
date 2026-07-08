@@ -1000,13 +1000,15 @@ Chart.register({
 // SEED DATA
 // ═══════════════════════════════════════════════════════════
 const SEED_CONSULTORES = [
-  {id:'ana-paula',  nome:'Ana Paula Souza'},
-  {id:'carlos',     nome:'Carlos Menezes'},
-  {id:'maria',      nome:'Maria Lima'},
-  {id:'cristiano',  nome:'Cristiano Santos'},
-  {id:'felipe',     nome:'Felipe Alves'},
-  {id:'silvia',     nome:'Silvia Costa'},
-  {id:'severiano',  nome:'Severiano Rocha'},
+  {id:'ana-paula',  nome:'Ana Paula Souza',   tipo:'implantacao'},
+  {id:'carlos',     nome:'Carlos Menezes',    tipo:'implantacao'},
+  {id:'maria',      nome:'Maria Lima',         tipo:'implantacao'},
+  {id:'cristiano',  nome:'Cristiano Santos',  tipo:'implantacao'},
+  {id:'felipe',     nome:'Felipe Alves',      tipo:'implantacao'},
+  {id:'silvia',     nome:'Silvia Costa',      tipo:'implantacao'},
+  {id:'severiano',  nome:'Severiano Rocha',   tipo:'implantacao'},
+  {id:'priscila',   nome:'Priscila Mendes',   tipo:'implantacao'},
+  {id:'joao',       nome:'João Ferreira',     tipo:'cs'},
 ];
 
 function mkFases(checks) {
@@ -1530,6 +1532,210 @@ const SEED_CLIENTES = [
       {de:'1ª Reunião',para:'Cancelado',data:'2025-07-15T10:00:00',motivo:'Cliente optou por solução concorrente'},
     ],
   },
+  // ── João (CS) ──────────────────────────────────────────────────────────────
+  {
+    id:'NEXTAR', projeto:'SAGP-00201', produto:'CPS', consultorId:'joao', segmento:'Saúde',
+    status:'cs_ativo', etapa:'CS Ativo', dataInicio:'2025-06-01', prazo:'2026-12-31',
+    dataInicioImplantacao:'2025-06-01', dataInicioCS:'2025-09-01',
+    csat:1.5, healthHistory:[{data:'2026-07-01', valor:50}],
+    ativPlaybooks:[{
+      id:'pb_nxt1', nome:'CS CPS', fase:'cs', donoId:'joao', estado:'ativo',
+      atividades:[
+        {id:'at_nxt1',nome:'Revisão trimestral',status:'pendente',registros:[],checklist:[],anotacoes:[]},
+        {id:'at_nxt2',nome:'Plano de expansão',status:'pendente',registros:[],checklist:[],anotacoes:[]}
+      ]
+    }]
+  },
+  {
+    id:'SIGMA PRINT', projeto:'SAGP-00202', produto:'NX/IOT', consultorId:'joao', segmento:'Indústria',
+    status:'cs_ativo', etapa:'CS Ativo', dataInicio:'2025-01-01', prazo:'2026-12-31',
+    dataInicioImplantacao:'2025-01-01', dataInicioCS:'2025-04-01',
+    csat:2.0, healthHistory:[{data:'2026-07-01', valor:42}],
+    ativPlaybooks:[{
+      id:'pb_sig1', nome:'CS NX', fase:'cs', donoId:'joao', estado:'ativo',
+      atividades:[
+        {id:'at_sig1',nome:'Onboarding CS',status:'pendente',registros:[],checklist:[],anotacoes:[]},
+        {id:'at_sig2',nome:'Revisão mensal',status:'pendente',registros:[],checklist:[],anotacoes:[]}
+      ]
+    }]
+  },
+  {
+    id:'OPTIX', projeto:'SAGP-00203', produto:'CPS', consultorId:'joao', segmento:'Serviços',
+    status:'cs_ativo', etapa:'CS Ativo', dataInicio:'2025-03-01', prazo:'2026-12-31',
+    dataInicioImplantacao:'2025-03-01', dataInicioCS:'2025-06-01',
+    csat:4.0, healthHistory:[{data:'2026-07-01', valor:62}],
+    ativPlaybooks:[{
+      id:'pb_opt1', nome:'CS CPS', fase:'cs', donoId:'joao', estado:'ativo',
+      atividades:[
+        {id:'at_opt1',nome:'QBR Q2',status:'concluida',dataLimite:'2026-06-30',dataConclusao:'2026-06-01',
+          registros:[{id:'r_opt1',tipo:'contato',data:'2026-06-01',obs:'Reunião Q2'}]},
+        {id:'at_opt2',nome:'Plano Q3',status:'pendente',registros:[],checklist:[],anotacoes:[]}
+      ]
+    }]
+  },
+  {
+    id:'MAPEX', projeto:'SAGP-00204', produto:'CPS', consultorId:'joao', segmento:'Varejo',
+    status:'cs_ativo', etapa:'CS Ativo', dataInicio:'2024-10-01', prazo:'2026-12-31',
+    dataInicioImplantacao:'2024-10-01', dataInicioCS:'2025-01-01',
+    csat:4.2, proximaAcao:'Apresentar módulo analytics', healthHistory:[{data:'2026-07-01', valor:58}],
+    ativPlaybooks:[{
+      id:'pb_map1', nome:'CS CPS', fase:'cs', donoId:'joao', estado:'ativo',
+      atividades:[
+        {id:'at_map1',nome:'QBR Q1',status:'concluida',dataLimite:'2026-03-31',dataConclusao:'2026-03-28',
+          registros:[{id:'r_map1',tipo:'contato',data:'2026-06-28',obs:'Ligação mensal'}]},
+        {id:'at_map2',nome:'QBR Q3',status:'pendente',registros:[],checklist:[],anotacoes:[]}
+      ]
+    }]
+  },
+  {
+    id:'SAUDETECH', projeto:'SAGP-00205', produto:'NX/IOT', consultorId:'joao', segmento:'Saúde',
+    status:'cs_ativo', etapa:'CS Ativo', dataInicio:'2025-05-01', prazo:'2026-12-31',
+    dataInicioImplantacao:'2025-05-01', dataInicioCS:'2025-08-01',
+    csat:4.0, proximaAcao:'Renovar contrato Q3', healthHistory:[{data:'2026-07-01', valor:72}],
+    ativPlaybooks:[{
+      id:'pb_sau1', nome:'CS NX', fase:'cs', donoId:'joao', estado:'ativo',
+      atividades:[
+        {id:'at_sau1',nome:'Onboarding CS',status:'concluida',dataLimite:'2025-09-01',dataConclusao:'2025-08-28',
+          registros:[{id:'r_sau1',tipo:'contato',data:'2026-07-03',obs:'Alinhamento contrato'}]},
+        {id:'at_sau2',nome:'Revisão semestral',status:'concluida',dataLimite:'2026-06-01',dataConclusao:'2026-05-30',registros:[]},
+        {id:'at_sau3',nome:'Renovação Q3',status:'pendente',registros:[],checklist:[],anotacoes:[]}
+      ]
+    }]
+  },
+  {
+    id:'BETAFORM', projeto:'SAGP-00206', produto:'CPS', consultorId:'joao', segmento:'Tecnologia',
+    status:'cs_ativo', etapa:'CS Ativo', dataInicio:'2024-06-01', prazo:'2026-12-31',
+    dataInicioImplantacao:'2024-06-01', dataInicioCS:'2024-09-01',
+    csat:4.8, healthHistory:[{data:'2026-07-01', valor:88}],
+    ativPlaybooks:[{
+      id:'pb_bet1', nome:'CS CPS', fase:'cs', donoId:'joao', estado:'ativo',
+      atividades:[
+        {id:'at_bet1',nome:'Onboarding CS',status:'concluida',dataLimite:'2024-10-01',dataConclusao:'2024-09-28',registros:[]},
+        {id:'at_bet2',nome:'Expansão módulo 2',status:'concluida',dataLimite:'2025-03-01',dataConclusao:'2025-02-20',registros:[]},
+        {id:'at_bet3',nome:'Renovação anual',status:'concluida',dataLimite:'2025-09-01',dataConclusao:'2025-08-15',
+          registros:[{id:'r_bet1',tipo:'contato',data:'2026-07-05',obs:'Check-in mensal'}]},
+        {id:'at_bet4',nome:'Expansão módulo 3',status:'pendente',registros:[],checklist:[],anotacoes:[]}
+      ]
+    }]
+  },
+  // ── Priscila (Implantação) ─────────────────────────────────────────────────
+  {
+    id:'RIALTO', projeto:'SAGP-00301', produto:'CPS', consultorId:'priscila', segmento:'Varejo',
+    status:'em_implantacao', etapa:'Evolução', dataInicio:'2026-01-15', prazo:'2026-05-30',
+    dataInicioImplantacao:'2026-01-15', dataInicioCS:null,
+    healthHistory:[{data:'2026-07-01', valor:40}],
+    ativPlaybooks:[{
+      id:'pb_rial1', nome:'Implantação CPS', fase:'implantacao', donoId:'priscila', estado:'ativo',
+      atividades:[
+        {id:'at_rial1',nome:'Kickoff',status:'concluida',dataLimite:'2026-02-01',dataConclusao:'2026-02-01',
+          registros:[{id:'r_rial1',tipo:'contato',data:'2026-07-01',obs:'Revisão de progresso'}]},
+        {id:'at_rial2',nome:'Parametrização',status:'concluida',dataLimite:'2026-03-01',dataConclusao:'2026-03-01',registros:[]},
+        {id:'at_rial3',nome:'Treinamento',status:'pendente',registros:[],checklist:[],anotacoes:[]},
+        {id:'at_rial4',nome:'Go-live',status:'pendente',registros:[],checklist:[],anotacoes:[]}
+      ]
+    }]
+  },
+  {
+    id:'FERREX', projeto:'SAGP-00302', produto:'NX/IOT', consultorId:'priscila', segmento:'Indústria',
+    status:'em_implantacao', etapa:'Implantação', dataInicio:'2026-02-01', prazo:'2026-06-15',
+    dataInicioImplantacao:'2026-02-01', dataInicioCS:null,
+    healthHistory:[{data:'2026-07-01', valor:35}],
+    ativPlaybooks:[{
+      id:'pb_fer1', nome:'Implantação NX', fase:'implantacao', donoId:'priscila', estado:'ativo',
+      atividades:[
+        {id:'at_fer1',nome:'1ª Reunião',status:'concluida',dataLimite:'2026-02-15',dataConclusao:'2026-02-15',
+          registros:[{id:'r_fer1',tipo:'contato',data:'2026-07-02',obs:'Acompanhamento'}]},
+        {id:'at_fer2',nome:'Levantamento',status:'pendente',registros:[],checklist:[],anotacoes:[]},
+        {id:'at_fer3',nome:'Configuração',status:'pendente',registros:[],checklist:[],anotacoes:[]}
+      ]
+    }]
+  },
+  {
+    id:'AQUAMAX', projeto:'SAGP-00303', produto:'CPS', consultorId:'priscila', segmento:'Saúde',
+    status:'em_implantacao', etapa:'Engajamento', dataInicio:'2026-03-01', prazo:'2026-09-30',
+    dataInicioImplantacao:'2026-03-01', dataInicioCS:null,
+    healthHistory:[{data:'2026-07-01', valor:55}],
+    ativPlaybooks:[{
+      id:'pb_aqu1', nome:'Implantação CPS', fase:'implantacao', donoId:'priscila', estado:'pausado',
+      atividades:[
+        {id:'at_aqu1',nome:'Kickoff',status:'concluida',dataLimite:'2026-03-15',dataConclusao:'2026-03-15',
+          registros:[{id:'r_aqu1',tipo:'contato',data:'2026-06-25',obs:'Tentativa de retomada'}]},
+        {id:'at_aqu2',nome:'Parametrização',status:'pendente',registros:[],checklist:[],anotacoes:[]},
+        {id:'at_aqu3',nome:'Treinamento',status:'pendente',registros:[],checklist:[],anotacoes:[]}
+      ]
+    }]
+  },
+  {
+    id:'LUMIA', projeto:'SAGP-00304', produto:'CPS', consultorId:'priscila', segmento:'Tecnologia',
+    status:'em_implantacao', etapa:'Evolução', dataInicio:'2026-02-15', prazo:'2026-08-15',
+    dataInicioImplantacao:'2026-02-15', dataInicioCS:null,
+    healthHistory:[{data:'2026-07-01', valor:60}],
+    ativPlaybooks:[{
+      id:'pb_lum1', nome:'Implantação CPS', fase:'implantacao', donoId:'priscila', estado:'ativo',
+      atividades:[
+        {id:'at_lum1',nome:'Kickoff',status:'concluida',dataLimite:'2026-03-01',dataConclusao:'2026-02-28',registros:[]},
+        {id:'at_lum2',nome:'Parametrização',status:'concluida',dataLimite:'2026-04-01',dataConclusao:'2026-03-30',
+          registros:[{id:'r_lum1',tipo:'contato',data:'2026-06-18',obs:'Status call'}]},
+        {id:'at_lum3',nome:'Treinamento',status:'pendente',registros:[],checklist:[],anotacoes:[]},
+        {id:'at_lum4',nome:'Go-live',status:'pendente',registros:[],checklist:[],anotacoes:[]}
+      ]
+    }]
+  },
+  {
+    id:'NORDIK', projeto:'SAGP-00305', produto:'NX/IOT', consultorId:'priscila', segmento:'Energia',
+    status:'em_implantacao', etapa:'Conclusão', dataInicio:'2025-10-01', prazo:'2026-07-31',
+    dataInicioImplantacao:'2025-10-01', dataInicioCS:null,
+    healthHistory:[{data:'2026-07-01', valor:85}],
+    ativPlaybooks:[{
+      id:'pb_nor1', nome:'Implantação NX', fase:'implantacao', donoId:'priscila', estado:'ativo',
+      atividades:[
+        {id:'at_nor1',nome:'Kickoff',status:'concluida',dataLimite:'2025-10-15',dataConclusao:'2025-10-14',registros:[]},
+        {id:'at_nor2',nome:'Levantamento',status:'concluida',dataLimite:'2025-11-01',dataConclusao:'2025-10-30',registros:[]},
+        {id:'at_nor3',nome:'Configuração',status:'concluida',dataLimite:'2025-12-01',dataConclusao:'2025-11-28',registros:[]},
+        {id:'at_nor4',nome:'Treinamento',status:'concluida',dataLimite:'2026-02-01',dataConclusao:'2026-01-28',registros:[]},
+        {id:'at_nor5',nome:'Testes UAT',status:'concluida',dataLimite:'2026-04-01',dataConclusao:'2026-03-28',registros:[]},
+        {id:'at_nor6',nome:'Go-live',status:'concluida',dataLimite:'2026-06-01',dataConclusao:'2026-05-30',registros:[]},
+        {id:'at_nor7',nome:'Ajustes pós go-live',status:'concluida',dataLimite:'2026-06-30',dataConclusao:'2026-06-28',registros:[]},
+        {id:'at_nor8',nome:'Treinamento avançado',status:'concluida',dataLimite:'2026-07-15',dataConclusao:'2026-07-05',registros:[]},
+        {id:'at_nor9',nome:'Documentação',status:'concluida',dataLimite:'2026-07-20',dataConclusao:'2026-07-06',
+          registros:[{id:'r_nor1',tipo:'contato',data:'2026-07-04',obs:'Validação final pré-handoff'}]},
+        {id:'at_nor10',nome:'Handoff CS',status:'pendente',registros:[],checklist:[],anotacoes:[]}
+      ]
+    }]
+  },
+  {
+    id:'TESTEK', projeto:'SAGP-00306', produto:'CPS', consultorId:'priscila', segmento:'Serviços',
+    status:'em_implantacao', etapa:'Implantação', dataInicio:'2026-04-01', prazo:'2026-10-31',
+    dataInicioImplantacao:'2026-04-01', dataInicioCS:null,
+    healthHistory:[{data:'2026-07-01', valor:72}],
+    ativPlaybooks:[{
+      id:'pb_tes1', nome:'Implantação CPS', fase:'implantacao', donoId:'priscila', estado:'ativo',
+      atividades:[
+        {id:'at_tes1',nome:'Kickoff',status:'concluida',dataLimite:'2026-04-15',dataConclusao:'2026-04-14',
+          registros:[{id:'r_tes1',tipo:'contato',data:'2026-07-06',obs:'Reunião semanal'}]},
+        {id:'at_tes2',nome:'Levantamento',status:'concluida',dataLimite:'2026-05-15',dataConclusao:'2026-05-13',registros:[]},
+        {id:'at_tes3',nome:'Configuração',status:'pendente',registros:[],checklist:[],anotacoes:[]},
+        {id:'at_tes4',nome:'Treinamento',status:'pendente',registros:[],checklist:[],anotacoes:[]}
+      ]
+    }]
+  },
+  {
+    id:'VIATECH', projeto:'SAGP-00307', produto:'NX/IOT', consultorId:'priscila', segmento:'Logística',
+    status:'em_implantacao', etapa:'Evolução', dataInicio:'2026-03-15', prazo:'2026-09-15',
+    dataInicioImplantacao:'2026-03-15', dataInicioCS:null,
+    healthHistory:[{data:'2026-07-01', valor:68}],
+    ativPlaybooks:[{
+      id:'pb_via1', nome:'Implantação NX', fase:'implantacao', donoId:'priscila', estado:'ativo',
+      atividades:[
+        {id:'at_via1',nome:'Kickoff',status:'concluida',dataLimite:'2026-04-01',dataConclusao:'2026-03-30',registros:[]},
+        {id:'at_via2',nome:'Levantamento',status:'concluida',dataLimite:'2026-04-30',dataConclusao:'2026-04-28',registros:[]},
+        {id:'at_via3',nome:'Configuração',status:'concluida',dataLimite:'2026-06-01',dataConclusao:'2026-05-28',
+          registros:[{id:'r_via1',tipo:'contato',data:'2026-07-07',obs:'Status parametrização'}]},
+        {id:'at_via4',nome:'Treinamento equipe',status:'pendente',registros:[],checklist:[],anotacoes:[]},
+        {id:'at_via5',nome:'Go-live',status:'pendente',registros:[],checklist:[],anotacoes:[]}
+      ]
+    }]
+  },
 ];
 
 // ─── Enriquecimento do SEED para demonstração ─────────────────────────────
@@ -1794,7 +2000,7 @@ const DB = {
 
 function initData() {
   // Versão dos dados — incrementar força re-seed para todos os usuários
-  var DATA_V = 'v4';
+  var DATA_V = 'v5';
   if (localStorage.getItem('grv_cs_v') !== DATA_V) {
     localStorage.removeItem(DB.CLIENTES);
     localStorage.removeItem(DB.CONSULTORES);
