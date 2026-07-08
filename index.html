@@ -391,8 +391,14 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 .c-link   { color:var(--accent); text-decoration:none; font-size:11px; font-weight:500; }
 .c-link:hover { text-decoration:underline; }
 .tipo-badge { display:inline-block; font-size:10px; font-weight:700; padding:2px 7px; border-radius:3px; white-space:nowrap; }
-.tipo-grupo { background:rgba(139,92,246,.15); color:#a78bfa; }
-.tipo-ind   { background:rgba(100,116,139,.12); color:var(--text3); }
+.tipo-grupo  { background:rgba(139,92,246,.15); color:#a78bfa; }
+.tipo-ind    { background:rgba(100,116,139,.12); color:var(--text3); }
+.tipo-reopen { background:rgba(251,146,60,.15); color:#fb923c; border:1px solid rgba(251,146,60,.3); }
+
+/* SORT */
+.th-s { cursor:pointer; user-select:none; white-space:nowrap; }
+.th-s:hover { color:var(--accent); }
+.srt-ind { font-size:9px; margin-left:3px; color:var(--accent); }
 
 /* URGENCY LEGEND */
 .urg-legend { display:flex; gap:12px; padding:5px 14px; background:var(--bg3); border-bottom:1px solid var(--border); }
@@ -547,8 +553,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 
 <!-- INBOX FILTER BAR -->
 <div class="inbox-bar" id="inbox-bar" style="display:none">
-  <span class="inbox-bar-label">Caixas:</span>
-  <button class="inbox-trigger" id="inbox-trigger" onclick="openIbp(event)" aria-label="Filtrar por caixa de entrada">
+  <span class="inbox-bar-label" id="inbox-bar-label">Equipes:</span>
+  <button class="inbox-trigger" id="inbox-trigger" onclick="openIbp(event)" aria-label="Filtrar por equipe">
     <span id="inbox-trigger-txt">Todas</span> ▾
   </button>
   <div class="inbox-chips" id="inbox-chips"></div>
@@ -628,14 +634,14 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     <table class="cv-table" role="table" aria-label="Conversas aguardando atendimento">
       <thead>
         <tr>
-          <th>Ticket</th>
+          <th class="th-s" onclick="setSort('waiting','id')">Ticket<span id="srt-w-id" class="srt-ind"></span></th>
           <th>Cód. Ref.</th>
-          <th>Cliente</th>
+          <th class="th-s" onclick="setSort('waiting','client')">Cliente<span id="srt-w-client" class="srt-ind"></span></th>
           <th class="th-f">Tipo<button class="th-fb" id="thw-tipo" onclick="openCfp(event,'waiting','tipo','Tipo')" aria-label="Filtrar por Tipo">▾</button></th>
           <th class="th-f">Serviço<button class="th-fb" id="thw-svc" onclick="openCfp(event,'waiting','svc','Serviço')" aria-label="Filtrar por Serviço">▾</button></th>
           <th class="th-f">Atendente<button class="th-fb" id="thw-agent" onclick="openCfp(event,'waiting','agent','Atendente')" aria-label="Filtrar por Atendente">▾</button></th>
-          <th>Data</th>
-          <th>Duração</th>
+          <th class="th-s" onclick="setSort('waiting','date')">Data<span id="srt-w-date" class="srt-ind"></span></th>
+          <th class="th-s" onclick="setSort('waiting','dur')">Duração<span id="srt-w-dur" class="srt-ind"> ▼</span></th>
           <th class="th-f">Origem<button class="th-fb" id="thw-origin" onclick="openCfp(event,'waiting','origin','Origem')" aria-label="Filtrar por Origem">▾</button></th>
           <th>Ação</th>
         </tr>
@@ -692,14 +698,14 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     <table class="cv-table" role="table" aria-label="Conversas em atendimento">
       <thead>
         <tr>
-          <th>Ticket</th>
+          <th class="th-s" onclick="setSort('inprog','id')">Ticket<span id="srt-i-id" class="srt-ind"></span></th>
           <th>Cód. Ref.</th>
-          <th>Cliente</th>
+          <th class="th-s" onclick="setSort('inprog','client')">Cliente<span id="srt-i-client" class="srt-ind"></span></th>
           <th class="th-f">Tipo<button class="th-fb" id="thi-tipo" onclick="openCfp(event,'inprog','tipo','Tipo')" aria-label="Filtrar por Tipo">▾</button></th>
           <th class="th-f">Serviço<button class="th-fb" id="thi-svc" onclick="openCfp(event,'inprog','svc','Serviço')" aria-label="Filtrar por Serviço">▾</button></th>
           <th class="th-f">Atendente<button class="th-fb" id="thi-agent" onclick="openCfp(event,'inprog','agent','Atendente')" aria-label="Filtrar por Atendente">▾</button></th>
-          <th>Data</th>
-          <th>Duração</th>
+          <th class="th-s" onclick="setSort('inprog','date')">Data<span id="srt-i-date" class="srt-ind"></span></th>
+          <th class="th-s" onclick="setSort('inprog','dur')">Duração<span id="srt-i-dur" class="srt-ind"> ▼</span></th>
           <th class="th-f">Origem<button class="th-fb" id="thi-origin" onclick="openCfp(event,'inprog','origin','Origem')" aria-label="Filtrar por Origem">▾</button></th>
           <th>Ação</th>
         </tr>
@@ -888,6 +894,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
       <button class="agent-pill" onclick="setAgentTabPeriod('6')">6 meses</button>
       <button class="agent-pill" onclick="setAgentTabPeriod('12')">12 meses</button>
     </div>
+    <button class="inbox-trigger" id="agent-team-trigger" onclick="openAgentTeamFilter(event)" style="margin-right:4px">
+      <span id="agent-team-trigger-txt">Todas as equipes</span> ▾
+    </button>
     <button class="inbox-trigger" id="agent-filter-trigger" onclick="openAgentFilter(event)">
       <span id="agent-filter-trigger-txt">Todos os agentes</span> ▾
     </button>
@@ -959,7 +968,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 <!-- INBOX FILTER POPUP -->
 <div id="ibp" class="hidden" role="dialog" aria-modal="true" aria-label="Filtrar caixas de entrada">
   <div class="ibp-head">
-    <span class="ibp-head-title">Caixas de entrada</span>
+    <span class="ibp-head-title" id="ibp-title">Caixas de entrada</span>
     <button class="ibp-xs" onclick="ibpAll()">Todas</button>
     <button class="ibp-xs" onclick="ibpNone()">Limpar</button>
   </div>
@@ -974,6 +983,18 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 <div id="config-page" style="display:none;background:var(--bg);min-height:calc(100vh - 56px);margin-left:52px">
   <div class="config-page">
     <h2 style="margin:0;font-size:18px;font-weight:700;color:var(--text)">Configurações</h2>
+
+    <!-- GRUPOS DE FILTRO -->
+    <div class="config-card">
+      <h3>Grupos de filtro</h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Agrupe caixas de entrada em equipes. O filtro do painel passa a mostrar os grupos em vez das caixas individuais.</p>
+      <div id="cfg-grupos-list"></div>
+      <button onclick="addGrupo()" style="margin-top:8px;padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:5px;font-size:12px;cursor:pointer">+ Adicionar grupo</button>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button onclick="saveGrupos()" style="padding:7px 18px;background:var(--accent);color:#fff;border:none;border-radius:5px;font-size:13px;cursor:pointer">Salvar grupos</button>
+        <button onclick="clearGrupos()" style="padding:7px 14px;background:none;border:1px solid var(--border);border-radius:5px;font-size:12px;color:var(--text2);cursor:pointer">Limpar tudo</button>
+      </div>
+    </div>
 
     <!-- SLAs -->
     <div class="config-card">
@@ -1091,6 +1112,21 @@ let cfg = {
   threshold: parseInt(localStorage.getItem('grv_threshold') || '0', 10) || 0,
   token:     localStorage.getItem('grv_token')      || ''
 };
+
+/* Mapeamento inbox_id → team_id do Chatwoot.
+   Base para exibir dados históricos por EQUIPE com cobertura 100%.
+   Inbox 17 (SAG) não tem time fixo — tratado separadamente como "SAG". */
+const INBOX_TEAM_MAP = {
+  3: 1, 4: 1, 18: 1,   /* nxlite (3 inboxes) → nxlite (team 1) */
+  5: 3,                  /* Equipe3             → equipe 3 (team 3) */
+  6: 2,                  /* consultoriadigital  → consultoria (team 2) */
+  7: 8, 13: 8,           /* diagnostico + qual  → qualidade_dev (team 8) */
+  11: 7,                 /* equipe2             → equipe 2 (team 7) */
+  12: 6,                 /* equipe1             → equipe 1 (team 6) */
+  14: 9,                 /* equipe_tecnica      → equipe_tecnica (team 9) */
+  19: 11, 20: 11         /* comercial cps + nx  → comercial (team 11) */
+};
+const SAG_INBOX_ID = 17;
 let timer = null, countdown = REFRESH_SEC;
 let _rawConvs = [];
 let _allInProg = [], _allWaiting = [], _inboxMap = {}, _shownCount = PAGE_SIZE, _totalOpen = 0;
@@ -1100,11 +1136,15 @@ let _filters = { waiting: {}, inprog: {} };
 let _cfpState = { tbl: null, col: null, vals: [], sel: new Set() };
 let _showNd = false;
 let _toastTimer = null;
-let _inboxFilter = null;      /* null = todas; Set<number> = filtro ativo */
-let _ibpSel = new Set();
-let _ibpMode = 'panel';       /* 'panel' | 'chart' — qual filtro o popup está editando */
-let _agentFilter = null;      /* null = sem filtro; {id, name} = agente ativo */
-let _chartInboxFilter = null; /* filtro de inbox independente da aba Análise */
+let _teamFilter      = null;   /* null = todos; Set<number> de teamIds — filtro painel */
+let _grupos          = [];     /* legado — mantido para compatibilidade Settings */
+let _teamMap         = {};     /* {teamId: {id,name}} — times do Chatwoot */
+let _ibpSel          = new Set();
+let _ibpMode         = 'panel'; /* 'panel' | 'chart' */
+let _activeGrupos    = null;   /* legado */
+let _agentFilter     = null;   /* null = sem filtro; {id, name} = agente ativo */
+let _chartTeamFilter = null;   /* filtro de equipe independente da aba Análise */
+try { _grupos = JSON.parse(localStorage.getItem('grv_grupos') || '[]'); } catch(e) { _grupos = []; }
 let _SLA_TMA = parseInt(localStorage.getItem('grv_sla_tma') || '8',  10);
 let _SLA_TMR = parseInt(localStorage.getItem('grv_sla_tmr') || '30', 10);
 let _SLA_FCR = parseInt(localStorage.getItem('grv_sla_fcr') || '85', 10);
@@ -1123,13 +1163,17 @@ let _chartTeamCache  = {};   /* {`${id}:${since}:${until}`: {data, ts}} — TTL 
 let _authLimited     = false; /* true quando API de relatórios retornou 401/403 */
 
 /* ── AGENTES TAB STATE ── */
-let _agentTabPeriod  = '3';    /* '1'|'3'|'6'|'12' */
-let _agentTabFilter  = null;   /* Set<number>|null — ids de agentes */
+let _agentTabPeriod      = '3';  /* '1'|'3'|'6'|'12' */
+let _agentTabFilter      = null; /* Set<number>|null — ids de agentes */
+let _agentTabTeamFilter  = null; /* Set<number>|null — ids de times (filtra agentes) */
+let _teamMembersCache    = {};   /* {teamId: Set<agentId>} */
 let _agentList       = [];     /* [{id, name, ...}] */
 let _agentPerfData   = null;   /* {agentId: {agent, summary}} */
 let _agentCsat       = null;   /* [{id, name, total, positive}] | null */
 let _agentTabDirty   = false;  /* true → re-fetch ao entrar na aba */
 let _agentPerfSort   = { col: 'score', dir: 'desc' };
+let _sortWaiting     = { col: 'dur', dir: 'desc' };  /* desc = mais antigas primeiro */
+let _sortInprog      = { col: 'dur', dir: 'desc' };  /* desc = mais antigas primeiro */
 let _agentMonthCache = {};     /* {agentId: {periodKey: months[]}} — lazy */
 let _agentModalId    = null;   /* id do agente com modal aberto */
 let _agentModalOrder = [];     /* ids na ordem da tabela — para navegar ‹ › */
@@ -1338,12 +1382,21 @@ async function fetchKPIs() {
   document.getElementById('period-badge').textContent = p.badgeLabel;
   renderKPISkeleton();
 
-  /* busca summary por lista de inboxes, silencia erros individuais */
+  /* busca summary por lista de inboxes (fallback auth) */
   const summaryByIds = (ids, since, until) =>
     Promise.all(ids.map(id =>
       api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
         .catch(() => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null }))
     ));
+  /* busca summary por times → expande para inboxes (100% cobertura) */
+  const summaryByTeamIds = (teamIds, since, until) => {
+    const inboxIds = Object.entries(INBOX_TEAM_MAP)
+      .filter(([, tid]) => teamIds.includes(Number(tid)))
+      .map(([iid]) => Number(iid));
+    if (!inboxIds.length) return Promise.resolve([]);
+    return summaryByIds(inboxIds, since, until);
+  };
+
 
   try {
     let summary, summaryPrev;
@@ -1365,7 +1418,7 @@ async function fetchKPIs() {
       note.textContent = `Filtrado por agente: ${_agentFilter.name}`;
       note.style.display = '';
 
-    } else if (!_inboxFilter || _inboxFilter.size === 0) {
+    } else if (!_teamFilter || _teamFilter.size === 0) {
       /* Sem filtro — tenta type=account; se 401/403, fallback por inboxes acessíveis */
       try {
         [summary, summaryPrev] = await Promise.all([
@@ -1389,16 +1442,16 @@ async function fetchKPIs() {
       }
 
     } else {
-      /* Filtro por inbox ativo — comportamento original */
-      const ids = [..._inboxFilter];
+      /* Filtro por equipe ativo */
+      const teamIds = [..._teamFilter];
       const [currAll, prevAll] = await Promise.all([
-        summaryByIds(ids, p.since, p.until),
-        summaryByIds(ids, p.prevSince, p.prevUntil)
+        summaryByTeamIds(teamIds, p.since, p.until),
+        summaryByTeamIds(teamIds, p.prevSince, p.prevUntil)
       ]);
       summary     = aggregateSummaries(currAll);
       summaryPrev = aggregateSummaries(prevAll);
-      const names = ids.map(id => (_inboxMap[id] || {}).name || `#${id}`).join(', ');
-      note.textContent = `Filtrado por: ${names}`;
+      const names = teamIds.map(id => (_teamMap[id] || {}).name || `#${id}`).join(', ');
+      note.textContent = `Filtrado por equipe: ${names}`;
       note.style.display = '';
     }
 
@@ -1456,11 +1509,12 @@ function startDashboard() {
 async function fetchAll() {
   document.getElementById('hdr-countdown').textContent = 'Atualizando…';
   try {
-    const [agents, page1, pendingPage1, inboxes] = await Promise.all([
+    const [agents, page1, pendingPage1, inboxes, teamsResp] = await Promise.all([
       api(`/v1/accounts/${cfg.account}/agents`),
       api(`/v1/accounts/${cfg.account}/conversations?status=open&page=1`),
       api(`/v1/accounts/${cfg.account}/conversations?status=pending&page=1`).catch(() => null),
-      api(`/v1/accounts/${cfg.account}/inboxes`)
+      api(`/v1/accounts/${cfg.account}/inboxes`),
+      api(`/v1/accounts/${cfg.account}/teams`).catch(() => [])
     ]);
 
     let convs = page1.data?.payload || [];
@@ -1490,11 +1544,14 @@ async function fetchAll() {
 
     _inboxMap  = {};
     (inboxes.payload || []).forEach(i => { _inboxMap[i.id] = i; });
+    _teamMap = {};
+    (Array.isArray(teamsResp) ? teamsResp : (teamsResp?.payload || []))
+      .forEach(t => { _teamMap[t.id] = t; });
     if (Array.isArray(agents)) _agentList = agents;
     _agentTabDirty = true;
     _totalOpen = total;
 
-    renderInboxBar(inboxes.payload || []);
+    renderInboxBar();
     await fetchKPIs();
     renderAgents(agents, convs);
     renderConvs(convs);
@@ -1717,18 +1774,56 @@ function renderTriage(waiting) {
   strip.style.display = 'flex';
 }
 
-/* ── INBOX FILTER ── */
-function renderInboxBar(inboxes) {
-  const bar = document.getElementById('inbox-bar');
-  if (!inboxes.length) { bar.style.display = 'none'; _ibVisible = false; return; }
+/* ── TEAM FILTER BAR ── */
+function renderInboxBar() {
+  const bar   = document.getElementById('inbox-bar');
+  const teams = Object.values(_teamMap);
+  if (!teams.length) { bar.style.display = 'none'; _ibVisible = false; return; }
   _ibVisible = true;
   bar.style.display = 'flex';
+  const labelEl = document.getElementById('inbox-bar-label');
+  const titleEl = document.getElementById('ibp-title');
+  if (labelEl) labelEl.textContent = 'Equipes:';
+  if (titleEl) titleEl.textContent = 'Equipes';
   syncInboxBar();
 }
 
 function applyInboxFilter(convs) {
-  if (!_inboxFilter || _inboxFilter.size === 0) return convs;
-  return convs.filter(c => _inboxFilter.has(c.inbox_id));
+  if (!_teamFilter || _teamFilter.size === 0) return convs;
+  return convs.filter(c => _teamFilter.has(c.meta?.team?.id));
+}
+
+function sortConvs(arr, col, dir) {
+  const m = dir === 'asc' ? 1 : -1;
+  return [...arr].sort((a, b) => {
+    switch (col) {
+      case 'id':     return m * (a.id - b.id);
+      case 'client': return m * (a.meta?.sender?.name || '').localeCompare(b.meta?.sender?.name || '', 'pt-BR');
+      case 'date':   return m * ((a.created_at || 0) - (b.created_at || 0));
+      case 'dur': {
+        const elA = Date.now() - ((a.waiting_since > 0 ? a.waiting_since : a.created_at) || 0) * 1000;
+        const elB = Date.now() - ((b.waiting_since > 0 ? b.waiting_since : b.created_at) || 0) * 1000;
+        return m * (elA - elB); /* desc = mais antiga = maior elapsed */
+      }
+      default: return 0;
+    }
+  });
+}
+
+function setSort(table, col) {
+  const s = table === 'waiting' ? _sortWaiting : _sortInprog;
+  if (s.col === col) s.dir = s.dir === 'asc' ? 'desc' : 'asc';
+  else { s.col = col; s.dir = 'desc'; }
+  if (table === 'waiting') renderWaiting();
+  else renderInprog();
+}
+
+function updateSortUI(table, state) {
+  const pfx = table === 'waiting' ? 'srt-w' : 'srt-i';
+  ['id','client','date','dur'].forEach(col => {
+    const el = document.getElementById(`${pfx}-${col}`);
+    if (el) el.textContent = state.col === col ? (state.dir === 'asc' ? ' ▲' : ' ▼') : '';
+  });
 }
 
 function applyAgentFilter(convs) {
@@ -1789,23 +1884,20 @@ function applyInboxAndRender() {
 function openIbp(event) {
   _ibpMode = 'panel';
   event.stopPropagation();
-  const allIds = Object.keys(_inboxMap).map(Number);
-  _ibpSel = _inboxFilter ? new Set(_inboxFilter) : new Set(allIds);
 
-  const allCount = allIds.length;
-  const allChecked = !_inboxFilter || _ibpSel.size === allCount;
+  const teams  = Object.values(_teamMap).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  const allIds = teams.map(t => t.id);
+  _ibpSel = _teamFilter ? new Set(_teamFilter) : new Set(allIds);
+  const allChecked = !_teamFilter || _ibpSel.size === allIds.length;
 
   let html = `<label class="ibp-opt all-toggle">
     <input type="checkbox" id="ibp-all-chk" onchange="ibpToggleAll(this)" ${allChecked ? 'checked' : ''}>
-    <span>Todas as caixas (${allCount})</span>
+    <span>Todas as equipes (${allIds.length})</span>
   </label>`;
-
-  /* Agrupa inboxes por nome (todas numa única lista sem sub-categorias fixas) */
-  const sorted = Object.values(_inboxMap).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
-  sorted.forEach(inbox => {
+  teams.forEach(t => {
     html += `<label class="ibp-opt">
-      <input type="checkbox" ${_ibpSel.has(inbox.id) ? 'checked' : ''} data-id="${inbox.id}" onchange="ibpToggle(this)">
-      <span>${esc(inbox.name)}</span>
+      <input type="checkbox" ${_ibpSel.has(t.id) ? 'checked' : ''} data-id="${t.id}" onchange="ibpToggle(this)">
+      <span>${esc(t.name)}</span>
     </label>`;
   });
 
@@ -1828,19 +1920,19 @@ function openIbp(event) {
 function ibpToggle(el) {
   const id = parseInt(el.dataset.id, 10);
   if (el.checked) _ibpSel.add(id); else _ibpSel.delete(id);
-  const allIds  = Object.keys(_inboxMap).map(Number);
-  const allChk  = document.getElementById('ibp-all-chk');
+  const allIds = Object.values(_teamMap).map(t => t.id);
+  const allChk = document.getElementById('ibp-all-chk');
   if (allChk) allChk.checked = _ibpSel.size === allIds.length;
 }
 
 function ibpToggleAll(el) {
-  const allIds = Object.keys(_inboxMap).map(Number);
+  const allIds = Object.values(_teamMap).map(t => t.id);
   _ibpSel = el.checked ? new Set(allIds) : new Set();
   document.querySelectorAll('#ibp-body input[data-id]').forEach(cb => { cb.checked = el.checked; });
 }
 
 function ibpAll() {
-  const allIds = Object.keys(_inboxMap).map(Number);
+  const allIds = Object.values(_teamMap).map(t => t.id);
   _ibpSel = new Set(allIds);
   const c = document.getElementById('ibp-all-chk');
   if (c) c.checked = true;
@@ -1859,18 +1951,25 @@ function ibpClose() {
   document.getElementById('inbox-trigger').classList.remove('active');
   const cit = document.getElementById('chart-inbox-trigger');
   if (cit) cit.classList.remove('active');
+  const att = document.getElementById('agent-team-trigger');
+  if (att) att.classList.remove('active');
 }
 
 function ibpApply() {
-  const allIds = Object.keys(_inboxMap).map(Number);
+  const allIds = Object.values(_teamMap).map(t => t.id);
   const filter = (_ibpSel.size === 0 || _ibpSel.size === allIds.length) ? null : new Set(_ibpSel);
   if (_ibpMode === 'chart') {
-    _chartInboxFilter = filter;
+    _chartTeamFilter = filter;
     ibpClose();
     syncChartInboxBar();
     fetchChartData();
+  } else if (_ibpMode === 'agent-team') {
+    _agentTabTeamFilter = filter;
+    ibpClose();
+    syncAgentTeamUI();
+    applyAgentTeamFilter();
   } else {
-    _inboxFilter = filter;
+    _teamFilter = filter;
     ibpClose();
     syncInboxBar();
     applyInboxAndRender();
@@ -1878,39 +1977,143 @@ function ibpApply() {
 }
 
 function clearInboxFilter() {
-  _inboxFilter = null;
+  _teamFilter = null;
   syncInboxBar();
   applyInboxAndRender();
 }
 
+/* ── GRUPOS DE FILTRO ── */
+let _grupoNextId = Date.now();
+
+function renderGruposList() {
+  const el = document.getElementById('cfg-grupos-list');
+  if (!el) return;
+  if (!_grupos.length) {
+    el.innerHTML = '<p style="font-size:12px;color:var(--text3);margin-bottom:8px">Nenhum grupo criado — o filtro mostra as caixas individuais.</p>';
+    return;
+  }
+  const teamEntries = Object.values(_teamMap).sort((a,b) => a.name.localeCompare(b.name, 'pt-BR'));
+
+  el.innerHTML = _grupos.map(g => {
+    if (!g.teamIds) g.teamIds = [];
+    const teamSection = teamEntries.length ? `
+      <div style="font-size:11px;color:var(--text2);margin-bottom:4px;margin-top:8px">Times Chatwoot (${g.teamIds.length} selecionado${g.teamIds.length!==1?'s':''}): <span style="color:var(--text3);font-size:10px">convs atribuídas por automação</span></div>
+      <div style="max-height:80px;overflow-y:auto;display:flex;flex-wrap:wrap;gap:4px">
+        ${teamEntries.map(t => `
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;padding:2px 6px;border-radius:3px;background:var(--bg2);cursor:pointer;border:1px solid var(--accent);opacity:0.85">
+            <input type="checkbox" ${g.teamIds.includes(t.id)?'checked':''} data-gid="${g.id}" data-tid="${t.id}" onchange="toggleGrupoTeam(this)">
+            ${esc(t.name)}
+          </label>`).join('')}
+      </div>` : '';
+
+    return `
+    <div style="border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:8px;background:var(--bg3)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <input type="text" value="${esc(g.name)}" placeholder="Nome do grupo" data-gid="${g.id}" data-field="name"
+          oninput="updateGrupo(this)"
+          style="flex:1;padding:5px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:13px">
+        <button onclick="removeGrupo(${g.id})" style="color:var(--red);background:none;border:none;cursor:pointer;font-size:16px" title="Remover grupo">×</button>
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Caixas de entrada (${g.inboxIds.length} selecionada${g.inboxIds.length!==1?'s':''}):</div>
+      <div style="max-height:120px;overflow-y:auto;display:flex;flex-wrap:wrap;gap:4px">
+        ${Object.values(_inboxMap).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR')).map(i => `
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;padding:2px 6px;border-radius:3px;background:var(--bg2);cursor:pointer">
+            <input type="checkbox" ${g.inboxIds.includes(i.id)?'checked':''} data-gid="${g.id}" data-iid="${i.id}" onchange="toggleGrupoInbox(this)">
+            ${esc(i.name)}
+          </label>`).join('')}
+      </div>
+      ${teamSection}
+    </div>`;
+  }).join('');
+}
+
+function addGrupo() {
+  _grupos.push({ id: ++_grupoNextId, name: 'Novo grupo', inboxIds: [], teamIds: [] });
+  renderGruposList();
+}
+
+function removeGrupo(id) {
+  _grupos = _grupos.filter(g => g.id !== id);
+  renderGruposList();
+}
+
+function updateGrupo(el) {
+  const gid = parseInt(el.dataset.gid, 10);
+  const g = _grupos.find(g => g.id === gid);
+  if (g) g.name = el.value;
+}
+
+function toggleGrupoInbox(el) {
+  const gid = parseInt(el.dataset.gid, 10);
+  const iid = parseInt(el.dataset.iid, 10);
+  const g = _grupos.find(g => g.id === gid);
+  if (!g) return;
+  if (el.checked) { if (!g.inboxIds.includes(iid)) g.inboxIds.push(iid); }
+  else g.inboxIds = g.inboxIds.filter(id => id !== iid);
+  renderGruposList();
+}
+
+function toggleGrupoTeam(el) {
+  const gid = parseInt(el.dataset.gid, 10);
+  const tid = parseInt(el.dataset.tid, 10);
+  const g = _grupos.find(g => g.id === gid);
+  if (!g) return;
+  if (!g.teamIds) g.teamIds = [];
+  if (el.checked) { if (!g.teamIds.includes(tid)) g.teamIds.push(tid); }
+  else g.teamIds = g.teamIds.filter(id => id !== tid);
+  renderGruposList();
+}
+
+function saveGrupos() {
+  /* Lê os nomes dos inputs antes de salvar */
+  document.querySelectorAll('#cfg-grupos-list input[data-field="name"]').forEach(inp => {
+    const gid = parseInt(inp.dataset.gid, 10);
+    const g = _grupos.find(g => g.id === gid);
+    if (g) g.name = inp.value.trim() || 'Grupo';
+  });
+  localStorage.setItem('grv_grupos', JSON.stringify(_grupos));
+  renderInboxBar();
+  syncInboxBar();
+  showToast('Grupos salvos.');
+}
+
+function clearGrupos() {
+  _grupos = [];
+  localStorage.removeItem('grv_grupos');
+  renderGruposList();
+  renderInboxBar();
+  syncInboxBar();
+  showToast('Grupos removidos.');
+}
+
 function removeInboxChip(id) {
-  if (_inboxFilter) {
-    _inboxFilter.delete(id);
-    if (_inboxFilter.size === 0) _inboxFilter = null;
+  if (_teamFilter) {
+    _teamFilter.delete(id);
+    if (_teamFilter.size === 0) _teamFilter = null;
   }
   syncInboxBar();
   applyInboxAndRender();
 }
 
-/* ── CHART INBOX FILTER ── */
+/* ── CHART TEAM FILTER ── */
 function openChartIbp(event) {
   _ibpMode = 'chart';
   event.stopPropagation();
-  const allIds = Object.keys(_inboxMap).map(Number);
-  _ibpSel = _chartInboxFilter ? new Set(_chartInboxFilter) : new Set(allIds);
+  const teams  = Object.values(_teamMap).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  const allIds = teams.map(t => t.id);
+  _ibpSel = _chartTeamFilter ? new Set(_chartTeamFilter) : new Set(allIds);
 
   const allCount   = allIds.length;
-  const allChecked = !_chartInboxFilter || _ibpSel.size === allCount;
+  const allChecked = !_chartTeamFilter || _ibpSel.size === allCount;
 
   let html = `<label class="ibp-opt all-toggle">
     <input type="checkbox" id="ibp-all-chk" onchange="ibpToggleAll(this)" ${allChecked ? 'checked' : ''}>
-    <span>Todas as caixas (${allCount})</span>
+    <span>Todas as equipes (${allCount})</span>
   </label>`;
-  const sorted = Object.values(_inboxMap).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
-  sorted.forEach(inbox => {
+  teams.forEach(t => {
     html += `<label class="ibp-opt">
-      <input type="checkbox" ${_ibpSel.has(inbox.id) ? 'checked' : ''} data-id="${inbox.id}" onchange="ibpToggle(this)">
-      <span>${esc(inbox.name)}</span>
+      <input type="checkbox" ${_ibpSel.has(t.id) ? 'checked' : ''} data-id="${t.id}" onchange="ibpToggle(this)">
+      <span>${esc(t.name)}</span>
     </label>`;
   });
 
@@ -1938,33 +2141,33 @@ function syncChartInboxBar() {
   if (!chipsEl) return;
 
   const noteEl = document.getElementById('chart-filter-note');
-  if (!_chartInboxFilter) {
-    chipsEl.innerHTML     = '';
+  if (!_chartTeamFilter) {
+    chipsEl.innerHTML = '';
     if (clearEl) clearEl.style.display = 'none';
     if (trigTxt) trigTxt.textContent   = 'Todas';
     if (noteEl)  noteEl.style.display  = 'none';
     return;
   }
 
-  if (trigTxt) trigTxt.textContent = `${_chartInboxFilter.size} selecionada${_chartInboxFilter.size > 1 ? 's' : ''}`;
+  if (trigTxt) trigTxt.textContent = `${_chartTeamFilter.size} equipe${_chartTeamFilter.size > 1 ? 's' : ''}`;
   if (clearEl) clearEl.style.display = '';
   if (noteEl)  noteEl.style.display  = '';
-  chipsEl.innerHTML = [..._chartInboxFilter].map(id => {
-    const name = (_inboxMap[id] || {}).name || `#${id}`;
+  chipsEl.innerHTML = [..._chartTeamFilter].map(id => {
+    const name = (_teamMap[id] || {}).name || `#${id}`;
     return `<span class="inbox-chip">${esc(name)}<button class="inbox-chip-rm" onclick="removeChartInboxChip(${id})" aria-label="Remover ${esc(name)}">×</button></span>`;
   }).join('');
 }
 
 function clearChartInboxFilter() {
-  _chartInboxFilter = null;
+  _chartTeamFilter = null;
   syncChartInboxBar();
   fetchChartData();
 }
 
 function removeChartInboxChip(id) {
-  if (_chartInboxFilter) {
-    _chartInboxFilter.delete(id);
-    if (_chartInboxFilter.size === 0) _chartInboxFilter = null;
+  if (_chartTeamFilter) {
+    _chartTeamFilter.delete(id);
+    if (_chartTeamFilter.size === 0) _chartTeamFilter = null;
   }
   syncChartInboxBar();
   fetchChartData();
@@ -1975,17 +2178,17 @@ function syncInboxBar() {
   const clearEl = document.getElementById('inbox-clear');
   const trigTxt = document.getElementById('inbox-trigger-txt');
 
-  if (!_inboxFilter) {
-    chipsEl.innerHTML  = '';
+  if (!_teamFilter) {
+    chipsEl.innerHTML     = '';
     clearEl.style.display = 'none';
-    trigTxt.textContent = 'Todas';
+    trigTxt.textContent   = 'Todas';
     return;
   }
 
-  trigTxt.textContent = `${_inboxFilter.size} selecionada${_inboxFilter.size > 1 ? 's' : ''}`;
+  trigTxt.textContent = `${_teamFilter.size} equipe${_teamFilter.size > 1 ? 's' : ''}`;
   clearEl.style.display = '';
-  chipsEl.innerHTML = [..._inboxFilter].map(id => {
-    const name = (_inboxMap[id] || {}).name || `#${id}`;
+  chipsEl.innerHTML = [..._teamFilter].map(id => {
+    const name = (_teamMap[id] || {}).name || `#${id}`;
     return `<span class="inbox-chip">${esc(name)}<button class="inbox-chip-rm" onclick="removeInboxChip(${id})" aria-label="Remover ${esc(name)}">×</button></span>`;
   }).join('');
 }
@@ -2008,13 +2211,15 @@ function renderConvs(convs) {
 
 function renderWaiting() {
   const filtered = applyFilters(_allWaiting, 'waiting');
+  const sorted   = sortConvs(filtered, _sortWaiting.col, _sortWaiting.dir);
   const bw = document.getElementById('badge-waiting');
   bw.textContent = filtered.length;
   const exceeded = cfg.threshold > 0 && filtered.length >= cfg.threshold;
   bw.className = `badge ${filtered.length > 0 ? 'badge-orange' : 'badge-subtle'}${exceeded ? ' badge-pulse' : ''}`;
-  document.getElementById('waiting-tbody').innerHTML = filtered.length
-    ? filtered.map(c => rowHtml(c, true)).join('')
+  document.getElementById('waiting-tbody').innerHTML = sorted.length
+    ? sorted.map(c => rowHtml(c, true)).join('')
     : emptyRow('Nenhuma conversa aguardando atendimento', 10);
+  updateSortUI('waiting', _sortWaiting);
   syncFilterButtons('waiting');
 }
 
@@ -2035,28 +2240,17 @@ function renderPending() {
 
 function renderInprog() {
   const filtered = applyFilters(_allInProg, 'inprog');
-  const shown    = filtered.slice(0, _shownCount);
+  const sorted   = sortConvs(filtered, _sortInprog.col, _sortInprog.dir);
+  const shown    = sorted.slice(0, _shownCount);
 
-  const groupOrder = [], groups = {};
-  shown.forEach(c => {
-    const k = c.inbox_id;
-    if (!groups[k]) { groups[k] = []; groupOrder.push(k); }
-    groups[k].push(c);
-  });
-
-  let html = '';
-  groupOrder.forEach(iid => {
-    const name = (_inboxMap[iid] || {}).name || `Fila #${iid}`;
-    html += `<tr class="queue-row"><td colspan="10">${esc(name)}</td></tr>`;
-    html += groups[iid].map(c => rowHtml(c, true, false, true)).join('');
-  });
-
+  let html = shown.map(c => rowHtml(c, true, false, true)).join('');
   if (!html) html = emptyRow('Nenhuma conversa em atendimento', 10);
   document.getElementById('inprog-tbody').innerHTML = html;
   document.getElementById('badge-inprog').textContent =
     `${shown.length} de ${filtered.length} abertas`;
   document.getElementById('show-more-wrap').style.display =
     filtered.length > _shownCount ? '' : 'none';
+  updateSortUI('inprog', _sortInprog);
   syncFilterButtons('inprog');
 }
 
@@ -2091,9 +2285,10 @@ function rowHtml(c, applyUrgency, pendingMode, inprogMode) {
   const tipoBadge = grupo
     ? '<span class="tipo-badge tipo-grupo">Grupo</span>'
     : '<span class="tipo-badge tipo-ind">Individual</span>';
+  const reopenBadge = c.resolved_at ? '<span class="tipo-badge tipo-reopen" title="Conversa reaberta após resolução">↩ Reaberta</span>' : '';
 
   return `<tr class="data-row${rowCls}" onclick="window.open('${esc(url)}','_blank')">
-    <td class="c-ticket">#${c.id}</td>
+    <td class="c-ticket">#${c.id}${reopenBadge ? ' ' + reopenBadge : ''}</td>
     <td class="c-ref">${esc(ref)}</td>
     <td class="c-client">${esc(client)}</td>
     <td>${tipoBadge}</td>
@@ -2194,7 +2389,7 @@ document.addEventListener('click', e => {
   const cfp = document.getElementById('cfp');
   if (cfp && !cfp.classList.contains('hidden') && !cfp.contains(e.target)) cfpClose();
   const ibp = document.getElementById('ibp');
-  if (ibp && !ibp.classList.contains('hidden') && !ibp.contains(e.target) && !e.target.closest('#inbox-trigger') && !e.target.closest('#chart-inbox-trigger')) ibpClose();
+  if (ibp && !ibp.classList.contains('hidden') && !ibp.contains(e.target) && !e.target.closest('#inbox-trigger') && !e.target.closest('#chart-inbox-trigger') && !e.target.closest('#agent-team-trigger')) ibpClose();
 });
 
 document.addEventListener('keydown', e => {
@@ -2295,10 +2490,13 @@ async function fetchChartData() {
   }
   const EMPTY_MONTH = () => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null, incoming_messages_count: 0, outgoing_messages_count: 0 });
   const fetchMonth = async ({ since, until }) => {
-    /* Se filtro de inbox de gráficos ativo, busca por inbox e agrega */
-    if (_chartInboxFilter && _chartInboxFilter.size > 0) {
-      const ids = [..._chartInboxFilter];
-      const res = await Promise.all(ids.map(id =>
+    /* Se filtro de equipe ativo, expande para inboxes e agrega (cobertura 100%) */
+    if (_chartTeamFilter && _chartTeamFilter.size > 0) {
+      const inboxIds = Object.entries(INBOX_TEAM_MAP)
+        .filter(([, tid]) => _chartTeamFilter.has(Number(tid)))
+        .map(([iid]) => Number(iid));
+      if (!inboxIds.length) return EMPTY_MONTH();
+      const res = await Promise.all(inboxIds.map(id =>
         api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
           .catch(EMPTY_MONTH)
       ));
@@ -2331,30 +2529,72 @@ async function fetchChartData() {
 async function fetchTeamComparison(periods) {
   const last = periods[periods.length - 1];
   const { since, until } = last;
-  const ids = (_chartInboxFilter && _chartInboxFilter.size > 0)
-    ? [..._chartInboxFilter]
-    : Object.keys(_inboxMap).map(Number);
-  if (!ids.length) return null;
   const now = Date.now(), TTL = 5 * 60 * 1000;
-  const results = await Promise.all(ids.map(id => {
-    const key = `${id}:${since}:${until}`;
-    if (_chartTeamCache[key] && now - _chartTeamCache[key].ts < TTL) return _chartTeamCache[key].data;
+
+  /* Fetch por inbox — único jeito de ter 100% de cobertura */
+  const fetchInbox = id => {
+    const key = `inbox:${id}:${since}:${until}`;
+    if (_chartTeamCache[key] && now - _chartTeamCache[key].ts < TTL) return Promise.resolve(_chartTeamCache[key].data);
     return api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
       .then(r => {
-        const entry = {
-          name: (_inboxMap[id] || {}).name || `Inbox ${id}`,
-          conversations_count: r.conversations_count || 0,
-          tma_h:   r.avg_resolution_time    != null ? +(r.avg_resolution_time    / 3600).toFixed(2) : null,
-          tmr_min: r.avg_first_response_time != null ? +(r.avg_first_response_time / 60).toFixed(1)  : null
+        const d = {
+          convs:     r.conversations_count || 0,
+          tmaTot:    (r.avg_resolution_time    || 0) * (r.conversations_count || 0),
+          tmrTot:    (r.avg_first_response_time || 0) * (r.conversations_count || 0),
+          hasTma:    r.avg_resolution_time    != null && (r.conversations_count || 0) > 0,
+          hasTmr:    r.avg_first_response_time != null && (r.conversations_count || 0) > 0
         };
-        _chartTeamCache[key] = { data: entry, ts: now };
-        return entry;
+        _chartTeamCache[key] = { data: d, ts: now };
+        return d;
       })
       .catch(() => null);
-  }));
-  const all   = results.filter(Boolean);
-  const items = all.filter(r => r.conversations_count > 0 && (r.tma_h != null || r.tmr_min != null));
-  return { items, total: ids.length, withData: items.length };
+  };
+
+  /* Quais inboxes buscar (respeita filtro de equipe) */
+  const allInboxIds = Object.keys(INBOX_TEAM_MAP).map(Number);
+  const filteredIds = (_chartTeamFilter && _chartTeamFilter.size > 0)
+    ? allInboxIds.filter(id => _chartTeamFilter.has(Number(INBOX_TEAM_MAP[id])))
+    : allInboxIds;
+  const includeSAG = !_chartTeamFilter || _chartTeamFilter.size === 0;
+
+  const [inboxResults, sagResult] = await Promise.all([
+    Promise.all(filteredIds.map(fetchInbox)),
+    includeSAG ? fetchInbox(SAG_INBOX_ID) : Promise.resolve(null)
+  ]);
+
+  /* Agrupa por equipe */
+  const grp = {};
+  filteredIds.forEach((inboxId, i) => {
+    const r = inboxResults[i]; if (!r) return;
+    const tid = Number(INBOX_TEAM_MAP[inboxId]);
+    if (!grp[tid]) grp[tid] = { name: (_teamMap[tid] || {}).name || `Time ${tid}`, convs: 0, tmaTot: 0, tmrTot: 0, hasTma: false, hasTmr: false };
+    grp[tid].convs  += r.convs;
+    grp[tid].tmaTot += r.tmaTot;
+    grp[tid].tmrTot += r.tmrTot;
+    if (r.hasTma) grp[tid].hasTma = true;
+    if (r.hasTmr) grp[tid].hasTmr = true;
+  });
+
+  const items = Object.values(grp)
+    .filter(t => t.convs > 0 && (t.hasTma || t.hasTmr))
+    .map(t => ({
+      name: t.name,
+      conversations_count: t.convs,
+      tma_h:   t.hasTma ? +(t.tmaTot / t.convs / 3600).toFixed(2) : null,
+      tmr_min: t.hasTmr ? +(t.tmrTot / t.convs / 60).toFixed(1)   : null
+    }));
+
+  /* SAG separado — roteador, sem TMA */
+  if (sagResult && sagResult.convs > 0) {
+    items.push({
+      name: 'SAG',
+      conversations_count: sagResult.convs,
+      tma_h: null,
+      tmr_min: sagResult.hasTmr ? +(sagResult.tmrTot / sagResult.convs / 60).toFixed(1) : null
+    });
+  }
+
+  return { items, total: items.length, withData: items.length };
 }
 
 /* Retorna {since, until} para o período selecionado */
@@ -3060,8 +3300,8 @@ function renderCharts() {
   const labels     = _chartData.map(d => d.monthLabel);
   const fullLabels = _chartData.map(d => d.fullLabel || d.monthLabel);
   const n          = _chartData.length;
-  const chartConvs = (_chartInboxFilter && _chartInboxFilter.size > 0)
-    ? _rawConvs.filter(cv => _chartInboxFilter.has(cv.inbox_id))
+  const chartConvs = (_chartTeamFilter && _chartTeamFilter.size > 0)
+    ? _rawConvs.filter(cv => _chartTeamFilter.has(cv.meta?.team?.id))
     : _rawConvs;
 
   function setMetric(id, val) {
@@ -3465,7 +3705,7 @@ function showPage(page) {
     if (!_agentPerfData || _agentTabDirty) { _agentTabDirty = false; fetchAgentTab(); }
     else renderAgentTab();
   }
-  if (page === 'configuracoes') loadConfigPage();
+  if (page === 'configuracoes') { loadConfigPage(); renderGruposList(); }
 }
 
 /* ── CONFIGURAÇÕES ── */
@@ -3621,6 +3861,77 @@ function clearAgentFilter() {
   _agentTabFilter = null;
   updateAgentFilterUI();
   _agentPerfData  = null;
+  _agentMonthCache = {};
+  fetchAgentTab();
+}
+
+function openAgentTeamFilter(event) {
+  _ibpMode = 'agent-team';
+  event.stopPropagation();
+  const teams  = Object.values(_teamMap).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  const allIds = teams.map(t => t.id);
+  _ibpSel = _agentTabTeamFilter ? new Set(_agentTabTeamFilter) : new Set(allIds);
+  const allChecked = !_agentTabTeamFilter || _ibpSel.size === allIds.length;
+  let html = `<label class="ibp-opt all-toggle">
+    <input type="checkbox" id="ibp-all-chk" onchange="ibpToggleAll(this)" ${allChecked ? 'checked' : ''}>
+    <span>Todas as equipes (${allIds.length})</span>
+  </label>`;
+  teams.forEach(t => {
+    html += `<label class="ibp-opt">
+      <input type="checkbox" ${_ibpSel.has(t.id) ? 'checked' : ''} data-id="${t.id}" onchange="ibpToggle(this)">
+      <span>${esc(t.name)}</span>
+    </label>`;
+  });
+  document.getElementById('ibp-body').innerHTML = html;
+  const popup = document.getElementById('ibp');
+  popup.classList.remove('hidden');
+  const rect = event.currentTarget.getBoundingClientRect();
+  const pw = 260, ph = 380;
+  let left = rect.left;
+  let top  = rect.bottom + 4;
+  if (left + pw > window.innerWidth  - 8) left = window.innerWidth  - pw - 8;
+  if (top  + ph > window.innerHeight - 8) top  = rect.top - ph - 4;
+  popup.style.left = Math.max(4, left) + 'px';
+  popup.style.top  = Math.max(4, top)  + 'px';
+  document.getElementById('agent-team-trigger').classList.add('active');
+}
+
+function syncAgentTeamUI() {
+  const trig = document.getElementById('agent-team-trigger');
+  const txt  = document.getElementById('agent-team-trigger-txt');
+  if (!txt) return;
+  if (trig) trig.classList.remove('active');
+  txt.textContent = _agentTabTeamFilter
+    ? `${_agentTabTeamFilter.size} equipe${_agentTabTeamFilter.size > 1 ? 's' : ''}`
+    : 'Todas as equipes';
+}
+
+async function applyAgentTeamFilter() {
+  if (!_agentTabTeamFilter || _agentTabTeamFilter.size === 0) {
+    _agentTabFilter = null;
+    updateAgentFilterUI();
+    _agentPerfData = null;
+    _agentMonthCache = {};
+    fetchAgentTab();
+    return;
+  }
+  /* Busca membros de cada time selecionado e monta o filtro de agentes */
+  const memberIds = new Set();
+  await Promise.all([..._agentTabTeamFilter].map(async teamId => {
+    if (_teamMembersCache[teamId]) {
+      _teamMembersCache[teamId].forEach(id => memberIds.add(id));
+      return;
+    }
+    try {
+      const members = await api(`/v1/accounts/${cfg.account}/teams/${teamId}/team_members`);
+      const ids = (Array.isArray(members) ? members : (members?.payload || [])).map(m => m.id);
+      _teamMembersCache[teamId] = new Set(ids);
+      ids.forEach(id => memberIds.add(id));
+    } catch(e) { /* ignora erro por time */ }
+  }));
+  _agentTabFilter = memberIds.size > 0 ? memberIds : null;
+  updateAgentFilterUI();
+  _agentPerfData = null;
   _agentMonthCache = {};
   fetchAgentTab();
 }
