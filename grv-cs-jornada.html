@@ -3387,135 +3387,55 @@ function updateVencDropdownBadges() {
 }
 
 function renderVencimentos() {
-  const sec = document.getElementById('sec-vencimentos');
+  var sec = document.getElementById('sec-vencimentos');
   if (!sec) return;
-  const _horizDias = _venc_filter_horizonte==='proximos30' ? 30 : _venc_filter_horizonte==='proximos7' ? 7 : 0;
-  const allVenc = getTodasVencidas(_horizDias);
 
-  let todos = allVenc.slice();
-  if (_venc_filter_cons !== 'todos')
-    todos = todos.filter(function(v){ return resolverResponsavel(v.at, v.pb, v.cliente) === _venc_filter_cons; });
-  if (_venc_filter_urgency === 'critico')  todos = todos.filter(function(v){ return v.diff < -15; });
-  if (_venc_filter_urgency === 'atrasado') todos = todos.filter(function(v){ return v.diff < 0 && v.diff >= -15; });
-  if (_venc_filter_urgency === 'hoje')     todos = todos.filter(function(v){ return v.diff === 0; });
-  if (_venc_filter_etapa !== 'todos')      todos = todos.filter(function(v){ return (v.cliente.status||'em_implantacao') === _venc_filter_etapa; });
-  if (_venc_filter_produto !== 'todos')    todos = todos.filter(function(v){ return (v.cliente.produto||'') === _venc_filter_produto; });
-  if (_venc_filter_busca.trim())           todos = todos.filter(function(v){ return v.cliente.id.toLowerCase().includes(_venc_filter_busca.trim().toLowerCase()); });
+  var kpi = getKpiVencimentos();
+  updateVencDropdownBadges();
 
-  const consOpts = '<option value="todos">Todos os consultores</option>' +
-    getConsultores().map(function(con) {
-      return '<option value="'+con.id+'"'+(con.id===_venc_filter_cons?' selected':'')+'>'+con.nome+'</option>';
-    }).join('');
+  var kpiHtml = '<div class="painel-kpi-strip">' +
+    mkKpiCard('Críticas', kpi.criticas, '#dc2626', 'Risco de churn') +
+    mkKpiCard('Vencem hoje', kpi.hoje, '#eab308', 'Fila do dia') +
+    mkKpiCard('Esta semana', kpi.semana, 'var(--primary)', 'Próximos 7 dias') +
+    mkKpiCard('SLA em dia', kpi.sla + '%', '#22c55e', 'Atividades no prazo') +
+  '</div>';
 
-  const produtosUnicos = allVenc
-    .map(function(v){ return v.cliente.produto||''; })
-    .filter(function(p,i,a){ return p && a.indexOf(p)===i; })
-    .sort();
-  const prodOpts = '<option value="todos">Todos os produtos</option>' +
-    produtosUnicos.map(function(p){
-      return '<option value="'+p+'"'+(_venc_filter_produto===p?' selected':'')+'>'+p+'</option>';
-    }).join('');
+  var toolHtml = '<div class="painel-toolbar">' +
+    '<div class="painel-toggle-group">' +
+      '<button class="painel-toggle-btn' + (_venc_fila === 'minha' ? ' active' : '') + '" ' +
+        'onclick="_venc_fila=\'minha\';renderVencimentos()">Minha fila</button>' +
+      '<button class="painel-toggle-btn' + (_venc_fila === 'time' ? ' active' : '') + '" ' +
+        'onclick="_venc_fila=\'time\';renderVencimentos()">Time todo</button>' +
+    '</div>' +
+    '<div class="painel-tabs">' +
+      '<button class="painel-tab' + (_venc_tab === 'resolver' ? ' active' : '') + '" ' +
+        'onclick="setVencTab(\'resolver\')">A resolver</button>' +
+      '<button class="painel-tab' + (_venc_tab === 'planejar' ? ' active' : '') + '" ' +
+        'onclick="setVencTab(\'planejar\')">A planejar</button>' +
+      '<button class="painel-tab' + (_venc_tab === 'cliente' ? ' active' : '') + '" ' +
+        'onclick="setVencTab(\'cliente\')">Por cliente</button>' +
+    '</div>' +
+  '</div>';
 
-  const selStyle = 'padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;color:var(--text);outline:none;background:var(--surface);cursor:pointer';
+  var contentHtml;
+  if (_venc_tab === 'resolver')       contentHtml = renderVencAResolver();
+  else if (_venc_tab === 'planejar')  contentHtml = renderVencPlanejar();
+  else                                contentHtml = renderVencPorCliente();
 
-  const filterBar =
-    '<div style="margin-bottom:20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
-    '<input id="venc-busca" type="text" placeholder="Buscar cliente..." value="' + _venc_filter_busca.replace(/"/g,'&quot;') + '" ' +
-      'oninput="_venc_filter_busca=this.value;renderVencimentos();setTimeout(function(){var el=document.getElementById(\'venc-busca\');if(el){el.focus();el.setSelectionRange(_venc_filter_busca.length,_venc_filter_busca.length);}},0)" ' +
-      'style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;font-family:inherit;outline:none;min-width:150px">' +
-    '<select onchange="_venc_filter_cons=this.value;renderVencimentos()" style="'+selStyle+'">' + consOpts + '</select>' +
-    '<select onchange="_venc_filter_horizonte=this.value;renderVencimentos()" style="'+selStyle+'">' +
-      '<option value="vencidas"'+(_venc_filter_horizonte==='vencidas'?' selected':'')+'>Vencidas</option>' +
-      '<option value="proximos7"'+(_venc_filter_horizonte==='proximos7'?' selected':'')+'>+ Próximos 7 dias</option>' +
-      '<option value="proximos30"'+(_venc_filter_horizonte==='proximos30'?' selected':'')+'>+ Próximos 30 dias</option>' +
-    '</select>' +
-    '<select onchange="_venc_filter_urgency=this.value;renderVencimentos()" style="'+selStyle+'">' +
-      '<option value="todos"'+(_venc_filter_urgency==='todos'?' selected':'')+'>Todas urgências</option>' +
-      '<option value="critico"'+(_venc_filter_urgency==='critico'?' selected':'')+'>⚠ Crítico (&gt;15d)</option>' +
-      '<option value="atrasado"'+(_venc_filter_urgency==='atrasado'?' selected':'')+'>Atrasado (1–15d)</option>' +
-      '<option value="hoje"'+(_venc_filter_urgency==='hoje'?' selected':'')+'>Vence hoje</option>' +
-    '</select>' +
-    '<select onchange="_venc_filter_etapa=this.value;renderVencimentos()" style="'+selStyle+'">' +
-      '<option value="todos"'+(_venc_filter_etapa==='todos'?' selected':'')+'>Todas etapas</option>' +
-      '<option value="em_implantacao"'+(_venc_filter_etapa==='em_implantacao'?' selected':'')+'>Implantação</option>' +
-      '<option value="cs_ativo"'+(_venc_filter_etapa==='cs_ativo'?' selected':'')+'>CS Ativo</option>' +
-    '</select>' +
-    (produtosUnicos.length
-      ? '<select onchange="_venc_filter_produto=this.value;renderVencimentos()" style="'+selStyle+'">' + prodOpts + '</select>'
-      : '') +
-    '<span style="font-size:12px;color:var(--text3)">' + todos.length + ' de ' + allVenc.length + ' vencimento' + (allVenc.length!==1?'s':'') + '</span>' +
-    '<button onclick="exportarVencimentosCSV()" class="btn btn-secondary btn-sm" style="margin-left:auto">⬇ Exportar CSV</button>' +
-    '</div>';
+  sec.innerHTML = '<div class="venc-wrap">' + kpiHtml + toolHtml + contentHtml + '</div>';
 
-  if (!allVenc.length) {
-    sec.innerHTML = '<div class="content-inner"><div class="page-header"><h1 class="page-title">Vencimentos</h1></div>' +
-      '<div class="empty-state"><div class="es-icon">✅</div>' +
-      '<div class="es-text" style="font-weight:700;color:var(--green);font-size:16px">Tudo em dia!</div>' +
-      '<div style="font-size:13px;color:var(--text3);margin-top:4px">Nenhuma atividade vencida.</div>' +
-      '<div style="margin-top:20px"><a class="btn btn-primary" href="#carteira">Ver Minha Carteira</a></div></div></div>';
-    return;
-  }
+  ['resolver','planejar','cliente'].forEach(function(t) {
+    var el = document.getElementById('drop-venc-' + t);
+    if (el) el.classList.toggle('active', t === _venc_tab);
+  });
+}
 
-  const criticos  = todos.filter(function(v){return v.diff<-15;}).sort(function(a,b){return a.diff-b.diff;});
-  const atrasados = todos.filter(function(v){return v.diff<0&&v.diff>=-15;}).sort(function(a,b){return a.diff-b.diff;});
-  const hoje_lst  = todos.filter(function(v){return v.diff===0;});
-  const proximas  = todos.filter(function(v){return v.diff>0;}).sort(function(a,b){return a.diff-b.diff;});
-
-  function mkRow(v, stripeClr, diasBg, diasClr) {
-    const diasTxt     = v.diff===0 ? 'Vence hoje' : v.diff > 0 ? 'em '+v.diff+'d' : Math.abs(v.diff)+'d atrás';
-    const respExplicito = v.at.responsavelId;
-    const resp          = resolverResponsavel(v.at, v.pb, v.cliente);
-    const respCon       = getConsultores().find(function(x){ return x.id === resp; });
-    const respNome      = respCon ? respCon.nome : (resp || '—');
-    const respSufixo    = !respExplicito && v.pb.donoId && v.pb.donoId === resp
-      ? ' <span style="font-size:9px;color:var(--text3)">(pb)</span>'
-      : !respExplicito && !v.pb.donoId
-      ? ' <span style="font-size:9px;color:var(--text3)">(cliente)</span>'
-      : '';
-    const nome        = v.cliente.id;
-    const clienteLink = '<a href="#cliente/' + encodeURIComponent(v.clienteId) + '" ' +
-      'onclick="event.stopPropagation()" ' +
-      'style="color:var(--primary);font-weight:600;text-decoration:none">' + nome + '</a>';
-    const pauseBadge  = (v.pb.status === 'pausado')
-      ? '<span style="background:#FFF3EE;color:var(--primary);font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:4px">⏸ Pausado</span>'
-      : '';
-    return '<div class="venc-row" style="cursor:pointer" onclick="navegarParaAtividades(\''+v.clienteId+'\',\''+v.pbId+'\')">' +
-      '<div class="venc-stripe" style="background:'+stripeClr+'"></div>' +
-      '<div class="venc-avatar" style="background:'+avatarGradiente(nome)+'">'+nome[0].toUpperCase()+'</div>' +
-      '<div class="venc-info">' +
-        '<div class="venc-nome">'+(v.at.nome||'—')+'</div>' +
-        '<div class="venc-meta">'+clienteLink+' · '+(v.pb.nome||'Playbook')+pauseBadge+' · <b style="color:var(--text2)">'+respNome+'</b>'+respSufixo+'</div>' +
-      '</div>' +
-      '<div class="venc-right">' +
-        '<span class="venc-dias" style="background:'+diasBg+';color:'+diasClr+'">'+diasTxt+'</span>' +
-        '<button class="venc-btn-ok" onclick="concluirVenc(event,\''+v.clienteId+'\',\''+v.pbId+'\',\''+v.atId+'\')">✓ Concluir</button>' +
-        '<div style="position:relative;display:inline-block">' +
-          '<button class="venc-btn-ir" onclick="toggleVencMenu(event,\''+v.clienteId+'\',\''+v.pbId+'\',\''+v.atId+'\',\''+encodeURIComponent(v.at.dataLimite||'')+'\',\''+resp+'\')">···</button>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  }
-
-  function renderGroup(items, label, stripeClr, dotClr, diasBg, diasClr) {
-    if (!items.length) return '';
-    return '<div class="venc-group">' +
-      '<div class="venc-group-label"><span class="venc-dot" style="background:'+dotClr+'"></span>'+label+' ('+items.length+')</div>' +
-      items.map(function(v){return mkRow(v,stripeClr,diasBg,diasClr);}).join('') +
-      '</div>';
-  }
-
-  const noResults = !todos.length
-    ? '<div style="padding:32px;text-align:center;color:var(--text3);font-size:13px">Nenhum vencimento para este consultor.</div>' : '';
-
-  sec.innerHTML = '<div class="content-inner">' +
-    '<div class="page-header"><h1 class="page-title">Vencimentos</h1>' +
-    '<p class="page-subtitle">Atividades com prazo vencido ou vencendo hoje</p></div>' +
-    '<div class="venc-wrap">' + filterBar + noResults +
-      renderGroup(criticos,  'Crítico',        'var(--red)',    'var(--red)',    '#FFF5F5', 'var(--red)') +
-      renderGroup(atrasados, 'Atrasado',       'var(--primary)','var(--primary)','#FFF3EE', '#b7430e') +
-      renderGroup(hoje_lst,  'Vence hoje',     'var(--yellow)', 'var(--yellow)', '#FFFFF0', '#92701e') +
-      renderGroup(proximas,  'Próximas',       'var(--green)',  'var(--green)',  '#F0FFF4', '#16803c') +
-    '</div></div>';
+function mkKpiCard(label, value, color, sub) {
+  return '<div class="painel-kpi-card">' +
+    '<div class="painel-kpi-label">' + label + '</div>' +
+    '<div class="painel-kpi-value" style="color:' + color + '">' + value + '</div>' +
+    '<div class="painel-kpi-sub">' + sub + '</div>' +
+  '</div>';
 }
 
 function toggleVencMenu(evt, clienteId, pbId, atId, dlEnc, respId) {
