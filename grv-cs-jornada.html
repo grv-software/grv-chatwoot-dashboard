@@ -3326,6 +3326,66 @@ let _venc_filter_produto = 'todos';
 let _venc_filter_busca      = '';
 let _venc_filter_horizonte  = 'vencidas';
 
+let _venc_tab   = 'resolver'; // 'resolver' | 'planejar' | 'cliente'
+let _venc_fila  = 'minha';   // 'minha' | 'time'
+let _venc_chips = ['vencidas']; // active chips for 'Por cliente' view
+
+function setVencTab(tab) {
+  _venc_tab = tab;
+  var hash = location.hash.replace('#','');
+  if (hash === 'vencimentos') {
+    renderVencimentos();
+  } else {
+    navigate('vencimentos');
+  }
+  ['resolver','planejar','cliente'].forEach(function(t) {
+    var el = document.getElementById('drop-venc-' + t);
+    if (el) el.classList.toggle('active', t === tab);
+  });
+}
+
+function getKpiVencimentos() {
+  var ativo = getConsultorAtivo();
+  var todos30 = getTodasVencidas(30);
+  var minha = todos30.filter(function(v) {
+    return resolverResponsavel(v.at, v.pb, v.cliente) === ativo;
+  });
+  var criticas = minha.filter(function(v) { return v.diff < -3; }).length;
+  var hoje     = minha.filter(function(v) { return v.diff === 0; }).length;
+  var semana   = todos30.filter(function(v) { return v.diff > 0 && v.diff <= 7; }).length;
+  var totalAtivas = 0;
+  var emDia = 0;
+  var agora = new Date(); agora.setHours(0,0,0,0);
+  getClientes().forEach(function(c) {
+    (c.ativPlaybooks || []).forEach(function(pb) {
+      if ((pb.status || 'ativo') === 'cancelado') return;
+      (pb.atividades || []).forEach(function(at) {
+        if (at.status === 'concluida') return;
+        if (!at.dataLimite) return;
+        totalAtivas++;
+        var dl = new Date(at.dataLimite + 'T00:00:00');
+        if (dl >= agora) emDia++;
+      });
+    });
+  });
+  var sla = totalAtivas > 0 ? Math.round(emDia / totalAtivas * 100) : 100;
+  return { criticas: criticas, hoje: hoje, semana: semana, sla: sla };
+}
+
+function updateVencDropdownBadges() {
+  var ativo = getConsultorAtivo();
+  var vencidas = getTodasVencidas(0).filter(function(v) {
+    return resolverResponsavel(v.at, v.pb, v.cliente) === ativo;
+  }).length;
+  var proximos7 = getTodasVencidas(7).filter(function(v) {
+    return v.diff > 0 && resolverResponsavel(v.at, v.pb, v.cliente) === ativo;
+  }).length;
+  var bR = document.getElementById('drop-venc-resolver-badge');
+  var bP = document.getElementById('drop-venc-planejar-badge');
+  if (bR) { bR.textContent = vencidas || ''; bR.style.display = vencidas ? '' : 'none'; }
+  if (bP) { bP.textContent = proximos7 || ''; bP.style.display = proximos7 ? '' : 'none'; }
+}
+
 function renderVencimentos() {
   const sec = document.getElementById('sec-vencimentos');
   if (!sec) return;
