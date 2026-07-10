@@ -717,6 +717,18 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .painel-kpi-label{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
 .painel-kpi-value{font-size:26px;font-weight:700;line-height:1.1;margin-top:4px;font-variant-numeric:tabular-nums}
 .painel-kpi-sub{font-size:11px;color:var(--text3);margin-top:3px}
+/* ── KPI CARD — padrão unificado ── */
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow-1)}
+.kpi-card .kpi-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text4);margin-bottom:8px}
+.kpi-card .kpi-value{font-size:32px;font-weight:800;line-height:1;letter-spacing:-1.2px;font-variant-numeric:tabular-nums}
+.kpi-card .kpi-sublabel{font-size:11px;color:var(--text3);margin-top:3px}
+.kpi-card.v-red    .kpi-value{color:var(--red)}
+.kpi-card.v-amber  .kpi-value{color:var(--yellow)}
+.kpi-card.v-orange .kpi-value{color:var(--primary)}
+.kpi-card.v-green  .kpi-value{color:var(--green)}
+.kpi-card.v-blue   .kpi-value{color:var(--blue)}
+@media(max-width:640px){.kpi-strip{grid-template-columns:repeat(2,1fr)}}
 .painel-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
 .painel-toggle-group{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden}
 .painel-toggle-btn{background:none;border:none;padding:6px 14px;font-size:13px;cursor:pointer;color:var(--text2);transition:background .15s,color .15s;font-family:inherit}
@@ -3396,7 +3408,7 @@ function renderVencimentos() {
   var kpi = getKpiVencimentos();
   updateVencDropdownBadges();
 
-  var kpiHtml = '<div class="painel-kpi-strip">' +
+  var kpiHtml = '<div class="kpi-strip">' +
     mkKpiCard('Críticas', kpi.criticas, '#dc2626', 'Risco de churn') +
     mkKpiCard('Vencem hoje', kpi.hoje, '#eab308', 'Fila do dia') +
     mkKpiCard('Esta semana', kpi.semana, 'var(--primary)', 'Próximos 7 dias') +
@@ -3440,11 +3452,18 @@ function renderVencimentos() {
   });
 }
 
-function mkKpiCard(label, value, color, sub) {
-  return '<div class="painel-kpi-card">' +
-    '<div class="painel-kpi-label">' + label + '</div>' +
-    '<div class="painel-kpi-value" style="color:' + color + '">' + value + '</div>' +
-    '<div class="painel-kpi-sub">' + sub + '</div>' +
+function mkKpiCard(label, value, colorVar, sub) {
+  var variantMap = {
+    '#dc2626':'v-red','var(--red)':'v-red',
+    '#eab308':'v-amber','var(--yellow)':'v-amber',
+    'var(--primary)':'v-orange',
+    '#22c55e':'v-green','var(--green)':'v-green'
+  };
+  var cls = variantMap[colorVar] || 'v-orange';
+  return '<div class="kpi-card ' + cls + '">' +
+    '<div class="kpi-label">' + label + '</div>' +
+    '<div class="kpi-value">' + value + '</div>' +
+    '<div class="kpi-sublabel">' + sub + '</div>' +
   '</div>';
 }
 
