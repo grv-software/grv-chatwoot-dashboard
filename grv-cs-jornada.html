@@ -607,7 +607,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .kanban-col.drag-over{border-color:var(--primary) !important;background:rgba(224,90,30,.04)}
 .kanban-col-hdr{padding:10px 12px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .kanban-col-name{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--text2)}
-.kanban-col-name .kc-emoji{font-size:14px}
+.kanban-col-name .kc-icon{width:14px;height:14px;flex-shrink:0;opacity:.8}
 .kanban-col-ct{background:var(--primary-light);color:var(--primary);font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px}
 .kanban-cards{padding:8px;display:flex;flex-direction:column;gap:8px;min-height:60px}
 
@@ -634,7 +634,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .lista-section-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none;transition:background .1s}
 .lista-section-hdr:hover{background:var(--bg)}
 .lista-section-hdr-left{display:flex;align-items:center;gap:10px}
-.lista-section-emoji{font-size:16px}
+.lista-section-icon{width:16px;height:16px;flex-shrink:0;color:var(--text3)}
 .lista-section-name{font-size:14px;font-weight:700;color:var(--text)}
 .lista-section-ct{background:var(--primary-light);color:var(--primary);font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px}
 .lista-chev{font-size:11px;color:var(--text3);transition:transform .2s}
@@ -1036,13 +1036,34 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 const ETAPAS = ['1ª Reunião','Engajamento','Evolução','Conclusão','Pausado','Interrompido','Cancelado'];
 
 const ETAPA_META = {
-  '1ª Reunião':  {emoji:'🤝', color:'blue'},
-  'Engajamento': {emoji:'⚡', color:'purple'},
-  'Evolução':    {emoji:'📈', color:'green'},
-  'Conclusão':   {emoji:'🏁', color:'yellow'},
-  'Pausado':     {emoji:'⏸️', color:'gray'},
-  'Interrompido':{emoji:'🚫', color:'red'},
-  'Cancelado':   {emoji:'❌', color:'black'},
+  '1ª Reunião':  {
+    icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    color:'blue'
+  },
+  'Engajamento': {
+    icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
+    color:'purple'
+  },
+  'Evolução':    {
+    icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
+    color:'green'
+  },
+  'Conclusão':   {
+    icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>',
+    color:'yellow'
+  },
+  'Pausado':     {
+    icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>',
+    color:'gray'
+  },
+  'Interrompido':{
+    icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+    color:'red'
+  },
+  'Cancelado':   {
+    icon:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>',
+    color:'black'
+  },
 };
 
 const STATUS_COLOR = {
@@ -3078,8 +3099,8 @@ function getDiasNaEtapa(c) {
 }
 
 function getEtapaBadge(etapa) {
-  const m = ETAPA_META[etapa] || {emoji:'', color:'gray'};
-  return `<span class="badge badge-${m.color}">${m.emoji} ${etapa}</span>`;
+  const m = ETAPA_META[etapa] || {icon:'', color:'gray'};
+  return `<span class="badge badge-${m.color}" style="display:inline-flex;align-items:center;gap:4px">${m.icon}${etapa}</span>`;
 }
 
 function getStatusBadge(status) {
@@ -4463,7 +4484,7 @@ function renderJornadaAccordion(clientes, consultores) {
       <div class="lista-section">
         <div class="lista-section-hdr" onclick="toggleCarteiraJornada('${etapa}')">
           <div class="lista-section-hdr-left">
-            <span class="lista-section-emoji">${m.emoji}</span>
+            <span class="lista-section-icon">${m.icon}</span>
             <span class="lista-section-name">${etapa}</span>
             <span class="lista-section-ct">${count}</span>
           </div>
@@ -4529,7 +4550,7 @@ function renderKanbanBoard(clientes, consultores, enableDnD) {
     return `
       <div class="kanban-col" ${colAttrs}>
         <div class="kanban-col-hdr">
-          <div class="kanban-col-name"><span class="kc-emoji">${m.emoji}</span><span>${etapa}</span></div>
+          <div class="kanban-col-name"><span class="kc-icon">${m.icon}</span><span>${etapa}</span></div>
           <span class="kanban-col-ct">${cls.length}</span>
         </div>
         <div class="kanban-cards">${cards}</div>
@@ -5049,7 +5070,7 @@ function renderImplantacao() {
       </select>
       <select onchange="setProjEtapa(this.value)">
         <option value="">Todas etapas</option>
-        ${ETAPAS.map(function(e){ return '<option value="'+e+'"'+(e===_proj_etapa?' selected':'')+'>'+ETAPA_META[e].emoji+' '+e+'</option>'; }).join('')}
+        ${ETAPAS.map(function(e){ return '<option value="'+e+'"'+(e===_proj_etapa?' selected':'')+'>'+e+'</option>'; }).join('')}
       </select>
       <select onchange="setProjStatus(this.value)">
         <option value="">Todos status</option>
@@ -5253,7 +5274,7 @@ function renderPortfolio() {
       ${_proj_kpi_filter ? kpiPill : `
       <select onchange="setProjEtapa(this.value)">
         <option value="">Todas etapas</option>
-        ${ETAPAS.map(function(e){ return '<option value="'+e+'"'+(e===_proj_etapa?' selected':'')+'>'+ETAPA_META[e].emoji+' '+e+'</option>'; }).join('')}
+        ${ETAPAS.map(function(e){ return '<option value="'+e+'"'+(e===_proj_etapa?' selected':'')+'>'+e+'</option>'; }).join('')}
       </select>
       <select onchange="setProjStatus(this.value)">
         <option value="">Todos status</option>
@@ -6629,7 +6650,7 @@ function openModal(clienteId, dragDestEtapa) {
   const sel = document.getElementById('modal-etapa-sel');
 
   sel.innerHTML = ETAPAS.filter(e => e !== c.etapa)
-    .map(e => `<option value="${e}"${e===dragDestEtapa?' selected':''}>${ETAPA_META[e].emoji} ${e}</option>`)
+    .map(e => `<option value="${e}"${e===dragDestEtapa?' selected':''}>${e}</option>`)
     .join('');
   sel.disabled = !!dragDestEtapa;
 
@@ -6756,7 +6777,7 @@ function renderCriar() {
             <div class="form-group">
               <label>Etapa inicial</label>
               <select id="f-etapa">
-                ${ETAPAS.map(e => `<option value="${e}">${ETAPA_META[e].emoji} ${e}</option>`).join('')}
+                ${ETAPAS.map(e => `<option value="${e}">${e}</option>`).join('')}
               </select>
             </div>
             <div class="form-group">
@@ -6821,7 +6842,7 @@ function renderCriar() {
           <div class="form-group">
             <label>Etapa inicial</label>
             <select id="f-etapa">
-              ${ETAPAS.map(e => `<option value="${e}">${ETAPA_META[e].emoji} ${e}</option>`).join('')}
+              ${ETAPAS.map(e => `<option value="${e}">${e}</option>`).join('')}
             </select>
           </div>
           <div class="form-group">
