@@ -3438,6 +3438,121 @@ function mkKpiCard(label, value, color, sub) {
   '</div>';
 }
 
+function renderVencAResolver() {
+  var consultor = _venc_fila === 'minha' ? getConsultorAtivo() : 'todos';
+  var todos = getTodasVencidas(0);
+  if (consultor !== 'todos') {
+    todos = todos.filter(function(v) {
+      return resolverResponsavel(v.at, v.pb, v.cliente) === consultor;
+    });
+  }
+
+  if (!todos.length) {
+    return '<div class="venc-empty"><div>✅</div>' +
+      '<div style="font-weight:700;margin-top:8px">Tudo em dia!</div>' +
+      '<div style="font-size:13px;color:var(--text3)">Nenhuma atividade vencida na sua fila.</div></div>';
+  }
+
+  var criticos  = todos.filter(function(v) { return v.diff < -3; });
+  var atrasados = todos.filter(function(v) { return v.diff < 0 && v.diff >= -3; });
+  var hojeList  = todos.filter(function(v) { return v.diff === 0; });
+
+  function mkResolverRow(v) {
+    var absDiff = Math.abs(v.diff);
+    var diasTxt = v.diff < 0
+      ? 'Venceu há ' + absDiff + (absDiff === 1 ? ' dia' : ' dias')
+      : 'Hoje';
+    var stripeClr = v.diff < -3 ? '#dc2626' : v.diff < 0 ? '#eab308' : 'var(--primary)';
+    var dueCls = v.diff < -3 ? 'painel-due-critico' : v.diff < 0 ? 'painel-due-atrasado' : 'painel-due-hoje';
+    var tipoIcons = { reuniao:'📞', treinamento:'🎓', relatorio:'📊', qbr:'📋', pesquisa:'⭐', followup:'📩' };
+    var icon = tipoIcons[v.at.tipo || ''] || '📋';
+    var resp = resolverResponsavel(v.at, v.pb, v.cliente);
+    var respCon = getConsultores().find(function(x) { return x.id === resp; });
+    var respNome = respCon ? respCon.nome : (resp || '—');
+    var nomeAt = v.at.nome || v.at.titulo || 'Atividade';
+    var clienteLink = '<a href="#cliente/' + encodeURIComponent(v.clienteId) + '" ' +
+      'onclick="event.stopPropagation()" ' +
+      'style="color:var(--primary);font-weight:600;text-decoration:none">' + v.clienteId + '</a>';
+    var rowId = 'vr_' + v.clienteId.replace(/[^a-zA-Z0-9]/g,'_') + '_' + v.atId;
+    return '' +
+      '<div class="venc-row painel-resolver-row" id="' + rowId + '">' +
+        '<div class="venc-stripe" style="background:' + stripeClr + '"></div>' +
+        '<span style="font-size:15px;flex-shrink:0">' + icon + '</span>' +
+        '<div class="venc-info">' +
+          '<div class="venc-nome">' + nomeAt + ' — ' + clienteLink + '</div>' +
+          '<div class="venc-meta">' + respNome + ' · ' + (v.cliente.segmento || '') + '</div>' +
+        '</div>' +
+        '<span class="painel-due ' + dueCls + '">' + diasTxt + '</span>' +
+        '<button class="venc-btn-ok" ' +
+          'onclick="abrirNotaVenc(\'' + rowId + '\',\'' + v.clienteId + '\',\'' + v.pbId + '\',\'' + v.atId + '\')">✓ Concluir</button>' +
+      '</div>' +
+      '<div class="painel-note-area" id="nota_' + rowId + '">' +
+        '<textarea class="painel-note-input" placeholder="Nota rápida (opcional) — salva no registro do cliente..."></textarea>' +
+        '<button class="painel-note-save" ' +
+          'onclick="concluirVencComNota(event,\'' + v.clienteId + '\',\'' + v.pbId + '\',\'' + v.atId + '\',\'nota_' + rowId + '\')">Salvar</button>' +
+        '<button class="painel-note-cancel" ' +
+          'onclick="fecharNotaVenc(\'nota_' + rowId + '\')">Cancelar</button>' +
+      '</div>';
+  }
+
+  function mkResolverGroup(items, label, dotClr) {
+    if (!items.length) return '';
+    return '<div class="venc-group">' +
+      '<div class="venc-group-label">' +
+        '<span class="venc-dot" style="background:' + dotClr + '"></span>' +
+        label + ' (' + items.length + ')' +
+      '</div>' +
+      items.map(mkResolverRow).join('') +
+    '</div>';
+  }
+
+  return mkResolverGroup(criticos, 'Crítico — vencido há 4+ dias', '#dc2626') +
+         mkResolverGroup(atrasados, 'Atrasado — vencido há 1–3 dias', '#eab308') +
+         mkResolverGroup(hojeList, 'Vence hoje', 'var(--primary)');
+}
+
+function abrirNotaVenc(rowId, clienteId, pbId, atId) {
+  var nota = document.getElementById('nota_' + rowId);
+  if (!nota) return;
+  nota.classList.toggle('open');
+  if (nota.classList.contains('open')) {
+    var inp = nota.querySelector('.painel-note-input');
+    if (inp) inp.focus();
+  }
+}
+
+function fecharNotaVenc(notaId) {
+  var nota = document.getElementById(notaId);
+  if (nota) nota.classList.remove('open');
+}
+
+function concluirVencComNota(evt, clienteId, pbId, atId, notaId) {
+  evt.stopPropagation();
+  var notaEl = document.getElementById(notaId);
+  var notaTxt = '';
+  if (notaEl) {
+    var inp = notaEl.querySelector('.painel-note-input');
+    if (inp) notaTxt = inp.value.trim();
+  }
+  var c  = getCliente(clienteId);
+  var pb = (c && c.ativPlaybooks || []).find(function(p) { return p.id === pbId; });
+  var at = (pb && pb.atividades || []).find(function(a) { return a.id === atId; });
+  if (!at || at.status === 'concluida') return;
+  at.status = 'concluida';
+  at.dataConclusao = new Date().toISOString();
+  if (!at.registros) at.registros = [];
+  var ativo = getConsultorAtivo();
+  var autor = (getConsultores().find(function(x) { return x.id === ativo; }) || {}).nome || ativo;
+  var textoReg = autor + ' marcou como Concluída (via Painel de Atividades)';
+  if (notaTxt) textoReg += ': ' + notaTxt;
+  at.registros.unshift({ id: 'reg_' + Date.now(), tipo: 'evento', texto: textoReg, data: new Date().toISOString() });
+  saveCliente(c);
+  updateVencBadge();
+  renderVencimentos();
+  showToast('Atividade concluída!', 3000);
+  checkImplantacaoConcluida(clienteId);
+}
+
 function toggleVencMenu(evt, clienteId, pbId, atId, dlEnc, respId) {
   evt.stopPropagation();
   document.querySelectorAll('.venc-popup').forEach(function(el){el.remove();});
