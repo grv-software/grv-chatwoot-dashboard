@@ -5806,6 +5806,28 @@ function renderAbaAtividades(c) {
   const pbs  = c.ativPlaybooks || [];
   const _hoje = new Date(); _hoje.setHours(0,0,0,0);
 
+  // Contagem consolidada de atrasadas e vencendo hoje
+  const _hojStr = new Date().toISOString().slice(0,10);
+  var _totalAtrasadas = 0, _totalHoje = 0;
+  (c.ativPlaybooks || []).forEach(function(pb) {
+    if (pb.status === 'cancelado' || pb.encerrado) return;
+    (pb.atividades || []).forEach(function(at) {
+      if (at.status === 'concluida') return;
+      if (at.status === 'atrasada') _totalAtrasadas++;
+      else if (at.dataLimite && at.dataLimite.slice(0,10) === _hojStr) _totalHoje++;
+    });
+  });
+  const _alertBarHtml = (_totalAtrasadas > 0 || _totalHoje > 0)
+    ? '<div class="alert-bar">'
+        + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+        + '<div class="alert-bar-text">'
+          + (_totalAtrasadas > 0 ? _totalAtrasadas + ' atividade' + (_totalAtrasadas > 1 ? 's' : '') + ' atrasada' + (_totalAtrasadas > 1 ? 's' : '') : '')
+          + (_totalAtrasadas > 0 && _totalHoje > 0 ? '<span class="alert-bar-sub"> · </span>' : '')
+          + (_totalHoje > 0 ? '<span class="alert-bar-sub">' + _totalHoje + ' vence' + (_totalHoje > 1 ? 'm' : '') + ' hoje</span>' : '')
+        + '</div>'
+      + '</div>'
+    : '';
+
   // Garante seleção válida
   if (!_pb_sel_id || !pbs.find(function(p){return p.id===_pb_sel_id;})) {
     _pb_sel_id = pbs.length > 0 ? pbs[0].id : null;
@@ -5842,9 +5864,13 @@ function renderAbaAtividades(c) {
             <button class="ov-dropdown-item danger" onclick="closePbMenu();excluirPlaybook('${pb.id}','${c.id}')">🗑 Excluir</button>
           </div>
         </div>` : '';
+    var _pbAtrasadas = (pb.atividades || []).filter(function(at){ return at.status === 'atrasada'; }).length;
+    var _pbAlertBadge = _pbAtrasadas > 0
+      ? '<span class="pb-badge-alert">' + _pbAtrasadas + ' atraso</span>'
+      : '';
     return `<div class="at-pb-card${isSel?' sel':''}" style="${cardBorderStyle};${cardOpacity}" onclick="selecionarPb('${pb.id}','${c.id}')">
       <div style="display:flex;align-items:flex-start;gap:4px;margin-bottom:2px">
-        <div class="at-pb-card-name" style="flex:1">${pb.nome}${pbStatusBadge}</div>
+        <div class="at-pb-card-name" style="flex:1">${pb.nome}${pbStatusBadge}${_pbAlertBadge}</div>
         ${actBtns}
       </div>
       <div class="at-pb-card-meta">${total} atividade${total!==1?'s':''} · ${done} concluída${done!==1?'s':''}${venc>0?' · <span style="color:var(--red);font-weight:700">'+venc+' vencida'+(venc>1?'s':'')+'</span>':''}</div>
@@ -5950,7 +5976,7 @@ function renderAbaAtividades(c) {
       ${!ativs.length && !addFormHtml ? '<div class="at-empty" style="height:200px"><div style="font-size:28px">📋</div><div>Nenhuma atividade.<br>Adicione a primeira acima.</div></div>' : ''}`;
   }
 
-  return `<div class="at-cols">
+  return _alertBarHtml + `<div class="at-cols">
     <div class="at-left-col">${leftHtml}</div>
     <div class="at-right-col">${rightHtml}</div>
   </div>`;
