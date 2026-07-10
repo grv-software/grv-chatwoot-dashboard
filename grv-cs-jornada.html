@@ -6574,22 +6574,51 @@ function addOvAnotacao() {
 }
 
 function renderAbaNotas(c) {
-  const regsHtml = c.registros.length
-    ? c.registros.map(r => `
-      <div class="at-reg-item">
-        <div class="at-reg-meta">${r.autor} · ${fmtDateTime(r.data)}</div>
-        <div class="at-reg-text">${r.texto}</div>
-      </div>`).join('')
-    : `<div style="color:var(--text3);font-size:13px;padding:16px 0">Nenhuma nota ainda.</div>`;
+  var tipoClasses = { alerta:'tipo-alerta', decisao:'tipo-decisao', observacao:'tipo-observacao' };
+  var tipoLabels  = { alerta:'Alerta', decisao:'Decisão', observacao:'Observação' };
 
-  return `<div class="card-block">
-    <div class="section-title">Notas</div>
-    <div id="regs-${c.id}">${regsHtml}</div>
-    <div class="reg-form at-write">
-      <textarea id="reg-input-${c.id}" placeholder="Adicionar anotação..." style="width:100%;min-height:90px;padding:10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;resize:vertical;box-sizing:border-box"></textarea>
-      <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="addRegistro('${c.id}')">Salvar nota</button>
-    </div>
-  </div>`;
+  var regsHtml = c.registros && c.registros.length
+    ? c.registros.slice().reverse().map(function(r) {
+        var t = r.tipo || '';
+        var cls = tipoClasses[t] || '';
+        var badge = cls
+          ? '<span class="nota-tipo nota-tipo-' + t + '">' + (tipoLabels[t] || t) + '</span>'
+          : '';
+        return '<div class="nota-card ' + cls + '">'
+          + '<div class="nota-top">'
+            + badge
+            + '<div class="nota-meta"><span class="nota-autor">' + r.autor + '</span><span class="nota-data">' + fmtDateTime(r.data) + '</span></div>'
+          + '</div>'
+          + '<div class="nota-texto">' + r.texto + '</div>'
+        + '</div>';
+      }).join('')
+    : '<div style="color:var(--text3);font-size:13px;padding:16px 0">Nenhuma nota registrada ainda. <a href="#" onclick="document.getElementById(\'nota-form-open-' + c.id + '\').click();return false" style="color:var(--primary);font-weight:600">Adicionar a primeira.</a></div>';
+
+  return '<div style="margin-bottom:16px;display:flex;align-items:center;gap:8px">'
+    + '<div style="flex:1;font-size:15px;font-weight:700;color:var(--text)">Notas</div>'
+    + '<button id="nota-form-open-' + c.id + '" class="nota-add-btn" onclick="document.getElementById(\'nota-form-wrap-' + c.id + '\').style.display=\'block\';this.style.display=\'none\'">'
+      + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+      + ' Nova nota'
+    + '</button>'
+  + '</div>'
+  + '<div id="nota-form-wrap-' + c.id + '" style="display:none;margin-bottom:12px">'
+    + '<div class="card-block">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'
+        + '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text4)">Tipo</div>'
+        + '<select id="nota-tipo-' + c.id + '" class="nota-tipo-select">'
+          + '<option value="observacao">Observação</option>'
+          + '<option value="alerta">Alerta</option>'
+          + '<option value="decisao">Decisão</option>'
+        + '</select>'
+      + '</div>'
+      + '<textarea id="reg-input-' + c.id + '" placeholder="Escreva sua nota aqui..." style="width:100%;min-height:80px;padding:10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;resize:vertical;box-sizing:border-box;font-family:inherit;line-height:1.5"></textarea>'
+      + '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">'
+        + '<button onclick="document.getElementById(\'nota-form-wrap-' + c.id + '\').style.display=\'none\';document.getElementById(\'nota-form-open-' + c.id + '\').style.display=\'\'" style="font-size:12px;font-weight:600;color:var(--text3);background:transparent;border:none;padding:6px 10px;cursor:pointer;border-radius:6px">Cancelar</button>'
+        + '<button class="btn btn-primary btn-sm" onclick="addRegistro(\'' + c.id + '\')">Salvar nota</button>'
+      + '</div>'
+    + '</div>'
+  + '</div>'
+  + '<div id="regs-' + c.id + '">' + regsHtml + '</div>';
 }
 
 function toggleFase(idx) {
@@ -6695,7 +6724,8 @@ function addRegistro(clienteId) {
   const ativo = getConsultorAtivo();
   const nome  = getConsultores().find(x => x.id === ativo)?.nome || ativo;
 
-  c.registros.unshift({id:'r'+Date.now(), autor:nome, data:new Date().toISOString(), texto});
+  var tipoEl = document.getElementById('nota-tipo-' + clienteId);
+  c.registros.unshift({id:'r'+Date.now(), autor:nome, data:new Date().toISOString(), texto, tipo: tipoEl ? tipoEl.value : 'observacao'});
   saveCliente(c);
   ta.value = '';
 
