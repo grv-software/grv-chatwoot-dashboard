@@ -11,14 +11,14 @@
   --primary-light: rgba(224,90,30,.10);
   --sidebar-bg: #ffffff;
   --sidebar-text: #718096;
-  --bg: #f8f9fb;
+  --bg: #F5F3F0;
   --surface: #ffffff;
-  --border: #e8ecf0;
-  --border-2: #f0f2f5;
-  --text: #1a202c;
-  --text2: #4a5568;
-  --text3: #718096;
-  --text4: #a0aec0;
+  --border: #E2DDD7;
+  --border-2: #EDE9E4;
+  --text: #1A1917;
+  --text2: #534E4A;
+  --text3: #8A847F;
+  --text4: #B5AFA9;
   --green: #38a169; --green-bg: rgba(56,161,105,.1);
   --red: #e53e3e;   --red-bg: rgba(229,62,62,.1);
   --yellow: #d69e2e;--yellow-bg: rgba(214,158,46,.1);
@@ -29,9 +29,12 @@
   --b-red-bg:   #FFF5F5;
   --b-orange-bg:#FFF3EE;
   --b-blue-bg:  #EBF8FF;
-  --radius: 9px;
-  --radius-sm: 7px;
-  --shadow: 0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.05);
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow:   0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-1: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-2: 0 4px 14px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+  --shadow-3: 0 12px 32px rgba(0,0,0,.12), 0 4px 8px rgba(0,0,0,.06);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(--bg);color:var(--text);display:flex;flex-direction:column;min-height:100vh}
@@ -52,7 +55,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .nav-item:hover .nav-icon{opacity:.75}
 .nav-group{position:relative;height:100%;display:flex;align-items:center}
 .nav-group:hover .nav-dropdown{display:flex}
-.nav-dropdown{display:none;position:absolute;top:100%;left:0;background:var(--sidebar-bg);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 4px 16px rgba(0,0,0,.12);padding:6px 0;flex-direction:column;min-width:200px;z-index:300}
+.nav-dropdown{display:none;position:absolute;top:100%;left:0;background:var(--sidebar-bg);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-2);padding:6px 0;flex-direction:column;min-width:200px;z-index:300}
 .nav-drop-header{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text4);padding:6px 16px 4px}
 .nav-drop-divider{height:1px;background:var(--border);margin:4px 0}
 .nav-drop-item{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;cursor:pointer;font-size:12.5px;color:var(--text2);transition:background .1s;border-left:2px solid transparent;white-space:nowrap}
@@ -422,7 +425,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 /* ── MODAL ───────────────────────────────────────────────── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:999}
 .modal-overlay.hidden{display:none}
-.modal-box{background:var(--surface);border-radius:10px;padding:24px;width:440px;max-width:95vw;box-shadow:0 8px 30px rgba(0,0,0,.2)}
+.modal-box{background:var(--surface);border-radius:10px;padding:24px;width:440px;max-width:95vw;box-shadow:var(--shadow-3)}
 .modal-box h3{font-size:16px;font-weight:700;margin-bottom:16px}
 .modal-label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;margin-top:12px}
 .modal-box select,.modal-box textarea{width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:13px;font-family:inherit;color:var(--text);outline:none}
@@ -446,7 +449,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .proj-ac{position:relative;width:42px;text-align:right;padding:8px 10px !important}
 .proj-dot{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);font-size:16px;letter-spacing:.5px;transition:border-color .12s,color .12s,background .12s}
 .proj-dot:hover,.proj-dot.open{border-color:var(--primary);color:var(--primary);background:rgba(224,90,30,.07)}
-.proj-pop{position:absolute;right:0;top:calc(100% + 4px);width:200px;background:#fff;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.13),0 2px 8px rgba(0,0,0,.07);border:1px solid var(--border);z-index:400;overflow:hidden;display:none}
+.proj-pop{position:absolute;right:0;top:calc(100% + 4px);width:200px;background:#fff;border-radius:10px;box-shadow:var(--shadow-2);border:1px solid var(--border);z-index:400;overflow:hidden;display:none}
 .proj-pop.vis{display:block}
 .proj-pop-head{padding:8px 14px 7px;border-bottom:1px solid var(--border);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .proj-pop-item{display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:12.5px;color:var(--text1);cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s}
@@ -505,7 +508,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 /* ── ACTIVITY OVERLAY ────────────────────────────────────── */
 .ov-backdrop{position:fixed;inset:0;background:rgba(15,20,30,.35);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}
 .ov-backdrop.open{opacity:1;pointer-events:all}
-.ov-panel{position:fixed;top:0;right:0;bottom:0;width:420px;background:var(--surface);border-left:1px solid var(--border);z-index:201;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s cubic-bezier(.4,0,.2,1);box-shadow:-4px 0 24px rgba(0,0,0,.08)}
+.ov-panel{position:fixed;top:0;right:0;bottom:0;width:420px;background:var(--surface);border-left:1px solid var(--border);z-index:201;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-2)}
 .ov-panel.open{transform:translateX(0)}
 .ov-hd{padding:14px 16px 0;border-bottom:1px solid var(--border-2);flex-shrink:0}
 .ov-hd-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
@@ -629,7 +632,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 /* ── LISTA ACCORDION (Carteira Jornada) ──────────────────── */
 .lista-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px}
 .lista-section-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none;transition:background .1s}
-.lista-section-hdr:hover{background:#f9fafb}
+.lista-section-hdr:hover{background:var(--bg)}
 .lista-section-hdr-left{display:flex;align-items:center;gap:10px}
 .lista-section-emoji{font-size:16px}
 .lista-section-name{font-size:14px;font-weight:700;color:var(--text)}
