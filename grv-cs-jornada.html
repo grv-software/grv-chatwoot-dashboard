@@ -621,7 +621,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .kcard-proj{font-size:11px;color:var(--primary);font-weight:600;margin-top:1px;margin-bottom:8px}
 .kcard-divider{border:none;border-top:1px solid var(--border);margin:8px 0}
 .kcard-prog-row{display:flex;align-items:center;gap:6px;margin-top:6px}
-.kcard-prog-wrap{flex:1;background:#edf2f7;border-radius:4px;height:5px;overflow:hidden}
+.kcard-prog-wrap{flex:1;background:var(--border-2);border-radius:4px;height:5px;overflow:hidden}
 .kcard-prog-fill{height:100%;border-radius:4px;background:var(--primary)}
 .kcard-pct{font-size:10px;color:var(--text3);white-space:nowrap}
 .kcard-meta{margin-top:8px;display:flex;flex-direction:column;gap:2px}
@@ -4521,6 +4521,7 @@ function renderKanbanBoard(clientes, consultores, enableDnD) {
             ? `draggable="true" ondragstart="dragStart(event,'${c.id}','${etapa}')" ondragend="dragEnd(event)"`
             : '';
           const urg = isUrgente(c);
+          const stColor = st === 'Atrasado' ? 'var(--red)' : st === 'Em ordem' ? 'var(--green)' : 'var(--text3)';
           const kpid = 'pkb' + c.id.replace(/\W/g,'');
           return `
             <div class="kcard${urg ? ' urgent' : ''}" ${dragAttrs} onclick="if(!_isDragging)navigate('cliente/${encodeURIComponent(c.id)}')">
@@ -4529,7 +4530,7 @@ function renderKanbanBoard(clientes, consultores, enableDnD) {
               <hr class="kcard-divider">
               ${getStatusBadge(st)}
               <div class="kcard-prog-row">
-                <div class="kcard-prog-wrap"><div class="kcard-prog-fill" style="width:${prog}%"></div></div>
+                <div class="kcard-prog-wrap"><div class="kcard-prog-fill" style="width:${prog}%;background:${stColor}"></div></div>
                 <span class="kcard-pct">${prog}%</span>
               </div>
               <div class="kcard-meta">
