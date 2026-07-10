@@ -2433,12 +2433,15 @@ function renderKpiRow(kpis) {
     {label:'Concluídos',   value:kpis.concluido,    cls:'kpi-concluido',color:'#38a169', drill:'Concluído'},
     {label:'Cancelados',   value:kpis.cancelado,    cls:'',             color:'#4a5568', drill:'Cancelado'},
   ];
-  return `<div class="dash-kpi-row">
-    ${cards.map((c,i) => `
-      <div class="dash-kpi-card ${c.cls}" onclick="drillKpi('${c.drill}')" title="Ver lista: ${c.label}" style="cursor:pointer">
-        <div class="dash-kpi-label">${c.label}</div>
-        <div class="dash-kpi-value" id="kpi-v-${i}" style="color:${c.color}">0</div>
-      </div>`).join('')}
+  return `<div class="kpi-strip" style="grid-template-columns:repeat(${cards.length},1fr);gap:12px;margin-bottom:24px">
+    ${cards.map((c,i) => {
+      const vMap = {'#e53e3e':'v-red','#dc2626':'v-red','#d69e2e':'v-amber','#eab308':'v-amber','#38a169':'v-green','#22c55e':'v-green','#3182ce':'v-blue','var(--primary)':'v-orange'};
+      const v = vMap[c.color] || 'v-orange';
+      return `<div class="kpi-card ${v}" onclick="drillKpi('${c.drill}')" title="${c.label}" style="cursor:pointer">
+        <div class="kpi-label">${c.label}</div>
+        <div class="kpi-value" id="kpi-v-${i}">0</div>
+      </div>`;
+    }).join('')}
   </div>`;
 }
 
