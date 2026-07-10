@@ -5430,7 +5430,7 @@ function renderProjetosGRV() {
 // ═══════════════════════════════════════════════════════════
 let _open_fases       = {};
 let _cliente_id_atual = null;
-let _cliente_aba      = '360';
+let _cliente_aba      = 'atividades';
 let _pb_expandidos    = {};
 let _pb_sel_id        = null;
 let _at_sel           = null;
@@ -5450,7 +5450,7 @@ function renderCliente(id) {
 
   if (id !== _cliente_id_atual) {
     _cliente_id_atual = id;
-    _cliente_aba      = '360';
+    _cliente_aba      = 'atividades';
     _pb_expandidos    = {};
     _pb_sel_id        = (c.ativPlaybooks && c.ativPlaybooks.length > 0) ? c.ativPlaybooks[0].id : null;
     _at_sel           = null;
@@ -5467,6 +5467,45 @@ function renderCliente(id) {
   const _stCS = typeof getStatusCliente === 'function' ? getStatusCliente(c, c.csId || c.consultorId || '') : null;
   const _stLabels = {atrasado:'Atrasado',em_ordem:'Em ordem',atencao:'Atenção',inicio:'Início'};
 
+  // ── Cálculos para a KPI strip ──
+  const _hs     = calcHealthScore(c);
+  const _hsClr  = _hs !== null ? hsColor(_hs) : 'var(--text3)';
+  const _csat   = calcCsatAtual(c);
+  const _csatClr = _csat !== null
+    ? (_csat >= 4 ? 'var(--green)' : _csat >= 3 ? 'var(--yellow)' : 'var(--red)')
+    : 'var(--text3)';
+  const _csatLastDate = (c.csatRespostas||[]).length
+    ? new Date((c.csatRespostas||[]).slice(-1)[0].data).toLocaleDateString('pt-BR')
+    : '';
+  const _nps    = calcNps(c);
+  const _npsClr = _nps !== null
+    ? (_nps >= 50 ? 'var(--green)' : _nps >= 0 ? 'var(--yellow)' : 'var(--red)')
+    : 'var(--text3)';
+  const _npsLbl = _nps !== null
+    ? (_nps >= 50 ? 'Excelente' : _nps >= 0 ? 'Bom' : 'Crítico') : '';
+
+  // Próxima atividade não concluída (todos os playbooks ativos)
+  const _allPend = (c.ativPlaybooks || [])
+    .filter(function(pb){ return pb.status !== 'cancelado' && !pb.encerrado; })
+    .reduce(function(arr, pb){ return arr.concat(pb.atividades || []); }, [])
+    .filter(function(at){ return at.status !== 'concluida' && at.dataLimite; })
+    .sort(function(a,b){ return a.dataLimite.localeCompare(b.dataLimite); });
+  const _proxAt    = _allPend[0] || null;
+  const _proxData  = _proxAt ? new Date(_proxAt.dataLimite).toLocaleDateString('pt-BR') : '';
+  const _proxAcao  = c.proximaAcao || '—';
+
+  // Badge de atrasadas na aba Atividades
+  const _totalAtrasadas = (c.ativPlaybooks || []).reduce(function(acc, pb) {
+    if (pb.status === 'cancelado') return acc;
+    return acc + (pb.atividades || []).filter(function(at){ return at.status === 'atrasada'; }).length;
+  }, 0);
+  const _tabBadge = _totalAtrasadas > 0
+    ? '<span style="font-size:10px;font-weight:700;background:#DC2626;color:#fff;padding:1px 5px;border-radius:10px;margin-left:4px;line-height:1.4">' + _totalAtrasadas + '</span>'
+    : '';
+
+  // Tempo como cliente para o subtítulo
+  const _tempoStr = c.dataInicioImplantacao ? tempoComoCliente(c.dataInicioImplantacao) : '';
+
   const abaContent = _cliente_aba === '360'
     ? renderAba360(c)
     : _cliente_aba === 'atividades'
@@ -5479,20 +5518,43 @@ function renderCliente(id) {
       <div class="dc-avatar-lg" style="background:linear-gradient(135deg,${_ag[0]},${_ag[1]})">${_letter}</div>
       <div class="dc-info">
         <div class="dc-name">${c.id}</div>
-        <div class="dc-sub">${c.projeto ? c.projeto + ' · ' : ''}${_consulNome}</div>
+        <div class="dc-sub">${c.projeto ? c.projeto + ' · ' : ''}${_consulNome}${_tempoStr ? ' · ' + _tempoStr + ' como cliente' : ''}</div>
         <div class="dc-chips">
           ${_stCS ? '<span class="chip-base chip-status-' + _stCS + '">' + (_stLabels[_stCS]||_stCS) + '</span>' : ''}
+          ${c.etapa ? getEtapaBadge(c.etapa) : ''}
           ${c.segmento ? '<span class="chip-base chip-seg">' + c.segmento + '</span>' : ''}
           ${c.produto  ? '<span class="chip-base chip-prod">' + c.produto  + '</span>' : ''}
-          ${(() => { var hs = calcHealthScore(c); if (hs === null) return ''; var clr = hsColor(hs); return '<span style="font-size:11px;font-weight:800;color:'+clr+';background:'+clr+'1a;padding:2px 8px;border-radius:12px;border:1px solid '+clr+'55">Health '+hs+'</span>'; })()}
         </div>
         ${(() => { var lt = getDiasUltimoContato(c); return lt !== null ? '<div style="font-size:11px;color:' + (lt===0?'#22c55e':lt<=7?'var(--text3)':lt<=14?'#eab308':'#ef4444') + ';margin-top:4px">Último contato: ' + (lt===0?'hoje':'há '+lt+' dia'+(lt===1?'':'s')) + '</div>' : ''; })()}
       </div>
     </div>
 
+    <div class="dc-kpi-strip">
+      <div class="dc-kpi">
+        <div class="dc-kpi-label">Health Score</div>
+        <div class="dc-kpi-val" style="color:${_hsClr}">${_hs !== null ? _hs : '—'}</div>
+        <div class="dc-kpi-sub">${_hs !== null ? 'Saúde geral' : 'Sem dados suficientes'}</div>
+      </div>
+      <div class="dc-kpi">
+        <div class="dc-kpi-label">CSAT</div>
+        <div class="dc-kpi-val" style="color:${_csatClr}">${_csat !== null ? _csat : '—'}${_csat !== null ? '<span style="font-size:13px;color:var(--text4);font-weight:500"> /5</span>' : ''}</div>
+        <div class="dc-kpi-sub">${_csatLastDate ? 'Última: ' + _csatLastDate : 'Sem respostas'}</div>
+      </div>
+      <div class="dc-kpi">
+        <div class="dc-kpi-label">NPS</div>
+        <div class="dc-kpi-val" style="color:${_npsClr}">${_nps !== null ? _nps : '—'}</div>
+        <div class="dc-kpi-sub">${_npsLbl || 'Sem respostas'}</div>
+      </div>
+      <div class="dc-kpi">
+        <div class="dc-kpi-label">Próxima ação</div>
+        <div class="dc-kpi-next">${_proxAcao}</div>
+        <div class="dc-kpi-sub">${_proxData ? '<span style="color:var(--yellow);font-weight:600">' + _proxData + '</span>' : 'Sem data definida'}</div>
+      </div>
+    </div>
+
     <div class="cliente-tabs">
       <button class="cliente-tab${_cliente_aba==='360'?' active':''}" onclick="setClienteAba('360','${c.id}')">Visão 360°</button>
-      <button class="cliente-tab${_cliente_aba==='atividades'?' active':''}" onclick="setClienteAba('atividades','${c.id}')">Atividades</button>
+      <button class="cliente-tab${_cliente_aba==='atividades'?' active':''}" onclick="setClienteAba('atividades','${c.id}')">Atividades${_tabBadge}</button>
       <button class="cliente-tab${_cliente_aba==='notas'?' active':''}" onclick="setClienteAba('notas','${c.id}')">Notas</button>
     </div>
 
