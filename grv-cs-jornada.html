@@ -706,6 +706,47 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .venc-btn-ir{padding:5px 9px;background:var(--surface);border:1px solid var(--border);border-radius:7px;font-size:11px;color:var(--text2);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:4px;font-weight:600}
 .venc-btn-ir:hover{border-color:var(--primary);color:var(--primary)}
 
+/* ── PAINEL DE ATIVIDADES – new components ──────────── */
+.venc-empty{text-align:center;padding:48px 24px;color:var(--text2)}
+.venc-empty div:first-child{font-size:32px}
+.painel-kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.painel-kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+.painel-kpi-label{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.painel-kpi-value{font-size:26px;font-weight:700;line-height:1.1;margin-top:4px;font-variant-numeric:tabular-nums}
+.painel-kpi-sub{font-size:11px;color:var(--text3);margin-top:3px}
+.painel-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.painel-toggle-group{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.painel-toggle-btn{background:none;border:none;padding:6px 14px;font-size:13px;cursor:pointer;color:var(--text2);transition:background .15s,color .15s;font-family:inherit}
+.painel-toggle-btn.active{background:var(--primary);color:#fff;font-weight:600}
+.painel-tabs{display:flex;gap:2px;background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.painel-tab{background:none;border:none;padding:6px 14px;font-size:13px;cursor:pointer;color:var(--text2);font-family:inherit;transition:background .15s,color .15s;white-space:nowrap}
+.painel-tab.active{background:var(--surface);color:var(--primary);font-weight:600;border-radius:6px}
+.painel-due{font-size:11px;font-weight:600;padding:2px 8px;border-radius:12px;white-space:nowrap;flex-shrink:0}
+.painel-due-critico{background:#fee2e2;color:#b91c1c}
+.painel-due-atrasado{background:#fef9c3;color:#92400e}
+.painel-due-hoje{background:#dcfce7;color:#166534}
+.painel-resolver-row{flex-wrap:wrap}
+.painel-note-area{display:none;gap:8px;align-items:flex-start;padding:0 16px 10px 56px;flex-wrap:wrap}
+.painel-note-area.open{display:flex}
+.painel-note-input{flex:1;min-width:200px;border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;font-family:inherit;background:var(--bg);color:var(--text);resize:none;height:50px}
+.painel-note-input:focus{outline:none;border-color:var(--primary)}
+.painel-note-save{background:var(--primary);color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.painel-note-cancel{background:none;color:var(--text3);border:1px solid var(--border);padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.painel-week-header{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text3);padding:12px 0 4px;border-bottom:2px solid var(--border);margin-bottom:8px}
+.painel-filter-chips{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.painel-chip{border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;cursor:pointer;background:var(--bg);color:var(--text2);transition:background .15s,border-color .15s,color .15s;user-select:none}
+.painel-chip.active{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:600}
+.painel-client-group{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.painel-client-header{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s}
+.painel-client-header:hover{background:var(--bg)}
+.painel-client-header.collapsed{border-bottom:none}
+.painel-chevron{font-size:11px;color:var(--text3);transition:transform .2s;flex-shrink:0;margin-left:auto}
+.painel-client-rows{padding:4px 0}
+.painel-client-row{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--border)}
+.painel-client-row:last-child{border-bottom:none}
+.painel-client-row:hover{background:var(--bg)}
+@media(max-width:640px){.painel-kpi-strip{grid-template-columns:repeat(2,1fr)}}
+
 /* ── Abas do cliente ─────────────────────────────── */
 .cliente-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:24px}
 .cliente-tab{padding:10px 20px;font-size:13px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;background:none;border-top:none;border-left:none;border-right:none}
