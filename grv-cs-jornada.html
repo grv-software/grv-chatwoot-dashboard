@@ -3637,7 +3637,7 @@ function renderVencPorCliente() {
   var byCliente = {};
   filtered.forEach(function(v) {
     if (!byCliente[v.clienteId]) {
-      byCliente[v.clienteId] = { cliente: v.cliente, items: [], vencidasCount: 0 };
+      byCliente[v.clienteId] = { clienteId: v.clienteId, cliente: v.cliente, items: [], vencidasCount: 0 };
     }
     byCliente[v.clienteId].items.push(v);
     if (classify(v) === 'vencidas') byCliente[v.clienteId].vencidasCount++;
