@@ -47,7 +47,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .sb-logo-text span{display:block;font-weight:400;font-size:9px;color:var(--text4)}
 .sb-nav{padding:0;flex:1;height:100%;display:flex;flex-direction:row;gap:0;align-items:center}
 .nav-item{display:flex;align-items:center;gap:6px;padding:0 14px;height:100%;position:relative;border-radius:0;color:var(--text3);cursor:pointer;font-size:12.5px;font-weight:500;transition:color .15s;text-decoration:none;margin-bottom:0;white-space:nowrap}
-.nav-item:hover{background:none;color:var(--text)}
+.nav-item:hover{background:rgba(0,0,0,.03);color:var(--text)}
 .nav-item.active{background:none;color:var(--primary);font-weight:600}
 .nav-item.active::after{content:'';position:absolute;bottom:0;left:14px;right:14px;height:2px;background:var(--primary);border-radius:2px 2px 0 0}
 .nav-icon{width:14px;height:14px;flex-shrink:0;opacity:.5}
@@ -468,8 +468,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .vt-btn.active{background:var(--b-orange-bg);color:var(--primary)}
 /* ── FEED CARDS ──────────────────────────────────────────── */
 .feed-wrap{padding:16px 24px;display:flex;flex-direction:column;gap:7px}
-.feed-card{display:flex;align-items:center;background:var(--surface);border-radius:var(--radius);padding:12px 16px;border:1px solid var(--border);cursor:pointer;transition:border-color .12s,box-shadow .12s;position:relative;overflow:hidden}
-.feed-card:hover{border-color:var(--primary);box-shadow:0 2px 12px rgba(224,90,30,.08)}
+.feed-card{display:flex;align-items:center;background:var(--surface);border-radius:var(--radius);padding:12px 16px;border:1px solid var(--border);cursor:pointer;transition:border-color .12s,box-shadow .12s,transform .1s;position:relative;overflow:hidden}
+.feed-card:hover{border-color:var(--primary);box-shadow:var(--shadow-2);transform:translateY(-1px)}
 .fc-stripe{position:absolute;left:0;top:0;bottom:0;width:4px}
 .fc-body{display:flex;align-items:center;gap:12px;flex:1;margin-left:4px}
 .fc-avatar{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0}
@@ -612,8 +612,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .kanban-cards{padding:8px;display:flex;flex-direction:column;gap:8px;min-height:60px}
 
 /* ── KANBAN CARD ─────────────────────────────────────────── */
-.kcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;cursor:pointer;transition:border-color .15s,box-shadow .15s,opacity .15s}
-.kcard:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(224,90,30,.12)}
+.kcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;cursor:pointer;transition:border-color .15s,box-shadow .15s,opacity .15s,transform .1s}
+.kcard:hover{border-color:var(--primary);box-shadow:var(--shadow-2);transform:translateY(-1px)}
 .kcard[draggable="true"]{cursor:grab}
 .kcard[draggable="true"]:active{cursor:grabbing}
 .kcard.dragging{opacity:.45;border:2px dashed var(--primary)}
@@ -705,7 +705,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .venc-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .venc-dias{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap}
 .venc-btn-ok{padding:5px 11px;background:var(--green);color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
-.venc-btn-ok:hover{opacity:.88}
+.venc-btn-ok:hover{opacity:1;box-shadow:0 2px 8px rgba(22,163,74,.35)}
 .venc-btn-ir{padding:5px 9px;background:var(--surface);border:1px solid var(--border);border-radius:7px;font-size:11px;color:var(--text2);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:4px;font-weight:600}
 .venc-btn-ir:hover{border-color:var(--primary);color:var(--primary)}
 
