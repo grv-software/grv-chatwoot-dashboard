@@ -645,7 +645,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 /* ── MISC ────────────────────────────────────────────────── */
 .proj-id{font-size:11px;color:var(--primary);font-weight:600;margin-top:1px}
 .empty-state{text-align:center;padding:48px 24px;color:var(--text3)}
-.es-icon{font-size:40px;margin-bottom:12px}
+.es-icon{width:40px;height:40px;margin:0 auto 12px;color:var(--text4)}
+.es-icon svg{width:40px;height:40px}
 .es-text{font-size:14px}
 .back-link{font-size:12px;color:var(--text3);text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-bottom:16px}
 .back-link:hover{color:var(--primary)}
@@ -711,7 +712,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 
 /* ── PAINEL DE ATIVIDADES – new components ──────────── */
 .venc-empty{text-align:center;padding:48px 24px;color:var(--text2)}
-.venc-empty div:first-child{font-size:32px}
+.venc-empty .es-icon{color:var(--text2)}
 .painel-kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
 .painel-kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
 .painel-kpi-label{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
@@ -3085,7 +3086,7 @@ function renderDashboardProjetos(clientes, consultores) {
   const periodoLabel = periodoOpts.find(function(o){ return o.v === _vg_periodo; });
 
   if (clientesFiltrados.length === 0) {
-    return filterBar + `<div class="empty-state"><div class="es-icon">📊</div><div class="es-text">Nenhum projeto encontrado para este período.</div></div>`;
+    return filterBar + `<div class="empty-state"><div class="es-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div class="es-text">Nenhum projeto encontrado para este período.</div></div>`;
   }
 
   const kpis = computeDashboardKPIs(clientesFiltrados);
@@ -3501,7 +3502,7 @@ function renderVencAResolver() {
   }
 
   if (!todos.length) {
-    return '<div class="venc-empty"><div>✅</div>' +
+    return '<div class="venc-empty"><div class="es-icon" style="color:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>' +
       '<div style="font-weight:700;margin-top:8px">Tudo em dia!</div>' +
       '<div style="font-size:13px;color:var(--text3)">Nenhuma atividade vencida na sua fila.</div></div>';
   }
@@ -3626,7 +3627,7 @@ function renderVencPlanejar() {
   todos.sort(function(a, b) { return a.diff - b.diff; });
 
   if (!todos.length) {
-    return '<div class="venc-empty"><div>📅</div>' +
+    return '<div class="venc-empty"><div class="es-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>' +
       '<div style="font-weight:700;margin-top:8px">Nada planejado</div>' +
       '<div style="font-size:13px;color:var(--text3)">Nenhuma atividade nos próximos 30 dias.</div></div>';
   }
@@ -3721,7 +3722,7 @@ function renderVencPorCliente() {
     var emptyMsg = consultor !== 'todos'
       ? 'Nenhuma atividade na sua fila. <button class="venc-btn-ir" style="margin-top:10px" onclick="_venc_fila=\'time\';renderVencimentos()">Ver time todo</button>'
       : 'Nenhuma atividade no período.';
-    return chipsHtml + '<div class="venc-empty"><div>🔍</div>' +
+    return chipsHtml + '<div class="venc-empty"><div class="es-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>' +
       '<div style="font-weight:700;margin-top:8px">Nada encontrado</div>' +
       '<div style="font-size:13px;color:var(--text3);margin-top:6px">' + emptyMsg + '</div></div>';
   }
@@ -4931,7 +4932,7 @@ function renderCustomer() {
     : '';
 
   var tableHtml = listClientes.length === 0
-    ? '<div class="empty-state"><div class="es-icon">⭐</div><div class="es-text">' + (_urg_filter ? 'Nenhum cliente urgente no momento.' : 'Nenhum cliente em Customer Success encontrado.') + '</div></div>'
+    ? '<div class="empty-state"><div class="es-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="es-text">' + (_urg_filter ? 'Nenhum cliente urgente no momento.' : 'Nenhum cliente em Customer Success encontrado.') + '</div></div>'
     : '<div class="proj-tw"><table class="proj-rt data-table"><thead><tr><th>Cliente</th><th>CS Responsável</th><th>Health</th><th>CSAT</th><th>Último Contato</th><th>Próxima Ação</th><th style="width:48px"></th></tr></thead><tbody>'+rows+'</tbody></table></div>';
 
   const filterBar = `
@@ -5095,7 +5096,7 @@ function renderImplantacao() {
     content = renderKanbanBoard(kImplClientes, consultores, false);
   } else {
     content = implClientes.length === 0
-      ? `<div class="empty-state"><div class="es-icon">🔍</div><div class="es-text">${_urg_filter ? 'Nenhum urgente nesta aba.' : 'Nenhum projeto em implantação encontrado.'}</div></div>`
+      ? `<div class="empty-state"><div class="es-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div class="es-text">${_urg_filter ? 'Nenhum urgente nesta aba.' : 'Nenhum projeto em implantação encontrado.'}</div></div>`
       : `<div style="display:flex;align-items:center;margin-bottom:4px">${urgBtnImpl}</div>
          ${hintImpl}
          <div class="table-wrap">
@@ -5296,7 +5297,7 @@ function renderPortfolio() {
   let content;
   if (_proj_view === 'lista') {
     content = portClientes.length === 0
-      ? `<div class="empty-state"><div class="es-icon">🔍</div><div class="es-text">${_urg_filter ? 'Nenhum urgente nesta aba.' : 'Nenhum projeto encontrado com este filtro.'}</div></div>`
+      ? `<div class="empty-state"><div class="es-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div class="es-text">${_urg_filter ? 'Nenhum urgente nesta aba.' : 'Nenhum projeto encontrado com este filtro.'}</div></div>`
       : `<div style="display:flex;align-items:center;margin-bottom:4px">${urgBtnPort}</div>
          ${hintPort}
          <div class="table-wrap">
@@ -5409,7 +5410,7 @@ function renderCliente(id) {
   const c   = getCliente(id);
 
   if (!c) {
-    sec.innerHTML = `<div class="empty-state"><div class="es-icon">❓</div><div class="es-text">Cliente não encontrado.</div></div>`;
+    sec.innerHTML = `<div class="empty-state"><div class="es-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div class="es-text">Cliente não encontrado.</div></div>`;
     return;
   }
 
