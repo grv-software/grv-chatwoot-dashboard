@@ -879,10 +879,25 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
         <div class="nav-drop-item" id="drop-ct-desempenho" onclick="setCarteiraTab('desempenho')">Desempenho</div>
       </div>
     </div>
-    <div class="nav-item" id="nav-vencimentos" data-route="vencimentos" onclick="navigate('vencimentos')">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      Vencimentos
-      <span class="nav-badge hidden" id="nav-venc-badge">0</span>
+    <div class="nav-group" id="nav-vencimentos-group">
+      <div class="nav-item" id="nav-vencimentos" data-route="vencimentos" onclick="navigate('vencimentos')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Painel de Atividades
+        <span class="nav-badge hidden" id="nav-venc-badge">0</span>
+      </div>
+      <div class="nav-dropdown" id="venc-dropdown">
+        <div class="nav-drop-header">PAINEL DE ATIVIDADES</div>
+        <div class="nav-drop-divider"></div>
+        <div class="nav-drop-item" id="drop-venc-resolver" onclick="setVencTab('resolver')">
+          A resolver <span class="nav-drop-badge" id="drop-venc-resolver-badge" style="display:none"></span>
+        </div>
+        <div class="nav-drop-item" id="drop-venc-planejar" onclick="setVencTab('planejar')">
+          A planejar <span class="nav-drop-badge" id="drop-venc-planejar-badge" style="display:none"></span>
+        </div>
+        <div class="nav-drop-item" id="drop-venc-cliente" onclick="setVencTab('cliente')">
+          Por cliente
+        </div>
+      </div>
     </div>
     <div class="nav-item" id="nav-criar" data-route="criar" onclick="navigate('criar')">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
