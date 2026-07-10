@@ -5584,210 +5584,158 @@ function tempoComoCliente(dataInicio) {
 }
 
 function renderAba360(c) {
-  const prog          = getProgresso(c);
-  const csNome        = getConsultores().find(x => x.id === c.csId)?.nome || '—';
-  const consultorNome = getConsultores().find(x => x.id === c.consultorId)?.nome || c.consultorId;
+  const csNome        = getConsultores().find(function(x){ return x.id === c.csId; })?.nome || '—';
+  const consultorNome = getConsultores().find(function(x){ return x.id === c.consultorId; })?.nome || c.consultorId || '—';
 
-  const tlHtml = (c.historicoEtapas || []).map(h => {
-    const label = h.de
-      ? `${h.de} → <strong style="color:var(--primary)">${h.para}</strong>`
-      : `→ <strong style="color:var(--primary)">${h.para}</strong>`;
-    return `<div class="tl-item">
-      <div class="tl-dot"></div>
-      <div class="tl-body">
-        ${label}
-        <div class="tl-meta">${fmtDateTime(h.data)} · ${h.motivo}</div>
-      </div>
-    </div>`;
-  }).join('');
+  const csatVal  = calcCsatAtual(c);
+  const csatClr  = csatVal !== null ? (csatVal >= 4 ? 'var(--green)' : csatVal >= 3 ? 'var(--yellow)' : 'var(--red)') : 'var(--text3)';
+  const csatLbl  = csatVal !== null ? (csatVal >= 4 ? 'Excelente' : csatVal >= 3 ? 'Bom' : 'Crítico') : '';
+  const npsVal   = calcNps(c);
+  const npsClr   = npsVal !== null ? (npsVal >= 50 ? 'var(--green)' : npsVal >= 0 ? 'var(--yellow)' : 'var(--red)') : 'var(--text3)';
+  const npsLbl   = npsVal !== null ? (npsVal >= 50 ? 'Excelente' : npsVal >= 0 ? 'Bom' : 'Crítico') : '';
+
+  const dataImplant = c.dataInicioImplantacao ? new Date(c.dataInicioImplantacao).toLocaleDateString('pt-BR') : '—';
+  const dataCS      = c.dataInicioCS ? new Date(c.dataInicioCS).toLocaleDateString('pt-BR') : '—';
+  const tempo       = c.dataInicioImplantacao ? tempoComoCliente(c.dataInicioImplantacao) : '—';
+
+  const contatosHtml = (c.contatos || []).length === 0
+    ? '<p style="font-size:12px;color:var(--text3);margin:0 0 12px">Nenhum contato cadastrado ainda.</p>'
+    : '<div style="margin-bottom:12px">' +
+      (c.contatos || []).map(function(ct) {
+        return '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-2)">'
+          + '<div style="flex:1;min-width:0">'
+            + '<div style="font-size:13px;font-weight:700;color:var(--text)">' + ct.nome
+              + (ct.cargo ? '<span style="font-size:11px;color:var(--text3);font-weight:400"> · ' + ct.cargo + '</span>' : '') + '</div>'
+            + '<div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap">'
+              + (ct.email ? '<a href="mailto:' + ct.email + '" class="contato-link"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></svg>' + ct.email + '</a>' : '')
+              + (ct.whatsapp ? '<a href="https://wa.me/' + ct.whatsapp.replace(/\D/g,'') + '" target="_blank" class="contato-link"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.06 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16"/></svg>' + ct.whatsapp + '</a>' : '')
+            + '</div>'
+          + '</div>'
+          + '<button onclick="removerContato(\'' + c.id + '\',\'' + ct.id + '\')" title="Remover" style="flex-shrink:0;padding:3px 8px;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--text3);font-size:11px;cursor:pointer">✕</button>'
+        + '</div>';
+      }).join('') + '</div>';
+
+  const csatRespHtml = (c.csatRespostas || []).length === 0
+    ? '<p style="font-size:12px;color:var(--text3);margin:0 0 12px">Nenhuma pesquisa registrada ainda.</p>'
+    : '<div style="margin-bottom:12px">' +
+      (c.csatRespostas || []).slice().reverse().slice(0, 5).map(function(r) {
+        const clr = r.score >= 4 ? 'var(--green)' : r.score >= 3 ? 'var(--yellow)' : 'var(--red)';
+        return '<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border-2)">'
+          + '<div style="width:28px;height:28px;border-radius:6px;background:' + clr + '1a;color:' + clr + ';font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + r.score + '</div>'
+          + '<div style="flex:1"><div style="font-size:11px;color:var(--text3)">' + new Date(r.data).toLocaleDateString('pt-BR') + '</div>'
+          + (r.obs ? '<div style="font-size:11px;color:var(--text2);margin-top:1px;font-style:italic">"' + r.obs + '"</div>' : '') + '</div>'
+        + '</div>';
+      }).join('') + '</div>';
+
+  const npsRespHtml = (c.npsRespostas || []).length === 0
+    ? '<p style="font-size:12px;color:var(--text3);margin:0 0 12px">Nenhuma resposta registrada ainda.</p>'
+    : '<div style="margin-bottom:12px">' +
+      (c.npsRespostas || []).slice().reverse().slice(0, 5).map(function(r) {
+        const clr  = r.score >= 9 ? 'var(--green)' : r.score >= 7 ? 'var(--text3)' : 'var(--red)';
+        const tipo = r.score >= 9 ? 'Promotor' : r.score >= 7 ? 'Neutro' : 'Detrator';
+        return '<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border-2)">'
+          + '<div style="width:28px;height:28px;border-radius:6px;background:' + clr + '1a;color:' + clr + ';font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + r.score + '</div>'
+          + '<div style="flex:1"><div style="font-size:10px;font-weight:700;color:' + clr + '">' + tipo + '</div>'
+          + '<div style="font-size:11px;color:var(--text3)">' + new Date(r.data).toLocaleDateString('pt-BR') + '</div>'
+          + (r.comentario ? '<div style="font-size:11px;color:var(--text2);margin-top:1px;font-style:italic">"' + r.comentario + '"</div>' : '') + '</div>'
+        + '</div>';
+      }).join('') + '</div>';
 
   return `
     <div class="grid-360">
-      <div class="card-360">
-        <div class="c360-label">Segmento</div>
-        <div class="c360-value">${c.segmento || '—'}</div>
-      </div>
-      <div class="card-360">
-        <div class="c360-label">CS Responsável</div>
-        <div class="c360-value">${csNome}</div>
-      </div>
-      <div class="card-360">
-        <div class="c360-label">Consultor Digital</div>
-        <div class="c360-value">${consultorNome}</div>
-      </div>
-      <div class="card-360">
-        <div class="c360-label">% Implantação</div>
-        <div class="c360-value">${prog}%</div>
-        <div class="c360-prog"><div class="c360-prog-fill" style="width:${prog}%"></div></div>
-      </div>
+      <div class="card-360"><div class="c360-label">Segmento</div><div class="c360-value">${c.segmento || '—'}</div></div>
+      <div class="card-360"><div class="c360-label">Produto</div><div class="c360-value">${c.produto || '—'}</div></div>
+      <div class="card-360"><div class="c360-label">CS Responsável</div><div class="c360-value">${csNome}</div></div>
+      <div class="card-360"><div class="c360-label">Consultor Digital</div><div class="c360-value">${consultorNome}</div></div>
     </div>
 
-    <div class="card-block" style="margin-top:16px">
-      <div class="section-title">Histórico de etapas</div>
-      <div class="tl-wrap">${tlHtml}</div>
-    </div>
+    <div class="v360-cols">
+      <div class="v360-col">
 
-    ${c.status === 'cs_ativo' ? `
-    <div style="background:var(--b-orange-bg);border:1px solid #fed7aa;border-radius:var(--radius);padding:14px 16px;margin-top:16px">
-      <div style="font-size:10px;font-weight:700;color:var(--text4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Histórico de ciclo de vida</div>
-      <div style="display:flex;gap:24px;flex-wrap:wrap">
-        <div>
-          <div style="font-size:10px;color:var(--text3)">Início da implantação</div>
-          <div style="font-size:13px;font-weight:700;color:var(--text)">${c.dataInicioImplantacao ? new Date(c.dataInicioImplantacao).toLocaleDateString('pt-BR') : '—'}</div>
+        <div class="card-block" style="margin-bottom:10px">
+          <div class="section-title">Ciclo de vida</div>
+          <div style="display:flex;gap:24px;flex-wrap:wrap">
+            <div>
+              <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text4);margin-bottom:3px">Início implantação</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text)">${dataImplant}</div>
+            </div>
+            <div>
+              <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text4);margin-bottom:3px">Entrada no CS</div>
+              <div style="font-size:13px;font-weight:700;color:var(--primary)">${dataCS}</div>
+            </div>
+            <div>
+              <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text4);margin-bottom:3px">Tempo como cliente</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text)">${tempo}</div>
+            </div>
+          </div>
         </div>
-        <div>
-          <div style="font-size:10px;color:var(--text3)">Entrada no CS</div>
-          <div style="font-size:13px;font-weight:700;color:var(--primary)">${c.dataInicioCS ? new Date(c.dataInicioCS).toLocaleDateString('pt-BR') : '—'}</div>
-        </div>
-        <div>
-          <div style="font-size:10px;color:var(--text3)">Tempo como cliente</div>
-          <div style="font-size:13px;font-weight:700;color:var(--text)">${tempoComoCliente(c.dataInicioImplantacao)}</div>
-        </div>
-      </div>
-    </div>` : ''}
 
-    <div class="card-block" style="margin-top:16px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div class="section-title" style="margin-bottom:0">Contatos do Cliente</div>
-        <span style="font-size:12px;color:var(--text3)">${(c.contatos||[]).length} contato${(c.contatos||[]).length!==1?'s':''}</span>
-      </div>
-      ${(c.contatos||[]).length === 0
-        ? '<p style="font-size:12px;color:var(--text3);margin:0 0 12px">Nenhum contato cadastrado ainda.</p>'
-        : '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">' +
-          (c.contatos||[]).map(function(ct){
-            return '<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:10px 12px;background:var(--b-surface);border-radius:8px;gap:12px">'
-              + '<div style="flex:1;min-width:0">'
-                + '<div style="font-size:13px;font-weight:700;color:var(--text)">' + ct.nome + '</div>'
-                + (ct.cargo ? '<div style="font-size:11px;color:var(--text3);margin-top:1px">' + ct.cargo + '</div>' : '')
-                + '<div style="display:flex;gap:12px;margin-top:6px;flex-wrap:wrap">'
-                  + (ct.email ? '<a href="mailto:'+ct.email+'" style="font-size:11px;color:var(--primary);text-decoration:none">✉ '+ct.email+'</a>' : '')
-                  + (ct.whatsapp ? '<a href="https://wa.me/'+ct.whatsapp.replace(/\D/g,'')+'" target="_blank" style="font-size:11px;color:#22c55e;text-decoration:none">📱 '+ct.whatsapp+'</a>' : '')
-                + '</div>'
-              + '</div>'
-              + '<button onclick="removerContato(\''+c.id+'\',\''+ct.id+'\')" title="Remover contato" style="flex-shrink:0;padding:3px 8px;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--text3);font-size:11px;cursor:pointer">✕</button>'
-            + '</div>';
-          }).join('') + '</div>'
-      }
-      <div id="ct-form-${c.id}" style="display:none;background:var(--b-surface);border-radius:8px;padding:12px;margin-bottom:8px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-          <div>
-            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Nome *</label>
-            <input id="ct-nome-${c.id}" type="text" placeholder="Ex: João Silva" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
+        <div class="card-block">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div class="section-title" style="margin-bottom:0">Contatos</div>
+            <button onclick="document.getElementById('ct-form-${c.id}').style.display='block'" style="font-size:11px;font-weight:700;color:var(--primary);background:transparent;border:none;cursor:pointer;padding:0">+ Adicionar</button>
           </div>
-          <div>
-            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Cargo</label>
-            <input id="ct-cargo-${c.id}" type="text" placeholder="Ex: Gerente de TI" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
+          ${contatosHtml}
+          <div id="ct-form-${c.id}" style="display:none;background:var(--b-surface);border-radius:8px;padding:12px;margin-top:8px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+              <div><label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Nome *</label><input id="ct-nome-${c.id}" type="text" placeholder="Ex: João Silva" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box"></div>
+              <div><label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Cargo</label><input id="ct-cargo-${c.id}" type="text" placeholder="Ex: Gerente de TI" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+              <div><label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">E-mail</label><input id="ct-email-${c.id}" type="email" placeholder="joao@empresa.com" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box"></div>
+              <div><label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">WhatsApp</label><input id="ct-wpp-${c.id}" type="text" placeholder="(11) 99999-9999" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box"></div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button onclick="adicionarContato('${c.id}',document.getElementById('ct-nome-${c.id}').value,document.getElementById('ct-cargo-${c.id}').value,document.getElementById('ct-email-${c.id}').value,document.getElementById('ct-wpp-${c.id}').value)" style="flex:1;padding:7px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Salvar contato</button>
+              <button onclick="cancelarFormContato('${c.id}')" style="padding:7px 14px;background:transparent;color:var(--text3);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer">Cancelar</button>
+            </div>
           </div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-          <div>
-            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">E-mail</label>
-            <input id="ct-email-${c.id}" type="email" placeholder="joao@empresa.com" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
-          </div>
-          <div>
-            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">WhatsApp</label>
-            <input id="ct-wpp-${c.id}" type="text" placeholder="(11) 99999-9999" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
-          </div>
-        </div>
-        <div style="display:flex;gap:8px">
-          <button onclick="adicionarContato('${c.id}',document.getElementById('ct-nome-${c.id}').value,document.getElementById('ct-cargo-${c.id}').value,document.getElementById('ct-email-${c.id}').value,document.getElementById('ct-wpp-${c.id}').value)" style="flex:1;padding:7px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Salvar contato</button>
-          <button onclick="cancelarFormContato('${c.id}')" style="padding:7px 14px;background:transparent;color:var(--text3);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer">Cancelar</button>
-        </div>
-      </div>
-      <button onclick="document.getElementById('ct-form-${c.id}').style.display='block'" style="font-size:12px;color:var(--primary);background:transparent;border:1px solid var(--primary);border-radius:6px;padding:5px 12px;cursor:pointer;font-weight:600">+ Adicionar contato</button>
-    </div>
 
-    <div class="card-block" style="margin-top:16px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div class="section-title" style="margin-bottom:0">Satisfação (CSAT)</div>
-        ${(() => {
-          const cs = calcCsatAtual(c);
-          if (cs === null) return '';
-          const clr = cs>=4?'#22c55e':cs>=3?'#eab308':'#ef4444';
-          return '<span style="font-size:22px;font-weight:800;color:'+clr+'">'+cs+' <span style="font-size:12px;color:var(--text3)">/ 5</span></span>';
-        })()}
       </div>
-      ${(c.csatRespostas||[]).length === 0
-        ? '<p style="font-size:12px;color:var(--text3);margin:0 0 12px">Nenhuma pesquisa registrada ainda.</p>'
-        : '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">' +
-          (c.csatRespostas||[]).slice().reverse().map(function(r){
-            const clr = r.score>=4?'#22c55e':r.score>=3?'#eab308':'#ef4444';
-            return '<div style="display:flex;align-items:center;gap:10px;padding:6px 8px;background:var(--b-surface);border-radius:6px;font-size:12px">'
-              + '<span style="font-weight:800;color:'+clr+';min-width:20px">'+r.score+'</span>'
-              + '<span style="color:var(--text3)">'+new Date(r.data).toLocaleDateString('pt-BR')+'</span>'
-              + (r.obs ? '<span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.obs+'</span>' : '')
-              + '</div>';
-          }).join('') + '</div>'
-      }
-      <div id="csat-form-${c.id}" style="display:none;background:var(--b-surface);border-radius:8px;padding:12px;margin-bottom:8px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-          <div>
-            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Score (1–5)</label>
-            <input id="csat-score-${c.id}" type="number" min="1" max="5" step="0.5" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
-          </div>
-          <div>
-            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Data</label>
-            <input id="csat-data-${c.id}" type="date" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
-          </div>
-        </div>
-        <div style="margin-bottom:10px">
-          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Observação (opcional)</label>
-          <input id="csat-obs-${c.id}" type="text" placeholder="Ex: cliente satisfeito com onboarding" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
-        </div>
-        <div style="display:flex;gap:8px">
-          <button onclick="registrarCsat('${c.id}',document.getElementById('csat-score-${c.id}').value,document.getElementById('csat-obs-${c.id}').value,document.getElementById('csat-data-${c.id}').value)" style="flex:1;padding:7px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Salvar</button>
-          <button onclick="cancelarFormCsat('${c.id}')" style="padding:7px 14px;background:transparent;color:var(--text3);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer">Cancelar</button>
-        </div>
-      </div>
-      <button onclick="document.getElementById('csat-form-${c.id}').style.display='block';var d=document.getElementById('csat-data-${c.id}');if(d)d.value=new Date().toISOString().slice(0,10)" style="font-size:12px;color:var(--primary);background:transparent;border:1px solid var(--primary);border-radius:6px;padding:5px 12px;cursor:pointer;font-weight:600">+ Registrar CSAT</button>
-    </div>
+      <div class="v360-col">
 
-    <div class="card-block" style="margin-top:16px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div class="section-title" style="margin-bottom:0">Net Promoter Score (NPS)</div>
-        ${(() => {
-          const nps = calcNps(c);
-          if (nps === null) return '';
-          const clr = nps>=50?'#22c55e':nps>=0?'#eab308':'#ef4444';
-          const lbl = nps>=50?'Excelente':nps>=0?'Bom':'Crítico';
-          return '<span style="font-size:22px;font-weight:800;color:'+clr+'">'+nps+' <span style="font-size:12px;color:var(--text3)">'+lbl+'</span></span>';
-        })()}
-      </div>
-      ${(c.npsRespostas||[]).length === 0
-        ? '<p style="font-size:12px;color:var(--text3);margin:0 0 12px">Nenhuma resposta registrada ainda.</p>'
-        : '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">' +
-          (c.npsRespostas||[]).slice().reverse().map(function(r){
-            const clr = r.score>=9?'#22c55e':r.score>=7?'var(--text3)':'#ef4444';
-            const tipo = r.score>=9?'Promotor':r.score>=7?'Neutro':'Detrator';
-            return '<div style="display:flex;align-items:center;gap:10px;padding:6px 8px;background:var(--b-surface);border-radius:6px;font-size:12px">'
-              + '<span style="font-weight:800;color:'+clr+';min-width:24px">'+r.score+'</span>'
-              + '<span style="color:'+clr+';font-size:10px;font-weight:700">'+tipo+'</span>'
-              + '<span style="color:var(--text3)">'+new Date(r.data).toLocaleDateString('pt-BR')+'</span>'
-              + (r.comentario ? '<span style="color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.comentario+'</span>' : '')
-              + '</div>';
-          }).join('') + '</div>'
-      }
-      <div id="nps-form-${c.id}" style="display:none;background:var(--b-surface);border-radius:8px;padding:12px;margin-bottom:8px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-          <div>
-            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Score NPS (0–10)</label>
-            <input id="nps-score-${c.id}" type="number" min="0" max="10" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
+        <div class="card-block" style="margin-bottom:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div class="section-title" style="margin-bottom:0">CSAT</div>
+            ${csatVal !== null ? `<div style="display:flex;align-items:baseline;gap:4px"><span style="font-size:28px;font-weight:800;letter-spacing:-1px;color:${csatClr}">${csatVal}</span><span style="font-size:12px;color:var(--text3)">/5 · ${csatLbl}</span></div>` : ''}
           </div>
-          <div>
-            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Data</label>
-            <input id="nps-data-${c.id}" type="date" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
+          ${csatRespHtml}
+          <div id="csat-form-${c.id}" style="display:none;background:var(--b-surface);border-radius:8px;padding:12px;margin-bottom:8px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+              <div><label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Score (1–5)</label><input id="csat-score-${c.id}" type="number" min="1" max="5" step="0.5" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box"></div>
+              <div><label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Data</label><input id="csat-data-${c.id}" type="date" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box"></div>
+            </div>
+            <div style="margin-bottom:10px"><label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Observação (opcional)</label><input id="csat-obs-${c.id}" type="text" placeholder="Ex: cliente satisfeito com onboarding" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box"></div>
+            <div style="display:flex;gap:8px">
+              <button onclick="registrarCsat('${c.id}',document.getElementById('csat-score-${c.id}').value,document.getElementById('csat-obs-${c.id}').value,document.getElementById('csat-data-${c.id}').value)" style="flex:1;padding:7px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Salvar</button>
+              <button onclick="cancelarFormCsat('${c.id}')" style="padding:7px 14px;background:transparent;color:var(--text3);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer">Cancelar</button>
+            </div>
           </div>
+          <button onclick="document.getElementById('csat-form-${c.id}').style.display='block';var d=document.getElementById('csat-data-${c.id}');if(d)d.value=new Date().toISOString().slice(0,10)" style="font-size:11px;font-weight:700;color:var(--primary);background:transparent;border:none;cursor:pointer;padding:0">+ Registrar CSAT</button>
         </div>
-        <div style="margin-bottom:10px">
-          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Comentário (opcional)</label>
-          <input id="nps-com-${c.id}" type="text" placeholder="Ex: indicaria para outros" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box">
+
+        <div class="card-block">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div class="section-title" style="margin-bottom:0">NPS</div>
+            ${npsVal !== null ? `<div style="display:flex;align-items:baseline;gap:4px"><span style="font-size:28px;font-weight:800;letter-spacing:-1px;color:${npsClr}">${npsVal}</span><span style="font-size:12px;color:var(--text3)">${npsLbl}</span></div>` : ''}
+          </div>
+          ${npsRespHtml}
+          <div id="nps-form-${c.id}" style="display:none;background:var(--b-surface);border-radius:8px;padding:12px;margin-bottom:8px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+              <div><label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Score NPS (0–10)</label><input id="nps-score-${c.id}" type="number" min="0" max="10" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box"></div>
+              <div><label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Data</label><input id="nps-data-${c.id}" type="date" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box"></div>
+            </div>
+            <div style="margin-bottom:10px"><label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">Comentário (opcional)</label><input id="nps-com-${c.id}" type="text" placeholder="Ex: indicaria para outros" style="width:100%;padding:6px 8px;background:var(--b-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;box-sizing:border-box"></div>
+            <div style="display:flex;gap:8px">
+              <button onclick="registrarNps('${c.id}',document.getElementById('nps-score-${c.id}').value,document.getElementById('nps-com-${c.id}').value,document.getElementById('nps-data-${c.id}').value)" style="flex:1;padding:7px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Salvar</button>
+              <button onclick="cancelarFormNps('${c.id}')" style="padding:7px 14px;background:transparent;color:var(--text3);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer">Cancelar</button>
+            </div>
+          </div>
+          <button onclick="document.getElementById('nps-form-${c.id}').style.display='block';var d=document.getElementById('nps-data-${c.id}');if(d)d.value=new Date().toISOString().slice(0,10)" style="font-size:11px;font-weight:700;color:var(--primary);background:transparent;border:none;cursor:pointer;padding:0">+ Registrar NPS</button>
         </div>
-        <div style="display:flex;gap:8px">
-          <button onclick="registrarNps('${c.id}',document.getElementById('nps-score-${c.id}').value,document.getElementById('nps-com-${c.id}').value,document.getElementById('nps-data-${c.id}').value)" style="flex:1;padding:7px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Salvar</button>
-          <button onclick="cancelarFormNps('${c.id}')" style="padding:7px 14px;background:transparent;color:var(--text3);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer">Cancelar</button>
-        </div>
+
       </div>
-      <button onclick="document.getElementById('nps-form-${c.id}').style.display='block';var d=document.getElementById('nps-data-${c.id}');if(d)d.value=new Date().toISOString().slice(0,10)" style="font-size:12px;color:var(--primary);background:transparent;border:1px solid var(--primary);border-radius:6px;padding:5px 12px;cursor:pointer;font-weight:600">+ Registrar NPS</button>
     </div>`;
 }
 
