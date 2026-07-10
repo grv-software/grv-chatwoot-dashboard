@@ -3418,9 +3418,16 @@ function renderVencimentos() {
   '</div>';
 
   var contentHtml;
-  if (_venc_tab === 'resolver')       contentHtml = renderVencAResolver();
-  else if (_venc_tab === 'planejar')  contentHtml = renderVencPlanejar();
-  else                                contentHtml = renderVencPorCliente();
+  try {
+    if (_venc_tab === 'resolver')       contentHtml = renderVencAResolver();
+    else if (_venc_tab === 'planejar')  contentHtml = renderVencPlanejar();
+    else                                contentHtml = renderVencPorCliente();
+  } catch(e) {
+    console.error('[Painel] erro na aba "' + _venc_tab + '":', e);
+    contentHtml = '<div style="color:#dc2626;padding:20px;font-size:13px;background:#fee2e2;border-radius:8px;margin:16px 0">' +
+      '<b>Erro ao carregar aba:</b> ' + (e && e.message ? e.message : String(e)) + '<br>' +
+      '<small style="opacity:.7">Abra o DevTools (F12) → Console para detalhes.</small></div>';
+  }
 
   sec.innerHTML = '<div class="venc-wrap">' + kpiHtml + toolHtml + contentHtml + '</div>';
 
