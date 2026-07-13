@@ -591,8 +591,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .at-right-col{overflow-y:auto;background:var(--surface);display:flex;flex-direction:column}
 .at-right-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border-2);flex-shrink:0;gap:10px}
 .at-right-title{font-size:14px;font-weight:800;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.at-row-new{display:flex;align-items:center;gap:10px;padding:11px 20px;border-bottom:1px solid var(--border-2);cursor:pointer;transition:background .1s}
+.at-row-new{display:flex;align-items:center;gap:10px;padding:11px 20px 11px 23px;border-bottom:1px solid var(--border-2);cursor:pointer;transition:background .1s;position:relative}
 .at-row-new:hover{background:var(--bg)}
+.at-row-new::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:0 2px 2px 0}
+.at-row-new.row-atrasada::before{background:var(--red)}
+.at-row-new.row-hoje::before{background:var(--yellow)}
 .at-checkbox{width:17px;height:17px;border-radius:4px;border:1.5px solid #cbd5e0;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;font-weight:800}
 .at-checkbox.done{background:var(--green);border-color:var(--green);color:#fff}
 .at-row-name{font-size:13px;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -5917,7 +5920,8 @@ function renderAbaAtividades(c) {
       let slaTxt  = '';
       if (late)      slaTxt = `<span style="font-size:9px;background:#FFF5F5;color:var(--red);border-radius:4px;padding:1px 5px;font-weight:700">${Math.abs(diasR)}d atrás</span>`;
       else if (prox) slaTxt = `<span style="font-size:9px;background:#FFFFF0;color:var(--yellow);border-radius:4px;padding:1px 5px;font-weight:700">${diasR}d</span>`;
-      return `<div class="at-row-new" onclick="openAtividade('${c.id}','${selPb.id}','${at.id}')">
+      const rowCls = late ? ' row-atrasada' : prox ? ' row-hoje' : '';
+      return `<div class="at-row-new${rowCls}" onclick="openAtividade('${c.id}','${selPb.id}','${at.id}')">
         <div class="at-checkbox${done?' done':''}">${done?'✓':''}</div>
         <span class="at-row-name${done?' done':''}">${at.nome}</span>
         <div class="at-row-right">
