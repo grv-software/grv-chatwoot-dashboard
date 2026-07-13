@@ -6737,16 +6737,7 @@ function addRegistro(clienteId) {
   var tipoEl = document.getElementById('nota-tipo-' + clienteId);
   c.registros.unshift({id:'r'+Date.now(), autor:nome, data:new Date().toISOString(), texto, tipo: tipoEl ? tipoEl.value : 'observacao'});
   saveCliente(c);
-  ta.value = '';
-
-  const regsEl = document.getElementById('regs-' + clienteId);
-  if (regsEl) {
-    regsEl.innerHTML = c.registros.map(r => `
-      <div class="reg-item">
-        <div class="reg-meta"><strong>${r.autor}</strong> · ${fmtDateTime(r.data)}</div>
-        <div class="reg-text">${r.texto}</div>
-      </div>`).join('');
-  }
+  setClienteAba('notas', clienteId);
 }
 
 // ─── Modal Alterar Etapa ────────────────────────────────────
