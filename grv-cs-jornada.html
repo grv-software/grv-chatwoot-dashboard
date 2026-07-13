@@ -527,19 +527,19 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .ov-dates-row{display:flex;gap:10px;padding:8px 0 4px}
 
 /* ── Novo header do cliente ────────────────────────── */
-.dc-header{display:flex;align-items:center;gap:16px;padding:20px 0 18px}
+.dc-header{display:flex;align-items:center;gap:12px;padding:14px 0 12px}
 .dc-back{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--text3);flex-shrink:0;text-decoration:none}
 .dc-back:hover{background:var(--bg)}
-.dc-avatar-lg{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff;flex-shrink:0}
+.dc-avatar-lg{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;flex-shrink:0}
 .dc-info{flex:1;min-width:0}
 .dc-name{font-size:20px;font-weight:800;color:var(--text);line-height:1.2}
 .dc-sub{font-size:12px;color:var(--text3);margin-top:3px}
 .dc-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
 .dc-kpi-strip{display:flex;border-top:1px solid var(--border-2)}
-.dc-kpi{flex:1;padding:10px 14px;border-right:1px solid var(--border-2)}
+.dc-kpi{flex:1;padding:8px 12px;border-right:1px solid var(--border-2)}
 .dc-kpi:last-child{border-right:none;flex:2}
 .dc-kpi-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text4);margin-bottom:4px}
-.dc-kpi-val{font-size:22px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.8px}
+.dc-kpi-val{font-size:18px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.6px}
 .dc-kpi-sub{font-size:10px;color:var(--text3);margin-top:2px}
 .dc-kpi-next{font-size:13px;font-weight:700;color:var(--text);margin-top:2px}
 .v360-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
@@ -577,7 +577,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .chip-prod{background:#FFF3EE;color:var(--primary)}
 
 /* ── Atividades: duas colunas ──────────────────────── */
-.at-cols{display:grid;grid-template-columns:240px 1fr;min-height:480px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.at-cols{display:grid;grid-template-columns:220px 1fr;align-items:start;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
 .at-left-col{border-right:1px solid var(--border);background:#fafbfc;padding:12px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:5px}
 .at-left-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text4);padding:0 6px 4px}
 .at-pb-card{padding:10px 12px;border-radius:9px;border:1.5px solid transparent;cursor:pointer;background:var(--surface);transition:all .12s}
@@ -5494,10 +5494,15 @@ function renderCliente(id) {
   const _proxData  = _proxAt ? new Date(_proxAt.dataLimite).toLocaleDateString('pt-BR') : '';
   const _proxAcao  = c.proximaAcao || '—';
 
-  // Badge de atrasadas na aba Atividades
+  // Badge de atrasadas na aba Atividades (usa dataLimite como fonte primária, igual ao render das linhas)
+  const _hojeBadge = new Date(); _hojeBadge.setHours(0,0,0,0);
   const _totalAtrasadas = (c.ativPlaybooks || []).reduce(function(acc, pb) {
     if (pb.status === 'cancelado') return acc;
-    return acc + (pb.atividades || []).filter(function(at){ return at.status === 'atrasada'; }).length;
+    return acc + (pb.atividades || []).filter(function(at) {
+      if (at.status === 'concluida') return false;
+      const dl = at.dataLimite ? new Date(at.dataLimite+'T00:00:00') : null;
+      return (dl && dl < _hojeBadge) || at.status === 'atrasada';
+    }).length;
   }, 0);
   const _tabBadge = _totalAtrasadas > 0
     ? '<span style="font-size:10px;font-weight:700;background:#DC2626;color:#fff;padding:1px 5px;border-radius:10px;margin-left:4px;line-height:1.4">' + _totalAtrasadas + '</span>'
@@ -5813,7 +5818,9 @@ function renderAbaAtividades(c) {
     if (pb.status === 'cancelado' || pb.encerrado) return;
     (pb.atividades || []).forEach(function(at) {
       if (at.status === 'concluida') return;
-      if (at.status === 'atrasada') _totalAtrasadas++;
+      const _dl = at.dataLimite ? new Date(at.dataLimite+'T00:00:00') : null;
+      const _isLate = (_dl && _dl < _hoje) || at.status === 'atrasada';
+      if (_isLate) _totalAtrasadas++;
       else if (at.dataLimite && at.dataLimite.slice(0,10) === _hojStr) _totalHoje++;
     });
   });
@@ -5864,9 +5871,8 @@ function renderAbaAtividades(c) {
             <button class="ov-dropdown-item danger" onclick="closePbMenu();excluirPlaybook('${pb.id}','${c.id}')">🗑 Excluir</button>
           </div>
         </div>` : '';
-    var _pbAtrasadas = (pb.atividades || []).filter(function(at){ return at.status === 'atrasada'; }).length;
-    var _pbAlertBadge = _pbAtrasadas > 0
-      ? '<span class="pb-badge-alert">' + _pbAtrasadas + ' atraso</span>'
+    var _pbAlertBadge = venc > 0
+      ? '<span class="pb-badge-alert">' + venc + ' atraso</span>'
       : '';
     return `<div class="at-pb-card${isSel?' sel':''}" style="${cardBorderStyle};${cardOpacity}" onclick="selecionarPb('${pb.id}','${c.id}')">
       <div style="display:flex;align-items:flex-start;gap:4px;margin-bottom:2px">
