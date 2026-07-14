@@ -510,21 +510,38 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .ov-backdrop.open{opacity:1;pointer-events:all}
 .ov-panel{position:fixed;top:0;right:0;bottom:0;width:420px;background:var(--surface);border-left:1px solid var(--border);z-index:201;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-2)}
 .ov-panel.open{transform:translateX(0)}
-.ov-hd{padding:14px 16px 0;border-bottom:1px solid var(--border-2);flex-shrink:0}
-.ov-hd-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
-.ov-title{font-size:14px;font-weight:800;color:var(--text);flex:1;margin-right:12px;line-height:1.3}
-.ov-close{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--text3);flex-shrink:0}
+/* ── OVERLAY PANEL — 6 zonas ───────────────────────────── */
+.ov-stripe{height:4px;flex-shrink:0;transition:background .2s}
+.ov-head{border-bottom:1px solid var(--border-2);flex-shrink:0}
+.ov-head-row1{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 8px;position:relative;gap:8px}
+.ov-head-title{font-size:18px;font-weight:800;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:-.5px;line-height:1.1}
+.ov-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;padding:3px 9px;border-radius:12px;flex-shrink:0;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.ov-tag-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.ov-head-row2{padding:0 18px 12px;font-size:11px;color:var(--text4);display:flex;align-items:center;gap:5px;flex-wrap:wrap;line-height:1.4}
+.ov-head-row2 b{color:var(--text3);font-weight:600}
+.ov-head-av{width:16px;height:16px;border-radius:4px;background:linear-gradient(135deg,var(--primary),#ff8c5a);display:inline-flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;color:#fff;flex-shrink:0;vertical-align:middle}
+.ov-kpi-strip{display:grid;grid-template-columns:1fr 1fr 1fr}
+.ov-kpi-cell{padding:10px 14px;border-right:1px solid var(--border-2);border-top:1px solid var(--border-2)}
+.ov-kpi-cell:last-child{border-right:none}
+.ov-kpi-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--text4);margin-bottom:3px}
+.ov-kpi-val{font-size:13px;font-weight:800;color:var(--text);letter-spacing:-.2px}
+.ov-kpi-urgency{font-size:9px;font-weight:700;margin-top:2px}
+.ov-kpi-input{display:none}
+.ov-kpi-prog-track{height:3px;background:var(--border-2);border-radius:2px;overflow:hidden;margin-top:5px}
+.ov-kpi-prog-fill{height:100%;border-radius:2px;transition:width .3s}
+.ov-close{width:26px;height:26px;border-radius:7px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--text3);flex-shrink:0}
 .ov-close:hover{background:var(--border-2)}
-.ov-meta{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
-.ov-tabs{display:flex}
-.ov-tab{padding:8px 14px;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s}
+.ov-meta{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.ov-tabs{display:flex;border-bottom:1px solid var(--border-2)}
+.ov-tab{flex:1;text-align:center;padding:10px 0;font-size:11px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .12s}
 .ov-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
-.ov-body{flex:1;overflow-y:auto;padding:16px}
-.ov-footer{padding:12px 16px;border-top:1px solid var(--border-2);flex-shrink:0;background:var(--surface)}
-.ov-btn-concluir{width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .15s}
+.ov-body{flex:1;overflow-y:auto;padding:16px 20px}
+.ov-footer{padding:11px 20px;border-top:1px solid var(--border-2);flex-shrink:0;background:var(--bg);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ov-footer-prog{font-size:11px;color:var(--text3);white-space:nowrap}
+.ov-footer-prog strong{font-weight:800;color:var(--green)}
+.ov-btn-concluir{padding:9px 20px;background:var(--primary);color:#fff;border:1.5px solid transparent;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .15s;white-space:nowrap;flex-shrink:0}
 .ov-btn-concluir:hover{opacity:.88}
-.ov-btn-concluir.done{background:var(--border-2);color:var(--text3);cursor:default}
-.ov-dates-row{display:flex;gap:10px;padding:8px 0 4px}
+.ov-btn-concluir.done{background:transparent;color:var(--green);border-color:var(--green);cursor:default;opacity:1}
 
 /* ── Novo header do cliente ────────────────────────── */
 .dc-header{display:flex;align-items:center;gap:12px;padding:14px 0 12px}
@@ -607,11 +624,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .at-status-pendente{font-size:10px;font-weight:700;color:var(--text3)}
 .at-status-em_andamento{font-size:10px;font-weight:700;color:var(--blue)}
 /* registro */
-.ov-reg-form{display:flex;gap:8px;margin-bottom:16px}
-.ov-reg-av{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--primary),#ff8c5a);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;margin-top:2px}
-.ov-reg-wrap{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px}
-.ov-reg-ta{border:none;outline:none;font-size:12px;color:var(--text);background:transparent;width:100%;resize:none;font-family:inherit;min-height:40px}
-.ov-reg-send{float:right;margin-top:6px;padding:5px 12px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer}
+.ov-reg-form{display:flex;gap:9px;margin-bottom:16px;align-items:flex-start}
+.ov-reg-av{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--primary),#ff8c5a);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0;margin-top:1px}
+.ov-reg-wrap{flex:1}
+.ov-reg-ta{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;font-size:12px;color:var(--text);resize:none;min-height:56px;box-sizing:border-box;font-family:inherit;line-height:1.5;outline:none;transition:border-color .12s}
+.ov-reg-ta:focus{border-color:var(--primary)}
+.ov-reg-actions{display:flex;justify-content:space-between;align-items:center;margin-top:7px}
+.ov-reg-hint{font-size:10px;color:var(--text4)}
+.ov-reg-send{padding:6px 16px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer}
 .ov-reg-item{display:flex;gap:10px;margin-bottom:14px}
 .ov-reg-iav{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0}
 .ov-reg-ibody{flex:1}
@@ -996,10 +1016,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 <!-- ── ACTIVITY OVERLAY ──────────────────────────────────── -->
 <div class="ov-backdrop" id="ov-backdrop" onclick="closeAtividade()"></div>
 <div class="ov-panel" id="ov-panel">
-  <div class="ov-hd">
-    <div class="ov-hd-top" style="position:relative">
-      <div class="ov-title" id="ov-titulo">Atividade</div>
+  <!-- Zona 1: Stripe de status -->
+  <div class="ov-stripe" id="ov-stripe"></div>
+  <!-- Zona 2: Header -->
+  <div class="ov-head">
+    <div class="ov-head-row1">
+      <div class="ov-head-title" id="ov-titulo">Atividade</div>
       <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+        <span class="ov-tag" id="ov-tag"><span class="ov-tag-dot" id="ov-tag-dot"></span><span id="ov-tag-lbl">Pendente</span></span>
         <div class="ov-menu-btn" onclick="toggleOvMenu(event)" title="Mais opções">···</div>
         <div class="ov-close" onclick="closeAtividade()">✕</div>
       </div>
@@ -1012,28 +1036,38 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
         <button class="ov-dropdown-item danger" onclick="excluirAtividade()">🗑 Excluir atividade</button>
       </div>
     </div>
-    <div class="ov-meta" id="ov-meta"></div>
-    <div id="ov-deadline-wrap" style="display:none;padding:4px 0 0;font-size:11px;font-weight:600">
-      <span id="ov-deadline"></span>
-    </div>
-    <div class="ov-dates-row">
-      <div style="flex:1">
-        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text4);margin-bottom:3px">Início</div>
-        <input type="date" id="ov-data-inicio" onchange="saveOvDatas()" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:11px;color:var(--text);background:var(--bg);outline:none;cursor:pointer">
+    <div class="ov-head-row2" id="ov-meta"></div>
+    <!-- Zona 3: KPI Strip -->
+    <div class="ov-kpi-strip">
+      <div class="ov-kpi-cell" onclick="document.getElementById('ov-data-inicio').showPicker&&document.getElementById('ov-data-inicio').showPicker()" style="cursor:pointer">
+        <div class="ov-kpi-label">Início</div>
+        <div class="ov-kpi-val" id="ov-kpi-inicio">—</div>
+        <input type="date" id="ov-data-inicio" class="ov-kpi-input" onchange="saveOvDatas()">
       </div>
-      <div style="flex:1">
-        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text4);margin-bottom:3px">Meta (fim)</div>
-        <input type="date" id="ov-data-fim" onchange="saveOvDatas()" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:11px;color:var(--text);background:var(--bg);outline:none;cursor:pointer">
+      <div class="ov-kpi-cell" onclick="document.getElementById('ov-data-fim').showPicker&&document.getElementById('ov-data-fim').showPicker()" style="cursor:pointer">
+        <div class="ov-kpi-label">Prazo</div>
+        <div class="ov-kpi-val" id="ov-kpi-prazo">—</div>
+        <div class="ov-kpi-urgency" id="ov-kpi-urgency"></div>
+        <input type="date" id="ov-data-fim" class="ov-kpi-input" onchange="saveOvDatas()">
+      </div>
+      <div class="ov-kpi-cell">
+        <div class="ov-kpi-label">Progresso</div>
+        <div class="ov-kpi-val" id="ov-kpi-prog">—</div>
+        <div class="ov-kpi-prog-track"><div class="ov-kpi-prog-fill" id="ov-kpi-prog-fill" style="width:0%"></div></div>
       </div>
     </div>
+    <!-- Zona 4: Tabs -->
     <div class="ov-tabs">
       <div class="ov-tab active" onclick="setOverlayTab('registro',this)">Registro</div>
       <div class="ov-tab" onclick="setOverlayTab('checklist',this)">Checklist</div>
       <div class="ov-tab" onclick="setOverlayTab('anotacao',this)">Anotação</div>
     </div>
   </div>
+  <!-- Zona 5: Body -->
   <div class="ov-body" id="ov-body"></div>
+  <!-- Zona 6: Footer -->
   <div class="ov-footer">
+    <span class="ov-footer-prog" id="ov-footer-prog"></span>
     <button class="ov-btn-concluir" id="ov-btn-concluir" onclick="concluirAtividade()">✓ Marcar como Concluída</button>
   </div>
 </div>
@@ -6145,32 +6179,86 @@ function openAtividade(cId, pbId, atId) {
   const at = (pb?.atividades || []).find(a => a.id === atId);
   if (!at) return;
 
+  // ── Status efetivo (data-based) ──
+  const _hoje = new Date(); _hoje.setHours(0,0,0,0);
+  const dl     = at.dataLimite ? new Date(at.dataLimite + 'T00:00:00') : null;
+  const diffD  = dl ? Math.round((dl - _hoje) / 86400000) : null;
+  const effSt  = at.status === 'concluida' ? 'concluida'
+    : (dl && dl < _hoje) ? 'atrasada'
+    : (dl && diffD === 0) ? 'hoje'
+    : at.status || 'pendente';
+
+  // ── Zona 1: Stripe ──
+  const stStripe = {
+    concluida:    'linear-gradient(90deg,#38a169,#68d391)',
+    atrasada:     'linear-gradient(90deg,#e53e3e,#fc8181)',
+    hoje:         'linear-gradient(90deg,#d69e2e,#f6d860)',
+    pendente:     'linear-gradient(90deg,var(--border),var(--border-2))',
+    em_andamento: 'linear-gradient(90deg,#3182ce,#63b3ed)'
+  };
+  const stripeEl = document.getElementById('ov-stripe');
+  if (stripeEl) stripeEl.style.background = stStripe[effSt] || stStripe.pendente;
+
+  // ── Zona 2: Título ──
   document.getElementById('ov-titulo').textContent = at.nome || at.titulo || '—';
 
-  const stBg  = {concluida:'var(--b-green-bg)',atrasada:'var(--b-red-bg)',pendente:'var(--border-2)',em_andamento:'var(--b-blue-bg)'};
-  const stClr = {concluida:'var(--green)',atrasada:'var(--red)',pendente:'var(--text3)',em_andamento:'var(--blue)'};
-  const stLbl = {concluida:'Concluída',atrasada:'Atrasada',pendente:'Pendente',em_andamento:'Em andamento'};
-  const resp  = at.responsavelId || pb.donoId || '?';
-  const st    = at.status || 'pendente';
+  // ── Zona 2: Tag de status ──
+  const stTagBg  = {concluida:'rgba(56,161,105,.13)',atrasada:'rgba(229,62,62,.12)',hoje:'rgba(214,158,46,.13)',pendente:'var(--border-2)',em_andamento:'rgba(49,130,206,.12)'};
+  const stTagClr = {concluida:'#38a169',atrasada:'#e53e3e',hoje:'#d69e2e',pendente:'var(--text3)',em_andamento:'#3182ce'};
+  const stLbl    = {concluida:'Concluída',atrasada:'Atrasada',hoje:'Vence hoje',pendente:'Pendente',em_andamento:'Em andamento'};
+  const tagEl    = document.getElementById('ov-tag');
+  const tagDotEl = document.getElementById('ov-tag-dot');
+  const tagLblEl = document.getElementById('ov-tag-lbl');
+  if (tagEl)    { tagEl.style.background = stTagBg[effSt] || stTagBg.pendente; tagEl.style.color = stTagClr[effSt] || stTagClr.pendente; }
+  if (tagDotEl) tagDotEl.style.background = stTagClr[effSt] || stTagClr.pendente;
+  if (tagLblEl) tagLblEl.textContent = stLbl[effSt] || effSt;
 
-  document.getElementById('ov-meta').innerHTML =
-    '<span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)">' +
-      '<span style="width:20px;height:20px;border-radius:5px;background:linear-gradient(135deg,var(--primary),#ff8c5a);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff">' +
-        resp[0].toUpperCase() +
-      '</span>' +
-      resp +
-    '</span>' +
-    '<span class="status-badge" style="background:' + (stBg[st]||'var(--border-2)') + ';color:' + (stClr[st]||'var(--text3)') + '">' +
-      (stLbl[st]||st) +
-    '</span>';
+  // ── Zona 2: Meta inline ──
+  const fmt = function(d){ return d ? new Date(d+'T00:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'}) : '—'; };
+  const respId   = at.responsavelId || pb.donoId || '';
+  const respNome = respId ? ((getConsultores().find(function(x){return x.id===respId;})||{}).nome||respId) : '—';
+  const metaEl   = document.getElementById('ov-meta');
+  if (metaEl) {
+    metaEl.innerHTML =
+      '<span class="ov-head-av">' + (respNome[0]||'?').toUpperCase() + '</span>' +
+      ' <b>' + respNome + '</b>' +
+      ' · ' + (pb.nome || 'Playbook') +
+      (at.dataInicio || at.dataLimite ? ' · ' + fmt(at.dataInicio) + ' → <b>' + fmt(at.dataLimite) + '</b>' : '');
+  }
 
-  // Datas de início e fim
-  const diInput = document.getElementById('ov-data-inicio');
-  const dfInput = document.getElementById('ov-data-fim');
-  if (diInput) diInput.value = at.dataInicio ? at.dataInicio.split('T')[0] : '';
-  if (dfInput) dfInput.value = at.dataLimite ? at.dataLimite.split('T')[0] : '';
+  // ── Zona 3: KPI Strip ──
+  const inicioEl   = document.getElementById('ov-kpi-inicio');
+  const prazoEl    = document.getElementById('ov-kpi-prazo');
+  const urgencyEl  = document.getElementById('ov-kpi-urgency');
+  const progEl     = document.getElementById('ov-kpi-prog');
+  const progFillEl = document.getElementById('ov-kpi-prog-fill');
+  const diInput    = document.getElementById('ov-data-inicio');
+  const dfInput    = document.getElementById('ov-data-fim');
+  if (inicioEl) inicioEl.textContent = at.dataInicio ? fmt(at.dataInicio) : '—';
+  if (prazoEl)  prazoEl.textContent  = at.dataLimite ? fmt(at.dataLimite) : '—';
+  if (diInput)  diInput.value        = at.dataInicio ? at.dataInicio.split('T')[0] : '';
+  if (dfInput)  dfInput.value        = at.dataLimite ? at.dataLimite.split('T')[0] : '';
+  if (urgencyEl) {
+    urgencyEl.innerHTML = '';
+    if (dl && at.status !== 'concluida') {
+      if (diffD < 0)       urgencyEl.innerHTML = '<span style="color:var(--red)">' + Math.abs(diffD) + 'd atrás</span>';
+      else if (diffD === 0) urgencyEl.innerHTML = '<span style="color:var(--yellow)">Vence hoje</span>';
+      else if (diffD <= 7)  urgencyEl.innerHTML = '<span style="color:var(--yellow)">em ' + diffD + 'd</span>';
+    }
+  }
+  const totalAts = (pb.atividades || []).length;
+  const doneAts  = (pb.atividades || []).filter(function(a){ return a.status === 'concluida'; }).length;
+  const pct      = totalAts > 0 ? Math.round(doneAts / totalAts * 100) : 0;
+  if (progEl)     { progEl.textContent = doneAts + ' / ' + totalAts; progEl.style.color = doneAts === totalAts ? 'var(--green)' : 'var(--text)'; }
+  if (progFillEl) { progFillEl.style.width = pct + '%'; progFillEl.style.background = stTagClr[effSt] || 'var(--text3)'; }
 
-  // Botão Concluir
+  // ── Zona 6: Footer progresso ──
+  const footerProgEl = document.getElementById('ov-footer-prog');
+  if (footerProgEl) {
+    footerProgEl.innerHTML = '<strong>' + doneAts + '/' + totalAts + '</strong> atividade' + (totalAts !== 1 ? 's' : '') + ' concluída' + (totalAts !== 1 ? 's' : '');
+  }
+
+  // ── Botão Concluir ──
   const btnC = document.getElementById('ov-btn-concluir');
   if (btnC) {
     if (at.status === 'concluida') {
@@ -6184,37 +6272,11 @@ function openAtividade(cId, pbId, atId) {
     }
   }
 
-  const dlWrap = document.getElementById('ov-deadline-wrap');
-  const dlSpan = document.getElementById('ov-deadline');
-  if (dlWrap && dlSpan) {
-    if (at.dataLimite && at.status !== 'concluida') {
-      const hoje2 = new Date(); hoje2.setHours(0,0,0,0);
-      const dlDate = new Date(at.dataLimite + 'T00:00:00');
-      const diffMs = dlDate - hoje2;
-      const diffD  = Math.round(diffMs / 86400000);
-      const ddmm   = dlDate.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'});
-      if (diffD < 0) {
-        dlSpan.innerHTML = '<span style="color:var(--red)">⏰ Vencida há ' + Math.abs(diffD) + ' dia' + (Math.abs(diffD)!==1?'s':'') + ' · ' + ddmm + '</span>';
-      } else if (diffD === 0) {
-        dlSpan.innerHTML = '<span style="color:#d69e2e">⚠️ Vence hoje · ' + ddmm + '</span>';
-      } else if (diffD <= 7) {
-        dlSpan.innerHTML = '<span style="color:#d69e2e">⚠️ Vence em ' + diffD + ' dia' + (diffD!==1?'s':'') + ' · ' + ddmm + '</span>';
-      } else {
-        dlSpan.innerHTML = '<span style="color:var(--text3)">📅 Prazo: ' + ddmm + ' (' + diffD + ' dias)</span>';
-      }
-      dlWrap.style.display = '';
-    } else {
-      dlWrap.style.display = 'none';
-    }
-  }
-
-  // Reabrir button — visible only for concluded activities
+  // ── Botão Reabrir ──
   const btnReabrir = document.getElementById('ov-btn-reabrir');
   if (btnReabrir) btnReabrir.style.display = at.status === 'concluida' ? '' : 'none';
 
-  // Close menu if was open
   closeOvMenu();
-
   document.querySelectorAll('.ov-tab').forEach(function(t, i) { t.classList.toggle('active', i === 0); });
   renderOverlayTab('registro');
   document.getElementById('ov-backdrop').classList.add('open');
@@ -6276,10 +6338,13 @@ function renderOvRegistro() {
     '</div>';
   }).join('');
   return '<div class="ov-reg-form">' +
-    '<div class="ov-reg-av">' + cid[0].toUpperCase() + '</div>' +
+    '<div class="ov-reg-av">' + (cid[0]||'?').toUpperCase() + '</div>' +
     '<div class="ov-reg-wrap">' +
       '<textarea class="ov-reg-ta" id="ov-reg-input" placeholder="Adicionar registro..."></textarea>' +
-      '<button class="ov-reg-send" onclick="addOvRegistro()">Registrar</button>' +
+      '<div class="ov-reg-actions">' +
+        '<span class="ov-reg-hint">Registre um andamento ou decisão</span>' +
+        '<button class="ov-reg-send" onclick="addOvRegistro()">Registrar</button>' +
+      '</div>' +
     '</div>' +
   '</div>' +
   (itens || '<p style="font-size:12px;color:var(--text4);text-align:center;padding:20px">Nenhum registro ainda.</p>');
@@ -6306,23 +6371,33 @@ function saveOvDatas() {
   if (di !== undefined) at.dataInicio  = di || null;
   if (df !== undefined) at.dataLimite  = df || null;
   saveCliente(c);
-  // Atualiza badge de deadline sem fechar o overlay
-  const dlWrap = document.getElementById('ov-deadline-wrap');
-  const dlSpan = document.getElementById('ov-deadline');
-  if (dlWrap && dlSpan) {
+  // Atualiza KPI strip sem fechar o overlay
+  const fmt2       = function(d){ return d ? new Date(d+'T00:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'}) : '—'; };
+  const inicioEl2  = document.getElementById('ov-kpi-inicio');
+  const prazoEl2   = document.getElementById('ov-kpi-prazo');
+  const urgencyEl2 = document.getElementById('ov-kpi-urgency');
+  const metaEl2    = document.getElementById('ov-meta');
+  if (inicioEl2) inicioEl2.textContent = fmt2(at.dataInicio);
+  if (prazoEl2)  prazoEl2.textContent  = fmt2(at.dataLimite);
+  if (urgencyEl2) {
+    urgencyEl2.innerHTML = '';
     if (at.dataLimite && at.status !== 'concluida') {
-      const h = new Date(); h.setHours(0,0,0,0);
-      const d = new Date(at.dataLimite + 'T00:00:00');
-      const dd = Math.round((d - h) / 86400000);
-      const ddmm = d.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'});
-      if (dd < 0)      dlSpan.innerHTML = '<span style="color:var(--red)">⏰ Vencida há ' + Math.abs(dd) + ' dia' + (Math.abs(dd)!==1?'s':'') + ' · ' + ddmm + '</span>';
-      else if (dd===0) dlSpan.innerHTML = '<span style="color:#d69e2e">⚠️ Vence hoje · ' + ddmm + '</span>';
-      else if (dd<=7)  dlSpan.innerHTML = '<span style="color:#d69e2e">⚠️ Vence em ' + dd + ' dia' + (dd!==1?'s':'') + ' · ' + ddmm + '</span>';
-      else             dlSpan.innerHTML = '<span style="color:var(--text3)">📅 Prazo: ' + ddmm + ' (' + dd + ' dias)</span>';
-      dlWrap.style.display = '';
-    } else {
-      dlWrap.style.display = 'none';
+      const h2  = new Date(); h2.setHours(0,0,0,0);
+      const d2  = new Date(at.dataLimite + 'T00:00:00');
+      const dd2 = Math.round((d2 - h2) / 86400000);
+      if (dd2 < 0)        urgencyEl2.innerHTML = '<span style="color:var(--red)">' + Math.abs(dd2) + 'd atrás</span>';
+      else if (dd2 === 0) urgencyEl2.innerHTML = '<span style="color:var(--yellow)">Vence hoje</span>';
+      else if (dd2 <= 7)  urgencyEl2.innerHTML = '<span style="color:var(--yellow)">em ' + dd2 + 'd</span>';
     }
+  }
+  if (metaEl2) {
+    const respId2   = at.responsavelId || pb.donoId || '';
+    const respNome2 = respId2 ? ((getConsultores().find(function(x){return x.id===respId2;})||{}).nome||respId2) : '—';
+    metaEl2.innerHTML =
+      '<span class="ov-head-av">' + (respNome2[0]||'?').toUpperCase() + '</span>' +
+      ' <b>' + respNome2 + '</b>' +
+      ' · ' + (pb.nome || 'Playbook') +
+      (at.dataInicio || at.dataLimite ? ' · ' + fmt2(at.dataInicio) + ' → <b>' + fmt2(at.dataLimite) + '</b>' : '');
   }
 }
 
