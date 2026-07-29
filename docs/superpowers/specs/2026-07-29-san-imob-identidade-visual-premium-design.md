@@ -2,7 +2,7 @@
 
 **Data:** 2026-07-29
 **Status:** Aprovado
-**Escopo:** Substituir a identidade visual genérica do protótipo SAN Imob (cor, ícones, logo, tratamento do card de IA) por uma linguagem à altura de produtos SaaS premium (Linear/Vercel/Notion/Lofty), sem alterar estrutura, conteúdo ou navegação já existentes
+**Escopo:** Substituir a identidade visual genérica do protótipo SAN Imob (cor, ícones, logo, tratamento do card de IA) por uma linguagem à altura de produtos SaaS premium (Linear/Vercel/Notion/Lofty), e incorporar diferenciais de posicionamento competitivo (badge de pricing simples, painel de atividade da IA, toast em tempo real, score de lead numérico) — sem alterar estrutura, conteúdo ou navegação já existentes
 
 ---
 
@@ -17,7 +17,9 @@ Uma análise do protótipo atual (`san-imob/index.html`, `imoveis.html`, `client
 5. Sem microinteração de transição — troca de conteúdo é instantânea.
 6. Logo é emoji + texto, sem identidade própria.
 
-Este spec resolve os seis pontos numa só passada, consistente nas três páginas.
+**Contexto competitivo adicional:** o Kenlo (principal concorrente brasileiro) cobra a IA por créditos ("Koins"), gerando insegurança em imobiliárias pequenas, e tem interface densa/dark theme de alta curva de aprendizado. A Lofty (referência americana) já opera IA agêntica visível — um painel "Cowork" mostra em tempo real o que a IA está fazendo, com toast notifications e score de lead numérico. O posicionamento do SAN Imob é: mais simples que Kenlo (IA inclusa, sem créditos), mais brasileiro que Lofty (WhatsApp nativo), com IA no núcleo do produto. Isso adiciona quatro elementos ao escopo deste spec (seções 7 a 10), além dos seis pontos de identidade visual.
+
+Este spec resolve os seis pontos de identidade visual e os quatro diferenciais competitivos numa só passada, consistente nas três páginas.
 
 ---
 
@@ -78,7 +80,7 @@ Adicionar `letter-spacing: -0.02em` aos elementos de maior destaque visual em to
 
 ---
 
-## 6. Escopo de aplicação
+## 6. Escopo de aplicação (identidade visual)
 
 | Mudança | index.html | imoveis.html | clientes.html |
 |---|---|---|---|
@@ -93,12 +95,84 @@ Adicionar `letter-spacing: -0.02em` aos elementos de maior destaque visual em to
 
 ---
 
+## 7. Badge "✦ IA inclusa" na navbar
+
+Presente nas três páginas, logo após o wordmark "SAN Imob" na navbar (antes dos links de navegação). Pill pequena: fundo `#EEF2FF`, texto indigo `#4F46E5`, ~11-12px, ícone sparkle SVG (mesmo do card de IA) + texto "IA inclusa". Comunica visualmente, desde o primeiro olhar, o diferencial de pricing (sem créditos/Koins) sem precisar de texto explicativo.
+
+---
+
+## 8. Painel "Atividade da IA" (`index.html`, novo bloco)
+
+Novo bloco na tela Início, posicionado logo abaixo do `.ai-card` de oportunidade (que continua no topo como destaque principal — a ação mais urgente). O painel comunica que a IA trabalha continuamente sobre toda a carteira, não só quando solicitada — mesmo papel do painel "Cowork" da Lofty.
+
+**Estrutura:** card branco padrão (mesmo estilo dos outros cards do produto, sem o tratamento especial do ai-card), título "Atividade da IA", lista de 4 itens recentes. Cada item tem:
+- Ícone de status: ✓ concluído (verde `#16A34A`), ↻ processando (indigo `#4F46E5`, com leve animação de rotação contínua enquanto for o único item "em andamento" exibido), ⏳ agendado (cinza `#6B7280`)
+- Descrição da ação, citando o canal (WhatsApp) quando aplicável
+- Tempo relativo, alinhado à direita
+
+**Conteúdo (mock, ordem cronológica decrescente):**
+1. ✓ Mensagem enviada via WhatsApp — Marcos Andrade (há 2 min)
+2. ↻ Analisando carteira de 481 imóveis... (agora)
+3. ✓ Proposta gerada — Ap. 2q Palmeiras (há 18 min)
+4. ⏳ Follow-up agendado — Fernanda Lima (amanhã 10h)
+
+Sem interatividade além do hover leve nas linhas (mesmo padrão de `.list-row` já usado em Imóveis/Clientes) — não há ação real por trás dos itens nesta rodada.
+
+---
+
+## 9. Toast de oportunidade em tempo real (`index.html`)
+
+Aparece apenas na tela Início, simulando monitoramento ativo da IA. Dispara automaticamente ~5 segundos após o carregamento da página (via `setTimeout`), sem exigir nenhuma ação do usuário.
+
+**Conteúdo:** "✦ Nova oportunidade: Fernanda Lima abriu a proposta 3x hoje" + botão de texto "Ver" + botão de fechar (×).
+
+**Comportamento:**
+- Desliza a partir da borda direita, fixado no canto inferior direito da viewport (`position: fixed`).
+- Auto-dismiss após ~5 segundos, com fade-out.
+- Dispensável manualmente a qualquer momento pelo botão ×, cancelando o timer de auto-dismiss.
+- Dispara uma única vez por carregamento de página — não repete nem enfileira novos toasts.
+- Entrada/saída animada por `transform`/`opacity` (150-250ms, ease-out na entrada, ease-in na saída). Sob `prefers-reduced-motion: reduce`, aparece/desaparece sem slide, só com fade instantâneo mais curto.
+- Não bloqueia interação com o restante da página (não é modal).
+
+---
+
+## 10. Score numérico na lista de Clientes (`clientes.html`)
+
+Os badges de chance de fechamento já existentes (Alta/Média/Baixa) ganham um número ao lado, mantendo a cor/badge como indicador primário (não depende só do número para ser compreendido): formato `"Alta · 94"`.
+
+**Valores atribuídos (mantendo a ordem já existente na lista):**
+
+| Cliente | Score | Valor |
+|---|---|---|
+| Marcos Andrade | Alta | 94 |
+| Fernanda Lima | Alta | 91 |
+| Ricardo Souza | Alta | 87 |
+| Juliana Prado | Média | 68 |
+| Carlos Eduardo | Média | 61 |
+| Patrícia Nunes | Média | 58 |
+| Bruno Tavares | Baixa | 34 |
+| Camila Rocha | Baixa | 22 |
+
+---
+
+## 11. Escopo de aplicação (features competitivas)
+
+| Mudança | index.html | imoveis.html | clientes.html |
+|---|---|---|---|
+| Badge "IA inclusa" na navbar | ✅ | ✅ | ✅ |
+| Painel "Atividade da IA" | ✅ (único lugar) | — | — |
+| Toast de oportunidade em tempo real | ✅ (único lugar) | — | — |
+| Score numérico nos badges de chance | — | — | ✅ (único lugar onde o badge existe) |
+
+---
+
 ## O que não muda
 
 - Estrutura de navbar, layout de coluna central (max-width 960px), estrutura de listas e filtros já aprovados nos specs anteriores.
 - Cores semânticas de status (verde/amarelo/cinza/vermelho).
 - Conteúdo, dados fictícios e comportamento de filtros/chips (continuam sendo mockup visual, sem filtragem real de dados).
 - Nenhuma dependência externa nova é introduzida — sem CDN de ícones, sem web fonts além do Inter já usado.
+- `imoveis.html` e `clientes.html` não ganham painel de atividade nem toast nesta rodada — só `index.html` (ver seções 8 e 9).
 
 ---
 
@@ -109,3 +183,6 @@ Adicionar `letter-spacing: -0.02em` aos elementos de maior destaque visual em to
 - O crossfade do `enviarMensagem()` precisa aguardar o `transitionend` (ou usar `setTimeout` equivalente à duração do fade-out) antes de trocar o `innerHTML`, para não cortar a transição.
 - Testar visualmente que o gradiente do `.ai-card` continua legível com o texto em `#374151`/`#111827` — o tint é claro o suficiente para não afetar contraste.
 - Repetir cada substituição (cor, ícone, logo) nos três arquivos individualmente, já que não há CSS/JS compartilhado entre eles (decisão já tomada em spec anterior).
+- O ícone ↻ do painel de atividade usa `@keyframes spin` contínuo só enquanto for o único item "processando" da lista mockada — não é um indicador de estado real, então não precisa de lógica de start/stop, só rodar infinitamente via CSS.
+- O toast usa `aria-live="polite"` (não rouba foco) e o timer de auto-dismiss deve ser cancelado (`clearTimeout`) se o usuário clicar em ×, para não tentar remover um elemento já removido.
+- `setTimeout` do toast dispara uma vez só — não usar `setInterval` nem recriar o timer em nenhuma interação da página.
