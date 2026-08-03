@@ -1,0 +1,2455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soma Imob — Início</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%231F2937'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23D67A52'/%3E%3Cstop offset='100%25' stop-color='%231E4D5C'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== Reset & base ===== */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    min-width: 900px;
+    font-family: 'Inter', sans-serif;
+    background: #F8F7F5;
+    color: #1F2937;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible {
+    outline: 2px solid #D67A52;
+    outline-offset: 2px;
+  }
+
+  /* ===== Navbar horizontal fixa ===== */
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid #EDE8E3;
+    z-index: 100;
+  }
+
+  .navbar-inner {
+    max-width: 1200px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .navbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
+  .logomark {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logomark svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .logo-text {
+    letter-spacing: -0.02em;
+  }
+
+  .logo-soma {
+    font-weight: 700;
+    color: #1F2937;
+  }
+
+  .logo-imob {
+    font-weight: 600;
+    color: #1E4D5C;
+    letter-spacing: 0.06em;
+    margin-left: 2px;
+  }
+
+  .ia-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #E4EDEF;
+    color: #1E4D5C;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .ia-pill svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  .ia-pill--push-right {
+    margin-left: auto;
+  }
+
+  /* ===== Navegação: dropdowns ===== */
+  .navbar-links {
+    position: relative;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .nav-indicator {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: #FBEAE1;
+    border-radius: 8px;
+    z-index: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .nav-indicator {
+      transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  }
+
+  .navbar-links li {
+    position: relative;
+    z-index: 1;
+  }
+
+  .navbar-links a,
+  .navbar-links .placeholder-link,
+  .nav-dropdown-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: none;
+    border: none;
+    color: #374151;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .navbar-links li:not(.active) a:hover,
+  .navbar-links li:not(.active) .placeholder-link:hover,
+  .navbar-links li:not(.active) .nav-dropdown-trigger:hover {
+    background: #F3F4F6;
+  }
+
+  .navbar-links li.active a,
+  .navbar-links li.active .placeholder-link,
+  .navbar-links li.active .nav-dropdown-trigger {
+    color: #D67A52;
+    font-weight: 600;
+  }
+
+  .nav-dropdown.open .nav-dropdown-trigger {
+    background: #F3F4F6;
+  }
+
+  .chevron {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.2s ease;
+  }
+
+  .nav-dropdown.open .chevron {
+    transform: rotate(180deg);
+  }
+
+  .nav-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 240px;
+    background: #fff;
+    border: 1px solid #EDE8E3;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
+    padding: 6px;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .nav-dropdown-menu {
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+  }
+
+  .nav-dropdown.open .nav-dropdown-menu {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 14px;
+    color: #374151;
+    text-decoration: none;
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .dropdown-item:hover {
+    background: #F3F4F6;
+  }
+
+  .dropdown-item.active {
+    background: #FBEAE1;
+    color: #D67A52;
+    font-weight: 600;
+  }
+
+  .dropdown-item--highlight {
+    color: #D67A52;
+    font-weight: 600;
+  }
+
+  .dropdown-item--highlight:hover {
+    background: #FBEAE1;
+  }
+
+  .dropdown-item-icon-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dropdown-item-icon-label svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .dropdown-divider {
+    height: 1px;
+    background: #EDE8E3;
+    margin: 6px 4px;
+  }
+
+  .nav-badge {
+    background: #DC2626;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 999px;
+    line-height: 1.5;
+  }
+
+  /* Botão de disparo do painel Arnês IA, estilo Gemini */
+  .ia-launcher {
+    position: relative;
+    overflow: hidden;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: #fff;
+    background: #1E4D5C;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.1s ease;
+  }
+
+  .ia-launcher:active {
+    transform: scale(0.97);
+  }
+
+  .ia-launcher svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .ia-launcher::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    transform: skewX(-20deg);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ia-launcher:hover::after {
+      animation: iaShimmer 600ms ease-out;
+    }
+  }
+
+  @keyframes iaShimmer {
+    from { left: -75%; }
+    to { left: 125%; }
+  }
+
+  .navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #D67A52;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .icon-btn {
+    background: none;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #374151;
+  }
+
+  .icon-btn:hover {
+    background: #F3F4F6;
+  }
+
+  .icon-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .btn {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 9px 16px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  .btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .btn-primary {
+    background: #D67A52;
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: #B66846;
+  }
+
+  .btn-outline {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    color: #374151;
+  }
+
+  .btn-outline:hover {
+    border-color: #D67A52;
+    color: #D67A52;
+  }
+
+  .btn-text {
+    background: none;
+    border: none;
+    color: #6B7280;
+    font-weight: 500;
+  }
+
+  .btn-text:hover {
+    color: #1F2937;
+  }
+
+  /* ===== Página: coluna central ===== */
+  .page {
+    padding-top: 64px;
+    transition: margin-right 0.3s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page {
+      transition: margin-right 0.01s linear;
+    }
+  }
+
+  body.ia-panel-open .page {
+    margin-right: 400px;
+  }
+
+  .content {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 32px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* Bloco 1: saudação */
+  .greeting h2 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+
+  .greeting p {
+    font-size: 14px;
+    color: #6B7280;
+  }
+
+  /* Bloco 2: card de destaque da IA */
+  .ai-card {
+    background: linear-gradient(135deg, #FFFFFF 0%, #E4EDEF 100%);
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid #1E4D5C;
+    border-radius: 10px;
+    padding: 20px 24px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ai-card {
+      animation: aiCardEnter 250ms ease-out;
+    }
+  }
+
+  @keyframes aiCardEnter {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .ai-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .ai-card-icon {
+    color: #1E4D5C;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .ai-card-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .ai-card-header h3 {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .ai-card p {
+    font-size: 14px;
+    color: #374151;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .ai-card-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  /* Bloco 2b: painel de atividade da IA */
+  .activity-panel {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 20px 24px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  }
+
+  .activity-title {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+
+  .activity-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .activity-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 4px;
+    border-bottom: 1px solid #F3F4F6;
+    transition: background 0.15s ease;
+  }
+
+  .activity-item:last-child {
+    border-bottom: none;
+  }
+
+  .activity-item:hover {
+    background: #F8F7F5;
+  }
+
+  .activity-icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .activity-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .activity-icon--done { color: #16A34A; }
+  .activity-icon--processing { color: #1E4D5C; }
+  .activity-icon--scheduled { color: #6B7280; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .activity-icon--processing svg {
+      animation: spin 1.6s linear infinite;
+    }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .activity-text {
+    flex: 1;
+    font-size: 13.5px;
+    color: #374151;
+  }
+
+  .activity-time {
+    font-size: 12px;
+    color: #9CA3AF;
+    white-space: nowrap;
+  }
+
+  /* Bloco 3: grid de métricas */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .metric-card {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 20px 22px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  }
+
+  .metric-card:hover {
+    border-color: #D67A52;
+    box-shadow: 0 4px 12px rgba(16, 24, 40, 0.06);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .metric-card:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  .metric-card .value {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #1F2937;
+    line-height: 1.2;
+  }
+
+  .metric-card .label {
+    font-size: 13px;
+    color: #6B7280;
+    margin-top: 4px;
+  }
+
+  .metric-card .delta {
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 10px;
+  }
+
+  .delta-green { color: #16A34A; }
+  .delta-yellow { color: #CA8A04; }
+  .delta-gray { color: #6B7280; }
+
+  /* Bloco 4: input da IA */
+  .ai-input-block {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 20px 24px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  }
+
+  .ai-input-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #D67A52;
+    margin-bottom: 10px;
+  }
+
+  .ai-input-label svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .ai-input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .ai-input-row input {
+    flex: 1;
+    font-family: inherit;
+    font-size: 14px;
+    padding: 10px 14px;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    color: #1F2937;
+  }
+
+  .ai-input-row input:focus {
+    outline: none;
+    border-color: #D67A52;
+  }
+
+  .ai-input-row .btn-primary {
+    white-space: nowrap;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chip {
+    font-family: inherit;
+    font-size: 13px;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 999px;
+    padding: 6px 14px;
+    cursor: pointer;
+    color: #374151;
+    transition: border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  }
+
+  .chip:hover {
+    border-color: #D67A52;
+    color: #D67A52;
+  }
+
+  .chip:active {
+    transform: scale(0.97);
+  }
+
+  /* Bloco 5: Inteligência da semana (gráficos) */
+  .intel-section {
+    margin-top: 28px;
+  }
+
+  .intel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .intel-header svg {
+    width: 18px;
+    height: 18px;
+    color: #1E4D5C;
+  }
+
+  .intel-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1F2937;
+  }
+
+  .intel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .intel-grid { grid-template-columns: 1fr; }
+  }
+
+  .intel-card {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+    opacity: 0;
+    transform: translateY(8px);
+    animation: intelCardIn 0.4s ease forwards;
+  }
+
+  .intel-card:nth-child(1) { animation-delay: 0.05s; }
+  .intel-card:nth-child(2) { animation-delay: 0.15s; }
+  .intel-card:nth-child(3) { animation-delay: 0.25s; }
+  .intel-card:nth-child(4) { animation-delay: 0.35s; }
+
+  @keyframes intelCardIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .intel-card {
+      opacity: 1;
+      transform: none;
+      animation: none;
+    }
+  }
+
+  .intel-card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1F2937;
+    margin-bottom: 12px;
+  }
+
+  .intel-canvas-wrap {
+    position: relative;
+    width: 100%;
+    height: 180px;
+  }
+
+  .intel-canvas-wrap canvas {
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+  }
+
+  .intel-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: #1F2937;
+    color: #fff;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translate(-50%, -100%);
+    transition: opacity 0.1s ease;
+    z-index: 5;
+  }
+
+  .intel-tooltip.visible {
+    opacity: 1;
+  }
+
+  .intel-narrative {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #F1EFEC;
+  }
+
+  .intel-narrative svg {
+    width: 14px;
+    height: 14px;
+    color: #1E4D5C;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .intel-narrative p {
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: #4B5563;
+  }
+
+  /* ===== Toast de oportunidade em tempo real ===== */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    max-width: 340px;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    box-shadow: 0 4px 16px rgba(17, 24, 39, 0.08);
+    opacity: 0;
+    transform: translateX(16px);
+    pointer-events: none;
+    transition: opacity 200ms ease-in, transform 200ms ease-in, right 0.3s ease;
+    z-index: 200;
+  }
+
+  body.ia-panel-open .toast {
+    right: 424px;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    transition: opacity 200ms ease-out, transform 200ms ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toast,
+    .toast.show {
+      transform: none;
+      transition: opacity 120ms linear;
+    }
+  }
+
+  .toast-icon {
+    color: #D67A52;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .toast-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .toast-body {
+    flex: 1;
+  }
+
+  .toast-body p {
+    font-size: 13px;
+    color: #1F2937;
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+
+  .toast-action {
+    font-family: inherit;
+    background: none;
+    border: none;
+    color: #D67A52;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .toast-close {
+    background: none;
+    border: none;
+    color: #9CA3AF;
+    cursor: pointer;
+    padding: 2px;
+    flex-shrink: 0;
+    display: flex;
+  }
+
+  .toast-close:hover {
+    color: #374151;
+  }
+
+  .toast-close svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  /* ===== Banner de reconexão (fallback quando a API está fora) ===== */
+  .reconnect-banner {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: #FEF3C7;
+    color: #92400E;
+    font-size: 13px;
+    text-align: center;
+    padding: 8px 16px;
+    z-index: 90;
+    display: none;
+  }
+
+  .reconnect-banner.show {
+    display: block;
+  }
+
+  /* ===== Skeleton de carregamento ===== */
+  .skeleton {
+    background: #EDECEA;
+    border-radius: 6px;
+    color: transparent !important;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .skeleton {
+      animation: skeletonPulse 1.4s ease-in-out infinite;
+    }
+  }
+
+  @keyframes skeletonPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+
+  /* ===== Painel lateral da Arnês IA (estilo Gemini, empurra o conteúdo) ===== */
+  .ia-panel {
+    position: fixed;
+    top: 64px;
+    right: 0;
+    bottom: 0;
+    width: 400px;
+    background: #F8F7F5;
+    border-left: 1px solid #EDE8E3;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    z-index: 150;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ia-panel {
+      transition: transform 0.3s ease-out;
+    }
+  }
+
+  .ia-panel.show {
+    transform: translateX(0);
+  }
+
+  .ia-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-bottom: 1px solid #EDE8E3;
+    flex-shrink: 0;
+  }
+
+  .ia-panel-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.02em;
+  }
+
+  .ia-panel-close {
+    background: none;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #374151;
+    cursor: pointer;
+  }
+
+  .ia-panel-close:hover {
+    background: #F3F4F6;
+  }
+
+  .ia-panel-close svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .ia-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ia-greeting {
+    margin-bottom: 24px;
+  }
+
+  .ia-greeting h2 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #1E4D5C;
+    margin-bottom: 6px;
+  }
+
+  .ia-greeting p {
+    font-size: 15px;
+    color: #6B7280;
+  }
+
+  .ia-panel-suggestions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .ia-suggestion-chip {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    text-align: left;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #374151;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+  }
+
+  .ia-suggestion-chip svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #D67A52;
+  }
+
+  .ia-suggestion-chip:hover {
+    background: #FBEAE1;
+    border-color: #D67A52;
+    color: #D67A52;
+  }
+
+  .ia-suggestion-chip:active {
+    transform: scale(0.97);
+  }
+
+  .ia-suggestion-chip.pulsing {
+    pointer-events: none;
+    background: #FBEAE1;
+    border-color: #D67A52;
+    color: #D67A52;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ia-suggestion-chip.pulsing {
+      animation: chipPulse 1s ease-in-out infinite;
+    }
+  }
+
+  @keyframes chipPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+
+  .ia-panel-history {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .ia-panel-history:not(:empty) {
+    margin-bottom: 14px;
+  }
+
+  .ia-message {
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .ia-message--ai {
+    align-self: flex-start;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    color: #374151;
+  }
+
+  .ia-message--user {
+    align-self: flex-end;
+    background: #1E4D5C;
+    color: #fff;
+  }
+
+  .ia-panel-footer {
+    padding: 14px 20px 20px;
+    flex-shrink: 0;
+  }
+
+  .ia-input-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 999px;
+    padding: 6px 6px 6px 16px;
+  }
+
+  .ia-input-pill:focus-within {
+    border-color: #1E4D5C;
+  }
+
+  .ia-input-pill input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 14px;
+    color: #1F2937;
+  }
+
+  .ia-input-pill input:focus {
+    outline: none;
+  }
+
+  .ia-send-btn {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #1E4D5C, #3A7686);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .ia-send-btn:active {
+    transform: scale(0.92);
+  }
+
+  .ia-send-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===== Navbar ===== -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-logo">
+        <div class="logomark">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <defs>
+              <linearGradient id="starGradientNav" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#D67A52"/>
+                <stop offset="100%" stop-color="#1E4D5C"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#starGradientNav)" d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/>
+          </svg>
+        </div>
+        <span class="logo-text"><span class="logo-soma">Soma</span> <span class="logo-imob">Imob</span></span>
+        <span class="ia-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+          Arnês IA inclusa
+        </span>
+      </div>
+
+      <ul class="navbar-links" id="navbarLinks">
+        <span class="nav-indicator" id="navIndicator"></span>
+
+        <li class="active" data-page="Início">
+          <a href="index.html">Início</a>
+        </li>
+
+        <li class="nav-dropdown" data-page="Indicadores">
+          <button class="nav-dropdown-trigger" type="button" aria-expanded="false">
+            Indicadores
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <a class="dropdown-item" href="dashboard.html">Dashboard</a>
+            <a class="dropdown-item" href="inteligencia_mercado.html">Inteligência de mercado</a>
+            <a class="dropdown-item" href="metas.html">Metas e performance</a>
+            <button type="button" class="dropdown-item">Relatórios</button>
+          </div>
+        </li>
+
+        <li class="nav-dropdown" data-page="Atendimento">
+          <button class="nav-dropdown-trigger" type="button" aria-expanded="false">
+            Atendimento
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <a class="dropdown-item" href="clientes.html">Clientes <span class="nav-badge">307</span></a>
+            <a class="dropdown-item" href="atendimento.html">Pipeline de vendas</a>
+            <button type="button" class="dropdown-item">Distribuição automática</button>
+            <button type="button" class="dropdown-item">WhatsApp Omnichannel</button>
+            <button type="button" class="dropdown-item">Histórico</button>
+          </div>
+        </li>
+
+        <li class="nav-dropdown" data-page="Imóveis">
+          <button class="nav-dropdown-trigger" type="button" aria-expanded="false">
+            Imóveis
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <button type="button" class="dropdown-item dropdown-item--highlight" onclick="location.href='imoveis.html'">
+              <span class="dropdown-item-icon-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Novo imóvel
+              </span>
+            </button>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="imoveis.html">Imóveis</a>
+            <button type="button" class="dropdown-item">Condomínios</button>
+            <button type="button" class="dropdown-item">Portais de publicação</button>
+            <button type="button" class="dropdown-item">Captação de imóveis</button>
+            <button type="button" class="dropdown-item">Avaliação de imóveis</button>
+          </div>
+        </li>
+
+        <li class="nav-placeholder" data-page="Sites">
+          <span class="placeholder-link">Sites</span>
+        </li>
+
+        <li class="nav-ia-item">
+          <button class="ia-launcher" id="iaTrigger" type="button" aria-label="Peça à Arnês IA">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+          </button>
+        </li>
+      </ul>
+
+      <div class="navbar-actions">
+        <button class="icon-btn" title="Notificações">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <div class="avatar" title="Samuel W. — Corretor">SW</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== Banner de reconexão ===== -->
+  <div class="reconnect-banner" id="reconnectBanner" role="status">
+    ⚠ Arnês IA temporariamente indisponível. Os dados exibidos são os últimos carregados. Tentando reconectar...
+  </div>
+
+  <!-- ===== Página ===== -->
+  <div class="page">
+    <div class="content">
+
+      <!-- Bloco 1: saudação -->
+      <div class="greeting">
+        <h2>Boa tarde, Samuel</h2>
+        <p>Você tem 3 leads quentes e 2 propostas aguardando resposta.</p>
+      </div>
+
+      <!-- Bloco 2: card de destaque da IA -->
+      <div class="ai-card" id="aiCard">
+        <div class="ai-card-body" id="aiCardBody">
+          <div class="ai-card-header">
+            <span class="ai-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+            </span>
+            <h3>A IA identificou uma oportunidade</h3>
+            <span class="ia-pill ia-pill--push-right">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+              IA
+            </span>
+          </div>
+          <p>
+            Marcos Andrade pediu simulação ontem e não recebeu retorno.
+            Histórico indica alta chance de fechamento. Quer que eu envie
+            uma mensagem agora?
+          </p>
+          <div class="ai-card-actions">
+            <button class="btn btn-primary" onclick="enviarMensagem()">Enviar mensagem</button>
+            <button class="btn btn-outline">Ver perfil</button>
+            <button class="btn btn-text" onclick="ignorarAlerta()">Ignorar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco 2b: painel de atividade da IA -->
+      <div class="activity-panel">
+        <h3 class="activity-title">Atividade da IA</h3>
+        <div class="activity-list">
+          <div class="activity-item">
+            <span class="activity-icon activity-icon--done">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            </span>
+            <span class="activity-text">Mensagem enviada via WhatsApp — Marcos Andrade</span>
+            <span class="activity-time">há 2 min</span>
+          </div>
+          <div class="activity-item">
+            <span class="activity-icon activity-icon--processing">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>
+            </span>
+            <span class="activity-text">Analisando carteira de 481 imóveis...</span>
+            <span class="activity-time">agora</span>
+          </div>
+          <div class="activity-item">
+            <span class="activity-icon activity-icon--done">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            </span>
+            <span class="activity-text">Proposta gerada — Ap. 2q Palmeiras</span>
+            <span class="activity-time">há 18 min</span>
+          </div>
+          <div class="activity-item">
+            <span class="activity-icon activity-icon--scheduled">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            </span>
+            <span class="activity-text">Follow-up agendado — Fernanda Lima</span>
+            <span class="activity-time">amanhã 10h</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco 3: grid de métricas -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="value">481</div>
+          <div class="label">Imóveis ativos</div>
+          <div class="delta delta-green">↑ 5 novos esta semana</div>
+        </div>
+        <div class="metric-card">
+          <div class="value">1.538</div>
+          <div class="label">Leads em aberto</div>
+          <div class="delta delta-yellow">307 tarefas atrasadas</div>
+        </div>
+        <div class="metric-card">
+          <div class="value">9</div>
+          <div class="label">Propostas abertas</div>
+          <div class="delta delta-gray">2 vencem esta semana</div>
+        </div>
+      </div>
+
+      <!-- Bloco 4: input da IA -->
+      <div class="ai-input-block">
+        <label class="ai-input-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+          IA — conhece sua carteira, seus clientes e seu histórico
+        </label>
+        <div class="ai-input-row">
+          <input type="text" id="aiInput" placeholder="Ex: qual cliente tem mais chance de fechar essa semana?">
+          <button class="btn btn-primary" onclick="perguntarIA()">Perguntar →</button>
+        </div>
+        <div class="chips">
+          <button class="chip" onclick="preencherInput('Buscar imóvel por perfil')">Buscar imóvel por perfil</button>
+          <button class="chip" onclick="preencherInput('Gerar proposta')">Gerar proposta</button>
+          <button class="chip" onclick="preencherInput('Leads parados')">Leads parados</button>
+          <button class="chip" onclick="preencherInput('Feedback proprietários')">Feedback proprietários</button>
+        </div>
+      </div>
+
+      <!-- Bloco 5: Inteligência da semana -->
+      <div class="intel-section">
+        <div class="intel-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+          <h3>Inteligência da semana</h3>
+        </div>
+        <div class="intel-grid">
+
+          <div class="intel-card">
+            <div class="intel-card-title">Velocidade por etapa do funil (dias médios)</div>
+            <div class="intel-canvas-wrap">
+              <canvas id="chartVelocidade" width="400" height="180"></canvas>
+              <div class="intel-tooltip" id="tooltipVelocidade"></div>
+            </div>
+            <div class="intel-narrative">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+              <p>Notei que os leads estão travando mais na etapa de Negociação — 5,6 dias em média, quase o dobro de um mês atrás. Vale revisar os leads parados nessa fase esta semana.</p>
+            </div>
+          </div>
+
+          <div class="intel-card">
+            <div class="intel-card-title">Temperatura dos leads — últimas 6 semanas</div>
+            <div class="intel-canvas-wrap">
+              <canvas id="chartTemperatura" width="400" height="180"></canvas>
+              <div class="intel-tooltip" id="tooltipTemperatura"></div>
+            </div>
+            <div class="intel-narrative">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+              <p>A proporção de leads quentes vem subindo de forma consistente — de 12 para 29 nas últimas 6 semanas. É um bom sinal: a qualificação está funcionando melhor.</p>
+            </div>
+          </div>
+
+          <div class="intel-card">
+            <div class="intel-card-title">Origem dos leads (mix)</div>
+            <div class="intel-canvas-wrap">
+              <canvas id="chartOrigem" width="400" height="180"></canvas>
+              <div class="intel-tooltip" id="tooltipOrigem"></div>
+            </div>
+            <div class="intel-narrative">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+              <p>Site e WhatsApp respondem por 60% dos leads que chegam. Indicação também é forte, com 22% — talvez valha um programa formal de recompensa pra quem indica.</p>
+            </div>
+          </div>
+
+          <div class="intel-card">
+            <div class="intel-card-title">Dias no mercado por tipo de imóvel</div>
+            <div class="intel-canvas-wrap">
+              <canvas id="chartDiasMercado" width="400" height="180"></canvas>
+              <div class="intel-tooltip" id="tooltipDiasMercado"></div>
+            </div>
+            <div class="intel-narrative">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+              <p>Terrenos estão parados por mais tempo — 95 dias em média — e a tendência é de piora. Os demais tipos estão melhorando. Pode ser hora de repensar a divulgação dos terrenos.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== Toast de oportunidade em tempo real ===== -->
+  <div class="toast" id="aiToast" role="status" aria-live="polite">
+    <span class="toast-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+    </span>
+    <div class="toast-body">
+      <p>Nova oportunidade: Fernanda Lima abriu a proposta 3x hoje</p>
+      <button class="toast-action" id="toastVer" type="button">Ver</button>
+    </div>
+    <button class="toast-close" id="toastClose" type="button" aria-label="Fechar notificação">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <!-- ===== Toast genérico de erro de API ===== -->
+  <div class="toast" id="errorToast" role="status" aria-live="polite">
+    <span class="toast-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+    </span>
+    <div class="toast-body">
+      <p id="errorToastText">Ocorreu um erro.</p>
+    </div>
+  </div>
+
+  <!-- ===== Painel lateral da Arnês IA (estilo Gemini) ===== -->
+  <aside class="ia-panel" id="iaPanel" aria-hidden="true">
+    <div class="ia-panel-header">
+      <div class="ia-panel-brand">
+        <div class="logomark">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <defs>
+              <linearGradient id="starGradientPanel" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#D67A52"/>
+                <stop offset="100%" stop-color="#1E4D5C"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#starGradientPanel)" d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/>
+          </svg>
+        </div>
+        <span>Arnês IA</span>
+      </div>
+      <button class="ia-panel-close" id="iaPanelClose" type="button" aria-label="Fechar painel da IA">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="ia-panel-body">
+      <div class="ia-greeting" id="iaGreeting">
+        <h2>Olá, Samuel</h2>
+        <p>Sou a Arnês IA. Como posso ajudar?</p>
+      </div>
+
+      <div class="ia-panel-history" id="iaHistory"></div>
+
+      <div class="ia-panel-suggestions" id="iaSuggestions">
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Qual lead tem mais chance de fechar hoje?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Tem alguma proposta vencendo essa semana?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Qual imóvel está parado há mais tempo?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Quais proprietários precisam de feedback?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Como foi a semana da imobiliária?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Gera relatório do mês</span></button>
+      </div>
+    </div>
+
+    <div class="ia-panel-footer">
+      <div class="ia-input-pill">
+        <input type="text" id="iaPanelInput" placeholder="Pergunte sobre sua carteira, leads ou imóveis...">
+        <button class="ia-send-btn" id="iaPanelSend" type="button" aria-label="Enviar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9 22 2Z"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <script src="js/config.js"></script>
+  <script>
+    // Preenche o input quando um chip é clicado
+    function preencherInput(texto) {
+      document.getElementById('aiInput').value = texto;
+      document.getElementById('aiInput').focus();
+    }
+
+    // Envia a pergunta do bloco de input pra Arnês IA de verdade (POST /api/chat),
+    // exibindo a resposta no painel lateral — não mais um alert().
+    function perguntarIA() {
+      const inputEl = document.getElementById('aiInput');
+      const texto = inputEl.value.trim();
+      if (!texto) {
+        alert('Digite uma pergunta para a IA.');
+        return;
+      }
+      inputEl.value = '';
+      document.getElementById('iaTrigger').click(); // abre o painel lateral (reaproveita a lógica já existente)
+      if (typeof enviarPerguntaSomaIA === 'function') {
+        enviarPerguntaSomaIA(texto);
+      }
+    }
+
+    // Troca o card de oportunidade por uma confirmação, com crossfade.
+    // Se houver um alerta real carregado da API (window.alertaAtual), aprova
+    // de verdade e abre o WhatsApp; senão, cai no comportamento de mockup
+    // (card fixo do Marcos Andrade) — assim a tela continua demonstrável
+    // mesmo com o backend fora do ar.
+    function enviarMensagem() {
+      const body = document.getElementById('aiCardBody');
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      function aplicarConteudo(html) {
+        if (prefersReduced) {
+          body.innerHTML = html;
+          return;
+        }
+        body.style.transition = 'opacity 100ms ease-in';
+        body.style.opacity = '0';
+        setTimeout(function () {
+          body.innerHTML = html;
+          body.style.transition = 'opacity 150ms ease-out';
+          body.style.opacity = '1';
+        }, 100);
+      }
+
+      const nomeConfirmacao = (window.alertaAtual && window.alertaAtual.cliente_nome) || 'Marcos Andrade';
+      const htmlConfirmacao = `
+        <div class="ai-card-header">
+          <span class="ai-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+          </span>
+          <h3>Mensagem enviada</h3>
+        </div>
+        <p>
+          Mensagem enviada para ${nomeConfirmacao} via WhatsApp. Follow-up
+          agendado para amanhã às 10h.
+        </p>
+      `;
+
+      if (window.apiDisponivel && window.alertaAtual) {
+        apiFetch(`/alertas/${window.alertaAtual.id}/aprovar`, { method: 'POST' })
+          .then(function (dados) {
+            aplicarConteudo(htmlConfirmacao);
+            if (dados.whatsapp_url) {
+              window.open(dados.whatsapp_url, '_blank');
+            }
+          })
+          .catch(function (erro) {
+            console.error('Falha ao aprovar alerta:', erro);
+            mostrarErroToast('Não consegui aprovar o alerta agora.');
+          });
+      } else {
+        aplicarConteudo(htmlConfirmacao);
+      }
+    }
+
+    // Rejeita o alerta atual (se veio da API) e limpa o card visualmente.
+    function ignorarAlerta() {
+      const body = document.getElementById('aiCardBody');
+
+      function limparCard() {
+        body.innerHTML = `
+          <div class="ai-card-header">
+            <span class="ai-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+            </span>
+            <h3>Sem novas oportunidades no momento</h3>
+          </div>
+          <p>A Arnês IA continua monitorando sua carteira em segundo plano.</p>
+        `;
+      }
+
+      if (window.apiDisponivel && window.alertaAtual) {
+        apiFetch(`/alertas/${window.alertaAtual.id}/rejeitar`, { method: 'POST' })
+          .then(limparCard)
+          .catch(function (erro) {
+            console.error('Falha ao rejeitar alerta:', erro);
+            mostrarErroToast('Não consegui descartar o alerta agora.');
+          });
+      } else {
+        limparCard();
+      }
+    }
+
+    // Indicador deslizante da navbar: acompanha o item ativo
+    (function () {
+      const navList = document.getElementById('navbarLinks');
+      const indicator = document.getElementById('navIndicator');
+
+      function moveIndicatorTo(li, animate) {
+        const listRect = navList.getBoundingClientRect();
+        const itemRect = li.getBoundingClientRect();
+        if (!animate) indicator.style.transition = 'none';
+        indicator.style.left = (itemRect.left - listRect.left) + 'px';
+        indicator.style.width = itemRect.width + 'px';
+        if (!animate) {
+          indicator.offsetHeight;
+          indicator.style.transition = '';
+        }
+      }
+
+      const activeLi = navList.querySelector('li.active');
+      if (activeLi) moveIndicatorTo(activeLi, false);
+
+      window.addEventListener('resize', function () {
+        const current = navList.querySelector('li.active');
+        if (current) moveIndicatorTo(current, false);
+      });
+
+      // Itens de menu ainda não conectados a uma página: só destacam ao clicar
+      document.querySelectorAll('#navbarLinks li.nav-placeholder').forEach(function (item) {
+        item.addEventListener('click', function () {
+          document.querySelectorAll('#navbarLinks li').forEach(function (li) {
+            li.classList.remove('active');
+          });
+          item.classList.add('active');
+          moveIndicatorTo(item, true);
+        });
+      });
+    })();
+
+    // Menus dropdown da navbar: abrem no hover ou clique, fecham ao clicar fora
+    (function () {
+      const dropdowns = document.querySelectorAll('.nav-dropdown');
+
+      function closeAll(except) {
+        dropdowns.forEach(function (dd) {
+          if (dd !== except) {
+            dd.classList.remove('open');
+            const trigger = dd.querySelector('.nav-dropdown-trigger');
+            if (trigger) trigger.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+
+      dropdowns.forEach(function (dd) {
+        const trigger = dd.querySelector('.nav-dropdown-trigger');
+
+        dd.addEventListener('mouseenter', function () {
+          closeAll(dd);
+          dd.classList.add('open');
+          trigger.setAttribute('aria-expanded', 'true');
+        });
+
+        dd.addEventListener('mouseleave', function () {
+          dd.classList.remove('open');
+          trigger.setAttribute('aria-expanded', 'false');
+        });
+
+        trigger.addEventListener('click', function (e) {
+          e.stopPropagation();
+          const isOpen = dd.classList.contains('open');
+          closeAll(dd);
+          if (isOpen) {
+            dd.classList.remove('open');
+            trigger.setAttribute('aria-expanded', 'false');
+          } else {
+            dd.classList.add('open');
+            trigger.setAttribute('aria-expanded', 'true');
+          }
+        });
+      });
+
+      document.querySelectorAll('.dropdown-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+          closeAll(null);
+        });
+      });
+
+      document.addEventListener('click', function () {
+        closeAll(null);
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeAll(null);
+      });
+    })();
+
+    // Números das métricas contam do zero até o valor final ao carregar.
+    // Hoje nenhum .value tem mais [data-target] — esses 3 cards tinham
+    // números fixos (481/1538/9) que animavam e depois sobrescreviam de
+    // volta o valor real vindo de GET /api/metricas (carregarMetricas(),
+    // mais abaixo), alguns instantes depois de a animação terminar. O
+    // seletor abaixo não encontra nada de propósito.
+    (function () {
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      function formatNumber(n) {
+        return n.toLocaleString('pt-BR');
+      }
+
+      document.querySelectorAll('.metric-card .value[data-target]').forEach(function (el, index) {
+        const target = parseInt(el.getAttribute('data-target'), 10);
+
+        if (prefersReduced) {
+          el.textContent = formatNumber(target);
+          return;
+        }
+
+        const duration = 900;
+        const delay = index * 100;
+
+        setTimeout(function () {
+          const start = performance.now();
+          function tick(now) {
+            const progress = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = formatNumber(Math.floor(eased * target));
+            if (progress < 1) {
+              requestAnimationFrame(tick);
+            } else {
+              el.textContent = formatNumber(target);
+            }
+          }
+          requestAnimationFrame(tick);
+        }, delay);
+      });
+    })();
+
+    // Toast de oportunidade: dispara uma vez, ~5s após carregar a página
+    (function () {
+      const toast = document.getElementById('aiToast');
+      let dismissTimer = null;
+
+      function hideToast() {
+        clearTimeout(dismissTimer);
+        toast.classList.remove('show');
+      }
+
+      function showToast() {
+        toast.classList.add('show');
+        dismissTimer = setTimeout(hideToast, 5000);
+      }
+
+      document.getElementById('toastClose').addEventListener('click', hideToast);
+      document.getElementById('toastVer').addEventListener('click', hideToast);
+
+      setTimeout(showToast, 5000);
+    })();
+
+    // Painel lateral da Arnês IA (estilo Gemini): desliza da direita e empurra o conteúdo
+    (function () {
+      const trigger = document.getElementById('iaTrigger');
+      const panel = document.getElementById('iaPanel');
+      const closeBtn = document.getElementById('iaPanelClose');
+      const greeting = document.getElementById('iaGreeting');
+      const suggestions = document.getElementById('iaSuggestions');
+      const history = document.getElementById('iaHistory');
+      const input = document.getElementById('iaPanelInput');
+      const sendBtn = document.getElementById('iaPanelSend');
+
+      function openPanel() {
+        document.body.classList.add('ia-panel-open');
+        panel.classList.add('show');
+        panel.setAttribute('aria-hidden', 'false');
+      }
+
+      function closePanel() {
+        document.body.classList.remove('ia-panel-open');
+        panel.classList.remove('show');
+        panel.setAttribute('aria-hidden', 'true');
+      }
+
+      trigger.addEventListener('click', openPanel);
+      closeBtn.addEventListener('click', closePanel);
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && panel.classList.contains('show')) closePanel();
+      });
+
+      function addMessage(texto, role) {
+        greeting.style.display = 'none';
+        suggestions.style.display = 'none';
+        const msg = document.createElement('div');
+        msg.className = 'ia-message ia-message--' + role;
+        const p = document.createElement('p');
+        p.textContent = texto;
+        msg.appendChild(p);
+        history.appendChild(msg);
+        history.scrollTop = history.scrollHeight;
+      }
+
+      // Histórico da conversa (formato {role, content}) — enviado a cada
+      // chamada pra API poder responder levando o contexto da conversa
+      // em conta, não só a última pergunta isolada.
+      window.iaHistorico = window.iaHistorico || [];
+
+      // Nem toda intenção do backend devolve "resposta" (texto livre de
+      // Sonnet/Haiku) — EDICAO_CADASTRO, CRIACAO_CADASTRO, CONFIGURAR_META,
+      // ACAO_WHATSAPP e os casos de navegação sem resultado usam "mensagem"
+      // (ou "erro"). Sem isso, addMessage(dados.resposta, ...) recebia
+      // undefined pra essas intenções e a conversa ficava sem responder
+      // nada, dando a impressão de estar travada.
+      function extrairTextoResposta(dados) {
+        if (dados.resposta) return dados.resposta;
+        if (dados.mensagem) return dados.mensagem;
+        if (typeof dados.erro === 'string') return dados.erro;
+        return 'Não entendi — pode reformular?';
+      }
+
+      // Função compartilhada com o bloco de input da tela Início
+      // (perguntarIA() no topo deste arquivo chama esta mesma função,
+      // via window, pra não duplicar a lógica de chamada à API).
+      window.enviarPerguntaSomaIA = function (texto) {
+        if (!texto.trim()) return;
+        addMessage(texto, 'user');
+        input.value = '';
+
+        if (!window.apiDisponivel) {
+          // Backend fora do ar: mantém uma resposta genérica pra a tela
+          // continuar demonstrável offline, igual ao comportamento
+          // original de mockup.
+          setTimeout(function () {
+            addMessage('A Arnês IA está temporariamente indisponível — tento de novo assim que reconectar.', 'ai');
+          }, 400);
+          return;
+        }
+
+        window.iaHistorico.push({ role: 'user', content: texto });
+
+        addMessage('Pensando...', 'ai');
+        const bolhaPensando = history.lastElementChild;
+
+        apiFetch('/chat', {
+          method: 'POST',
+          body: JSON.stringify({ pergunta: texto, historico: window.iaHistorico }),
+        })
+          .then(function (dados) {
+            const textoResposta = extrairTextoResposta(dados);
+            bolhaPensando.querySelector('p').textContent = textoResposta;
+            window.iaHistorico.push({ role: 'assistant', content: textoResposta });
+            // dados.acao_sugerida fica disponível aqui pra uma versão
+            // futura oferecer um botão de ação direto na conversa —
+            // no MVP atual só é recebido, ainda sem UI própria.
+          })
+          .catch(function (erro) {
+            console.error('Falha ao chamar /api/chat:', erro);
+            bolhaPensando.querySelector('p').textContent = 'Não consegui falar com a Arnês IA agora. Tente de novo em instantes.';
+            if (typeof mostrarErroToast === 'function') {
+              mostrarErroToast('Arnês IA indisponível no momento.');
+            }
+          })
+          .finally(function () {
+            history.scrollTop = history.scrollHeight;
+          });
+      };
+
+      sendBtn.addEventListener('click', function () {
+        window.enviarPerguntaSomaIA(input.value);
+      });
+
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') window.enviarPerguntaSomaIA(input.value);
+      });
+
+      document.querySelectorAll('.ia-suggestion-chip').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          // Some com os outros chips e deixa o clicado pulsando por um
+          // instante — dá a sensação de "processando" mesmo quando a
+          // resposta chega rápido, antes de cair no fluxo normal de chat.
+          document.querySelectorAll('.ia-suggestion-chip').forEach(function (c) {
+            if (c !== chip) c.style.display = 'none';
+          });
+          chip.classList.add('pulsing');
+          const texto = chip.textContent.trim();
+          setTimeout(function () {
+            window.enviarPerguntaSomaIA(texto);
+          }, 350);
+        });
+      });
+    })();
+
+    // ===== Conexão com a API: health check, métricas, alertas =====
+    (function () {
+      window.apiDisponivel = false;
+      window.alertaAtual = null;
+
+      const banner = document.getElementById('reconnectBanner');
+      const errorToast = document.getElementById('errorToast');
+      let errorToastTimer = null;
+
+      window.mostrarErroToast = function (mensagem) {
+        document.getElementById('errorToastText').textContent = mensagem;
+        errorToast.classList.add('show');
+        clearTimeout(errorToastTimer);
+        errorToastTimer = setTimeout(function () {
+          errorToast.classList.remove('show');
+        }, 4000);
+      };
+
+      function formatarNumero(n) {
+        return n.toLocaleString('pt-BR');
+      }
+
+      function carregarMetricas() {
+        apiFetch('/metricas')
+          .then(function (dados) {
+            const cards = document.querySelectorAll('.metric-card');
+            if (cards[0]) {
+              cards[0].querySelector('.value').textContent = formatarNumero(dados.imoveis_ativos);
+            }
+            if (cards[1]) {
+              cards[1].querySelector('.value').textContent = formatarNumero(dados.leads_abertos);
+              cards[1].querySelector('.delta').textContent = dados.tarefas_atrasadas + ' tarefas atrasadas';
+            }
+            if (cards[2]) {
+              cards[2].querySelector('.value').textContent = formatarNumero(dados.propostas_abertas);
+              cards[2].querySelector('.delta').textContent = dados.propostas_vencendo_semana + ' vencem esta semana';
+            }
+          })
+          .catch(function (erro) {
+            console.error('Falha ao carregar métricas:', erro);
+            // Mantém os números mockados já animados na tela — não há
+            // fallback adicional a aplicar aqui além de deixá-los como estão.
+          });
+      }
+
+      function carregarAlertas() {
+        const cardBody = document.getElementById('aiCardBody');
+        cardBody.classList.add('skeleton');
+
+        apiFetch('/alertas')
+          .then(function (dados) {
+            cardBody.classList.remove('skeleton');
+            const alertas = dados.alertas || [];
+
+            if (alertas.length === 0) {
+              window.alertaAtual = null;
+              cardBody.innerHTML = `
+                <div class="ai-card-header">
+                  <span class="ai-card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+                  </span>
+                  <h3>Sem novas oportunidades no momento</h3>
+                </div>
+                <p>A Arnês IA continua monitorando sua carteira em segundo plano.</p>
+              `;
+              return;
+            }
+
+            const alerta = alertas[0];
+            window.alertaAtual = alerta;
+
+            cardBody.innerHTML = `
+              <div class="ai-card-header">
+                <span class="ai-card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+                </span>
+                <h3>A IA identificou uma oportunidade</h3>
+                <span class="ia-pill ia-pill--push-right">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+                  IA
+                </span>
+              </div>
+              <p>${(alerta.cliente_nome ? alerta.cliente_nome + ' — ' : '') + (alerta.mensagem_sugerida || '')}</p>
+              <div class="ai-card-actions">
+                <button class="btn btn-primary" onclick="enviarMensagem()">Enviar mensagem</button>
+                <button class="btn btn-outline">Ver perfil</button>
+                <button class="btn btn-text" onclick="ignorarAlerta()">Ignorar</button>
+              </div>
+            `;
+          })
+          .catch(function (erro) {
+            cardBody.classList.remove('skeleton');
+            console.error('Falha ao carregar alertas:', erro);
+            // Mantém o card mockado original visível (fallback offline).
+          });
+      }
+
+      function verificarConexao() {
+        apiFetch('/health')
+          .then(function () {
+            const reconectou = !window.apiDisponivel;
+            window.apiDisponivel = true;
+            banner.classList.remove('show');
+            if (reconectou) {
+              carregarMetricas();
+              carregarAlertas();
+            }
+          })
+          .catch(function () {
+            window.apiDisponivel = false;
+            banner.classList.add('show');
+          });
+      }
+
+      // Primeira verificação imediata — se a API responder, o próprio
+      // .then() de verificarConexao() já dispara carregarMetricas() e
+      // carregarAlertas() (via a flag `reconectou`). Repete a cada 15s
+      // pra detectar reconexão ou queda de conexão.
+      verificarConexao();
+      setInterval(verificarConexao, 15000);
+    })();
+
+    // ===== Bloco 5: Inteligência da semana — gráficos via Canvas API =====
+    (function () {
+      const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const COLORS = {
+        orange: '#D67A52',
+        petroleo: '#1E4D5C',
+        green: '#16A34A',
+        amber: '#CA8A04',
+        gray: '#6B7280',
+        grayLight: '#D1D5DB'
+      };
+      const redraws = [];
+
+      function debounce(fn, ms) {
+        let t;
+        return function () {
+          clearTimeout(t);
+          const args = arguments;
+          t = setTimeout(function () { fn.apply(null, args); }, ms);
+        };
+      }
+
+      function setupCanvas(canvas) {
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = Math.round(rect.width * dpr);
+        canvas.height = Math.round(rect.height * dpr);
+        const ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { ctx: ctx, w: rect.width, h: rect.height };
+      }
+
+      function animate(draw, duration) {
+        if (REDUCED_MOTION) { draw(1); return; }
+        const start = performance.now();
+        function step(now) {
+          const t = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - t, 3);
+          draw(eased);
+          if (t < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      }
+
+      function showTooltip(el, x, y, text) {
+        el.textContent = text;
+        el.style.left = x + 'px';
+        el.style.top = Math.max(y - 8, 12) + 'px';
+        el.classList.add('visible');
+      }
+
+      function hideTooltip(el) {
+        el.classList.remove('visible');
+      }
+
+      // ---------- Gráfico 1: barras horizontais — velocidade por etapa ----------
+      function chartVelocidade() {
+        const canvas = document.getElementById('chartVelocidade');
+        const tooltip = document.getElementById('tooltipVelocidade');
+        if (!canvas) return;
+        const data = [
+          { label: 'Novo contato', valor: 1.2 },
+          { label: 'Qualificação', valor: 2.5 },
+          { label: 'Visita agendada', valor: 4.1 },
+          { label: 'Proposta', valor: 3.8 },
+          { label: 'Negociação', valor: 5.6 },
+          { label: 'Fechamento', valor: 2.0 }
+        ];
+        const maxValor = Math.max.apply(null, data.map(function (d) { return d.valor; }));
+        const labelW = 96;
+
+        function draw(progress) {
+          const cv = setupCanvas(canvas);
+          const ctx = cv.ctx, w = cv.w, h = cv.h;
+          ctx.clearRect(0, 0, w, h);
+          const rowH = h / data.length;
+          const barAreaW = w - labelW - 40;
+
+          ctx.font = '11px Inter, sans-serif';
+          ctx.textBaseline = 'middle';
+
+          data.forEach(function (d) {
+            const idx = data.indexOf(d);
+            const y = rowH * idx + rowH / 2;
+            const barW = (d.valor / maxValor) * barAreaW * progress;
+            const isMax = d.valor === maxValor;
+
+            ctx.fillStyle = '#6B7280';
+            ctx.textAlign = 'left';
+            ctx.fillText(d.label, 0, y);
+
+            ctx.fillStyle = isMax ? COLORS.orange : COLORS.petroleo;
+            const barH = 12;
+            ctx.beginPath();
+            if (ctx.roundRect) {
+              ctx.roundRect(labelW, y - barH / 2, Math.max(barW, 2), barH, 4);
+            } else {
+              ctx.rect(labelW, y - barH / 2, Math.max(barW, 2), barH);
+            }
+            ctx.fill();
+
+            ctx.fillStyle = '#1F2937';
+            ctx.fillText(d.valor.toFixed(1) + 'd', labelW + (d.valor / maxValor) * barAreaW + 6, y);
+          });
+
+          canvas._chartData = { data: data, rowH: rowH };
+        }
+
+        animate(draw, 700);
+        redraws.push(function () { draw(1); });
+
+        canvas.addEventListener('mousemove', function (e) {
+          const info = canvas._chartData;
+          if (!info) return;
+          const idx = Math.min(info.data.length - 1, Math.max(0, Math.floor(e.offsetY / info.rowH)));
+          const d = info.data[idx];
+          showTooltip(tooltip, e.offsetX, e.offsetY, d.label + ': ' + d.valor.toFixed(1) + ' dias em média');
+        });
+        canvas.addEventListener('mouseleave', function () { hideTooltip(tooltip); });
+      }
+
+      // ---------- Gráfico 2: multi-linha — temperatura dos leads ----------
+      function chartTemperatura() {
+        const canvas = document.getElementById('chartTemperatura');
+        const tooltip = document.getElementById('tooltipTemperatura');
+        if (!canvas) return;
+        const semanas = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6'];
+        const series = [
+          { nome: 'Quente', cor: COLORS.orange, valores: [12, 15, 18, 22, 25, 29] },
+          { nome: 'Morno', cor: COLORS.amber, valores: [34, 30, 33, 31, 29, 28] },
+          { nome: 'Frio', cor: COLORS.gray, valores: [58, 55, 50, 47, 44, 41] }
+        ];
+        const maxValor = 65;
+        const padding = { top: 10, right: 10, bottom: 20, left: 8 };
+
+        function draw(progress) {
+          const cv = setupCanvas(canvas);
+          const ctx = cv.ctx, w = cv.w, h = cv.h;
+          ctx.clearRect(0, 0, w, h);
+          const plotW = w - padding.left - padding.right;
+          const plotH = h - padding.top - padding.bottom;
+          const stepX = plotW / (semanas.length - 1);
+
+          ctx.strokeStyle = '#E5E7EB';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(padding.left, padding.top + plotH);
+          ctx.lineTo(padding.left + plotW, padding.top + plotH);
+          ctx.stroke();
+
+          ctx.font = '10px Inter, sans-serif';
+          ctx.fillStyle = '#9CA3AF';
+          ctx.textAlign = 'center';
+          semanas.forEach(function (s, i) {
+            ctx.fillText(s, padding.left + stepX * i, h - 6);
+          });
+
+          const totalSteps = semanas.length - 1;
+          const advance = totalSteps * progress;
+          const visiblePoints = Math.min(semanas.length, Math.floor(advance) + 1);
+          const partial = advance - (visiblePoints - 1);
+
+          series.forEach(function (serie) {
+            ctx.strokeStyle = serie.cor;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let i = 0; i < visiblePoints; i++) {
+              let vx = padding.left + stepX * i;
+              let vy = padding.top + plotH - (serie.valores[i] / maxValor) * plotH;
+              if (i === visiblePoints - 1 && i < semanas.length - 1 && partial > 0) {
+                const nextY = padding.top + plotH - (serie.valores[i + 1] / maxValor) * plotH;
+                vy = vy + (nextY - vy) * partial;
+                vx = vx + stepX * partial;
+              }
+              if (i === 0) ctx.moveTo(vx, vy); else ctx.lineTo(vx, vy);
+            }
+            ctx.stroke();
+
+            ctx.fillStyle = serie.cor;
+            for (let i = 0; i < visiblePoints; i++) {
+              const px = padding.left + stepX * i;
+              const py = padding.top + plotH - (serie.valores[i] / maxValor) * plotH;
+              ctx.beginPath();
+              ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          });
+
+          canvas._chartData = { semanas: semanas, series: series, padding: padding, stepX: stepX };
+        }
+
+        animate(draw, 800);
+        redraws.push(function () { draw(1); });
+
+        canvas.addEventListener('mousemove', function (e) {
+          const info = canvas._chartData;
+          if (!info) return;
+          const idx = Math.min(info.semanas.length - 1, Math.max(0, Math.round((e.offsetX - info.padding.left) / info.stepX)));
+          const linhas = info.series.map(function (s) { return s.nome + ': ' + s.valores[idx]; }).join(' · ');
+          showTooltip(tooltip, e.offsetX, e.offsetY, info.semanas[idx] + ' — ' + linhas);
+        });
+        canvas.addEventListener('mouseleave', function () { hideTooltip(tooltip); });
+      }
+
+      // ---------- Gráfico 3: donut — origem dos leads ----------
+      function chartOrigem() {
+        const canvas = document.getElementById('chartOrigem');
+        const tooltip = document.getElementById('tooltipOrigem');
+        if (!canvas) return;
+        const data = [
+          { label: 'Site', valor: 32, cor: COLORS.petroleo },
+          { label: 'WhatsApp', valor: 28, cor: COLORS.orange },
+          { label: 'Indicação', valor: 22, cor: COLORS.green },
+          { label: 'Portais', valor: 12, cor: COLORS.amber },
+          { label: 'Redes sociais', valor: 6, cor: COLORS.gray }
+        ];
+        const total = data.reduce(function (acc, d) { return acc + d.valor; }, 0);
+
+        function draw(progress) {
+          const cv = setupCanvas(canvas);
+          const ctx = cv.ctx, w = cv.w, h = cv.h;
+          ctx.clearRect(0, 0, w, h);
+          const cx = 58, cy = h / 2, rOuter = 46, rInner = 28;
+          let startAngle = -Math.PI / 2;
+          const sweepTotal = Math.PI * 2 * progress;
+          let drawn = 0;
+          const segments = [];
+
+          data.forEach(function (d) {
+            const sliceAngle = (d.valor / total) * Math.PI * 2;
+            const remaining = Math.max(0, Math.min(sliceAngle, sweepTotal - drawn));
+            if (remaining > 0) {
+              ctx.beginPath();
+              ctx.fillStyle = d.cor;
+              ctx.moveTo(cx, cy);
+              ctx.arc(cx, cy, rOuter, startAngle, startAngle + remaining);
+              ctx.closePath();
+              ctx.fill();
+            }
+            segments.push({ label: d.label, valor: d.valor, start: startAngle, end: startAngle + sliceAngle });
+            startAngle += sliceAngle;
+            drawn += sliceAngle;
+          });
+
+          ctx.globalCompositeOperation = 'destination-out';
+          ctx.beginPath();
+          ctx.arc(cx, cy, rInner, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalCompositeOperation = 'source-over';
+
+          ctx.fillStyle = '#1F2937';
+          ctx.font = '700 13px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(String(total), cx, cy - 6);
+          ctx.font = '9px Inter, sans-serif';
+          ctx.fillStyle = '#9CA3AF';
+          ctx.fillText('leads/mês', cx, cy + 9);
+
+          const legendX = 122;
+          const rowH = h / data.length;
+          ctx.textAlign = 'left';
+          data.forEach(function (d, i) {
+            const y = rowH * i + rowH / 2;
+            ctx.fillStyle = d.cor;
+            ctx.fillRect(legendX, y - 4, 8, 8);
+            ctx.fillStyle = '#374151';
+            ctx.font = '11px Inter, sans-serif';
+            ctx.fillText(d.label + ' — ' + d.valor + '%', legendX + 14, y);
+          });
+
+          canvas._chartData = { segments: segments, cx: cx, cy: cy, rOuter: rOuter, rInner: rInner };
+        }
+
+        animate(draw, 700);
+        redraws.push(function () { draw(1); });
+
+        canvas.addEventListener('mousemove', function (e) {
+          const info = canvas._chartData;
+          if (!info) return;
+          const dx = e.offsetX - info.cx;
+          const dy = e.offsetY - info.cy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < info.rInner || dist > info.rOuter) { hideTooltip(tooltip); return; }
+          let angle = Math.atan2(dy, dx);
+          if (angle < -Math.PI / 2) angle += Math.PI * 2;
+          const found = info.segments.find(function (s) { return angle >= s.start && angle <= s.end; });
+          if (found) {
+            showTooltip(tooltip, e.offsetX, e.offsetY, found.label + ': ' + found.valor + '%');
+          } else {
+            hideTooltip(tooltip);
+          }
+        });
+        canvas.addEventListener('mouseleave', function () { hideTooltip(tooltip); });
+      }
+
+      // ---------- Gráfico 4: barras verticais agrupadas — dias no mercado ----------
+      function chartDiasMercado() {
+        const canvas = document.getElementById('chartDiasMercado');
+        const tooltip = document.getElementById('tooltipDiasMercado');
+        if (!canvas) return;
+        const categorias = ['Apartamento', 'Casa', 'Terreno', 'Comercial'];
+        const mesPassado = [45, 62, 90, 70];
+        const esteMes = [38, 58, 95, 61];
+        const maxValor = 100;
+        const padding = { top: 10, right: 10, bottom: 34, left: 10 };
+
+        function draw(progress) {
+          const cv = setupCanvas(canvas);
+          const ctx = cv.ctx, w = cv.w, h = cv.h;
+          ctx.clearRect(0, 0, w, h);
+          const plotW = w - padding.left - padding.right;
+          const plotH = h - padding.top - padding.bottom;
+          const groupW = plotW / categorias.length;
+          const barW = groupW * 0.28;
+          const gap = groupW * 0.08;
+          const bars = [];
+
+          categorias.forEach(function (cat, i) {
+            const groupX = padding.left + groupW * i;
+            const barPassadoH = (mesPassado[i] / maxValor) * plotH * progress;
+            const barEsteH = (esteMes[i] / maxValor) * plotH * progress;
+            const isPior = esteMes[i] > mesPassado[i];
+
+            const x1 = groupX + groupW / 2 - barW - gap / 2;
+            ctx.fillStyle = COLORS.grayLight;
+            ctx.fillRect(x1, padding.top + plotH - barPassadoH, barW, barPassadoH);
+
+            const x2 = groupX + groupW / 2 + gap / 2;
+            ctx.fillStyle = isPior ? COLORS.orange : COLORS.petroleo;
+            ctx.fillRect(x2, padding.top + plotH - barEsteH, barW, barEsteH);
+
+            ctx.fillStyle = '#6B7280';
+            ctx.font = '10px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(cat, groupX + groupW / 2, h - 10);
+
+            bars.push({ x: x1, w: barW, label: cat + ' — mês passado', valor: mesPassado[i] });
+            bars.push({ x: x2, w: barW, label: cat + ' — este mês', valor: esteMes[i] });
+          });
+
+          canvas._chartData = { bars: bars };
+        }
+
+        animate(draw, 700);
+        redraws.push(function () { draw(1); });
+
+        canvas.addEventListener('mousemove', function (e) {
+          const info = canvas._chartData;
+          if (!info) return;
+          const hit = info.bars.find(function (b) { return e.offsetX >= b.x && e.offsetX <= b.x + b.w; });
+          if (hit) {
+            showTooltip(tooltip, e.offsetX, e.offsetY, hit.label + ': ' + hit.valor + ' dias');
+          } else {
+            hideTooltip(tooltip);
+          }
+        });
+        canvas.addEventListener('mouseleave', function () { hideTooltip(tooltip); });
+      }
+
+      chartVelocidade();
+      chartTemperatura();
+      chartOrigem();
+      chartDiasMercado();
+
+      window.addEventListener('resize', debounce(function () {
+        redraws.forEach(function (fn) { fn(); });
+      }, 200));
+    })();
+  </script>
+
+</body>
+</html>

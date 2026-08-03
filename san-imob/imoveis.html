@@ -1,0 +1,2752 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soma Imob — Imóveis</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%231F2937'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23D67A52'/%3E%3Cstop offset='100%25' stop-color='%231E4D5C'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== Reset & base ===== */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    min-width: 900px;
+    font-family: 'Inter', sans-serif;
+    background: #F8F7F5;
+    color: #1F2937;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible {
+    outline: 2px solid #D67A52;
+    outline-offset: 2px;
+  }
+
+  /* ===== Navbar horizontal fixa ===== */
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid #EDE8E3;
+    z-index: 100;
+  }
+
+  .navbar-inner {
+    max-width: 1200px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .navbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
+  .logomark {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logomark svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .logo-text {
+    letter-spacing: -0.02em;
+  }
+
+  .logo-soma {
+    font-weight: 700;
+    color: #1F2937;
+  }
+
+  .logo-imob {
+    font-weight: 600;
+    color: #1E4D5C;
+    letter-spacing: 0.06em;
+    margin-left: 2px;
+  }
+
+  .ia-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #E4EDEF;
+    color: #1E4D5C;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .ia-pill svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  /* ===== Navegação: dropdowns ===== */
+  .navbar-links {
+    position: relative;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .nav-indicator {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: #FBEAE1;
+    border-radius: 8px;
+    z-index: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .nav-indicator {
+      transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  }
+
+  .navbar-links li {
+    position: relative;
+    z-index: 1;
+  }
+
+  .navbar-links a,
+  .navbar-links .placeholder-link,
+  .nav-dropdown-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: none;
+    border: none;
+    color: #374151;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .navbar-links li:not(.active) a:hover,
+  .navbar-links li:not(.active) .placeholder-link:hover,
+  .navbar-links li:not(.active) .nav-dropdown-trigger:hover {
+    background: #F3F4F6;
+  }
+
+  .navbar-links li.active a,
+  .navbar-links li.active .placeholder-link,
+  .navbar-links li.active .nav-dropdown-trigger {
+    color: #D67A52;
+    font-weight: 600;
+  }
+
+  .nav-dropdown.open .nav-dropdown-trigger {
+    background: #F3F4F6;
+  }
+
+  .chevron {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.2s ease;
+  }
+
+  .nav-dropdown.open .chevron {
+    transform: rotate(180deg);
+  }
+
+  .nav-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 240px;
+    background: #fff;
+    border: 1px solid #EDE8E3;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
+    padding: 6px;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .nav-dropdown-menu {
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+  }
+
+  .nav-dropdown.open .nav-dropdown-menu {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 14px;
+    color: #374151;
+    text-decoration: none;
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .dropdown-item:hover {
+    background: #F3F4F6;
+  }
+
+  .dropdown-item.active {
+    background: #FBEAE1;
+    color: #D67A52;
+    font-weight: 600;
+  }
+
+  .dropdown-item--highlight {
+    color: #D67A52;
+    font-weight: 600;
+  }
+
+  .dropdown-item--highlight:hover {
+    background: #FBEAE1;
+  }
+
+  .dropdown-item-icon-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dropdown-item-icon-label svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .dropdown-divider {
+    height: 1px;
+    background: #EDE8E3;
+    margin: 6px 4px;
+  }
+
+  .nav-badge {
+    background: #DC2626;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 999px;
+    line-height: 1.5;
+  }
+
+  /* Botão de disparo do painel Arnês IA, estilo Gemini */
+  .ia-launcher {
+    position: relative;
+    overflow: hidden;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: #fff;
+    background: #1E4D5C;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.1s ease;
+  }
+
+  .ia-launcher:active {
+    transform: scale(0.97);
+  }
+
+  .ia-launcher svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .ia-launcher::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    transform: skewX(-20deg);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ia-launcher:hover::after {
+      animation: iaShimmer 600ms ease-out;
+    }
+  }
+
+  @keyframes iaShimmer {
+    from { left: -75%; }
+    to { left: 125%; }
+  }
+
+  .navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #D67A52;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .icon-btn {
+    background: none;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #374151;
+  }
+
+  .icon-btn:hover {
+    background: #F3F4F6;
+  }
+
+  .icon-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .btn {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 9px 16px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  .btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .btn-primary {
+    background: #D67A52;
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: #B66846;
+  }
+
+  /* ===== Página: coluna central ===== */
+  .page {
+    padding-top: 64px;
+    transition: margin-right 0.3s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page {
+      transition: margin-right 0.01s linear;
+    }
+  }
+
+  body.ia-panel-open .page {
+    margin-right: 400px;
+  }
+
+  .content {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 32px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .greeting h2 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+
+  .greeting p {
+    font-size: 14px;
+    color: #6B7280;
+  }
+
+  /* ===== Barra de filtro ===== */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 0 1 320px;
+    display: flex;
+    align-items: center;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    color: #9CA3AF;
+    pointer-events: none;
+    width: 16px;
+    height: 16px;
+  }
+
+  .search-input {
+    flex: 1;
+    font-family: inherit;
+    font-size: 14px;
+    padding: 9px 14px 9px 36px;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    color: #1F2937;
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: #D67A52;
+  }
+
+  .filter-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    font-family: inherit;
+    font-size: 13px;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 999px;
+    padding: 6px 14px;
+    cursor: pointer;
+    color: #374151;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  }
+
+  .chip:hover {
+    border-color: #D67A52;
+    color: #D67A52;
+  }
+
+  .chip:active {
+    transform: scale(0.97);
+  }
+
+  .chip.active {
+    background: #D67A52;
+    border-color: #D67A52;
+    color: #fff;
+  }
+
+  /* ===== Lista de imóveis (layout híbrido) ===== */
+  .list {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+    overflow: hidden;
+  }
+
+  .list-header,
+  .list-row {
+    display: grid;
+    grid-template-columns: 40px 64px 110px 1fr 100px 150px 70px;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+  }
+
+  .list-header {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #6B7280;
+    border-bottom: 1px solid #E5E7EB;
+  }
+
+  .list-row {
+    font-size: 14px;
+    color: #1F2937;
+    border-bottom: 1px solid #E5E7EB;
+    border-left: 3px solid transparent;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  }
+
+  .list-row:last-child {
+    border-bottom: none;
+  }
+
+  .list-row:hover {
+    background: #FBEAE1;
+    border-left-color: #D67A52;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .list-row:hover {
+      transform: translateX(2px);
+    }
+  }
+
+  .thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: #F3F4F6;
+    color: #9CA3AF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .thumb svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .list-row .codigo {
+    color: #6B7280;
+    font-size: 13px;
+  }
+
+  .list-row .preco {
+    font-weight: 600;
+  }
+
+  .status-badges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .status-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .status-ativo {
+    background: #DCFCE7;
+    color: #16A34A;
+  }
+
+  .status-reservado {
+    background: #FEF9C3;
+    color: #CA8A04;
+  }
+
+  .status-exclusivo {
+    background: #FBEAE1;
+    color: #D67A52;
+  }
+
+  .dias {
+    font-size: 13px;
+    color: #6B7280;
+    text-align: right;
+  }
+
+  /* ===== Banner de reconexão (fallback quando a API está fora) ===== */
+  .reconnect-banner {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: #FEF3C7;
+    color: #92400E;
+    font-size: 13px;
+    text-align: center;
+    padding: 8px 16px;
+    z-index: 90;
+    display: none;
+  }
+
+  .reconnect-banner.show {
+    display: block;
+  }
+
+  /* ===== Skeleton de carregamento ===== */
+  .skeleton {
+    background: #EDECEA;
+    border-radius: 6px;
+    color: transparent !important;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .skeleton {
+      animation: skeletonPulse 1.4s ease-in-out infinite;
+    }
+  }
+
+  @keyframes skeletonPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+
+  /* ===== Toast genérico de erro de API ===== */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    max-width: 340px;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    box-shadow: 0 4px 16px rgba(17, 24, 39, 0.08);
+    opacity: 0;
+    transform: translateX(16px);
+    pointer-events: none;
+    transition: opacity 200ms ease-in, transform 200ms ease-in;
+    z-index: 200;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    transition: opacity 200ms ease-out, transform 200ms ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toast,
+    .toast.show {
+      transform: none;
+      transition: opacity 120ms linear;
+    }
+  }
+
+  .toast-icon {
+    color: #D67A52;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .toast-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .toast-body {
+    flex: 1;
+  }
+
+  .toast-body p {
+    font-size: 13px;
+    color: #1F2937;
+    line-height: 1.5;
+  }
+
+  /* ===== Modal: Novo imóvel ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 250;
+    transition: opacity 0.15s ease;
+  }
+
+  .modal-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .modal-overlay { transition: none; }
+  }
+
+  .modal {
+    background: #F8F7F5;
+    border-radius: 12px;
+    width: min(760px, 100%);
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 16px 48px rgba(16, 24, 40, 0.2);
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid #E5E7EB;
+    flex-shrink: 0;
+  }
+
+  .modal-header h2 {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .modal-close {
+    background: none;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #374151;
+    cursor: pointer;
+  }
+
+  .modal-close:hover { background: #F3F4F6; }
+  .modal-close svg { width: 15px; height: 15px; }
+
+  .modal-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 10px 24px 0;
+    border-bottom: 1px solid #E5E7EB;
+    flex-shrink: 0;
+  }
+
+  .modal-tab {
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    background: none;
+    border: none;
+    color: #6B7280;
+    padding: 10px 6px 12px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+
+  .modal-tab:hover { color: #374151; }
+
+  .modal-tab.active {
+    color: #D67A52;
+    border-bottom-color: #D67A52;
+  }
+
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+  }
+
+  .modal-tab-panel { display: none; }
+  .modal-tab-panel.active { display: block; }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid #E5E7EB;
+    background: #fff;
+    border-radius: 0 0 12px 12px;
+    flex-shrink: 0;
+  }
+
+  .btn-ghost {
+    background: none;
+    color: #374151;
+    border-color: #E5E7EB;
+  }
+
+  .btn-ghost:hover { background: #F3F4F6; }
+
+  /* ===== Formulário: seções e grids ===== */
+  .form-section {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+  }
+
+  .form-section:last-child { margin-bottom: 0; }
+
+  .form-section-title {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #1F2937;
+    margin-bottom: 14px;
+  }
+
+  .form-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  .form-grid-2 { grid-template-columns: 1fr 1fr; }
+  .form-grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .form-grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .form-field label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .form-field input,
+  .form-field select,
+  .form-field textarea {
+    font-family: inherit;
+    font-size: 13.5px;
+    padding: 9px 12px;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    color: #1F2937;
+    background: #fff;
+    width: 100%;
+  }
+
+  .form-field textarea {
+    resize: vertical;
+    min-height: 72px;
+  }
+
+  .form-field input:focus,
+  .form-field select:focus,
+  .form-field textarea:focus {
+    outline: none;
+    border-color: #D67A52;
+  }
+
+  .form-field-checkbox {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .form-field-checkbox label {
+    font-weight: 500;
+  }
+
+  .cep-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .cep-row input { flex: 1; }
+
+  .btn-buscar-cep {
+    white-space: nowrap;
+    background: #fff;
+    color: #1E4D5C;
+    border-color: #C7D9DD;
+  }
+
+  .btn-buscar-cep:hover { background: #EEF3F4; }
+
+  .amenities-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .amenity-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #374151;
+  }
+
+  .btn-ia-generate {
+    background: #fff;
+    color: #1E4D5C;
+    border: 1px solid #C7D9DD;
+    margin-top: 10px;
+  }
+
+  .btn-ia-generate:hover { background: #EEF3F4; }
+
+  .btn-ia-generate svg { color: #1E4D5C; }
+
+  /* ===== Upload de fotos (drag-and-drop) ===== */
+  .photo-dropzone {
+    border: 2px dashed #D1D5DB;
+    border-radius: 10px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    color: #6B7280;
+    font-size: 13px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .photo-dropzone svg {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 8px;
+    color: #9CA3AF;
+  }
+
+  .photo-dropzone:hover,
+  .photo-dropzone.dragover {
+    border-color: #1E4D5C;
+    background: #EEF3F4;
+  }
+
+  .photo-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .photo-thumb {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #E5E7EB;
+  }
+
+  .photo-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .photo-remove {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(17, 24, 39, 0.7);
+    color: #fff;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ===== Cadastro por voz ===== */
+  .voice-tab-panel {
+    text-align: center;
+    padding: 12px 8px 4px;
+  }
+
+  .voice-intro {
+    font-size: 13.5px;
+    color: #6B7280;
+    max-width: 460px;
+    margin: 0 auto 20px;
+    line-height: 1.6;
+  }
+
+  .voice-fallback {
+    background: #FEF3C7;
+    color: #92400E;
+    font-size: 13px;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    display: none;
+    text-align: left;
+  }
+
+  .voice-fallback.show { display: block; }
+
+  .voice-mic-btn {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: #1E4D5C;
+    color: #fff;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .voice-mic-btn svg { width: 30px; height: 30px; }
+
+  .voice-mic-btn:disabled {
+    background: #D1D5DB;
+    cursor: not-allowed;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .voice-mic-btn.listening::before {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      border: 2px solid #1E4D5C;
+      animation: voicePulse 1.4s ease-out infinite;
+    }
+  }
+
+  @keyframes voicePulse {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.35); opacity: 0; }
+  }
+
+  .voice-status-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1F2937;
+    min-height: 20px;
+    margin-bottom: 16px;
+    max-width: 460px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .voice-progress-track {
+    background: #F3F4F6;
+    border-radius: 999px;
+    height: 8px;
+    max-width: 360px;
+    margin: 0 auto 20px;
+    overflow: hidden;
+  }
+
+  .voice-progress-fill {
+    height: 100%;
+    width: 0;
+    background: #1E4D5C;
+    border-radius: 999px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .voice-progress-fill { transition: width 0.4s ease; }
+  }
+
+  .voice-controls {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+
+  .voice-checklist {
+    list-style: none;
+    text-align: left;
+    max-width: 360px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .voice-checklist li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #6B7280;
+  }
+
+  .voice-checklist li.answered {
+    color: #1F2937;
+    font-weight: 500;
+  }
+
+  .voice-check-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #E5E7EB;
+    color: transparent;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .voice-check-icon svg { width: 11px; height: 11px; }
+
+  .voice-checklist li.answered .voice-check-icon {
+    background: #DCFCE7;
+    color: #16A34A;
+  }
+
+  /* ===== Painel lateral da Arnês IA (estilo Gemini, empurra o conteúdo) ===== */
+  .ia-panel {
+    position: fixed;
+    top: 64px;
+    right: 0;
+    bottom: 0;
+    width: 400px;
+    background: #F8F7F5;
+    border-left: 1px solid #EDE8E3;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    z-index: 150;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ia-panel {
+      transition: transform 0.3s ease-out;
+    }
+  }
+
+  .ia-panel.show {
+    transform: translateX(0);
+  }
+
+  .ia-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-bottom: 1px solid #EDE8E3;
+    flex-shrink: 0;
+  }
+
+  .ia-panel-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.02em;
+  }
+
+  .ia-panel-close {
+    background: none;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #374151;
+    cursor: pointer;
+  }
+
+  .ia-panel-close:hover {
+    background: #F3F4F6;
+  }
+
+  .ia-panel-close svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .ia-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ia-greeting {
+    margin-bottom: 24px;
+  }
+
+  .ia-greeting h2 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #1E4D5C;
+    margin-bottom: 6px;
+  }
+
+  .ia-greeting p {
+    font-size: 15px;
+    color: #6B7280;
+  }
+
+  .ia-panel-suggestions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .ia-suggestion-chip {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    text-align: left;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #374151;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+  }
+
+  .ia-suggestion-chip svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #D67A52;
+  }
+
+  .ia-suggestion-chip:hover {
+    background: #FBEAE1;
+    border-color: #D67A52;
+    color: #D67A52;
+  }
+
+  .ia-suggestion-chip:active {
+    transform: scale(0.97);
+  }
+
+  .ia-suggestion-chip.pulsing {
+    pointer-events: none;
+    background: #FBEAE1;
+    border-color: #D67A52;
+    color: #D67A52;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ia-suggestion-chip.pulsing {
+      animation: chipPulse 1s ease-in-out infinite;
+    }
+  }
+
+  @keyframes chipPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+
+  .ia-panel-history {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .ia-panel-history:not(:empty) {
+    margin-bottom: 14px;
+  }
+
+  .ia-message {
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .ia-message--ai {
+    align-self: flex-start;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    color: #374151;
+  }
+
+  .ia-message--user {
+    align-self: flex-end;
+    background: #1E4D5C;
+    color: #fff;
+  }
+
+  .ia-panel-footer {
+    padding: 14px 20px 20px;
+    flex-shrink: 0;
+  }
+
+  .ia-input-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 999px;
+    padding: 6px 6px 6px 16px;
+  }
+
+  .ia-input-pill:focus-within {
+    border-color: #1E4D5C;
+  }
+
+  .ia-input-pill input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 14px;
+    color: #1F2937;
+  }
+
+  .ia-input-pill input:focus {
+    outline: none;
+  }
+
+  .ia-send-btn {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #1E4D5C, #3A7686);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .ia-send-btn:active {
+    transform: scale(0.92);
+  }
+
+  .ia-send-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===== Navbar ===== -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-logo">
+        <div class="logomark">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <defs>
+              <linearGradient id="starGradientNav" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#D67A52"/>
+                <stop offset="100%" stop-color="#1E4D5C"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#starGradientNav)" d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/>
+          </svg>
+        </div>
+        <span class="logo-text"><span class="logo-soma">Soma</span> <span class="logo-imob">Imob</span></span>
+        <span class="ia-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+          Arnês IA inclusa
+        </span>
+      </div>
+
+      <ul class="navbar-links" id="navbarLinks">
+        <span class="nav-indicator" id="navIndicator"></span>
+
+        <li data-page="Início">
+          <a href="index.html">Início</a>
+        </li>
+
+        <li class="nav-dropdown" data-page="Indicadores">
+          <button class="nav-dropdown-trigger" type="button" aria-expanded="false">
+            Indicadores
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <a class="dropdown-item" href="dashboard.html">Dashboard</a>
+            <a class="dropdown-item" href="inteligencia_mercado.html">Inteligência de mercado</a>
+            <a class="dropdown-item" href="metas.html">Metas e performance</a>
+            <button type="button" class="dropdown-item">Relatórios</button>
+          </div>
+        </li>
+
+        <li class="nav-dropdown" data-page="Atendimento">
+          <button class="nav-dropdown-trigger" type="button" aria-expanded="false">
+            Atendimento
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <a class="dropdown-item" href="clientes.html">Clientes <span class="nav-badge">307</span></a>
+            <a class="dropdown-item" href="atendimento.html">Pipeline de vendas</a>
+            <button type="button" class="dropdown-item">Distribuição automática</button>
+            <button type="button" class="dropdown-item">WhatsApp Omnichannel</button>
+            <button type="button" class="dropdown-item">Histórico</button>
+          </div>
+        </li>
+
+        <li class="nav-dropdown active" data-page="Imóveis">
+          <button class="nav-dropdown-trigger" type="button" aria-expanded="false">
+            Imóveis
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <button type="button" class="dropdown-item dropdown-item--highlight" id="btnNovoImovel">
+              <span class="dropdown-item-icon-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Novo imóvel
+              </span>
+            </button>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item active" href="imoveis.html">Imóveis</a>
+            <button type="button" class="dropdown-item">Condomínios</button>
+            <button type="button" class="dropdown-item">Portais de publicação</button>
+            <button type="button" class="dropdown-item">Captação de imóveis</button>
+            <button type="button" class="dropdown-item">Avaliação de imóveis</button>
+          </div>
+        </li>
+
+        <li class="nav-placeholder" data-page="Sites">
+          <span class="placeholder-link">Sites</span>
+        </li>
+
+        <li class="nav-ia-item">
+          <button class="ia-launcher" id="iaTrigger" type="button" aria-label="Peça à Arnês IA">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+          </button>
+        </li>
+      </ul>
+
+      <div class="navbar-actions">
+        <button class="icon-btn" title="Notificações">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <div class="avatar" title="Samuel W. — Corretor">SW</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== Banner de reconexão ===== -->
+  <div class="reconnect-banner" id="reconnectBanner" role="status">
+    ⚠ Arnês IA temporariamente indisponível. Os dados exibidos são os últimos carregados. Tentando reconectar...
+  </div>
+
+  <!-- ===== Página ===== -->
+  <div class="page">
+    <div class="content">
+
+      <div class="greeting">
+        <h2>Imóveis</h2>
+        <p id="saudacaoImoveis">481 imóveis ativos na carteira. Filtre por status ou busque por bairro, tipo ou código.</p>
+      </div>
+
+      <!-- Barra de filtro -->
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" class="search-input" id="buscaImoveis" placeholder="Buscar por bairro, tipo ou código...">
+        </div>
+        <div class="filter-chips" id="filterChips">
+          <button class="chip active" data-filter="todos">Todos</button>
+          <button class="chip" data-filter="ativos">Ativos</button>
+          <button class="chip" data-filter="reservados">Reservados</button>
+        </div>
+      </div>
+
+      <!-- Lista de imóveis -->
+      <div class="list" id="listaImoveis">
+        <div class="list-header">
+          <span></span>
+          <span>Código</span>
+          <span>Tipo</span>
+          <span>Bairro</span>
+          <span>Preço</span>
+          <span>Status</span>
+          <span>Dias</span>
+        </div>
+
+        <div class="list-row">
+          <div class="thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9"/></svg></div>
+          <div class="codigo">#1023</div>
+          <div>Ap. 2q</div>
+          <div>Palmeiras</div>
+          <div class="preco">R$ 480.000</div>
+          <div class="status-badges">
+            <span class="status-badge status-ativo">Ativo</span>
+            <span class="status-badge status-exclusivo">Exclusivo</span>
+          </div>
+          <div class="dias">12 dias</div>
+        </div>
+
+        <div class="list-row">
+          <div class="thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9"/></svg></div>
+          <div class="codigo">#1044</div>
+          <div>Casa 3q</div>
+          <div>Centro</div>
+          <div class="preco">R$ 620.000</div>
+          <div class="status-badges">
+            <span class="status-badge status-ativo">Ativo</span>
+          </div>
+          <div class="dias">45 dias</div>
+        </div>
+
+        <div class="list-row">
+          <div class="thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9"/></svg></div>
+          <div class="codigo">#1051</div>
+          <div>Ap. 1q</div>
+          <div>Jd. Amanda</div>
+          <div class="preco">R$ 355.000</div>
+          <div class="status-badges">
+            <span class="status-badge status-reservado">Reservado</span>
+          </div>
+          <div class="dias">3 dias</div>
+        </div>
+
+        <div class="list-row">
+          <div class="thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9"/></svg></div>
+          <div class="codigo">#1067</div>
+          <div>Ap. 3q</div>
+          <div>Palmeiras</div>
+          <div class="preco">R$ 710.000</div>
+          <div class="status-badges">
+            <span class="status-badge status-ativo">Ativo</span>
+          </div>
+          <div class="dias">88 dias</div>
+        </div>
+
+        <div class="list-row">
+          <div class="thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9"/></svg></div>
+          <div class="codigo">#1078</div>
+          <div>Casa 2q</div>
+          <div>Bosque</div>
+          <div class="preco">R$ 410.000</div>
+          <div class="status-badges">
+            <span class="status-badge status-ativo">Ativo</span>
+          </div>
+          <div class="dias">21 dias</div>
+        </div>
+
+        <div class="list-row">
+          <div class="thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9"/></svg></div>
+          <div class="codigo">#1082</div>
+          <div>Cobertura 3q</div>
+          <div>Centro</div>
+          <div class="preco">R$ 890.000</div>
+          <div class="status-badges">
+            <span class="status-badge status-exclusivo">Exclusivo</span>
+          </div>
+          <div class="dias">6 dias</div>
+        </div>
+
+        <div class="list-row">
+          <div class="thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9"/></svg></div>
+          <div class="codigo">#1090</div>
+          <div>Ap. 2q</div>
+          <div>Vila Real</div>
+          <div class="preco">R$ 465.000</div>
+          <div class="status-badges">
+            <span class="status-badge status-reservado">Reservado</span>
+          </div>
+          <div class="dias">15 dias</div>
+        </div>
+
+        <div class="list-row">
+          <div class="thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9"/></svg></div>
+          <div class="codigo">#1101</div>
+          <div>Casa 4q</div>
+          <div>Jd. Primavera</div>
+          <div class="preco">R$ 950.000</div>
+          <div class="status-badges">
+            <span class="status-badge status-ativo">Ativo</span>
+          </div>
+          <div class="dias">34 dias</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== Modal: Novo imóvel ===== -->
+  <div class="modal-overlay" id="modalNovoImovel">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalNovoImovelTitulo">
+      <div class="modal-header">
+        <h2 id="modalNovoImovelTitulo">Novo imóvel</h2>
+        <button class="modal-close" id="modalClose" type="button" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-tabs">
+        <button class="modal-tab active" type="button" data-tab="tabManual">Cadastro manual</button>
+        <button class="modal-tab" type="button" data-tab="tabVoz">Cadastro por voz</button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- ===== Aba: cadastro manual ===== -->
+        <div class="modal-tab-panel active" id="tabManual">
+
+          <div class="form-section">
+            <div class="form-section-title">Tipo e finalidade</div>
+            <div class="form-grid form-grid-3">
+              <div class="form-field">
+                <label for="tipoImovel">Tipo</label>
+                <select id="tipoImovel">
+                  <option value="">Selecione</option>
+                  <option value="Apartamento">Apartamento</option>
+                  <option value="Casa">Casa</option>
+                  <option value="Cobertura">Cobertura</option>
+                  <option value="Terreno">Terreno</option>
+                  <option value="Comercial">Comercial</option>
+                  <option value="Rural">Rural</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="finalidadeImovel">Finalidade</label>
+                <select id="finalidadeImovel">
+                  <option value="venda">Venda</option>
+                  <option value="locacao">Locação</option>
+                  <option value="venda_locacao">Venda e locação</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="statusImovel">Status</label>
+                <select id="statusImovel">
+                  <option value="ativo">Ativo</option>
+                  <option value="reservado">Reservado</option>
+                  <option value="inativo">Inativo</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Endereço</div>
+            <div class="form-grid form-grid-3" style="margin-bottom: 12px;">
+              <div class="form-field">
+                <label for="cepImovel">CEP</label>
+                <div class="cep-row">
+                  <input type="text" id="cepImovel" placeholder="00000-000">
+                  <button type="button" class="btn btn-buscar-cep" id="btnBuscarCep">Buscar</button>
+                </div>
+              </div>
+              <div class="form-field">
+                <label for="numeroImovel">Número / complemento</label>
+                <input type="text" id="numeroImovel" placeholder="Ex: 120, apto 32">
+              </div>
+              <div class="form-field">
+                <label for="ufImovel">UF</label>
+                <input type="text" id="ufImovel" maxlength="2">
+              </div>
+            </div>
+            <div class="form-grid form-grid-3">
+              <div class="form-field">
+                <label for="logradouroImovel">Logradouro</label>
+                <input type="text" id="logradouroImovel">
+              </div>
+              <div class="form-field">
+                <label for="bairroImovel">Bairro</label>
+                <input type="text" id="bairroImovel">
+              </div>
+              <div class="form-field">
+                <label for="cidadeImovel">Cidade</label>
+                <input type="text" id="cidadeImovel">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Características</div>
+            <div class="form-grid form-grid-4" style="margin-bottom: 12px;">
+              <div class="form-field">
+                <label for="areaPrivativa">Área privativa (m²)</label>
+                <input type="number" id="areaPrivativa" min="0">
+              </div>
+              <div class="form-field">
+                <label for="areaTotal">Área total (m²)</label>
+                <input type="number" id="areaTotal" min="0">
+              </div>
+              <div class="form-field">
+                <label for="quartos">Quartos</label>
+                <input type="number" id="quartos" min="0">
+              </div>
+              <div class="form-field">
+                <label for="suites">Suítes</label>
+                <input type="number" id="suites" min="0">
+              </div>
+            </div>
+            <div class="form-grid form-grid-4">
+              <div class="form-field">
+                <label for="banheiros">Banheiros</label>
+                <input type="number" id="banheiros" min="0">
+              </div>
+              <div class="form-field">
+                <label for="vagas">Vagas de garagem</label>
+                <input type="number" id="vagas" min="0">
+              </div>
+              <div class="form-field">
+                <label for="andar">Andar</label>
+                <input type="number" id="andar" min="0">
+              </div>
+              <div class="form-field">
+                <label for="anoConstrucao">Ano de construção</label>
+                <input type="number" id="anoConstrucao" min="1900" max="2100">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Comodidades</div>
+            <div class="amenities-grid">
+              <label class="amenity-item"><input type="checkbox" value="Piscina"> Piscina</label>
+              <label class="amenity-item"><input type="checkbox" value="Academia"> Academia</label>
+              <label class="amenity-item"><input type="checkbox" value="Salão de festas"> Salão de festas</label>
+              <label class="amenity-item"><input type="checkbox" value="Portaria 24h"> Portaria 24h</label>
+              <label class="amenity-item"><input type="checkbox" value="Elevador"> Elevador</label>
+              <label class="amenity-item"><input type="checkbox" value="Churrasqueira"> Churrasqueira</label>
+              <label class="amenity-item"><input type="checkbox" value="Playground"> Playground</label>
+              <label class="amenity-item"><input type="checkbox" value="Pet place"> Pet place</label>
+              <label class="amenity-item"><input type="checkbox" value="Sacada/varanda"> Sacada/varanda</label>
+              <label class="amenity-item"><input type="checkbox" value="Mobiliado"> Mobiliado</label>
+              <label class="amenity-item"><input type="checkbox" value="Ar-condicionado"> Ar-condicionado</label>
+              <label class="amenity-item"><input type="checkbox" value="Área de serviço"> Área de serviço</label>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Preço e comissão</div>
+            <div class="form-grid form-grid-3" style="margin-bottom: 12px;">
+              <div class="form-field">
+                <label for="precoVenda">Valor de venda (R$)</label>
+                <input type="number" id="precoVenda" min="0">
+              </div>
+              <div class="form-field">
+                <label for="valorCondominio">Condomínio (R$)</label>
+                <input type="number" id="valorCondominio" min="0">
+              </div>
+              <div class="form-field">
+                <label for="valorIptu">IPTU anual (R$)</label>
+                <input type="number" id="valorIptu" min="0">
+              </div>
+            </div>
+            <div class="form-grid form-grid-3">
+              <div class="form-field">
+                <label for="percentualComissao">Comissão (%)</label>
+                <input type="number" id="percentualComissao" min="0" max="100" step="0.5">
+              </div>
+              <div class="form-field form-field-checkbox">
+                <input type="checkbox" id="aceitaPermuta">
+                <label for="aceitaPermuta">Aceita permuta</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Proprietário</div>
+            <div class="form-grid form-grid-3">
+              <div class="form-field">
+                <label for="proprietarioNome">Nome</label>
+                <input type="text" id="proprietarioNome">
+              </div>
+              <div class="form-field">
+                <label for="proprietarioTelefone">Telefone</label>
+                <input type="tel" id="proprietarioTelefone">
+              </div>
+              <div class="form-field">
+                <label for="proprietarioEmail">E-mail</label>
+                <input type="email" id="proprietarioEmail">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Descrição</div>
+            <div class="form-field">
+              <textarea id="descricaoImovel" placeholder="Descreva o imóvel, ou gere automaticamente com a Arnês IA..."></textarea>
+            </div>
+            <button type="button" class="btn btn-ia-generate" id="btnGerarDescricaoIA">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+              Gerar descrição com Arnês IA
+            </button>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Fotos</div>
+            <div class="photo-dropzone" id="dropzonePhotos">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+              <div>Arraste fotos aqui ou clique para selecionar</div>
+              <input type="file" id="inputPhotos" accept="image/*" multiple style="display: none;">
+            </div>
+            <div class="photo-preview-grid" id="previewPhotos"></div>
+          </div>
+
+        </div>
+
+        <!-- ===== Aba: cadastro por voz ===== -->
+        <div class="modal-tab-panel" id="tabVoz">
+          <div class="voice-tab-panel">
+            <p class="voice-intro">A Arnês IA faz 12 perguntas em voz alta e preenche o cadastro pra você. Responda naturalmente — no fim, você revisa tudo na aba de cadastro manual antes de salvar.</p>
+
+            <div class="voice-fallback" id="voiceFallback">
+              Seu navegador não suporta reconhecimento de voz. Use o Google Chrome ou preencha o formulário manualmente na aba "Cadastro manual".
+            </div>
+
+            <button type="button" class="voice-mic-btn" id="btnIniciarVoz">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/><path d="M8 22h8"/></svg>
+            </button>
+
+            <div class="voice-status-text" id="voiceStatusText">Toque no microfone para começar</div>
+
+            <div class="voice-progress-track">
+              <div class="voice-progress-fill" id="voiceProgressFill"></div>
+            </div>
+
+            <div class="voice-controls" id="voiceControls" style="display: none;">
+              <button type="button" class="btn btn-ghost" id="btnPausarVoz">Pausar</button>
+              <button type="button" class="btn btn-ghost" id="btnRepetirVoz">Repetir pergunta</button>
+              <button type="button" class="btn btn-ghost" id="btnCorrigirVoz">Corrigir última resposta</button>
+            </div>
+
+            <ul class="voice-checklist" id="voiceChecklist"></ul>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="btnCancelarModal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btnSalvarImovel">Salvar imóvel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Painel lateral da Arnês IA (estilo Gemini) ===== -->
+  <aside class="ia-panel" id="iaPanel" aria-hidden="true">
+    <div class="ia-panel-header">
+      <div class="ia-panel-brand">
+        <div class="logomark">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <defs>
+              <linearGradient id="starGradientPanel" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#D67A52"/>
+                <stop offset="100%" stop-color="#1E4D5C"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#starGradientPanel)" d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/>
+          </svg>
+        </div>
+        <span>Arnês IA</span>
+      </div>
+      <button class="ia-panel-close" id="iaPanelClose" type="button" aria-label="Fechar painel da IA">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="ia-panel-body">
+      <div class="ia-greeting" id="iaGreeting">
+        <h2>Olá, Samuel</h2>
+        <p>Sou a Arnês IA. Como posso ajudar?</p>
+      </div>
+
+      <div class="ia-panel-history" id="iaHistory"></div>
+
+      <div class="ia-panel-suggestions" id="iaSuggestions">
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Qual lead tem mais chance de fechar hoje?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Tem alguma proposta vencendo essa semana?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Qual imóvel está parado há mais tempo?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Quais proprietários precisam de feedback?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Como foi a semana da imobiliária?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Gera relatório do mês</span></button>
+      </div>
+    </div>
+
+    <div class="ia-panel-footer">
+      <div class="ia-input-pill">
+        <input type="text" id="iaPanelInput" placeholder="Pergunte sobre sua carteira, leads ou imóveis...">
+        <button class="ia-send-btn" id="iaPanelSend" type="button" aria-label="Enviar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9 22 2Z"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== Toast genérico de erro de API ===== -->
+  <div class="toast" id="errorToast" role="status" aria-live="polite">
+    <span class="toast-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+    </span>
+    <div class="toast-body">
+      <p id="errorToastText">Ocorreu um erro.</p>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script>
+    // Chips de filtro: alternam o destaque visual e, se a API estiver
+    // disponível, disparam uma nova busca com o filtro escolhido.
+    document.querySelectorAll('#filterChips .chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        document.querySelectorAll('#filterChips .chip').forEach(function (c) {
+          c.classList.remove('active');
+        });
+        chip.classList.add('active');
+        if (typeof carregarImoveis === 'function') carregarImoveis();
+      });
+    });
+
+    // Indicador deslizante da navbar: acompanha o item ativo
+    (function () {
+      const navList = document.getElementById('navbarLinks');
+      const indicator = document.getElementById('navIndicator');
+
+      function moveIndicatorTo(li, animate) {
+        const listRect = navList.getBoundingClientRect();
+        const itemRect = li.getBoundingClientRect();
+        if (!animate) indicator.style.transition = 'none';
+        indicator.style.left = (itemRect.left - listRect.left) + 'px';
+        indicator.style.width = itemRect.width + 'px';
+        if (!animate) {
+          indicator.offsetHeight;
+          indicator.style.transition = '';
+        }
+      }
+
+      const activeLi = navList.querySelector('li.active');
+      if (activeLi) moveIndicatorTo(activeLi, false);
+
+      window.addEventListener('resize', function () {
+        const current = navList.querySelector('li.active');
+        if (current) moveIndicatorTo(current, false);
+      });
+
+      // Itens de menu ainda não conectados a uma página: só destacam ao clicar
+      document.querySelectorAll('#navbarLinks li.nav-placeholder').forEach(function (item) {
+        item.addEventListener('click', function () {
+          document.querySelectorAll('#navbarLinks li').forEach(function (li) {
+            li.classList.remove('active');
+          });
+          item.classList.add('active');
+          moveIndicatorTo(item, true);
+        });
+      });
+    })();
+
+    // Menus dropdown da navbar: abrem no hover ou clique, fecham ao clicar fora
+    (function () {
+      const dropdowns = document.querySelectorAll('.nav-dropdown');
+
+      function closeAll(except) {
+        dropdowns.forEach(function (dd) {
+          if (dd !== except) {
+            dd.classList.remove('open');
+            const trigger = dd.querySelector('.nav-dropdown-trigger');
+            if (trigger) trigger.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+
+      dropdowns.forEach(function (dd) {
+        const trigger = dd.querySelector('.nav-dropdown-trigger');
+
+        dd.addEventListener('mouseenter', function () {
+          closeAll(dd);
+          dd.classList.add('open');
+          trigger.setAttribute('aria-expanded', 'true');
+        });
+
+        dd.addEventListener('mouseleave', function () {
+          dd.classList.remove('open');
+          trigger.setAttribute('aria-expanded', 'false');
+        });
+
+        trigger.addEventListener('click', function (e) {
+          e.stopPropagation();
+          const isOpen = dd.classList.contains('open');
+          closeAll(dd);
+          if (isOpen) {
+            dd.classList.remove('open');
+            trigger.setAttribute('aria-expanded', 'false');
+          } else {
+            dd.classList.add('open');
+            trigger.setAttribute('aria-expanded', 'true');
+          }
+        });
+      });
+
+      document.querySelectorAll('.dropdown-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+          closeAll(null);
+        });
+      });
+
+      document.addEventListener('click', function () {
+        closeAll(null);
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeAll(null);
+      });
+    })();
+
+    // ===== Conexão com a API: lista de imóveis com filtro/busca reais =====
+    const MAPA_FILTRO_STATUS = { todos: 'todos', ativos: 'ativo', reservados: 'reservado' };
+
+    function renderizarImoveis(imoveis) {
+      const lista = document.getElementById('listaImoveis');
+      lista.querySelectorAll('.list-row').forEach(function (row) { row.remove(); });
+
+      if (imoveis.length === 0) {
+        const vazio = document.createElement('div');
+        vazio.className = 'list-row';
+        vazio.innerHTML = '<div style="grid-column: 1 / -1; color: #6B7280;">Nenhum imóvel encontrado para esse filtro/busca.</div>';
+        lista.appendChild(vazio);
+        return;
+      }
+
+      const statusMap = {
+        ativo: { label: 'Ativo', cls: 'status-ativo' },
+        reservado: { label: 'Reservado', cls: 'status-reservado' },
+      };
+
+      imoveis.forEach(function (im) {
+        const st = statusMap[im.status] || { label: im.status, cls: 'status-reservado' };
+        const badges = '<span class="status-badge ' + st.cls + '">' + st.label + '</span>' +
+          (im.exclusivo ? '<span class="status-badge status-exclusivo">Exclusivo</span>' : '');
+
+        const row = document.createElement('div');
+        row.className = 'list-row';
+        row.innerHTML = `
+          <div class="thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9"/></svg></div>
+          <div class="codigo">${im.codigo}</div>
+          <div>${im.tipo}</div>
+          <div>${im.bairro}</div>
+          <div class="preco">R$ ${Math.round(im.preco).toLocaleString('pt-BR')}</div>
+          <div class="status-badges">${badges}</div>
+          <div class="dias">${im.dias_carteira} dias</div>
+        `;
+        lista.appendChild(row);
+      });
+    }
+
+    function carregarImoveis() {
+      if (!window.apiDisponivel) return;
+      const lista = document.getElementById('listaImoveis');
+      const filtroAtivo = document.querySelector('#filterChips .chip.active');
+      const status = MAPA_FILTRO_STATUS[filtroAtivo ? filtroAtivo.dataset.filter : 'todos'] || 'todos';
+      const busca = document.getElementById('buscaImoveis').value.trim();
+
+      lista.classList.add('skeleton');
+      apiFetch('/imoveis?status=' + encodeURIComponent(status) + '&busca=' + encodeURIComponent(busca))
+        .then(function (dados) {
+          lista.classList.remove('skeleton');
+          renderizarImoveis(dados.imoveis);
+        })
+        .catch(function (erro) {
+          lista.classList.remove('skeleton');
+          console.error('Falha ao carregar imóveis:', erro);
+          if (typeof mostrarErroToast === 'function') mostrarErroToast('Não consegui atualizar a lista de imóveis.');
+        });
+    }
+
+    // Busca com debounce de 400ms
+    (function () {
+      let debounceTimer = null;
+      document.getElementById('buscaImoveis').addEventListener('input', function () {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(carregarImoveis, 400);
+      });
+    })();
+
+    // Saudação "N imóveis ativos" — sempre conta os ATIVOS de verdade
+    // (independente do filtro/busca aplicados na lista abaixo), pura
+    // consulta SQL via GET /api/imoveis?status=ativo, sem IA nenhuma.
+    function atualizarSaudacaoImoveis() {
+      apiFetch('/imoveis?status=ativo')
+        .then(function (dados) {
+          const saudacao = document.getElementById('saudacaoImoveis');
+          saudacao.textContent = dados.total + (dados.total === 1 ? ' imóvel ativo' : ' imóveis ativos') +
+            ' na carteira. Filtre por status ou busque por bairro, tipo ou código.';
+        })
+        .catch(function (erro) {
+          console.error('Falha ao carregar total de imóveis ativos:', erro);
+          // Mantém o texto mockado original visível — sem fallback adicional.
+        });
+    }
+
+    // ===== Health check / banner de reconexão (mesmo padrão das outras telas) =====
+    (function () {
+      window.apiDisponivel = false;
+      const banner = document.getElementById('reconnectBanner');
+      const errorToast = document.getElementById('errorToast');
+      let errorToastTimer = null;
+
+      window.mostrarErroToast = function (mensagem) {
+        document.getElementById('errorToastText').textContent = mensagem;
+        errorToast.classList.add('show');
+        clearTimeout(errorToastTimer);
+        errorToastTimer = setTimeout(function () { errorToast.classList.remove('show'); }, 4000);
+      };
+
+      function verificarConexao() {
+        apiFetch('/health')
+          .then(function () {
+            const reconectou = !window.apiDisponivel;
+            window.apiDisponivel = true;
+            banner.classList.remove('show');
+            if (reconectou) {
+              carregarImoveis();
+              atualizarSaudacaoImoveis();
+            }
+          })
+          .catch(function () {
+            window.apiDisponivel = false;
+            banner.classList.add('show');
+          });
+      }
+
+      verificarConexao();
+      setInterval(verificarConexao, 15000);
+    })();
+
+    // ===== Modal: Novo imóvel — abrir/fechar, abas =====
+    (function () {
+      const overlay = document.getElementById('modalNovoImovel');
+      const btnAbrir = document.getElementById('btnNovoImovel');
+      const btnFechar = document.getElementById('modalClose');
+      const btnCancelar = document.getElementById('btnCancelarModal');
+      const btnSalvar = document.getElementById('btnSalvarImovel');
+
+      function abrirModal() {
+        overlay.classList.add('show');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function fecharModal() {
+        overlay.classList.remove('show');
+        document.body.style.overflow = '';
+      }
+
+      window.fecharModalNovoImovel = fecharModal;
+
+      btnAbrir.addEventListener('click', function (e) {
+        e.preventDefault();
+        abrirModal();
+      });
+      btnFechar.addEventListener('click', fecharModal);
+      btnCancelar.addEventListener('click', fecharModal);
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) fecharModal();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && overlay.classList.contains('show')) fecharModal();
+      });
+
+      // Salvar imóvel é CRUD puro — POST /api/imoveis (main.py) só grava
+      // no banco e gera o código (gerar_codigo_imovel, também em
+      // main.py). Nenhuma chamada de IA aqui: zero Haiku, zero Sonnet.
+      btnSalvar.addEventListener('click', function () {
+        const tipo = document.getElementById('tipoImovel').value;
+        const bairro = document.getElementById('bairroImovel').value.trim();
+        const precoStr = document.getElementById('precoVenda').value;
+        const preco = parseFloat(precoStr);
+        const quartosStr = document.getElementById('quartos').value;
+        const areaStr = document.getElementById('areaPrivativa').value;
+        const status = document.getElementById('statusImovel').value || 'ativo';
+
+        if (!tipo || !bairro || !precoStr || isNaN(preco)) {
+          if (typeof mostrarErroToast === 'function') {
+            mostrarErroToast('Preencha ao menos tipo, bairro e valor de venda pra salvar.');
+          }
+          return;
+        }
+
+        const payload = { tipo: tipo, bairro: bairro, preco: preco, status: status };
+        if (quartosStr) payload.quartos = parseInt(quartosStr, 10);
+        if (areaStr) payload.area_m2 = parseFloat(areaStr);
+
+        if (!window.apiDisponivel) {
+          if (typeof mostrarErroToast === 'function') {
+            mostrarErroToast('Arnês IA offline — não consigo salvar o imóvel agora. Tente de novo quando reconectar.');
+          }
+          return;
+        }
+
+        btnSalvar.disabled = true;
+        const textoOriginalBotao = btnSalvar.textContent;
+        btnSalvar.textContent = 'Salvando...';
+
+        apiFetch('/imoveis', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        })
+          .then(function (dados) {
+            fecharModal();
+            if (typeof mostrarErroToast === 'function') {
+              mostrarErroToast('Imóvel ' + dados.codigo + ' cadastrado com sucesso!');
+            }
+            carregarImoveis();
+            atualizarSaudacaoImoveis();
+          })
+          .catch(function (erro) {
+            console.error('Falha ao salvar imóvel:', erro);
+            if (typeof mostrarErroToast === 'function') {
+              mostrarErroToast('Não consegui salvar o imóvel agora. Tente de novo em instantes.');
+            }
+          })
+          .finally(function () {
+            btnSalvar.disabled = false;
+            btnSalvar.textContent = textoOriginalBotao;
+          });
+      });
+
+      document.querySelectorAll('.modal-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          document.querySelectorAll('.modal-tab').forEach(function (t) { t.classList.remove('active'); });
+          tab.classList.add('active');
+          document.querySelectorAll('.modal-tab-panel').forEach(function (p) { p.classList.remove('active'); });
+          document.getElementById(tab.dataset.tab).classList.add('active');
+        });
+      });
+    })();
+
+    // ===== Modal: busca de CEP via ViaCEP =====
+    function buscarCep() {
+      const cepDigitos = document.getElementById('cepImovel').value.replace(/\D/g, '');
+      if (cepDigitos.length !== 8) {
+        if (typeof mostrarErroToast === 'function') mostrarErroToast('Digite um CEP válido com 8 dígitos.');
+        return;
+      }
+      fetch('https://viacep.com.br/ws/' + cepDigitos + '/json/')
+        .then(function (r) { return r.json(); })
+        .then(function (dados) {
+          if (dados.erro) {
+            if (typeof mostrarErroToast === 'function') mostrarErroToast('CEP não encontrado.');
+            return;
+          }
+          document.getElementById('logradouroImovel').value = dados.logradouro || '';
+          document.getElementById('bairroImovel').value = dados.bairro || '';
+          document.getElementById('cidadeImovel').value = dados.localidade || '';
+          document.getElementById('ufImovel').value = dados.uf || '';
+        })
+        .catch(function () {
+          if (typeof mostrarErroToast === 'function') mostrarErroToast('Não consegui buscar o CEP agora.');
+        });
+    }
+    document.getElementById('btnBuscarCep').addEventListener('click', buscarCep);
+
+    // ===== Modal: gerar descrição mock com Arnês IA =====
+    document.getElementById('btnGerarDescricaoIA').addEventListener('click', function () {
+      const tipo = (document.getElementById('tipoImovel').value || 'imóvel').toLowerCase();
+      const bairro = document.getElementById('bairroImovel').value || 'ótima localização';
+      const quartos = document.getElementById('quartos').value;
+      const area = document.getElementById('areaPrivativa').value;
+      const descricaoEl = document.getElementById('descricaoImovel');
+      const btnGerar = document.getElementById('btnGerarDescricaoIA');
+
+      function descricaoOffline() {
+        const caracteristicas = [];
+        if (quartos) caracteristicas.push(quartos + ' quarto' + (quartos == 1 ? '' : 's'));
+        if (area) caracteristicas.push(area + 'm² de área privativa');
+        const trechoCaracteristicas = caracteristicas.length ? ' com ' + caracteristicas.join(' e ') : '';
+        return 'Excelente ' + tipo + trechoCaracteristicas + ', localizado em ' + bairro + '. ' +
+          'Ambientes amplos e bem iluminados, fácil acesso a comércio, escolas e transporte público. ' +
+          'Uma oportunidade rara para quem busca conforto, praticidade e valorização.';
+      }
+
+      if (!window.apiDisponivel) {
+        descricaoEl.value = descricaoOffline();
+        return;
+      }
+
+      const partesPergunta = ['Escreve uma descrição de anúncio pra vender um ' + tipo + ' em ' + bairro + '.'];
+      if (quartos) partesPergunta.push(quartos + ' quartos.');
+      if (area) partesPergunta.push(area + 'm² de área privativa.');
+      partesPergunta.push('Escreve só o texto do anúncio, sem saudação nem explicação, em 2-3 frases.');
+
+      descricaoEl.value = 'Gerando descrição com o Arnês...';
+      btnGerar.disabled = true;
+
+      apiFetch('/chat', {
+        method: 'POST',
+        body: JSON.stringify({ pergunta: partesPergunta.join(' '), historico: [], fonte: 'texto' }),
+      })
+        .then(function (dados) {
+          descricaoEl.value = dados.resposta || descricaoOffline();
+        })
+        .catch(function (erro) {
+          console.error('Falha ao chamar /api/chat:', erro);
+          descricaoEl.value = descricaoOffline();
+          if (typeof mostrarErroToast === 'function') mostrarErroToast('Arnês IA indisponível — gerando descrição offline.');
+        })
+        .finally(function () {
+          btnGerar.disabled = false;
+        });
+    });
+
+    // ===== Modal: upload de fotos com drag-and-drop e preview =====
+    (function () {
+      const dropzone = document.getElementById('dropzonePhotos');
+      const inputPhotos = document.getElementById('inputPhotos');
+      const previewGrid = document.getElementById('previewPhotos');
+
+      function adicionarFotos(files) {
+        Array.from(files).forEach(function (file) {
+          if (!file.type.startsWith('image/')) return;
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const thumb = document.createElement('div');
+            thumb.className = 'photo-thumb';
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            const remover = document.createElement('button');
+            remover.type = 'button';
+            remover.className = 'photo-remove';
+            remover.setAttribute('aria-label', 'Remover foto');
+            remover.textContent = '×';
+            remover.addEventListener('click', function () { thumb.remove(); });
+            thumb.appendChild(img);
+            thumb.appendChild(remover);
+            previewGrid.appendChild(thumb);
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      dropzone.addEventListener('click', function () { inputPhotos.click(); });
+      inputPhotos.addEventListener('change', function () { adicionarFotos(inputPhotos.files); });
+
+      ['dragenter', 'dragover'].forEach(function (evt) {
+        dropzone.addEventListener(evt, function (e) {
+          e.preventDefault();
+          dropzone.classList.add('dragover');
+        });
+      });
+      ['dragleave', 'drop'].forEach(function (evt) {
+        dropzone.addEventListener(evt, function (e) {
+          e.preventDefault();
+          dropzone.classList.remove('dragover');
+        });
+      });
+      dropzone.addEventListener('drop', function (e) {
+        if (e.dataTransfer.files.length) adicionarFotos(e.dataTransfer.files);
+      });
+    })();
+
+    // ===== Modal: cadastro por voz (Web Speech API) =====
+    (function () {
+      const PERGUNTAS_VOZ = [
+        { id: 'tipo', rotulo: 'Tipo do imóvel', texto: 'Qual o tipo do imóvel? Por exemplo, apartamento, casa, cobertura ou terreno.' },
+        { id: 'finalidade', rotulo: 'Finalidade (venda ou locação)', texto: 'Qual a finalidade? Venda, locação, ou ambos?' },
+        { id: 'cep', rotulo: 'CEP', texto: 'Qual o CEP do imóvel?' },
+        { id: 'numero_complemento', rotulo: 'Número e complemento', texto: 'Qual o número e complemento do endereço?' },
+        { id: 'area', rotulo: 'Área privativa (m²)', texto: 'Quantos metros quadrados de área privativa tem o imóvel?' },
+        { id: 'quartos_suites', rotulo: 'Quartos e suítes', texto: 'Quantos quartos, e quantas dessas são suítes?' },
+        { id: 'banheiros_vagas', rotulo: 'Banheiros e vagas de garagem', texto: 'Quantos banheiros e quantas vagas de garagem?' },
+        { id: 'andar', rotulo: 'Andar', texto: 'Em qual andar fica o imóvel?' },
+        { id: 'preco', rotulo: 'Valor de venda', texto: 'Qual o valor de venda do imóvel?' },
+        { id: 'condominio_iptu', rotulo: 'Condomínio e IPTU', texto: 'Qual o valor do condomínio e do IPTU?' },
+        { id: 'proprietario', rotulo: 'Proprietário (nome e telefone)', texto: 'Qual o nome e telefone do proprietário?' },
+        { id: 'observacao', rotulo: 'Observações', texto: 'Deseja adicionar alguma observação sobre o imóvel?' }
+      ];
+
+      const micBtn = document.getElementById('btnIniciarVoz');
+      const statusText = document.getElementById('voiceStatusText');
+      const progressFill = document.getElementById('voiceProgressFill');
+      const controls = document.getElementById('voiceControls');
+      const checklist = document.getElementById('voiceChecklist');
+      const fallbackMsg = document.getElementById('voiceFallback');
+      const btnPausar = document.getElementById('btnPausarVoz');
+      const btnRepetir = document.getElementById('btnRepetirVoz');
+      const btnCorrigir = document.getElementById('btnCorrigirVoz');
+
+      PERGUNTAS_VOZ.forEach(function (p, i) {
+        const li = document.createElement('li');
+        li.id = 'voiceChecklistItem' + i;
+        li.innerHTML = '<span class="voice-check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>' + p.rotulo + '</span>';
+        checklist.appendChild(li);
+      });
+
+      const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const suportaVoz = !!SpeechRecognitionCtor && !!window.speechSynthesis;
+
+      if (!suportaVoz) {
+        fallbackMsg.classList.add('show');
+        micBtn.disabled = true;
+        statusText.textContent = 'Reconhecimento de voz indisponível neste navegador.';
+      }
+
+      let vozIndex = 0;
+      let vozPausado = false;
+      let vozIniciado = false;
+      let vozRespostas = {};
+      let recognitionAtual = null;
+
+      function atualizarProgresso() {
+        progressFill.style.width = (vozIndex / PERGUNTAS_VOZ.length * 100) + '%';
+      }
+
+      function marcarRespondida(idx, respondida) {
+        const li = document.getElementById('voiceChecklistItem' + idx);
+        if (!li) return;
+        if (respondida) li.classList.add('answered');
+        else li.classList.remove('answered');
+      }
+
+      function falar(texto, callback) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(texto);
+        utter.lang = 'pt-BR';
+        utter.onend = function () { if (callback) callback(); };
+        window.speechSynthesis.speak(utter);
+      }
+
+      function ouvir(callback) {
+        recognitionAtual = new SpeechRecognitionCtor();
+        recognitionAtual.lang = 'pt-BR';
+        recognitionAtual.continuous = false;
+        recognitionAtual.interimResults = false;
+        recognitionAtual.maxAlternatives = 1;
+
+        statusText.textContent = 'Ouvindo...';
+        micBtn.classList.add('listening');
+
+        recognitionAtual.onresult = function (event) {
+          const transcript = event.results[0][0].transcript;
+          callback(transcript);
+        };
+        recognitionAtual.onerror = function () {
+          micBtn.classList.remove('listening');
+          statusText.textContent = 'Não entendi. Toque em "Repetir pergunta" para tentar de novo.';
+        };
+        recognitionAtual.onend = function () {
+          micBtn.classList.remove('listening');
+        };
+        recognitionAtual.start();
+      }
+
+      function perguntarAtual() {
+        if (vozPausado || vozIndex >= PERGUNTAS_VOZ.length) return;
+        const pergunta = PERGUNTAS_VOZ[vozIndex];
+        atualizarProgresso();
+        statusText.textContent = pergunta.texto;
+        falar(pergunta.texto, function () {
+          if (vozPausado) return;
+          ouvir(function (transcript) {
+            vozRespostas[pergunta.id] = transcript;
+            marcarRespondida(vozIndex, true);
+            vozIndex++;
+            atualizarProgresso();
+            setTimeout(function () {
+              if (vozIndex >= PERGUNTAS_VOZ.length) {
+                concluirCadastroPorVoz();
+              } else {
+                perguntarAtual();
+              }
+            }, 500);
+          });
+        });
+      }
+
+      function extrairNumeros(texto) {
+        const match = texto.match(/\d+/g);
+        return match ? match.map(Number) : [];
+      }
+
+      function preencherFormularioComRespostasDeVoz(respostas) {
+        if (respostas.tipo) {
+          const t = respostas.tipo.toLowerCase();
+          const opcoes = { apartamento: 'Apartamento', casa: 'Casa', cobertura: 'Cobertura', terreno: 'Terreno', comercial: 'Comercial', rural: 'Rural' };
+          for (const chave in opcoes) {
+            if (t.indexOf(chave) !== -1) { document.getElementById('tipoImovel').value = opcoes[chave]; break; }
+          }
+        }
+        if (respostas.finalidade) {
+          const f = respostas.finalidade.toLowerCase();
+          if (f.indexOf('loca') !== -1 && f.indexOf('venda') !== -1) document.getElementById('finalidadeImovel').value = 'venda_locacao';
+          else if (f.indexOf('loca') !== -1 || f.indexOf('aluguel') !== -1) document.getElementById('finalidadeImovel').value = 'locacao';
+          else if (f.indexOf('venda') !== -1) document.getElementById('finalidadeImovel').value = 'venda';
+        }
+        if (respostas.cep) {
+          const digitos = respostas.cep.replace(/\D/g, '');
+          if (digitos) {
+            document.getElementById('cepImovel').value = digitos;
+            buscarCep();
+          }
+        }
+        if (respostas.numero_complemento) {
+          document.getElementById('numeroImovel').value = respostas.numero_complemento;
+        }
+        if (respostas.area) {
+          const nums = extrairNumeros(respostas.area);
+          if (nums[0] !== undefined) document.getElementById('areaPrivativa').value = nums[0];
+        }
+        if (respostas.quartos_suites) {
+          const nums = extrairNumeros(respostas.quartos_suites);
+          if (nums[0] !== undefined) document.getElementById('quartos').value = nums[0];
+          if (nums[1] !== undefined) document.getElementById('suites').value = nums[1];
+        }
+        if (respostas.banheiros_vagas) {
+          const nums = extrairNumeros(respostas.banheiros_vagas);
+          if (nums[0] !== undefined) document.getElementById('banheiros').value = nums[0];
+          if (nums[1] !== undefined) document.getElementById('vagas').value = nums[1];
+        }
+        if (respostas.andar) {
+          const nums = extrairNumeros(respostas.andar);
+          if (nums[0] !== undefined) document.getElementById('andar').value = nums[0];
+        }
+        if (respostas.preco) {
+          const nums = extrairNumeros(respostas.preco);
+          if (nums.length) document.getElementById('precoVenda').value = nums.join('');
+        }
+        if (respostas.condominio_iptu) {
+          const nums = extrairNumeros(respostas.condominio_iptu);
+          if (nums[0] !== undefined) document.getElementById('valorCondominio').value = nums[0];
+          if (nums[1] !== undefined) document.getElementById('valorIptu').value = nums[1];
+        }
+        if (respostas.proprietario) {
+          document.getElementById('proprietarioNome').value = respostas.proprietario;
+          const telefone = respostas.proprietario.match(/\d{4,}/);
+          if (telefone) document.getElementById('proprietarioTelefone').value = telefone[0];
+        }
+        if (respostas.observacao) {
+          document.getElementById('descricaoImovel').value = respostas.observacao;
+        }
+      }
+
+      function concluirCadastroPorVoz() {
+        statusText.textContent = 'Cadastro concluído! Preenchendo o formulário para você revisar...';
+        controls.style.display = 'none';
+        micBtn.style.display = 'none';
+        falar('Cadastro concluído! Vou preencher o formulário para você revisar.', function () {
+          preencherFormularioComRespostasDeVoz(vozRespostas);
+          const abaManual = document.querySelector('.modal-tab[data-tab="tabManual"]');
+          if (abaManual) abaManual.click();
+        });
+      }
+
+      micBtn.addEventListener('click', function () {
+        if (!suportaVoz || vozIniciado) return;
+        vozIniciado = true;
+        vozPausado = false;
+        vozIndex = 0;
+        vozRespostas = {};
+        PERGUNTAS_VOZ.forEach(function (p, i) { marcarRespondida(i, false); });
+        controls.style.display = 'flex';
+        perguntarAtual();
+      });
+
+      btnPausar.addEventListener('click', function () {
+        vozPausado = !vozPausado;
+        btnPausar.textContent = vozPausado ? 'Continuar' : 'Pausar';
+        if (vozPausado) {
+          window.speechSynthesis.cancel();
+          if (recognitionAtual) recognitionAtual.abort();
+          statusText.textContent = 'Pausado. Toque em "Continuar" para retomar.';
+        } else {
+          perguntarAtual();
+        }
+      });
+
+      btnRepetir.addEventListener('click', function () {
+        window.speechSynthesis.cancel();
+        if (recognitionAtual) recognitionAtual.abort();
+        perguntarAtual();
+      });
+
+      btnCorrigir.addEventListener('click', function () {
+        if (vozIndex === 0) return;
+        window.speechSynthesis.cancel();
+        if (recognitionAtual) recognitionAtual.abort();
+        vozIndex--;
+        marcarRespondida(vozIndex, false);
+        delete vozRespostas[PERGUNTAS_VOZ[vozIndex].id];
+        atualizarProgresso();
+        perguntarAtual();
+      });
+    })();
+
+    // Painel lateral da Arnês IA (estilo Gemini): desliza da direita e empurra o conteúdo
+    (function () {
+      const trigger = document.getElementById('iaTrigger');
+      const panel = document.getElementById('iaPanel');
+      const closeBtn = document.getElementById('iaPanelClose');
+      const greeting = document.getElementById('iaGreeting');
+      const suggestions = document.getElementById('iaSuggestions');
+      const history = document.getElementById('iaHistory');
+      const input = document.getElementById('iaPanelInput');
+      const sendBtn = document.getElementById('iaPanelSend');
+
+      function openPanel() {
+        document.body.classList.add('ia-panel-open');
+        panel.classList.add('show');
+        panel.setAttribute('aria-hidden', 'false');
+      }
+
+      function closePanel() {
+        document.body.classList.remove('ia-panel-open');
+        panel.classList.remove('show');
+        panel.setAttribute('aria-hidden', 'true');
+      }
+
+      trigger.addEventListener('click', openPanel);
+      closeBtn.addEventListener('click', closePanel);
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && panel.classList.contains('show')) closePanel();
+      });
+
+      function addMessage(texto, role) {
+        greeting.style.display = 'none';
+        suggestions.style.display = 'none';
+        const msg = document.createElement('div');
+        msg.className = 'ia-message ia-message--' + role;
+        const p = document.createElement('p');
+        p.textContent = texto;
+        msg.appendChild(p);
+        history.appendChild(msg);
+        history.scrollTop = history.scrollHeight;
+      }
+
+      window.iaHistorico = window.iaHistorico || [];
+
+      // Nem toda intenção do backend devolve "resposta" (texto livre de
+      // Sonnet/Haiku) — EDICAO_CADASTRO, CRIACAO_CADASTRO, CONFIGURAR_META,
+      // ACAO_WHATSAPP e os casos de navegação sem resultado usam "mensagem"
+      // (ou "erro"). Sem isso, addMessage(dados.resposta, ...) recebia
+      // undefined pra essas intenções e a conversa ficava sem responder
+      // nada, dando a impressão de estar travada.
+      function extrairTextoResposta(dados) {
+        if (dados.resposta) return dados.resposta;
+        if (dados.mensagem) return dados.mensagem;
+        if (typeof dados.erro === 'string') return dados.erro;
+        return 'Não entendi — pode reformular?';
+      }
+
+      function enviarPergunta(texto) {
+        if (!texto.trim()) return;
+        addMessage(texto, 'user');
+        input.value = '';
+
+        if (!window.apiDisponivel) {
+          setTimeout(function () {
+            addMessage('A Arnês IA está temporariamente indisponível — tento de novo assim que reconectar.', 'ai');
+          }, 400);
+          return;
+        }
+
+        window.iaHistorico.push({ role: 'user', content: texto });
+
+        addMessage('Pensando...', 'ai');
+        const bolhaPensando = history.lastElementChild;
+
+        apiFetch('/chat', {
+          method: 'POST',
+          body: JSON.stringify({ pergunta: texto, historico: window.iaHistorico }),
+        })
+          .then(function (dados) {
+            const textoResposta = extrairTextoResposta(dados);
+            bolhaPensando.querySelector('p').textContent = textoResposta;
+            window.iaHistorico.push({ role: 'assistant', content: textoResposta });
+          })
+          .catch(function (erro) {
+            console.error('Falha ao chamar /api/chat:', erro);
+            bolhaPensando.querySelector('p').textContent = 'Não consegui falar com a Arnês IA agora. Tente de novo em instantes.';
+            if (typeof mostrarErroToast === 'function') mostrarErroToast('Arnês IA indisponível no momento.');
+          })
+          .finally(function () {
+            history.scrollTop = history.scrollHeight;
+          });
+      }
+
+      sendBtn.addEventListener('click', function () {
+        enviarPergunta(input.value);
+      });
+
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') enviarPergunta(input.value);
+      });
+
+      document.querySelectorAll('.ia-suggestion-chip').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          document.querySelectorAll('.ia-suggestion-chip').forEach(function (c) {
+            if (c !== chip) c.style.display = 'none';
+          });
+          chip.classList.add('pulsing');
+          const texto = chip.textContent.trim();
+          setTimeout(function () {
+            enviarPergunta(texto);
+          }, 350);
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,473 @@
+<title>Projetos GRV — Mockup</title>
+<style>
+:root {
+  --primary:#E05A1E;--primary-light:rgba(224,90,30,.10);
+  --bg:#f8f9fb;--surface:#ffffff;--border:#e8ecf0;--border-2:#f0f2f5;
+  --text:#1a202c;--text2:#4a5568;--text3:#718096;--text4:#a0aec0;
+  --green:#38a169;--green-bg:rgba(56,161,105,.1);
+  --red:#e53e3e;--red-bg:rgba(229,62,62,.1);
+  --yellow:#d69e2e;--yellow-bg:rgba(214,158,46,.1);
+  --gray:#718096;--gray-bg:rgba(113,128,150,.1);
+  --blue:#3182ce;--blue-bg:rgba(49,130,206,.1);
+  --radius:9px;--shadow:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;font-size:14px;background:var(--bg);color:var(--text);display:flex;flex-direction:column;min-height:100vh}
+
+/* ── TOPNAV */
+.topnav{width:100%;height:48px;background:var(--surface);display:flex;flex-direction:row;align-items:center;flex-shrink:0;position:sticky;top:0;z-index:200;border-bottom:1px solid var(--border);box-shadow:0 1px 6px rgba(0,0,0,.05);padding:0 20px}
+.logo{padding:0 16px 0 0;height:100%;display:flex;align-items:center;gap:9px;border-right:1px solid var(--border);margin-right:12px;flex-shrink:0}
+.logo-icon{width:26px;height:26px;background:#E05A1E;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#fff;flex-shrink:0}
+.logo-text{font-weight:700;font-size:11px;color:var(--text);line-height:1.2}
+.logo-text span{display:block;font-weight:400;font-size:9px;color:var(--text4)}
+.nav{flex:1;height:100%;display:flex;align-items:center}
+.nav-item{display:flex;align-items:center;gap:6px;padding:0 14px;height:100%;position:relative;color:var(--text3);cursor:pointer;font-size:12.5px;font-weight:500;white-space:nowrap;transition:color .15s}
+.nav-item:hover{color:var(--text)}
+.nav-item.active{color:var(--primary);font-weight:600}
+.nav-item.active::after{content:'';position:absolute;bottom:0;left:14px;right:14px;height:2px;background:var(--primary);border-radius:2px 2px 0 0}
+.nav-icon{width:14px;height:14px;flex-shrink:0;opacity:.5}
+.nav-item.active .nav-icon{opacity:1}
+.nav-footer{padding:0 0 0 16px;border-left:1px solid var(--border);margin-left:auto;height:100%;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.footer-label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text4);font-weight:700}
+.consultor-chip{display:flex;align-items:center;gap:7px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:4px 10px 4px 6px;cursor:pointer}
+.avatar{width:22px;height:22px;border-radius:5px;background:linear-gradient(135deg,#E05A1E,#ff8c5a);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff}
+.c-name{font-size:11px;font-weight:600;color:var(--text)}
+
+/* ── CONTENT */
+.content{flex:1;padding:20px 24px}
+
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+.page-title{font-size:20px;font-weight:700;color:var(--text)}
+.page-subtitle{font-size:13px;color:var(--text3);margin-top:2px}
+
+/* ── DROPDOWN NAV */
+.nav-group{position:relative;height:100%}
+.nav-group-trigger{display:flex;align-items:center;gap:6px;padding:0 14px;height:100%;position:relative;color:var(--text3);cursor:pointer;font-size:12.5px;font-weight:500;white-space:nowrap;transition:color .15s;user-select:none}
+.nav-group-trigger:hover,.nav-group-trigger.open{color:var(--primary)}
+.nav-group-trigger.open{font-weight:600}
+.nav-group-trigger.open::after{content:'';position:absolute;bottom:0;left:14px;right:14px;height:2px;background:var(--primary);border-radius:2px 2px 0 0}
+.nav-group-trigger .chevron{width:12px;height:12px;opacity:.5;transition:transform .15s}
+.nav-group-trigger.open .chevron{transform:rotate(180deg);opacity:1}
+.nav-group-trigger .active-sub{font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;background:var(--primary-light);color:var(--primary);margin-left:2px}
+
+.dropdown{position:absolute;top:calc(100% + 6px);left:0;min-width:188px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 24px rgba(0,0,0,.09),0 2px 6px rgba(0,0,0,.05);padding:4px;z-index:300;display:none;flex-direction:column}
+.nav-group:hover .dropdown{display:flex}
+
+.dropdown-header{padding:8px 12px 6px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text4);border-bottom:1px solid var(--border-2);margin-bottom:4px}
+.dropdown-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:6px;border-left:2px solid transparent;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:background .1s,color .1s,border-color .1s}
+.dropdown-item:hover{background:var(--bg);color:var(--text)}
+.dropdown-item.active{background:var(--primary-light);color:var(--primary);font-weight:600;border-left-color:var(--primary)}
+.dropdown-badge{font-size:11px;font-weight:600;color:var(--text4);font-variant-numeric:tabular-nums}
+.dropdown-item.active .dropdown-badge{color:rgba(224,90,30,.65)}
+
+/* ── KPI CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi-card{background:var(--surface);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.kpi-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:6px}
+.kpi-value{font-size:28px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.kpi-sub{font-size:11px;color:var(--text4);margin-top:4px}
+.kpi-primary .kpi-value{color:var(--primary)}
+.kpi-green .kpi-value{color:var(--green)}
+.kpi-red .kpi-value{color:var(--red)}
+.kpi-yellow .kpi-value{color:var(--yellow)}
+
+/* ── FILTER BAR */
+.filter-bar{display:flex;gap:8px;margin-bottom:14px;align-items:center}
+.filter-select{padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:12.5px;color:var(--text);background:var(--surface);cursor:pointer;font-family:inherit}
+.view-toggle{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-left:auto}
+.vt-btn{display:flex;align-items:center;gap:4px;padding:5px 11px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text3);white-space:nowrap;font-family:inherit}
+.vt-btn:hover{background:var(--bg);color:var(--text2)}
+.vt-btn.active{background:rgba(224,90,30,.08);color:var(--primary)}
+
+/* ── TABLE */
+.table-wrap{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow)}
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{background:#fafbfc;color:var(--text3);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;padding:9px 14px;text-align:left;border-bottom:1px solid var(--border);font-weight:600}
+.data-table td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:13px}
+.data-table tbody tr:last-child td{border-bottom:none}
+.data-table tbody tr{cursor:pointer;transition:background .1s}
+.data-table tbody tr:hover{background:#f9fafb}
+.client-name{font-weight:600;color:var(--text)}
+.client-proj{font-size:11px;color:var(--primary);font-weight:600;margin-top:1px}
+
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:600;white-space:nowrap}
+.badge-green{background:var(--green-bg);color:var(--green)}
+.badge-red{background:var(--red-bg);color:var(--red)}
+.badge-yellow{background:var(--yellow-bg);color:var(--yellow)}
+.badge-blue{background:var(--blue-bg);color:var(--blue)}
+.badge-gray{background:var(--gray-bg);color:var(--gray)}
+.badge-orange{background:rgba(224,90,30,.1);color:var(--primary)}
+
+.prog-wrap{background:#edf2f7;border-radius:4px;height:6px;overflow:hidden;min-width:80px}
+.prog-fill{height:100%;border-radius:4px;background:var(--primary)}
+
+.health-pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.hs-green{background:var(--green-bg);color:var(--green)}
+.hs-yellow{background:var(--yellow-bg);color:var(--yellow)}
+.hs-red{background:var(--red-bg);color:var(--red)}
+
+/* ── PORTFÓLIO hero */
+.portfolio-hero{background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border-radius:var(--radius);padding:32px;color:rgba(255,255,255,.7);position:relative;overflow:hidden}
+.portfolio-glow{position:absolute;top:-80px;right:-80px;width:300px;height:300px;background:radial-gradient(circle,rgba(224,90,30,.18) 0%,transparent 70%);pointer-events:none}
+.portfolio-eyebrow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.35);margin-bottom:8px}
+.portfolio-headline{font-size:32px;font-weight:800;color:#fff;line-height:1;letter-spacing:-1px;margin-bottom:6px}
+.portfolio-caption{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:28px}
+.portfolio-split{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid rgba(255,255,255,.07);padding-top:24px}
+.portfolio-split-item{padding:0 24px;border-right:1px solid rgba(255,255,255,.07)}
+.portfolio-split-item:first-child{padding-left:0}
+.portfolio-split-item:last-child{border-right:none}
+.ps-n{font-size:36px;font-weight:800;color:#fff;line-height:1;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.ps-l{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);margin-top:5px}
+
+/* ── PANELS */
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+</style>
+
+<!-- TOPNAV -->
+<nav class="topnav">
+  <div class="logo">
+    <div class="logo-icon">G</div>
+    <div class="logo-text">GRV Software <span>CS · Jornada do Cliente</span></div>
+  </div>
+  <div class="nav">
+    <!-- Projetos GRV com dropdown -->
+    <div class="nav-group" id="nav-group-projetos">
+      <div class="nav-group-trigger open" id="nav-trigger">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+        Projetos GRV
+        <span class="active-sub" id="nav-active-sub">Implantação</span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="dropdown" id="nav-dropdown">
+        <div class="dropdown-header">Projetos GRV</div>
+        <div class="dropdown-item" data-tab="portfolio" onclick="switchTab('portfolio')">Portfólio</div>
+        <div class="dropdown-item active" data-tab="implantacao" onclick="switchTab('implantacao')">
+          Implantação <span class="dropdown-badge">12</span>
+        </div>
+        <div class="dropdown-item" data-tab="customer" onclick="switchTab('customer')">
+          Customer <span class="dropdown-badge">8</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      Minha Carteira
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      Vencimentos
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      Criar Playbook
+    </div>
+  </div>
+  <div class="nav-footer">
+    <span class="footer-label">Consultor</span>
+    <div class="consultor-chip">
+      <div class="avatar">S</div>
+      <span class="c-name">Samuel W.</span>
+    </div>
+  </div>
+</nav>
+
+<!-- CONTENT -->
+<div class="content">
+  <div class="page-header" style="margin-bottom:16px">
+    <div>
+      <div class="page-title" id="page-title">Implantação</div>
+      <div class="page-subtitle" id="page-subtitle">12 projetos em implantação ativa</div>
+    </div>
+  </div>
+
+  <!-- PORTFÓLIO -->
+  <div class="tab-panel" id="tab-portfolio">
+    <div class="portfolio-hero">
+      <div class="portfolio-glow"></div>
+      <div class="portfolio-eyebrow">Visão Estratégica</div>
+      <div class="portfolio-headline">20 projetos ativos</div>
+      <div class="portfolio-caption">Portfólio completo — dashboard com KPIs, gráficos, alertas e performance por consultor</div>
+      <div class="portfolio-split">
+        <div class="portfolio-split-item">
+          <div class="ps-n">12</div>
+          <div class="ps-l">Em Implantação</div>
+        </div>
+        <div class="portfolio-split-item">
+          <div class="ps-n">8</div>
+          <div class="ps-l">Em Customer</div>
+        </div>
+        <div class="portfolio-split-item">
+          <div class="ps-n" style="color:#ef4444">4</div>
+          <div class="ps-l">Atrasados</div>
+        </div>
+        <div class="portfolio-split-item">
+          <div class="ps-n" style="color:#4ade80">72</div>
+          <div class="ps-l">Health Médio</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMPLANTAÇÃO -->
+  <div class="tab-panel active" id="tab-implantacao">
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-primary">
+        <div class="kpi-label">Em Implantação</div>
+        <div class="kpi-value">12</div>
+        <div class="kpi-sub">projetos ativos</div>
+      </div>
+      <div class="kpi-card kpi-green">
+        <div class="kpi-label">No Prazo</div>
+        <div class="kpi-value">8</div>
+        <div class="kpi-sub">67% do total</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Progresso Médio</div>
+        <div class="kpi-value" style="color:var(--text)">54<span style="font-size:16px;font-weight:600">%</span></div>
+        <div class="kpi-sub">das atividades concluídas</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Tempo Médio na Etapa</div>
+        <div class="kpi-value" style="color:var(--text)">18<span style="font-size:16px;font-weight:500"> dias</span></div>
+        <div class="kpi-sub">média do portfólio</div>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <select class="filter-select">
+        <option>Todos os consultores</option>
+        <option>Samuel Wallace</option>
+        <option>Guilherme Reis</option>
+        <option>Ana Paula</option>
+      </select>
+      <select class="filter-select">
+        <option>Todas as etapas</option>
+        <option>🤝 1ª Reunião</option>
+        <option>⚡ Engajamento</option>
+        <option>📈 Evolução</option>
+        <option>🏁 Conclusão</option>
+      </select>
+      <select class="filter-select">
+        <option>Todos os status</option>
+        <option>No prazo</option>
+        <option>Atrasado</option>
+        <option>Pausado</option>
+      </select>
+      <div class="view-toggle">
+        <button class="vt-btn active">☰ Lista</button>
+        <button class="vt-btn">⊞ Kanban</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Consultor Digital</th>
+            <th>Etapa</th>
+            <th style="width:160px">Progresso</th>
+            <th>Prazo</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="client-name">KMSIL</div><div class="client-proj">Tecnologia Médica</div></td>
+            <td style="font-size:12px;color:var(--text2)">Samuel Wallace</td>
+            <td><span class="badge badge-green">📈 Evolução</span></td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="prog-wrap" style="flex:1"><div class="prog-fill" style="width:78%"></div></div>
+                <span style="font-size:11px;color:var(--text3);font-variant-numeric:tabular-nums">78%</span>
+              </div>
+            </td>
+            <td style="font-size:12px;color:var(--text2)">15/08/25</td>
+            <td><span class="badge badge-green">No prazo</span></td>
+          </tr>
+          <tr>
+            <td><div class="client-name">ACME Corp</div><div class="client-proj">Automação Industrial</div></td>
+            <td style="font-size:12px;color:var(--text2)">Guilherme Reis</td>
+            <td><span class="badge badge-blue">⚡ Engajamento</span></td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="prog-wrap" style="flex:1"><div class="prog-fill" style="width:34%;background:var(--red)"></div></div>
+                <span style="font-size:11px;color:var(--text3);font-variant-numeric:tabular-nums">34%</span>
+              </div>
+            </td>
+            <td style="font-size:12px;color:var(--red);font-weight:600">22/07/25</td>
+            <td><span class="badge badge-red">Atrasado</span></td>
+          </tr>
+          <tr>
+            <td><div class="client-name">Grupo Serra</div><div class="client-proj">Logística e Transporte</div></td>
+            <td style="font-size:12px;color:var(--text2)">Ana Paula</td>
+            <td><span class="badge badge-orange">🤝 1ª Reunião</span></td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="prog-wrap" style="flex:1"><div class="prog-fill" style="width:12%"></div></div>
+                <span style="font-size:11px;color:var(--text3);font-variant-numeric:tabular-nums">12%</span>
+              </div>
+            </td>
+            <td style="font-size:12px;color:var(--text2)">30/08/25</td>
+            <td><span class="badge badge-green">No prazo</span></td>
+          </tr>
+          <tr>
+            <td><div class="client-name">Metalúrgica Lima</div><div class="client-proj">Fabricação e Processos</div></td>
+            <td style="font-size:12px;color:var(--text2)">Samuel Wallace</td>
+            <td><span class="badge badge-green">📈 Evolução</span></td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="prog-wrap" style="flex:1"><div class="prog-fill" style="width:91%"></div></div>
+                <span style="font-size:11px;color:var(--text3);font-variant-numeric:tabular-nums">91%</span>
+              </div>
+            </td>
+            <td style="font-size:12px;color:var(--red);font-weight:600">10/07/25</td>
+            <td><span class="badge badge-red">Atrasado</span></td>
+          </tr>
+          <tr>
+            <td><div class="client-name">BioSaúde Ltda</div><div class="client-proj">Clínicas e Hospitais</div></td>
+            <td style="font-size:12px;color:var(--text2)">Guilherme Reis</td>
+            <td><span class="badge badge-blue">⚡ Engajamento</span></td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="prog-wrap" style="flex:1"><div class="prog-fill" style="width:56%"></div></div>
+                <span style="font-size:11px;color:var(--text3);font-variant-numeric:tabular-nums">56%</span>
+              </div>
+            </td>
+            <td style="font-size:12px;color:var(--text2)">25/08/25</td>
+            <td><span class="badge badge-green">No prazo</span></td>
+          </tr>
+          <tr>
+            <td><div class="client-name">TechRetail</div><div class="client-proj">Varejo e E-commerce</div></td>
+            <td style="font-size:12px;color:var(--text2)">Ana Paula</td>
+            <td><span class="badge badge-green">📈 Evolução</span></td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="prog-wrap" style="flex:1"><div class="prog-fill" style="width:67%"></div></div>
+                <span style="font-size:11px;color:var(--text3);font-variant-numeric:tabular-nums">67%</span>
+              </div>
+            </td>
+            <td style="font-size:12px;color:var(--text2)">01/08/25</td>
+            <td><span class="badge badge-green">No prazo</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CUSTOMER -->
+  <div class="tab-panel" id="tab-customer">
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-primary">
+        <div class="kpi-label">Em Customer</div>
+        <div class="kpi-value">8</div>
+        <div class="kpi-sub">clientes ativos em CS</div>
+      </div>
+      <div class="kpi-card kpi-green">
+        <div class="kpi-label">Health Médio</div>
+        <div class="kpi-value">72</div>
+        <div class="kpi-sub">score de saúde</div>
+      </div>
+      <div class="kpi-card kpi-yellow">
+        <div class="kpi-label">CSAT Médio</div>
+        <div class="kpi-value">4.3<span style="font-size:16px">★</span></div>
+        <div class="kpi-sub">de 5.0 possível</div>
+      </div>
+      <div class="kpi-card kpi-red">
+        <div class="kpi-label">Sem Contato +30d</div>
+        <div class="kpi-value">2</div>
+        <div class="kpi-sub">clientes em risco</div>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <select class="filter-select">
+        <option>Todos os CS</option>
+        <option>Cristiano Alves</option>
+        <option>Samuel Wallace</option>
+        <option>Ana Paula</option>
+      </select>
+      <select class="filter-select">
+        <option>Ordenar: Health Score ↑</option>
+        <option>Ordenar: CSAT ↑</option>
+        <option>Ordenar: Último contato ↓</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>CS Responsável</th>
+            <th>Health Score</th>
+            <th>CSAT</th>
+            <th>Último Contato</th>
+            <th>Próxima Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="client-name">Construtora Vida</div><div class="client-proj">Construção Civil</div></td>
+            <td style="font-size:12px;color:var(--text2)">Guilherme Reis</td>
+            <td><span class="health-pill hs-red">38</span></td>
+            <td style="font-size:13px;color:var(--text2);font-variant-numeric:tabular-nums">3.1 ★</td>
+            <td style="font-size:12px;color:var(--red);font-weight:600">35 dias</td>
+            <td style="font-size:12px;color:var(--red);font-weight:600">⚠ Reunião urgente</td>
+          </tr>
+          <tr>
+            <td><div class="client-name">Indústrias Norte</div><div class="client-proj">Manufatura</div></td>
+            <td style="font-size:12px;color:var(--text2)">Cristiano Alves</td>
+            <td><span class="health-pill hs-red">45</span></td>
+            <td style="font-size:13px;color:var(--text2);font-variant-numeric:tabular-nums">3.8 ★</td>
+            <td style="font-size:12px;color:var(--red);font-weight:600">42 dias</td>
+            <td style="font-size:12px;color:var(--text3)">Renovação Q3</td>
+          </tr>
+          <tr>
+            <td><div class="client-name">MedGroup</div><div class="client-proj">Saúde e Diagnóstico</div></td>
+            <td style="font-size:12px;color:var(--text2)">Ana Paula</td>
+            <td><span class="health-pill hs-yellow">68</span></td>
+            <td style="font-size:13px;color:var(--text2);font-variant-numeric:tabular-nums">4.2 ★</td>
+            <td style="font-size:12px;color:var(--text3)">15 dias</td>
+            <td style="font-size:12px;color:var(--text3)">Expansão módulo</td>
+          </tr>
+          <tr>
+            <td><div class="client-name">Porto Digital</div><div class="client-proj">Tecnologia e Inovação</div></td>
+            <td style="font-size:12px;color:var(--text2)">Samuel Wallace</td>
+            <td><span class="health-pill hs-green">81</span></td>
+            <td style="font-size:13px;color:var(--text2);font-variant-numeric:tabular-nums">4.7 ★</td>
+            <td style="font-size:12px;color:var(--text3)">8 dias</td>
+            <td style="font-size:12px;color:var(--text3)">QBR Julho</td>
+          </tr>
+          <tr>
+            <td><div class="client-name">Rede Solar</div><div class="client-proj">Energia Renovável</div></td>
+            <td style="font-size:12px;color:var(--text2)">Cristiano Alves</td>
+            <td><span class="health-pill hs-green">92</span></td>
+            <td style="font-size:13px;color:var(--text2);font-variant-numeric:tabular-nums">4.9 ★</td>
+            <td style="font-size:12px;color:var(--text3)">3 dias</td>
+            <td style="font-size:12px;color:var(--text3)">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+var TAB_META = {
+  portfolio:   { title: 'Portfólio',   subtitle: 'Visão estratégica de todos os 20 projetos', label: 'Portfólio' },
+  implantacao: { title: 'Implantação', subtitle: '12 projetos em implantação ativa',            label: 'Implantação' },
+  customer:    { title: 'Customer',    subtitle: '8 clientes em Customer Success',              label: 'Customer' }
+};
+function switchTab(tab) {
+  document.querySelectorAll('.dropdown-item').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelector('.dropdown-item[data-tab="' + tab + '"]').classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('page-title').textContent    = TAB_META[tab].title;
+  document.getElementById('page-subtitle').textContent = TAB_META[tab].subtitle;
+  document.getElementById('nav-active-sub').textContent = TAB_META[tab].label;
+}
+</script>

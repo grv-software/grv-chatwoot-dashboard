@@ -1,0 +1,681 @@
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, 'Segoe UI', sans-serif; }
+
+h2 { font-size: 22px; font-weight: 700; color: #1a202c; margin-bottom: 6px; }
+.subtitle { font-size: 14px; color: #718096; margin-bottom: 32px; }
+
+/* ── Shell do app ── */
+.app-shell {
+  display: flex;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  height: 540px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  margin-bottom: 40px;
+}
+
+.sidebar {
+  width: 220px;
+  background: #1a202c;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.sb-logo {
+  padding: 20px 16px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.sb-g { width: 32px; height: 32px; background: #E05A1E; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: #fff; }
+.sb-brand { font-size: 12px; font-weight: 700; color: #fff; line-height: 1.3; }
+.sb-brand-sub { font-size: 10px; color: rgba(255,255,255,0.4); font-weight: 400; }
+.sb-section { padding: 16px 12px 8px; }
+.sb-section-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,0.3); margin-bottom: 6px; padding-left: 4px; }
+.sb-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 8px; margin-bottom: 2px;
+  cursor: pointer; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6);
+  transition: all .15s;
+}
+.sb-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
+.sb-item.active { background: rgba(224,90,30,0.2); color: #ff8c5a; }
+.sb-item-icon { font-size: 15px; }
+.sb-consul {
+  margin-top: auto;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.sb-consul-label { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,0.3); margin-bottom: 6px; font-weight: 700; }
+.sb-consul-val {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.06); border-radius: 8px; padding: 8px 10px;
+}
+.sb-cavatar { width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg,#E05A1E,#ff8c5a); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #fff; }
+.sb-cname { font-size: 11px; color: rgba(255,255,255,0.8); font-weight: 600; }
+
+.main { flex: 1; overflow-y: auto; background: #f8f9fb; }
+.main-inner { padding: 24px; max-width: 100%; }
+
+/* ── Minha Carteira ── */
+.cart-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+.cart-title { font-size: 20px; font-weight: 800; color: #1a202c; }
+.cart-sub { font-size: 13px; color: #718096; margin-top: 2px; }
+
+.kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.kpi-card {
+  background: #fff; border-radius: 12px; padding: 14px 16px;
+  border: 1px solid #e2e8f0;
+}
+.kpi-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #a0aec0; margin-bottom: 6px; }
+.kpi-val { font-size: 26px; font-weight: 800; color: #1a202c; line-height: 1; }
+.kpi-sub { font-size: 11px; margin-top: 4px; }
+
+.chips { display: flex; gap: 6px; margin-bottom: 14px; }
+.chip { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1.5px solid transparent; }
+.chip.act { background: #1a202c; color: #fff; }
+.chip.def { background: #fff; color: #4a5568; border-color: #e2e8f0; }
+.chip.red { background: #FFF5F5; color: #e53e3e; border-color: #fed7d7; }
+
+.feed-item {
+  display: flex; align-items: center; gap: 14px;
+  background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 8px;
+  border: 1px solid #e2e8f0; cursor: pointer;
+  transition: all .15s;
+}
+.feed-item:hover { border-color: #E05A1E; box-shadow: 0 2px 12px rgba(224,90,30,0.08); }
+.f-stripe { width: 4px; height: 44px; border-radius: 2px; flex-shrink: 0; }
+.f-avatar {
+  width: 40px; height: 40px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 800; color: #fff; flex-shrink: 0;
+}
+.f-info { flex: 1; min-width: 0; }
+.f-name { font-size: 14px; font-weight: 700; color: #1a202c; }
+.f-meta { font-size: 12px; color: #718096; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.f-middle { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 140px; }
+.f-etapa { font-size: 11px; font-weight: 600; color: #4a5568; }
+.f-prog-row { display: flex; align-items: center; gap: 6px; width: 100%; }
+.f-prog { flex: 1; height: 5px; background: #edf2f7; border-radius: 3px; overflow: hidden; }
+.f-prog-fill { height: 100%; border-radius: 3px; }
+.f-pct { font-size: 11px; font-weight: 700; color: #4a5568; }
+.f-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.f-badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.f-days { font-size: 11px; color: #a0aec0; }
+
+/* ── Detalhe do cliente ── */
+.cli-header {
+  background: #fff; border-radius: 14px; padding: 20px 24px;
+  border: 1px solid #e2e8f0; margin-bottom: 16px;
+}
+.cli-top { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
+.cli-avatar-lg {
+  width: 52px; height: 52px; border-radius: 14px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 900; color: #fff;
+  background: linear-gradient(135deg, #E05A1E, #ff8c5a);
+}
+.cli-name { font-size: 22px; font-weight: 800; color: #1a202c; line-height: 1.1; }
+.cli-proj { font-size: 13px; color: #E05A1E; font-weight: 600; margin-top: 2px; }
+.cli-badges { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0; }
+.cli-meta-row { display: flex; gap: 24px; }
+.cli-meta-item { }
+.cli-meta-label { font-size: 10px; text-transform: uppercase; letter-spacing: .07em; font-weight: 700; color: #a0aec0; margin-bottom: 3px; }
+.cli-meta-val { font-size: 13px; font-weight: 600; color: #2d3748; }
+
+/* Abas modernas */
+.tabs-wrap { display: flex; gap: 4px; margin-bottom: 20px; background: #fff; border-radius: 12px; padding: 6px; border: 1px solid #e2e8f0; width: fit-content; }
+.tab-btn {
+  padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none; background: none; color: #718096;
+  transition: all .15s;
+}
+.tab-btn.active { background: #E05A1E; color: #fff; box-shadow: 0 2px 8px rgba(224,90,30,0.3); }
+.tab-btn:hover:not(.active) { background: #f7fafc; color: #2d3748; }
+
+/* 360 grid */
+.g360 { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 16px; }
+.c360 {
+  background: #fff; border-radius: 12px; padding: 14px 16px;
+  border: 1px solid #e2e8f0;
+}
+.c360-l { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #a0aec0; margin-bottom: 6px; }
+.c360-v { font-size: 16px; font-weight: 700; color: #1a202c; }
+.c360-prog { height: 5px; background: #edf2f7; border-radius: 3px; margin-top: 8px; overflow: hidden; }
+.c360-fill { height: 100%; border-radius: 3px; background: #E05A1E; }
+
+/* Atividades */
+.at-layout { display: grid; grid-template-columns: 240px 1fr; height: 320px; background: #fff; border-radius: 14px; border: 1px solid #e2e8f0; overflow: hidden; }
+.at-sidebar { border-right: 1px solid #e2e8f0; padding: 12px 10px; overflow-y: auto; background: #fafbfc; }
+.at-panel { padding: 20px; overflow-y: auto; }
+
+.at-new-btn {
+  width: 100%; padding: 8px; border-radius: 8px; border: 1.5px dashed #e2e8f0;
+  background: none; color: #a0aec0; font-size: 12px; font-weight: 600; cursor: pointer;
+  margin-bottom: 14px; transition: all .15s;
+}
+.at-new-btn:hover { border-color: #E05A1E; color: #E05A1E; }
+
+.at-pb-hdr {
+  display: flex; align-items: center; gap: 6px; padding: 6px 8px;
+  border-radius: 8px; font-size: 12px; font-weight: 700; color: #2d3748;
+  cursor: pointer; margin-bottom: 2px;
+}
+.at-pb-hdr:hover { background: #f0f4f8; }
+.at-pb-chev { margin-left: auto; font-size: 10px; color: #a0aec0; }
+
+.at-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px 7px 22px; border-radius: 8px;
+  font-size: 12px; color: #4a5568; cursor: pointer; margin-bottom: 2px;
+}
+.at-item:hover { background: #f0f4f8; }
+.at-item.active {
+  background: #FFF3EE; color: #E05A1E;
+  border-left: 3px solid #E05A1E; padding-left: 19px; font-weight: 700;
+}
+.at-item-dot { font-size: 9px; }
+
+.at-panel-title { font-size: 17px; font-weight: 800; color: #1a202c; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid #edf2f7; }
+.at-reg { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+.at-reg:last-child { border-bottom: none; }
+.at-reg-meta { font-size: 11px; color: #a0aec0; margin-bottom: 3px; }
+.at-reg-txt { font-size: 13px; color: #2d3748; line-height: 1.5; }
+.at-write { margin-top: 14px; padding-top: 14px; border-top: 1px solid #edf2f7; }
+.at-textarea {
+  width: 100%; padding: 10px 12px; border: 1.5px solid #e2e8f0; border-radius: 10px;
+  font-size: 13px; resize: none; color: #4a5568; outline: none;
+  font-family: inherit; margin-bottom: 8px;
+}
+.at-btn {
+  padding: 8px 18px; border-radius: 8px; background: #E05A1E; color: #fff;
+  font-size: 13px; font-weight: 700; border: none; cursor: pointer;
+}
+
+/* Notas */
+.nota-list { }
+.nota-item {
+  padding: 14px 0; border-bottom: 1px solid #f0f0f0;
+}
+.nota-item:last-child { border-bottom: none; }
+.nota-meta { font-size: 11px; color: #a0aec0; margin-bottom: 4px; }
+.nota-txt { font-size: 13px; color: #2d3748; line-height: 1.6; }
+
+/* badges */
+.badge-green { background: #F0FFF4; color: #38a169; }
+.badge-red { background: #FFF5F5; color: #e53e3e; }
+.badge-orange { background: #FFF3EE; color: #E05A1E; }
+.badge-gray { background: #F7FAFC; color: #718096; }
+.badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+
+.btn-primary { background: #E05A1E; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.btn-outline { background: #fff; color: #E05A1E; border: 1.5px solid #E05A1E; padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
+
+/* Tabs nav */
+.screen-tabs { display: flex; gap: 4px; margin-bottom: 28px; border-bottom: 1px solid #e2e8f0; }
+.stab { padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer; color: #a0aec0; border-bottom: 2.5px solid transparent; margin-bottom: -1px; }
+.stab.act { color: #1a202c; border-bottom-color: #E05A1E; }
+
+.label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #a0aec0; margin-bottom: 12px; }
+</style>
+
+<h2>Direção B — em todas as telas</h2>
+<p class="subtitle">Veja como a mesma linguagem visual se aplica em cada contexto. Clique para selecionar o que aprovar ou deixe um comentário.</p>
+
+<!-- SCREEN NAV -->
+<div class="screen-tabs">
+  <div class="stab act" onclick="showScreen('carteira',this)">Minha Carteira</div>
+  <div class="stab" onclick="showScreen('detalhe',this)">Detalhe do Cliente</div>
+  <div class="stab" onclick="showScreen('360',this)">↳ Visão 360°</div>
+  <div class="stab" onclick="showScreen('atividades',this)">↳ Atividades</div>
+  <div class="stab" onclick="showScreen('notas',this)">↳ Notas</div>
+</div>
+
+<!-- ═════════ MINHA CARTEIRA ═════════ -->
+<div id="screen-carteira">
+<div class="app-shell">
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-g">G</div>
+      <div><div class="sb-brand">GRV Software</div><div class="sb-brand-sub">CS · Jornada do Cliente</div></div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-section-label">Menu</div>
+      <div class="sb-item"><span class="sb-item-icon">🌐</span> Projetos GRV</div>
+      <div class="sb-item active"><span class="sb-item-icon">📋</span> Minha Carteira</div>
+      <div class="sb-item"><span class="sb-item-icon">＋</span> Criar Playbook</div>
+    </div>
+    <div class="sb-consul">
+      <div class="sb-consul-label">Consultor ativo</div>
+      <div class="sb-consul-val">
+        <div class="sb-cavatar">S</div>
+        <div class="sb-cname">Severiano Rocha</div>
+      </div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="main-inner">
+      <div class="cart-header">
+        <div>
+          <div class="cart-title">Minha Carteira</div>
+          <div class="cart-sub">Severiano Rocha · 7 clientes</div>
+        </div>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">Total</div>
+          <div class="kpi-val" style="color:#1a202c">7</div>
+          <div class="kpi-sub" style="color:#718096">clientes ativos</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Em ordem</div>
+          <div class="kpi-val" style="color:#38a169">4</div>
+          <div class="kpi-sub" style="color:#38a169">dentro do prazo</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Atrasados</div>
+          <div class="kpi-val" style="color:#e53e3e">2</div>
+          <div class="kpi-sub" style="color:#e53e3e">precisam de atenção</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Pausados</div>
+          <div class="kpi-val" style="color:#d69e2e">1</div>
+          <div class="kpi-sub" style="color:#d69e2e">aguardando retorno</div>
+        </div>
+      </div>
+
+      <div class="chips">
+        <span class="chip act">Todos</span>
+        <span class="chip def">Em ordem</span>
+        <span class="chip red">Atrasados</span>
+        <span class="chip def">Pausados</span>
+      </div>
+
+      <div class="feed-item">
+        <div class="f-stripe" style="background:#e53e3e"></div>
+        <div class="f-avatar" style="background:linear-gradient(135deg,#E05A1E,#ff8c5a)">R</div>
+        <div class="f-info">
+          <div class="f-name">ROBOTIX</div>
+          <div class="f-meta">Integrar sensores com linha de montagem</div>
+        </div>
+        <div class="f-middle">
+          <div class="f-etapa">🏁 Conclusão</div>
+          <div class="f-prog-row">
+            <div class="f-prog"><div class="f-prog-fill" style="width:100%;background:#e53e3e"></div></div>
+            <span class="f-pct">100%</span>
+          </div>
+        </div>
+        <div class="f-right">
+          <span class="f-badge badge badge-red">Atrasado</span>
+          <span class="f-days">0 dias na etapa</span>
+        </div>
+      </div>
+
+      <div class="feed-item">
+        <div class="f-stripe" style="background:#38a169"></div>
+        <div class="f-avatar" style="background:linear-gradient(135deg,#38a169,#68d391)">A</div>
+        <div class="f-info">
+          <div class="f-name">AUTOMIND</div>
+          <div class="f-meta">Validar integração dos módulos de IA</div>
+        </div>
+        <div class="f-middle">
+          <div class="f-etapa">📈 Evolução</div>
+          <div class="f-prog-row">
+            <div class="f-prog"><div class="f-prog-fill" style="width:56%;background:#38a169"></div></div>
+            <span class="f-pct">56%</span>
+          </div>
+        </div>
+        <div class="f-right">
+          <span class="f-badge badge badge-green">Em ordem</span>
+          <span class="f-days">22 dias na etapa</span>
+        </div>
+      </div>
+
+      <div class="feed-item">
+        <div class="f-stripe" style="background:#718096"></div>
+        <div class="f-avatar" style="background:linear-gradient(135deg,#718096,#a0aec0)">U</div>
+        <div class="f-info">
+          <div class="f-name">USINAGEM3D</div>
+          <div class="f-meta">Primeira reunião de alinhamento</div>
+        </div>
+        <div class="f-middle">
+          <div class="f-etapa">🤝 1ª Reunião</div>
+          <div class="f-prog-row">
+            <div class="f-prog"><div class="f-prog-fill" style="width:6%;background:#718096"></div></div>
+            <span class="f-pct">6%</span>
+          </div>
+        </div>
+        <div class="f-right">
+          <span class="f-badge badge badge-green">Em ordem</span>
+          <span class="f-days">14 dias na etapa</span>
+        </div>
+      </div>
+
+      <div class="feed-item" style="opacity:.6">
+        <div class="f-stripe" style="background:#E05A1E"></div>
+        <div class="f-avatar" style="background:linear-gradient(135deg,#805ad5,#b794f4)">F</div>
+        <div class="f-info">
+          <div class="f-name">FERROPLAST</div>
+          <div class="f-meta">Acompanhar parametrização final</div>
+        </div>
+        <div class="f-middle">
+          <div class="f-etapa">⚡ Engajamento</div>
+          <div class="f-prog-row">
+            <div class="f-prog"><div class="f-prog-fill" style="width:31%;background:#805ad5"></div></div>
+            <span class="f-pct">31%</span>
+          </div>
+        </div>
+        <div class="f-right">
+          <span class="f-badge badge badge-orange">Em ordem</span>
+          <span class="f-days">9 dias na etapa</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═════════ DETALHE ═════════ -->
+<div id="screen-detalhe" style="display:none">
+<div class="app-shell">
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-g">G</div>
+      <div><div class="sb-brand">GRV Software</div><div class="sb-brand-sub">CS · Jornada do Cliente</div></div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-section-label">Menu</div>
+      <div class="sb-item"><span class="sb-item-icon">🌐</span> Projetos GRV</div>
+      <div class="sb-item active"><span class="sb-item-icon">📋</span> Minha Carteira</div>
+      <div class="sb-item"><span class="sb-item-icon">＋</span> Criar Playbook</div>
+    </div>
+    <div class="sb-consul">
+      <div class="sb-consul-label">Consultor ativo</div>
+      <div class="sb-consul-val">
+        <div class="sb-cavatar">S</div>
+        <div class="sb-cname">Severiano Rocha</div>
+      </div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="main-inner">
+      <div style="font-size:12px;color:#a0aec0;margin-bottom:16px;cursor:pointer">← Minha Carteira</div>
+
+      <div class="cli-header">
+        <div class="cli-top">
+          <div class="cli-avatar-lg">R</div>
+          <div style="flex:1">
+            <div class="cli-name">ROBOTIX</div>
+            <div class="cli-proj">SAGP-00131 · NX/IOT</div>
+          </div>
+          <div class="cli-badges">
+            <span class="badge badge-orange">🏁 Conclusão</span>
+            <span class="badge badge-red">Atrasado</span>
+            <button class="btn-primary" style="font-size:12px;padding:7px 14px">Alterar Etapa</button>
+          </div>
+        </div>
+        <div class="cli-meta-row">
+          <div class="cli-meta-item"><div class="cli-meta-label">Consultor</div><div class="cli-meta-val">Severiano Rocha</div></div>
+          <div class="cli-meta-item"><div class="cli-meta-label">Início</div><div class="cli-meta-val">19/01/2026</div></div>
+          <div class="cli-meta-item"><div class="cli-meta-label">Prazo</div><div class="cli-meta-val" style="color:#e53e3e">29/11/2026</div></div>
+          <div class="cli-meta-item"><div class="cli-meta-label">Dias na etapa</div><div class="cli-meta-val">0 dias</div></div>
+        </div>
+      </div>
+
+      <div class="tabs-wrap">
+        <button class="tab-btn active">Visão 360°</button>
+        <button class="tab-btn">Atividades</button>
+        <button class="tab-btn">Notas</button>
+      </div>
+
+      <div class="g360">
+        <div class="c360">
+          <div class="c360-l">Segmento</div>
+          <div class="c360-v">Serviços</div>
+        </div>
+        <div class="c360">
+          <div class="c360-l">CS Responsável</div>
+          <div class="c360-v">Silvia Ferreira</div>
+        </div>
+        <div class="c360">
+          <div class="c360-l">Consultor Digital</div>
+          <div class="c360-v">Severiano Rocha</div>
+        </div>
+        <div class="c360">
+          <div class="c360-l">% Implantação</div>
+          <div class="c360-v" style="color:#E05A1E">100%</div>
+          <div class="c360-prog"><div class="c360-fill" style="width:100%"></div></div>
+        </div>
+      </div>
+
+      <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:16px 20px">
+        <div style="font-size:12px;font-weight:700;color:#a0aec0;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Playbook de Implantação</div>
+        <div style="font-size:13px;color:#4a5568;line-height:2">✅ 1ª Reunião &amp; Kickoff — 4/4 &nbsp;·&nbsp; ✅ Engajamento — 4/4 &nbsp;·&nbsp; ✅ Evolução — 4/4 &nbsp;·&nbsp; ⏳ Conclusão — 0/4</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═════════ VISÃO 360 ═════════ -->
+<div id="screen-360" style="display:none">
+<div class="app-shell">
+  <div class="sidebar">
+    <div class="sb-logo"><div class="sb-g">G</div><div><div class="sb-brand">GRV Software</div><div class="sb-brand-sub">CS · Jornada do Cliente</div></div></div>
+    <div class="sb-section">
+      <div class="sb-section-label">Menu</div>
+      <div class="sb-item"><span class="sb-item-icon">🌐</span> Projetos GRV</div>
+      <div class="sb-item active"><span class="sb-item-icon">📋</span> Minha Carteira</div>
+      <div class="sb-item"><span class="sb-item-icon">＋</span> Criar Playbook</div>
+    </div>
+    <div class="sb-consul"><div class="sb-consul-label">Consultor ativo</div><div class="sb-consul-val"><div class="sb-cavatar">S</div><div class="sb-cname">Severiano Rocha</div></div></div>
+  </div>
+  <div class="main">
+    <div class="main-inner">
+      <div style="font-size:12px;color:#a0aec0;margin-bottom:12px;cursor:pointer">← Minha Carteira</div>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+        <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#E05A1E,#ff8c5a);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;flex-shrink:0">R</div>
+        <div><div style="font-size:18px;font-weight:800;color:#1a202c">ROBOTIX</div><div style="font-size:12px;color:#E05A1E;font-weight:600">SAGP-00131 · NX/IOT</div></div>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <span class="badge badge-orange">🏁 Conclusão</span>
+          <span class="badge badge-red">Atrasado</span>
+          <button class="btn-primary" style="font-size:12px;padding:6px 14px">Alterar Etapa</button>
+        </div>
+      </div>
+
+      <div class="tabs-wrap" style="margin-bottom:20px">
+        <button class="tab-btn active">Visão 360°</button>
+        <button class="tab-btn">Atividades</button>
+        <button class="tab-btn">Notas</button>
+      </div>
+
+      <!-- 4 cards topo -->
+      <div class="g360" style="margin-bottom:16px">
+        <div class="c360"><div class="c360-l">Segmento</div><div class="c360-v">Serviços</div></div>
+        <div class="c360"><div class="c360-l">CS Responsável</div><div class="c360-v">Silvia Ferreira</div></div>
+        <div class="c360"><div class="c360-l">Consultor Digital</div><div class="c360-v">Severiano Rocha</div></div>
+        <div class="c360">
+          <div class="c360-l">% Implantação</div>
+          <div class="c360-v" style="color:#E05A1E">100%</div>
+          <div class="c360-prog"><div class="c360-fill" style="width:100%"></div></div>
+        </div>
+      </div>
+
+      <!-- Playbook colapsado / pills -->
+      <div style="background:#fff;border-radius:14px;border:1px solid #e2e8f0;overflow:hidden">
+        <div style="padding:14px 18px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:13px;font-weight:700;color:#1a202c">Playbook de Implantação</span>
+          <div style="display:flex;gap:8px">
+            <span style="padding:3px 10px;border-radius:20px;background:#F0FFF4;color:#38a169;font-size:11px;font-weight:700">✅ 1ª Reunião 4/4</span>
+            <span style="padding:3px 10px;border-radius:20px;background:#F0FFF4;color:#38a169;font-size:11px;font-weight:700">✅ Engajamento 4/4</span>
+            <span style="padding:3px 10px;border-radius:20px;background:#F0FFF4;color:#38a169;font-size:11px;font-weight:700">✅ Evolução 4/4</span>
+            <span style="padding:3px 10px;border-radius:20px;background:#FFF3EE;color:#E05A1E;font-size:11px;font-weight:700">⏳ Conclusão 0/4</span>
+          </div>
+        </div>
+        <div style="padding:14px 18px;font-size:12px;color:#718096">
+          Clique em qualquer fase para ver e marcar as tarefas · <a style="color:#E05A1E;font-weight:600;text-decoration:none">Ver Atividades →</a>
+        </div>
+      </div>
+
+      <div style="background:#fff;border-radius:14px;border:1px solid #e2e8f0;padding:14px 18px;margin-top:12px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a0aec0;margin-bottom:10px">Histórico de Etapas</div>
+        <div style="display:flex;gap:0;align-items:center;font-size:12px;color:#4a5568">
+          <span style="padding:4px 10px;background:#f7fafc;border-radius:6px">🤝 1ª Reunião</span>
+          <span style="color:#a0aec0;padding:0 6px">→</span>
+          <span style="padding:4px 10px;background:#f7fafc;border-radius:6px">⚡ Engajamento</span>
+          <span style="color:#a0aec0;padding:0 6px">→</span>
+          <span style="padding:4px 10px;background:#f7fafc;border-radius:6px">📈 Evolução</span>
+          <span style="color:#a0aec0;padding:0 6px">→</span>
+          <span style="padding:4px 10px;background:#FFF3EE;color:#E05A1E;font-weight:700;border-radius:6px">🏁 Conclusão</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═════════ ATIVIDADES ═════════ -->
+<div id="screen-atividades" style="display:none">
+<div class="app-shell">
+  <div class="sidebar">
+    <div class="sb-logo"><div class="sb-g">G</div><div><div class="sb-brand">GRV Software</div><div class="sb-brand-sub">CS · Jornada do Cliente</div></div></div>
+    <div class="sb-section">
+      <div class="sb-section-label">Menu</div>
+      <div class="sb-item"><span class="sb-item-icon">🌐</span> Projetos GRV</div>
+      <div class="sb-item active"><span class="sb-item-icon">📋</span> Minha Carteira</div>
+      <div class="sb-item"><span class="sb-item-icon">＋</span> Criar Playbook</div>
+    </div>
+    <div class="sb-consul"><div class="sb-consul-label">Consultor ativo</div><div class="sb-consul-val"><div class="sb-cavatar">S</div><div class="sb-cname">Severiano Rocha</div></div></div>
+  </div>
+  <div class="main">
+    <div class="main-inner">
+      <div style="font-size:12px;color:#a0aec0;margin-bottom:12px;cursor:pointer">← Minha Carteira</div>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+        <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#E05A1E,#ff8c5a);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff">R</div>
+        <div><div style="font-size:18px;font-weight:800;color:#1a202c">ROBOTIX</div><div style="font-size:12px;color:#E05A1E;font-weight:600">SAGP-00131 · NX/IOT</div></div>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <span class="badge badge-orange">🏁 Conclusão</span>
+          <span class="badge badge-red">Atrasado</span>
+          <button class="btn-primary" style="font-size:12px;padding:6px 14px">Alterar Etapa</button>
+        </div>
+      </div>
+
+      <div class="tabs-wrap" style="margin-bottom:20px">
+        <button class="tab-btn">Visão 360°</button>
+        <button class="tab-btn active">Atividades</button>
+        <button class="tab-btn">Notas</button>
+      </div>
+
+      <div class="at-layout">
+        <div class="at-sidebar">
+          <button class="at-new-btn">＋ Novo playbook</button>
+          <div class="at-pb-hdr">
+            <span>📋</span><span>Implantação NX/IOT</span>
+            <span class="at-pb-chev">▾</span>
+          </div>
+          <div class="at-item">
+            <span class="at-item-dot">●</span>
+            <span>1ª Reunião de engajamento</span>
+          </div>
+          <div class="at-item active">
+            <span class="at-item-dot">●</span>
+            <span>Configuração de sensores</span>
+          </div>
+          <div class="at-item">
+            <span class="at-item-dot">○</span>
+            <span>Treinamento de usuários</span>
+          </div>
+          <div style="padding:4px 8px 10px 22px">
+            <button class="at-new-btn" style="margin:0;font-size:11px;padding:5px">＋ Atividade</button>
+          </div>
+          <div class="at-pb-hdr" style="margin-top:4px">
+            <span>📋</span><span>Visita de campo</span>
+            <span class="at-pb-chev">▸</span>
+          </div>
+        </div>
+        <div class="at-panel">
+          <div class="at-panel-title">Configuração de sensores</div>
+          <div class="at-reg">
+            <div class="at-reg-meta">Severiano Rocha · 20/04/2026 · 16:00</div>
+            <div class="at-reg-txt">12 sensores instalados na linha de produção principal. Testes de conectividade OK.</div>
+          </div>
+          <div class="at-write">
+            <textarea class="at-textarea" rows="3" placeholder="Registrar reunião, decisão ou detalhe..."></textarea>
+            <button class="at-btn">Salvar registro</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═════════ NOTAS ═════════ -->
+<div id="screen-notas" style="display:none">
+<div class="app-shell">
+  <div class="sidebar">
+    <div class="sb-logo"><div class="sb-g">G</div><div><div class="sb-brand">GRV Software</div><div class="sb-brand-sub">CS · Jornada do Cliente</div></div></div>
+    <div class="sb-section">
+      <div class="sb-section-label">Menu</div>
+      <div class="sb-item"><span class="sb-item-icon">🌐</span> Projetos GRV</div>
+      <div class="sb-item active"><span class="sb-item-icon">📋</span> Minha Carteira</div>
+      <div class="sb-item"><span class="sb-item-icon">＋</span> Criar Playbook</div>
+    </div>
+    <div class="sb-consul"><div class="sb-consul-label">Consultor ativo</div><div class="sb-consul-val"><div class="sb-cavatar">S</div><div class="sb-cname">Severiano Rocha</div></div></div>
+  </div>
+  <div class="main">
+    <div class="main-inner">
+      <div style="font-size:12px;color:#a0aec0;margin-bottom:12px;cursor:pointer">← Minha Carteira</div>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+        <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#E05A1E,#ff8c5a);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff">R</div>
+        <div><div style="font-size:18px;font-weight:800;color:#1a202c">ROBOTIX</div><div style="font-size:12px;color:#E05A1E;font-weight:600">SAGP-00131 · NX/IOT</div></div>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <span class="badge badge-orange">🏁 Conclusão</span>
+          <span class="badge badge-red">Atrasado</span>
+          <button class="btn-primary" style="font-size:12px;padding:6px 14px">Alterar Etapa</button>
+        </div>
+      </div>
+
+      <div class="tabs-wrap" style="margin-bottom:20px">
+        <button class="tab-btn">Visão 360°</button>
+        <button class="tab-btn">Atividades</button>
+        <button class="tab-btn active">Notas</button>
+      </div>
+
+      <div style="background:#fff;border-radius:14px;border:1px solid #e2e8f0;padding:20px 24px">
+        <div class="nota-list">
+          <div class="nota-item">
+            <div class="nota-meta">Severiano Rocha · 05/06/2026 · 14:30</div>
+            <div class="nota-txt">Kickoff realizado com sucesso. Equipe técnica bem engajada. Cronograma de instalação dos sensores definido.</div>
+          </div>
+          <div class="nota-item">
+            <div class="nota-meta">Severiano Rocha · 10/04/2026 · 10:00</div>
+            <div class="nota-txt">Reunião de alinhamento com gerente de TI. Definido responsável técnico do lado do cliente para acompanhar a implantação.</div>
+          </div>
+        </div>
+        <div class="at-write" style="margin-top:16px;padding-top:16px">
+          <textarea class="at-textarea" rows="3" placeholder="Adicionar anotação..."></textarea>
+          <button class="at-btn">Salvar nota</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+function showScreen(id, el) {
+  ['carteira','detalhe','360','atividades','notas'].forEach(s => {
+    const el = document.getElementById('screen-'+s);
+    if (el) el.style.display = 'none';
+  });
+  const screen = document.getElementById('screen-'+id);
+  if (screen) screen.style.display = 'block';
+  document.querySelectorAll('.stab').forEach(t => t.classList.remove('act'));
+  if (el) el.classList.add('act');
+}
+</script>

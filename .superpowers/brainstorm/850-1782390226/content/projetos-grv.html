@@ -1,0 +1,194 @@
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, 'Segoe UI', sans-serif; }
+h2 { font-size: 22px; font-weight: 700; color: #1a202c; margin-bottom: 6px; }
+.subtitle { font-size: 14px; color: #718096; margin-bottom: 28px; }
+
+.app-shell { display: flex; border: 1.5px solid #e2e8f0; border-radius: 16px; overflow: hidden; height: 580px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
+.sidebar { width: 220px; background: #1a202c; display: flex; flex-direction: column; flex-shrink: 0; }
+.sb-logo { padding: 20px 16px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.sb-g { width: 32px; height: 32px; background: #E05A1E; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: #fff; }
+.sb-brand { font-size: 12px; font-weight: 700; color: #fff; line-height: 1.3; }
+.sb-brand-sub { font-size: 10px; color: rgba(255,255,255,0.4); font-weight: 400; }
+.sb-section { padding: 16px 12px 8px; }
+.sb-section-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,0.3); margin-bottom: 6px; padding-left: 4px; }
+.sb-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; margin-bottom: 2px; cursor: pointer; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6); }
+.sb-item.active { background: rgba(224,90,30,0.2); color: #ff8c5a; }
+.sb-consul { margin-top: auto; padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.08); }
+.sb-consul-label { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,0.3); margin-bottom: 6px; font-weight: 700; }
+.sb-consul-val { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.06); border-radius: 8px; padding: 8px 10px; }
+.sb-cavatar { width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg,#E05A1E,#ff8c5a); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #fff; }
+.sb-cname { font-size: 11px; color: rgba(255,255,255,0.8); font-weight: 600; }
+
+.main { flex: 1; overflow-y: auto; background: #f8f9fb; }
+.main-inner { padding: 24px; }
+
+.badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.badge-green { background: #F0FFF4; color: #38a169; }
+.badge-red { background: #FFF5F5; color: #e53e3e; }
+.badge-orange { background: #FFF3EE; color: #E05A1E; }
+.badge-yellow { background: #FFFFF0; color: #d69e2e; }
+</style>
+
+<h2>Projetos GRV — com a linguagem B</h2>
+<p class="subtitle">A estrutura dos 3 painéis já foi redesenhada numa sessão anterior. A mudança aqui é visual: sidebar escura unificada, cards mais redondos, tipografia com mais hierarquia.</p>
+
+<div class="app-shell">
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-g">G</div>
+      <div><div class="sb-brand">GRV Software</div><div class="sb-brand-sub">CS · Jornada do Cliente</div></div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-section-label">Menu</div>
+      <div class="sb-item active">🌐 Projetos GRV</div>
+      <div class="sb-item">📋 Minha Carteira</div>
+      <div class="sb-item">＋ Criar Playbook</div>
+    </div>
+    <div class="sb-consul">
+      <div class="sb-consul-label">Consultor ativo</div>
+      <div class="sb-consul-val"><div class="sb-cavatar">S</div><div class="sb-cname">Todos os consultores</div></div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="main-inner">
+
+      <!-- Banner de saúde -->
+      <div style="background:#F0FFF4;border-left:4px solid #38a169;border-radius:12px;padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:12px">
+        <span style="font-size:20px">✅</span>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#276749">Portfólio saudável — 38 projetos ativos, tudo dentro do esperado</div>
+          <div style="font-size:11px;color:#38a169;margin-top:2px">7% atrasados · abaixo do limite de 20%</div>
+        </div>
+      </div>
+
+      <!-- Hero metrics -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px">
+        <div style="background:#fff;border-radius:14px;padding:18px 20px;border:1px solid #e2e8f0">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a0aec0;margin-bottom:10px">Projetos Ativos</div>
+          <div style="font-size:42px;font-weight:900;color:#1a202c;line-height:1">35</div>
+          <div style="font-size:11px;color:#718096;margin-top:6px;display:flex;align-items:center;gap:4px">
+            <span style="color:#38a169;font-weight:700">▲ 2</span> vs mês ant. <span style="font-size:10px;color:#a0aec0" title="Estimativa ilustrativa">★</span>
+          </div>
+        </div>
+        <div style="background:#fff;border-radius:14px;padding:18px 20px;border:1px solid #e2e8f0">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a0aec0;margin-bottom:10px">Atrasados</div>
+          <div style="display:flex;align-items:baseline;gap:10px">
+            <span style="font-size:42px;font-weight:900;color:#e53e3e;line-height:1">3</span>
+            <span style="font-size:14px;color:#e53e3e;font-weight:700">8%</span>
+          </div>
+          <div style="font-size:11px;color:#718096;margin-top:6px;display:flex;align-items:center;gap:4px">
+            <span style="color:#38a169;font-weight:700">▼ 1</span> vs mês ant. <span style="font-size:10px;color:#a0aec0" title="Estimativa ilustrativa">★</span>
+          </div>
+        </div>
+        <div style="background:#fff;border-radius:14px;padding:18px 20px;border:1px solid #e2e8f0">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a0aec0;margin-bottom:10px">Concluídos no Mês</div>
+          <div style="font-size:42px;font-weight:900;color:#38a169;line-height:1">4</div>
+          <div style="font-size:11px;color:#718096;margin-top:6px;display:flex;align-items:center;gap:4px">
+            <span style="color:#e53e3e;font-weight:700">▼ 1</span> vs mês ant. <span style="font-size:10px;color:#a0aec0" title="Estimativa ilustrativa">★</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zona 2: distribuição + alertas -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+
+        <!-- Narrativa status -->
+        <div style="background:#fff;border-radius:14px;border:1px solid #e2e8f0;padding:16px 20px">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a0aec0;margin-bottom:12px">Distribuição por Status</div>
+          <div style="font-size:13px;font-weight:700;color:#1a202c;margin-bottom:4px">CPS concentra 70% dos atrasos</div>
+          <div style="font-size:12px;color:#718096;margin-bottom:14px">7 dos 10 projetos atrasados são CPS</div>
+          <!-- barra de composição -->
+          <div style="display:flex;height:10px;border-radius:5px;overflow:hidden;margin-bottom:10px">
+            <div style="flex:20;background:#38a169" title="Em andamento"></div>
+            <div style="flex:5;background:#3182ce" title="Não iniciado"></div>
+            <div style="flex:3;background:#e53e3e" title="Atrasado"></div>
+            <div style="flex:2;background:#d69e2e" title="Pausado"></div>
+            <div style="flex:4;background:#a0aec0" title="Concluído"></div>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <span style="font-size:11px;color:#38a169;font-weight:600">● Em andamento 20</span>
+            <span style="font-size:11px;color:#e53e3e;font-weight:600">● Atrasado 3</span>
+            <span style="font-size:11px;color:#d69e2e;font-weight:600">● Pausado 2</span>
+            <span style="font-size:11px;color:#a0aec0;font-weight:600">● Concluído 4</span>
+          </div>
+        </div>
+
+        <!-- Top alertas -->
+        <div style="background:#fff;border-radius:14px;border:1px solid #e2e8f0;padding:16px 20px">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a0aec0;margin-bottom:12px">Alertas Críticos</div>
+
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:#FFF5F5;border-radius:10px;margin-bottom:8px">
+            <span style="font-size:16px;flex-shrink:0">🚨</span>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#c53030">FERROPLAST — 134 dias atrasado</div>
+              <div style="font-size:11px;color:#718096;margin-top:2px">Evolução · Felipe · Contatar cliente</div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:#FFFFF0;border-radius:10px;margin-bottom:8px">
+            <span style="font-size:16px;flex-shrink:0">⚠️</span>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#744210">RAS METAL — 87 dias atrasado</div>
+              <div style="font-size:11px;color:#718096;margin-top:2px">Evolução · Ana Paula · Resolver importação</div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:#FFFFF0;border-radius:10px">
+            <span style="font-size:16px;flex-shrink:0">⏸️</span>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#744210">CAMPOSC — pausado há 160 dias</div>
+              <div style="font-size:11px;color:#718096;margin-top:2px">Pausado · Carlos · Aguardando retorno</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tabela consultores (resumida) -->
+      <div style="background:#fff;border-radius:14px;border:1px solid #e2e8f0;padding:16px 20px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a0aec0;margin-bottom:12px">Performance por Consultor</div>
+        <div style="display:grid;grid-template-columns:1fr 60px 60px 60px 80px;gap:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#a0aec0;padding:0 4px;margin-bottom:6px">
+          <span>Consultor</span><span style="text-align:center">Total</span><span style="text-align:center">Atraso</span><span style="text-align:center">OK</span><span style="text-align:right">% Atraso</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 60px 60px 60px 80px;gap:0;font-size:12px">
+          <div style="display:contents">
+            <div style="padding:8px 4px;border-top:1px solid #f0f0f0;font-weight:700;color:#1a202c;display:flex;align-items:center;gap:8px">
+              <div style="width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#e53e3e,#fc8181);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff">F</div>Felipe
+            </div>
+            <div style="padding:8px 4px;border-top:1px solid #f0f0f0;text-align:center;color:#4a5568">7</div>
+            <div style="padding:8px 4px;border-top:1px solid #f0f0f0;text-align:center;color:#e53e3e;font-weight:700">3</div>
+            <div style="padding:8px 4px;border-top:1px solid #f0f0f0;text-align:center;color:#38a169">4</div>
+            <div style="padding:8px 4px;border-top:1px solid #f0f0f0;text-align:right">
+              <span style="padding:2px 8px;border-radius:20px;background:#FFF5F5;color:#e53e3e;font-weight:700;font-size:11px">43%</span>
+            </div>
+          </div>
+          <div style="display:contents">
+            <div style="padding:8px 4px;border-top:1px solid #f0f0f0;font-weight:700;color:#1a202c;display:flex;align-items:center;gap:8px">
+              <div style="width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#38a169,#68d391);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff">A</div>Ana Paula
+            </div>
+            <div style="padding:8px 4px;border-top:1px solid #f0f0f0;text-align:center;color:#4a5568">5</div>
+            <div style="padding:8px 4px;border-top:1px solid #f0f0f0;text-align:center;color:#e53e3e;font-weight:700">1</div>
+            <div style="padding:8px 4px;border-top:1px solid #f0f0f0;text-align:center;color:#38a169">4</div>
+            <div style="padding:8px 4px;border-top:1px solid #f0f0f0;text-align:right">
+              <span style="padding:2px 8px;border-radius:20px;background:#F0FFF4;color:#38a169;font-weight:700;font-size:11px">20%</span>
+            </div>
+          </div>
+          <div style="display:contents">
+            <div style="padding:8px 4px;border-top:1px solid #f0f0f0;font-weight:700;color:#4a5568;display:flex;align-items:center;gap:8px">
+              <div style="width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#3182ce,#63b3ed);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff">S</div>Silvia
+            </div>
+            <div style="padding:8px 4px;border-top:1px solid #f0f0f0;text-align:center;color:#4a5568">6</div>
+            <div style="padding:8px 4px;border-top:1px solid #f0f0f0;text-align:center;color:#4a5568">0</div>
+            <div style="padding:8px 4px;border-top:1px solid #f0f0f0;text-align:center;color:#38a169">6</div>
+            <div style="padding:8px 4px;border-top:1px solid #f0f0f0;text-align:right">
+              <span style="padding:2px 8px;border-radius:20px;background:#F0FFF4;color:#38a169;font-weight:700;font-size:11px">0%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

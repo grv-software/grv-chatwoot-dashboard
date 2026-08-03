@@ -1,0 +1,255 @@
+<style>
+  :root {
+    --primary: #E05A1E;
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: rgba(255,255,255,.1);
+    --text: #f0f2f8;
+    --text2: rgba(240,242,248,.7);
+    --text3: rgba(240,242,248,.4);
+    --green: #22c55e;
+    --yellow: #eab308;
+    --red: #ef4444;
+    --radius: 10px;
+  }
+
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; margin: 0; }
+
+  .page { max-width: 780px; margin: 0 auto; padding: 32px 20px; }
+
+  .question {
+    font-size: 13px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--primary); margin-bottom: 6px;
+  }
+  .description {
+    font-size: 14px; color: var(--text2); margin-bottom: 28px; line-height: 1.6;
+  }
+
+  /* Playbook card */
+  .pb-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .pb-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+  .pb-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .pb-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px;
+    background: #FFF3EE; color: var(--primary); white-space: nowrap;
+  }
+  .pb-menu {
+    background: transparent; border: 1px solid var(--border); color: var(--text3);
+    border-radius: 6px; padding: 2px 8px; cursor: pointer; font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* Dono selector — the new element */
+  .pb-dono {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 16px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .pb-dono-label { font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+  .pb-dono-select {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 4px 8px 4px 6px;
+    font-size: 12px; font-weight: 600; color: var(--text); cursor: pointer;
+    transition: border-color .15s;
+  }
+  .pb-dono-select:hover { border-color: var(--primary); }
+  .pb-dono-avatar {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: linear-gradient(135deg, #E05A1E, #ff8c55);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 800; color: #fff; flex-shrink: 0;
+  }
+  .pb-dono-arrow { font-size: 9px; color: var(--text3); margin-left: 2px; }
+
+  /* Activity rows */
+  .at-list { padding: 6px 0; }
+  .at-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 16px; transition: background .12s;
+  }
+  .at-row:hover { background: rgba(255,255,255,.03); }
+  .at-check {
+    width: 16px; height: 16px; border-radius: 4px;
+    border: 1.5px solid var(--border); flex-shrink: 0; cursor: pointer;
+    background: transparent;
+  }
+  .at-nome { flex: 1; font-size: 13px; color: var(--text); }
+  .at-date { font-size: 11px; color: var(--text3); flex-shrink: 0; }
+
+  /* Responsável chip — the new element on activities */
+  .at-resp {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 5px; padding: 3px 7px 3px 5px;
+    font-size: 11px; font-weight: 600; color: var(--text2);
+    cursor: pointer; white-space: nowrap; transition: border-color .15s;
+    flex-shrink: 0;
+  }
+  .at-resp:hover { border-color: var(--primary); color: var(--text); }
+  .at-resp-avatar {
+    width: 14px; height: 14px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; font-weight: 800; color: #fff; flex-shrink: 0;
+  }
+  .at-resp-arrow { font-size: 8px; color: var(--text3); }
+
+  /* Inherited badge */
+  .at-resp.herdado {
+    border-style: dashed;
+    color: var(--text3);
+  }
+  .at-resp.herdado .at-resp-avatar { opacity: .6; }
+
+  .at-concluir {
+    font-size: 11px; font-weight: 700; padding: 4px 10px;
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 5px; color: var(--text3); cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .divider { height: 1px; background: var(--border); margin: 0 16px; }
+
+  /* Legend */
+  .legend { margin-top: 16px; display: flex; gap: 20px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* Callout */
+  .callout {
+    background: rgba(224,90,30,.08); border: 1px solid rgba(224,90,30,.25);
+    border-radius: 8px; padding: 12px 14px; margin-bottom: 20px;
+    font-size: 13px; color: var(--text2); line-height: 1.5;
+  }
+  .callout strong { color: var(--primary); }
+
+  /* Selection buttons */
+  .actions { display: flex; gap: 10px; margin-top: 28px; flex-wrap: wrap; }
+  .btn-ok {
+    padding: 10px 22px; background: var(--primary); color: #fff;
+    border: none; border-radius: 8px; font-size: 13px; font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-ok:hover { background: #c94d15; }
+  .btn-ajuste {
+    padding: 10px 22px; background: transparent; color: var(--text2);
+    border: 1px solid var(--border); border-radius: 8px; font-size: 13px;
+    cursor: pointer;
+  }
+  .btn-ajuste:hover { border-color: var(--text2); }
+
+  .new-badge {
+    font-size: 9px; font-weight: 800; text-transform: uppercase;
+    background: var(--primary); color: #fff; padding: 1px 5px;
+    border-radius: 3px; margin-left: 4px; vertical-align: middle;
+  }
+</style>
+
+<div class="page">
+  <div class="question">Mockup — Atribuição de responsável</div>
+  <div class="description">
+    Veja como ficaria o card do playbook com o campo de <strong>Dono do playbook</strong>
+    e cada atividade com o chip de <strong>Responsável</strong>. Quando não atribuído, herda o dono do playbook (borda tracejada).
+  </div>
+
+  <div class="callout">
+    <strong>Novo:</strong> O dono do playbook aparece logo abaixo do nome.
+    Cada atividade tem um chip clicável de responsável — herda do playbook quando não preenchido.
+  </div>
+
+  <!-- Playbook card -->
+  <div class="pb-card">
+    <div class="pb-header">
+      <div>
+        <div class="pb-title">Onboarding Técnico <span class="pb-badge">⏸ Pausado</span></div>
+      </div>
+      <button class="pb-menu">···</button>
+    </div>
+
+    <!-- Dono do playbook — NOVO -->
+    <div class="pb-dono">
+      <span class="pb-dono-label">Dono</span>
+      <div class="pb-dono-select">
+        <div class="pb-dono-avatar">S</div>
+        Samuel Wallace
+        <span class="pb-dono-arrow">▼</span>
+      </div>
+    </div>
+
+    <!-- Atividades -->
+    <div class="at-list">
+
+      <div class="at-row">
+        <div class="at-check"></div>
+        <div class="at-nome">Configurar ambiente de homologação</div>
+        <div class="at-date">15/07</div>
+        <!-- Responsável explícito -->
+        <div class="at-resp">
+          <div class="at-resp-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">G</div>
+          Guilherme
+          <span class="at-resp-arrow">▼</span>
+        </div>
+        <button class="at-concluir">✓</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="at-row">
+        <div class="at-check"></div>
+        <div class="at-nome">Treinamento da equipe operacional</div>
+        <div class="at-date">22/07</div>
+        <!-- Responsável explícito -->
+        <div class="at-resp">
+          <div class="at-resp-avatar" style="background:linear-gradient(135deg,#E05A1E,#ff8c55)">S</div>
+          Samuel
+          <span class="at-resp-arrow">▼</span>
+        </div>
+        <button class="at-concluir">✓</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="at-row">
+        <div class="at-check"></div>
+        <div class="at-nome">Validar integração com ERP do cliente</div>
+        <div class="at-date">28/07</div>
+        <!-- Herdado do dono do playbook — borda tracejada -->
+        <div class="at-resp herdado">
+          <div class="at-resp-avatar" style="background:linear-gradient(135deg,#E05A1E,#ff8c55)">S</div>
+          Samuel
+          <span class="at-resp-arrow">▼</span>
+        </div>
+        <button class="at-concluir">✓</button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#6366f1"></div>
+      Responsável explícito (atribuído manualmente)
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:var(--border);border:1px dashed var(--text3)"></div>
+      Herdado do dono do playbook (borda tracejada)
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn-ok" onclick="toggleSelect(this)" data-choice="ok">Ficou bom, pode seguir</button>
+    <button class="btn-ajuste" onclick="toggleSelect(this)" data-choice="ajuste">Quero ajustar algo</button>
+  </div>
+</div>

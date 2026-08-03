@@ -1,0 +1,352 @@
+<style>
+  :root {
+    --grv-bg: #F5F3F0;
+    --grv-surface: #fff;
+    --grv-border: #E2DDD7;
+    --grv-text: #1A1917;
+    --grv-text2: #534E4A;
+    --grv-text3: #8A847F;
+    --grv-text4: #B5AFA9;
+    --grv-primary: #E05A1E;
+    --grv-green: #16A34A;
+    --grv-yellow: #D97706;
+    --grv-red: #DC2626;
+  }
+
+  .q-title { font-size: 15px; font-weight: 600; color: var(--grv-text); margin-bottom: 4px; }
+  .q-sub   { font-size: 13px; color: var(--grv-text3); margin-bottom: 24px; }
+
+  .approaches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+  .approach-card {
+    border: 2px solid var(--grv-border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--grv-surface);
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .approach-card:hover { border-color: var(--grv-primary); box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+  .approach-card.selected { border-color: var(--grv-primary); box-shadow: 0 0 0 3px rgba(224,90,30,.15); }
+
+  .approach-preview {
+    background: var(--grv-bg);
+    padding: 14px;
+    height: 280px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .approach-info { padding: 14px 16px 16px; }
+  .approach-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--grv-primary); margin-bottom: 4px;
+  }
+  .approach-title { font-size: 14px; font-weight: 700; color: var(--grv-text); margin-bottom: 6px; }
+  .approach-desc  { font-size: 12px; color: var(--grv-text3); line-height: 1.5; }
+
+  .pros-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .pro-tag  { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: rgba(22,163,74,.1); color: var(--grv-green); font-weight: 600; }
+  .con-tag  { font-size: 10px; padding: 2px 8px; border-radius: 20px; background: rgba(220,38,38,.08); color: var(--grv-red); font-weight: 600; }
+
+  /* ── mini mockup elements ── */
+  .mm-header {
+    background: var(--grv-surface);
+    border: 1px solid var(--grv-border);
+    border-radius: 8px 8px 0 0;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .mm-avatar { width: 28px; height: 28px; border-radius: 50%; background: #E2DDD7; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .mm-title-col { flex: 1; }
+  .mm-name { font-size: 10px; font-weight: 700; color: var(--grv-text); }
+  .mm-chips { display: flex; gap: 3px; margin-top: 2px; }
+  .mm-chip { font-size: 8px; padding: 1px 5px; border-radius: 4px; font-weight: 600; }
+  .mm-chip-green { background: rgba(22,163,74,.12); color: var(--grv-green); }
+  .mm-chip-orange { background: rgba(224,90,30,.12); color: var(--grv-primary); }
+  .mm-chip-gray { background: var(--grv-bg); color: var(--grv-text3); }
+
+  .mm-kpi-row { display: flex; gap: 4px; margin-top: 4px; }
+  .mm-kpi {
+    flex: 1;
+    background: var(--grv-surface);
+    border: 1px solid var(--grv-border);
+    border-radius: 6px;
+    padding: 5px 7px;
+  }
+  .mm-kpi-label { font-size: 7px; color: var(--grv-text4); text-transform: uppercase; font-weight: 700; letter-spacing: .04em; }
+  .mm-kpi-val   { font-size: 14px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+
+  .mm-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--grv-border); background: var(--grv-surface); margin-top: 4px; }
+  .mm-tab { font-size: 8px; padding: 5px 8px; color: var(--grv-text3); font-weight: 600; border-bottom: 2px solid transparent; cursor: default; }
+  .mm-tab.act { color: var(--grv-primary); border-bottom-color: var(--grv-primary); font-weight: 700; }
+
+  .mm-body { background: var(--grv-surface); border: 1px solid var(--grv-border); border-top: none; border-radius: 0 0 8px 8px; padding: 8px; }
+
+  .mm-row { display: flex; align-items: center; gap: 6px; padding: 4px 0; border-bottom: 1px solid var(--grv-bg); }
+  .mm-row:last-child { border-bottom: none; }
+  .mm-check { width: 10px; height: 10px; border-radius: 3px; border: 1.5px solid var(--grv-border); flex-shrink: 0; }
+  .mm-check.done { background: var(--grv-green); border-color: var(--grv-green); }
+  .mm-row-text { flex: 1; font-size: 8px; color: var(--grv-text2); }
+  .mm-row-text.done { text-decoration: line-through; color: var(--grv-text4); }
+  .mm-badge { font-size: 7px; padding: 1px 4px; border-radius: 3px; font-weight: 700; }
+  .mm-badge-red { background: rgba(220,38,38,.1); color: var(--grv-red); }
+  .mm-badge-yellow { background: rgba(217,119,6,.1); color: var(--grv-yellow); }
+  .mm-badge-ok { background: rgba(22,163,74,.1); color: var(--grv-green); }
+
+  .mm-section-title { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--grv-text4); margin-bottom: 4px; }
+  .mm-placeholder { height: 8px; border-radius: 4px; background: var(--grv-border); margin-bottom: 3px; }
+
+  /* Opção B — split layout */
+  .mm-split { display: flex; gap: 4px; }
+  .mm-sidebar { width: 72px; flex-shrink: 0; background: var(--grv-surface); border: 1px solid var(--grv-border); border-radius: 6px; padding: 7px; }
+  .mm-main { flex: 1; }
+  .mm-indicator { margin-bottom: 6px; }
+  .mm-ind-label { font-size: 7px; color: var(--grv-text4); text-transform: uppercase; font-weight: 700; }
+  .mm-ind-val { font-size: 16px; font-weight: 800; }
+
+  /* Opção C — scroll */
+  .mm-section { background: var(--grv-surface); border: 1px solid var(--grv-border); border-radius: 6px; padding: 7px; margin-bottom: 4px; }
+  .mm-sec-hd { font-size: 8px; font-weight: 700; color: var(--grv-text3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; }
+  .mm-sec-badge { font-size: 7px; padding: 1px 5px; border-radius: 10px; background: rgba(220,38,38,.1); color: var(--grv-red); font-weight: 700; }
+</style>
+
+<p class="q-title">Como reorganizar as 3 abas do detalhe do cliente?</p>
+<p class="q-sub">Cada abordagem responde às três perguntas de forma diferente — "Como está?" · "O que fazer?" · "O que aconteceu?"</p>
+
+<div class="approaches">
+
+  <!-- OPÇÃO A -->
+  <div class="approach-card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="approach-preview">
+
+      <!-- Header com KPIs -->
+      <div class="mm-header">
+        <div class="mm-avatar" style="background:linear-gradient(135deg,#E05A1E,#c44a10);color:#fff;font-size:11px;font-weight:800">KM</div>
+        <div class="mm-title-col">
+          <div class="mm-name">KMSIL · SAGP-00036</div>
+          <div class="mm-chips">
+            <span class="mm-chip mm-chip-green">CS Ativo</span>
+            <span class="mm-chip mm-chip-gray">Saúde</span>
+            <span class="mm-chip mm-chip-orange">Engajamento</span>
+          </div>
+        </div>
+      </div>
+      <!-- Faixa de KPIs abaixo do header -->
+      <div class="mm-kpi-row" style="margin-top:4px">
+        <div class="mm-kpi">
+          <div class="mm-kpi-label">Health</div>
+          <div class="mm-kpi-val" style="color:var(--grv-green)">82</div>
+        </div>
+        <div class="mm-kpi">
+          <div class="mm-kpi-label">CSAT</div>
+          <div class="mm-kpi-val" style="color:var(--grv-green)">4.2</div>
+        </div>
+        <div class="mm-kpi">
+          <div class="mm-kpi-label">NPS</div>
+          <div class="mm-kpi-val" style="color:var(--grv-yellow)">32</div>
+        </div>
+        <div class="mm-kpi" style="flex:2">
+          <div class="mm-kpi-label">Próxima ação</div>
+          <div style="font-size:8px;color:var(--grv-text2);font-weight:600;margin-top:2px">QBR mensal · amanhã</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="mm-tabs" style="margin-top:6px">
+        <div class="mm-tab act">Atividades</div>
+        <div class="mm-tab">Visão 360</div>
+        <div class="mm-tab">Notas</div>
+      </div>
+
+      <!-- Aba Atividades: alerta consolidado + lista -->
+      <div class="mm-body">
+        <div style="background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.15);border-radius:5px;padding:5px 7px;margin-bottom:6px;display:flex;align-items:center;gap:6px">
+          <div style="font-size:7px;font-weight:700;color:var(--grv-red)">2 ATRASADAS</div>
+          <div style="flex:1;height:1px;background:rgba(220,38,38,.15)"></div>
+          <div style="font-size:7px;color:var(--grv-red)">ver todas</div>
+        </div>
+        <div class="mm-row">
+          <div class="mm-check done"></div>
+          <div class="mm-row-text done">Reunião kick-off</div>
+          <div class="mm-badge mm-badge-ok">Concluída</div>
+        </div>
+        <div class="mm-row">
+          <div class="mm-check"></div>
+          <div class="mm-row-text">Enviar relatório Q2</div>
+          <div class="mm-badge mm-badge-red">3d atrás</div>
+        </div>
+        <div class="mm-row">
+          <div class="mm-check"></div>
+          <div class="mm-row-text">Agendar QBR mensal</div>
+          <div class="mm-badge mm-badge-yellow">Hoje</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="approach-info">
+      <div class="approach-label">Opção A</div>
+      <div class="approach-title">Header rico + tabs focadas</div>
+      <div class="approach-desc">Health, CSAT, NPS e próxima ação ficam sempre visíveis no topo — antes de qualquer aba. Atividades vira a aba principal, com alerta consolidado de atrasos. Visão 360 fica como referência, Notas ganha estrutura.</div>
+      <div class="pros-row">
+        <span class="pro-tag">Fit no sistema atual</span>
+        <span class="pro-tag">Sem mudança de paradigma</span>
+        <span class="con-tag">Ainda 3 tabs</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPÇÃO B -->
+  <div class="approach-card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="approach-preview">
+
+      <div class="mm-header" style="border-radius:8px 8px 0 0">
+        <div class="mm-avatar" style="background:linear-gradient(135deg,#E05A1E,#c44a10);color:#fff;font-size:11px;font-weight:800">KM</div>
+        <div class="mm-title-col">
+          <div class="mm-name">KMSIL · Saúde · CPS</div>
+          <div class="mm-chips">
+            <span class="mm-chip mm-chip-green">CS Ativo</span>
+            <span class="mm-chip mm-chip-orange">Engajamento</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mm-split" style="margin-top:4px">
+        <!-- Painel lateral fixo -->
+        <div class="mm-sidebar">
+          <div class="mm-indicator">
+            <div class="mm-ind-label">Health</div>
+            <div class="mm-ind-val" style="color:var(--grv-green)">82</div>
+            <!-- sparkline simulada -->
+            <svg width="60" height="16" viewBox="0 0 60 16" style="display:block;margin-top:2px">
+              <polyline points="0,12 10,10 20,8 30,11 40,6 50,4 60,5" fill="none" stroke="#16A34A" stroke-width="1.5" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="mm-indicator">
+            <div class="mm-ind-label">CSAT</div>
+            <div class="mm-ind-val" style="color:var(--grv-green);font-size:14px">4.2<span style="font-size:8px;color:var(--grv-text3);font-weight:500">/5</span></div>
+          </div>
+          <div class="mm-indicator">
+            <div class="mm-ind-label">NPS</div>
+            <div class="mm-ind-val" style="color:var(--grv-yellow);font-size:14px">32</div>
+          </div>
+          <div style="height:1px;background:var(--grv-border);margin:5px 0"></div>
+          <div class="mm-ind-label" style="margin-bottom:3px">Próxima</div>
+          <div style="font-size:7px;color:var(--grv-text2);font-weight:600;line-height:1.3">QBR mensal amanhã</div>
+          <div style="font-size:7px;color:var(--grv-text3);margin-top:2px">Claudia Santos</div>
+        </div>
+
+        <!-- Área principal com tabs -->
+        <div class="mm-main">
+          <div class="mm-tabs" style="border-radius:6px 6px 0 0;overflow:hidden">
+            <div class="mm-tab act">Atividades</div>
+            <div class="mm-tab">360</div>
+            <div class="mm-tab">Notas</div>
+          </div>
+          <div class="mm-body" style="border-radius:0 0 6px 6px">
+            <div class="mm-row">
+              <div class="mm-check"></div>
+              <div class="mm-row-text">Enviar relatório Q2</div>
+              <div class="mm-badge mm-badge-red">3d</div>
+            </div>
+            <div class="mm-row">
+              <div class="mm-check"></div>
+              <div class="mm-row-text">Agendar QBR</div>
+              <div class="mm-badge mm-badge-yellow">Hoje</div>
+            </div>
+            <div class="mm-row">
+              <div class="mm-check done"></div>
+              <div class="mm-row-text done">Kick-off</div>
+              <div class="mm-badge mm-badge-ok">✓</div>
+            </div>
+            <div class="mm-row">
+              <div class="mm-check"></div>
+              <div class="mm-row-text">Pesquisa NPS</div>
+              <div class="mm-badge mm-badge-yellow">+2d</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="approach-info">
+      <div class="approach-label">Opção B</div>
+      <div class="approach-title">Painel lateral fixo + tabs</div>
+      <div class="approach-desc">Coluna esquerda fixa (200px) com health score, sparkline de tendência, CSAT, NPS e próxima ação — visíveis em qualquer aba. A área direita mantém as tabs. O CS nunca "perde" o contexto de saúde ao navegar.</div>
+      <div class="pros-row">
+        <span class="pro-tag">Contexto sempre visível</span>
+        <span class="pro-tag">Sem troca de aba para status</span>
+        <span class="con-tag">Menos espaço útil</span>
+        <span class="con-tag">Maior mudança no código</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPÇÃO C -->
+  <div class="approach-card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="approach-preview" style="height:280px;overflow:hidden">
+
+      <div class="mm-header" style="border-radius:8px 8px 0 0">
+        <div class="mm-avatar" style="background:linear-gradient(135deg,#E05A1E,#c44a10);color:#fff;font-size:11px;font-weight:800">KM</div>
+        <div class="mm-title-col">
+          <div class="mm-name">KMSIL · SAGP-00036</div>
+          <div class="mm-chips">
+            <span class="mm-chip mm-chip-green">CS Ativo</span>
+            <span class="mm-chip mm-chip-orange">Engajamento</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:4px;overflow:hidden">
+        <!-- KPI strip -->
+        <div class="mm-kpi-row">
+          <div class="mm-kpi"><div class="mm-kpi-label">Health</div><div class="mm-kpi-val" style="color:var(--grv-green)">82</div></div>
+          <div class="mm-kpi"><div class="mm-kpi-label">CSAT</div><div class="mm-kpi-val" style="color:var(--grv-green)">4.2</div></div>
+          <div class="mm-kpi"><div class="mm-kpi-label">NPS</div><div class="mm-kpi-val" style="color:var(--grv-yellow)">32</div></div>
+        </div>
+
+        <!-- Seção: Pendências -->
+        <div class="mm-section" style="margin-top:4px">
+          <div class="mm-sec-hd">Pendências <span class="mm-sec-badge">2 atrasadas</span></div>
+          <div class="mm-row"><div class="mm-check"></div><div class="mm-row-text">Enviar relatório Q2</div><div class="mm-badge mm-badge-red">3d</div></div>
+          <div class="mm-row"><div class="mm-check"></div><div class="mm-row-text">Agendar QBR</div><div class="mm-badge mm-badge-yellow">Hoje</div></div>
+        </div>
+
+        <!-- Seção: Notas -->
+        <div class="mm-section">
+          <div class="mm-sec-hd">Notas recentes</div>
+          <div style="font-size:8px;color:var(--grv-text3);line-height:1.4">"Cliente pediu ajuste no módulo de relatórios — agendar call técnica."</div>
+          <div style="font-size:7px;color:var(--grv-text4);margin-top:2px">Ana Costa · 08/07</div>
+        </div>
+
+        <!-- Seção: Contatos -->
+        <div class="mm-section">
+          <div class="mm-sec-hd">Contatos</div>
+          <div style="font-size:8px;color:var(--grv-text2);font-weight:600">João Silva <span style="color:var(--grv-text4);font-weight:400">· Diretor de TI</span></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="approach-info">
+      <div class="approach-label">Opção C</div>
+      <div class="approach-title">Scroll único sem tabs</div>
+      <div class="approach-desc">Remove as tabs. Tudo numa página com seções colapsáveis: KPIs → Pendências críticas → Notas recentes → Playbooks → Contatos → Histórico. Navegação mais simples, mas perde a separação clara de contextos.</div>
+      <div class="pros-row">
+        <span class="pro-tag">Zero navegação por tab</span>
+        <span class="pro-tag">Tudo acessível com scroll</span>
+        <span class="con-tag">Pode ficar longo</span>
+        <span class="con-tag">Perde separação clara</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:20px;padding:14px 16px;background:rgba(224,90,30,.06);border:1px solid rgba(224,90,30,.15);border-radius:8px">
+  <div style="font-size:11px;font-weight:700;color:var(--grv-primary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Minha recomendação</div>
+  <div style="font-size:13px;color:var(--grv-text2);line-height:1.5">
+    <strong style="color:var(--grv-text)">Opção A</strong> — é o menor risco e o maior ganho. A estrutura de tabs já existe, o CS já conhece. O que falta é colocar os indicadores vitais no header (health, CSAT, NPS) e reorganizar o conteúdo de cada tab para ter um propósito claro. Custo baixo, impacto alto.
+  </div>
+</div>

@@ -1,0 +1,3022 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soma Imob — Metas e Performance</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%231F2937'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23D67A52'/%3E%3Cstop offset='100%25' stop-color='%231E4D5C'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== Reset & base ===== */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    min-width: 900px;
+    font-family: 'Inter', sans-serif;
+    background: #F8F7F5;
+    color: #1F2937;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline: 2px solid #D67A52;
+    outline-offset: 2px;
+  }
+
+  /* ===== Navbar horizontal fixa ===== */
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid #EDE8E3;
+    z-index: 100;
+  }
+
+  .navbar-inner {
+    max-width: 1200px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .navbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
+  .logomark {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logomark svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .logo-text {
+    letter-spacing: -0.02em;
+  }
+
+  .logo-soma {
+    font-weight: 700;
+    color: #1F2937;
+  }
+
+  .logo-imob {
+    font-weight: 600;
+    color: #1E4D5C;
+    letter-spacing: 0.06em;
+    margin-left: 2px;
+  }
+
+  .ia-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #E4EDEF;
+    color: #1E4D5C;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .ia-pill svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  /* ===== Navegação: dropdowns ===== */
+  .navbar-links {
+    position: relative;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .nav-indicator {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: #FBEAE1;
+    border-radius: 8px;
+    z-index: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .nav-indicator {
+      transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  }
+
+  .navbar-links li {
+    position: relative;
+    z-index: 1;
+  }
+
+  .navbar-links a,
+  .navbar-links .placeholder-link,
+  .nav-dropdown-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: none;
+    border: none;
+    color: #374151;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .navbar-links li:not(.active) a:hover,
+  .navbar-links li:not(.active) .placeholder-link:hover,
+  .navbar-links li:not(.active) .nav-dropdown-trigger:hover {
+    background: #F3F4F6;
+  }
+
+  .navbar-links li.active a,
+  .navbar-links li.active .placeholder-link,
+  .navbar-links li.active .nav-dropdown-trigger {
+    color: #D67A52;
+    font-weight: 600;
+  }
+
+  .nav-dropdown.open .nav-dropdown-trigger {
+    background: #F3F4F6;
+  }
+
+  .chevron {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.2s ease;
+  }
+
+  .nav-dropdown.open .chevron {
+    transform: rotate(180deg);
+  }
+
+  .nav-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 240px;
+    background: #fff;
+    border: 1px solid #EDE8E3;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
+    padding: 6px;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .nav-dropdown-menu {
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+  }
+
+  .nav-dropdown.open .nav-dropdown-menu {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 14px;
+    color: #374151;
+    text-decoration: none;
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .dropdown-item:hover {
+    background: #F3F4F6;
+  }
+
+  .dropdown-item.active {
+    background: #FBEAE1;
+    color: #D67A52;
+    font-weight: 600;
+  }
+
+  .dropdown-item--highlight {
+    color: #D67A52;
+    font-weight: 600;
+  }
+
+  .dropdown-item--highlight:hover {
+    background: #FBEAE1;
+  }
+
+  .dropdown-item-icon-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dropdown-item-icon-label svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .dropdown-divider {
+    height: 1px;
+    background: #EDE8E3;
+    margin: 6px 4px;
+  }
+
+  .nav-badge {
+    background: #DC2626;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 999px;
+    line-height: 1.5;
+  }
+
+  /* Botão de disparo do painel Arnês IA, estilo Gemini */
+  .ia-launcher {
+    position: relative;
+    overflow: hidden;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: #fff;
+    background: #1E4D5C;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.1s ease;
+  }
+
+  .ia-launcher:active {
+    transform: scale(0.97);
+  }
+
+  .ia-launcher svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .ia-launcher::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    transform: skewX(-20deg);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ia-launcher:hover::after {
+      animation: iaShimmer 600ms ease-out;
+    }
+  }
+
+  @keyframes iaShimmer {
+    from { left: -75%; }
+    to { left: 125%; }
+  }
+
+  .navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #D67A52;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .icon-btn {
+    background: none;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #374151;
+  }
+
+  .icon-btn:hover {
+    background: #F3F4F6;
+  }
+
+  .icon-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .btn {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 9px 16px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  .btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .btn-primary {
+    background: #D67A52;
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: #B66846;
+  }
+
+  .btn-outline-petroleo {
+    background: #fff;
+    color: #1E4D5C;
+    border-color: #C7D9DD;
+  }
+
+  .btn-outline-petroleo:hover {
+    background: #EEF3F4;
+  }
+
+  /* ===== Página: coluna central ===== */
+  .page {
+    padding-top: 64px;
+    transition: margin-right 0.3s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page {
+      transition: margin-right 0.01s linear;
+    }
+  }
+
+  body.ia-panel-open .page {
+    margin-right: 400px;
+  }
+
+  .content {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 32px 32px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* ===== Seletor de mês ===== */
+  .month-select {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1F2937;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+
+  /* ===== Grid de KPIs ===== */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .kpi-card {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 18px 20px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  }
+
+  .kpi-card .value {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .kpi-card .label {
+    font-size: 13px;
+    color: #6B7280;
+    margin-top: 4px;
+  }
+
+  .kpi-card .delta {
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 8px;
+  }
+
+  .delta-green { color: #16A34A; }
+  .delta-yellow { color: #CA8A04; }
+  .delta-gray { color: #6B7280; }
+
+  /* ===== Cartão genérico de conteúdo ===== */
+  .panel-card {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  }
+
+  .panel-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1F2937;
+    margin-bottom: 16px;
+  }
+
+  /* ===== Funil de conversão ===== */
+  .funnel-row {
+    display: grid;
+    grid-template-columns: 130px 1fr 70px 60px;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .funnel-row:last-child { margin-bottom: 0; }
+
+  .funnel-label {
+    font-size: 13px;
+    color: #374151;
+    font-weight: 500;
+  }
+
+  .funnel-bar-track {
+    background: #F3F4F6;
+    border-radius: 6px;
+    height: 22px;
+    overflow: hidden;
+  }
+
+  .funnel-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    width: 0;
+    background: #1E4D5C;
+  }
+
+  .funnel-row--final .funnel-bar-fill {
+    background: #D67A52;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .funnel-bar-fill {
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  }
+
+  .funnel-valor {
+    font-size: 13px;
+    font-weight: 700;
+    text-align: right;
+  }
+
+  .funnel-pct {
+    font-size: 12px;
+    color: #6B7280;
+    text-align: right;
+  }
+
+  /* ===== Gráficos lado a lado ===== */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .charts-row { grid-template-columns: 1fr; }
+  }
+
+  .chart-canvas-wrap {
+    position: relative;
+    width: 100%;
+    height: 200px;
+  }
+
+  .chart-canvas-wrap canvas {
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+  }
+
+  .chart-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: #1F2937;
+    color: #fff;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translate(-50%, -100%);
+    transition: opacity 0.1s ease;
+    z-index: 5;
+  }
+
+  .chart-tooltip.visible {
+    opacity: 1;
+  }
+
+  /* ===== Pontos fortes / de atenção ===== */
+  .insight-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .insight-grid { grid-template-columns: 1fr; }
+  }
+
+  .insight-panel {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid transparent;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  }
+
+  .insight-panel--strength {
+    border-left-color: #16A34A;
+  }
+
+  .insight-panel--weakness {
+    border-left-color: #D67A52;
+  }
+
+  .insight-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .insight-panel--strength .insight-panel-title { color: #16A34A; }
+  .insight-panel--weakness .insight-panel-title { color: #D67A52; }
+
+  .insight-panel-title svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .insight-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .insight-list li {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #374151;
+    padding-left: 14px;
+    position: relative;
+  }
+
+  .insight-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 7px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #9CA3AF;
+  }
+
+  /* ===== Recomendações da Arnês IA ===== */
+  /* ===== Banner de reconexão (fallback quando a API está fora) ===== */
+  .reconnect-banner {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: #FEF3C7;
+    color: #92400E;
+    font-size: 13px;
+    text-align: center;
+    padding: 8px 16px;
+    z-index: 90;
+    display: none;
+  }
+
+  .reconnect-banner.show {
+    display: block;
+  }
+
+  /* ===== Toast genérico de erro de API ===== */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    max-width: 340px;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    box-shadow: 0 4px 16px rgba(17, 24, 39, 0.08);
+    opacity: 0;
+    transform: translateX(16px);
+    pointer-events: none;
+    transition: opacity 200ms ease-in, transform 200ms ease-in;
+    z-index: 200;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    transition: opacity 200ms ease-out, transform 200ms ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toast,
+    .toast.show {
+      transform: none;
+      transition: opacity 120ms linear;
+    }
+  }
+
+  .toast-icon {
+    color: #D67A52;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .toast-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .toast-body {
+    flex: 1;
+  }
+
+  .toast-body p {
+    font-size: 13px;
+    color: #1F2937;
+    line-height: 1.5;
+  }
+
+  /* ===== Painel lateral da Arnês IA (estilo Gemini, empurra o conteúdo) ===== */
+  .ia-panel {
+    position: fixed;
+    top: 64px;
+    right: 0;
+    bottom: 0;
+    width: 400px;
+    background: #F8F7F5;
+    border-left: 1px solid #EDE8E3;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    z-index: 150;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ia-panel {
+      transition: transform 0.3s ease-out;
+    }
+  }
+
+  .ia-panel.show {
+    transform: translateX(0);
+  }
+
+  .ia-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-bottom: 1px solid #EDE8E3;
+    flex-shrink: 0;
+  }
+
+  .ia-panel-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.02em;
+  }
+
+  .ia-panel-close {
+    background: none;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #374151;
+    cursor: pointer;
+  }
+
+  .ia-panel-close:hover {
+    background: #F3F4F6;
+  }
+
+  .ia-panel-close svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .ia-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ia-greeting {
+    margin-bottom: 24px;
+  }
+
+  .ia-greeting h2 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #1E4D5C;
+    margin-bottom: 6px;
+  }
+
+  .ia-greeting p {
+    font-size: 15px;
+    color: #6B7280;
+  }
+
+  .ia-panel-suggestions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .ia-suggestion-chip {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    text-align: left;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #374151;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+  }
+
+  .ia-suggestion-chip svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #D67A52;
+  }
+
+  .ia-suggestion-chip:hover {
+    background: #FBEAE1;
+    border-color: #D67A52;
+    color: #D67A52;
+  }
+
+  .ia-suggestion-chip:active {
+    transform: scale(0.97);
+  }
+
+  .ia-suggestion-chip.pulsing {
+    pointer-events: none;
+    background: #FBEAE1;
+    border-color: #D67A52;
+    color: #D67A52;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ia-suggestion-chip.pulsing {
+      animation: chipPulse 1s ease-in-out infinite;
+    }
+  }
+
+  @keyframes chipPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+
+  .ia-panel-history {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .ia-panel-history:not(:empty) {
+    margin-bottom: 14px;
+  }
+
+  .ia-message {
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .ia-message--ai {
+    align-self: flex-start;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    color: #374151;
+  }
+
+  .ia-message--user {
+    align-self: flex-end;
+    background: #1E4D5C;
+    color: #fff;
+  }
+
+  .ia-panel-footer {
+    padding: 14px 20px 20px;
+    flex-shrink: 0;
+  }
+
+  .ia-input-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 999px;
+    padding: 6px 6px 6px 16px;
+  }
+
+  .ia-input-pill:focus-within {
+    border-color: #1E4D5C;
+  }
+
+  .ia-input-pill input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 14px;
+    color: #1F2937;
+  }
+
+  .ia-input-pill input:focus {
+    outline: none;
+  }
+
+  .ia-send-btn {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #1E4D5C, #3A7686);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .ia-send-btn:active {
+    transform: scale(0.92);
+  }
+
+  .ia-send-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+  .btn-sm {
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+
+  /* ===== Modal genérico (confirmação de ações do Arnês) ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 250;
+    transition: opacity 0.15s ease;
+  }
+
+  .modal-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .modal-overlay { transition: none; }
+  }
+
+  .modal-generico {
+    background: #F8F7F5;
+    border-radius: 12px;
+    width: min(520px, 100%);
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 16px 48px rgba(16, 24, 40, 0.2);
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1px solid #E5E7EB;
+    flex-shrink: 0;
+  }
+
+  .modal-header h2 {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .modal-close {
+    background: none;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #374151;
+    cursor: pointer;
+  }
+
+  .modal-close:hover { background: #F3F4F6; }
+  .modal-close svg { width: 14px; height: 14px; }
+
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 22px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #374151;
+  }
+
+  .modal-body p { margin-bottom: 10px; }
+  .modal-body p:last-child { margin-bottom: 0; }
+
+  .modal-body textarea {
+    width: 100%;
+    min-height: 90px;
+    font-family: inherit;
+    font-size: 13.5px;
+    padding: 10px 12px;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    color: #1F2937;
+    resize: vertical;
+    margin-top: 8px;
+  }
+
+  .modal-body textarea:focus {
+    outline: none;
+    border-color: #D67A52;
+  }
+
+  .modal-body ul.modal-lead-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 10px 0;
+  }
+
+  .modal-body ul.modal-lead-list li {
+    font-size: 13px;
+    color: #1F2937;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    padding: 7px 10px;
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 22px;
+    border-top: 1px solid #E5E7EB;
+    background: #fff;
+    border-radius: 0 0 12px 12px;
+    flex-shrink: 0;
+  }
+
+  .btn-ghost {
+    background: none;
+    color: #374151;
+    border-color: #E5E7EB;
+  }
+
+  .btn-ghost:hover { background: #F3F4F6; }
+
+  /* ===== Onboarding conversacional (Estado 1) ===== */
+  /* .content já define display:flex, então o atributo [hidden] sozinho não
+     tem prioridade suficiente para escondê-lo — força explicitamente aqui. */
+  .page .content[hidden] {
+    display: none;
+  }
+
+  .onboarding-wrap {
+    min-height: calc(100vh - 64px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .onboarding-wrap { transition: opacity 0.4s ease; }
+  }
+
+  .onboarding-wrap.fade-out { opacity: 0; }
+
+  .chat-window {
+    width: 100%;
+    max-width: 640px;
+    height: 620px;
+    max-height: calc(100vh - 128px);
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 16px 48px rgba(16, 24, 40, 0.12);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  @media (max-width: 700px) {
+    .chat-window { max-width: 100%; height: calc(100vh - 64px); border-radius: 0; }
+    .onboarding-wrap { padding: 0; }
+  }
+
+  .chat-header {
+    background: #1E4D5C;
+    color: #fff;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .chat-header-brand {
+    font-weight: 700;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .chat-header-brand svg { width: 14px; height: 14px; color: #D67A52; }
+
+  .chat-header-status {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.75);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .chat-header-status::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #4ADE80;
+    display: inline-block;
+  }
+
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: #fff;
+  }
+
+  .chat-msg { max-width: 80%; }
+  .chat-msg--arnes { align-self: flex-start; display: flex; gap: 8px; align-items: flex-start; }
+  .chat-msg--gestor { align-self: flex-end; }
+
+  .chat-msg-icon { color: #D67A52; font-size: 13px; flex-shrink: 0; margin-top: 12px; }
+
+  .chat-bubble {
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.55;
+    white-space: pre-line;
+  }
+
+  .chat-msg--arnes .chat-bubble { background: #F0F4F5; color: #1F2937; border-top-left-radius: 4px; }
+  .chat-msg--gestor .chat-bubble { background: #1E4D5C; color: #fff; border-top-right-radius: 4px; }
+
+  .chat-typing {
+    background: #F0F4F5;
+    border-radius: 14px;
+    border-top-left-radius: 4px;
+    padding: 14px 16px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .chat-typing span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #9CA3AF;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .chat-typing span { animation: chatTypingBounce 1s ease-in-out infinite; }
+    .chat-typing span:nth-child(2) { animation-delay: 0.15s; }
+    .chat-typing span:nth-child(3) { animation-delay: 0.3s; }
+  }
+
+  @keyframes chatTypingBounce {
+    0%, 100% { opacity: 0.3; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-3px); }
+  }
+
+  .chat-input-area {
+    padding: 16px 20px 20px;
+    border-top: 1px solid #EDE8E3;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .chat-quick-replies { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .chat-quick-reply {
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    background: #fff;
+    border: 1px solid #D67A52;
+    color: #D67A52;
+    border-radius: 999px;
+    padding: 9px 16px;
+    cursor: pointer;
+  }
+
+  .chat-quick-reply:hover { background: #FBEAE1; }
+
+  .chat-text-input-wrap { display: flex; gap: 8px; }
+
+  .chat-text-input-wrap input {
+    flex: 1;
+    font-family: inherit;
+    font-size: 14px;
+    padding: 10px 14px;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    color: #1F2937;
+  }
+
+  .chat-text-input-wrap input:focus { outline: none; border-color: #D67A52; }
+
+  .chat-progress-track {
+    background: #F3F4F6;
+    border-radius: 999px;
+    height: 8px;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .chat-progress-fill {
+    height: 100%;
+    width: 0;
+    background: #D67A52;
+    border-radius: 999px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .chat-progress-fill { transition: width 0.1s linear; }
+  }
+
+  /* ===== Estado 2: banner de calibração ===== */
+  .metas-banner {
+    background: #FEF3EE;
+    border-left: 4px solid #D67A52;
+    border-radius: 8px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .metas-banner-texto p {
+    font-size: 13px;
+    color: #7C4A32;
+    line-height: 1.5;
+  }
+
+  .metas-banner-respostas {
+    font-size: 12px;
+    color: #9A6A4C;
+    margin-top: 4px;
+  }
+
+  .btn-reconfigurar {
+    background: none;
+    border: 1px solid #D67A52;
+    color: #D67A52;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 7px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn-reconfigurar:hover { background: #FBEAE1; }
+
+  /* ===== Linha 1: KPIs ===== */
+  .metas-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  @media (max-width: 900px) {
+    .metas-kpi-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .metas-kpi-card {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 18px 20px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  }
+
+  .metas-kpi-numero {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1F2937;
+    letter-spacing: -0.02em;
+  }
+
+  .metas-kpi-numero .metas-kpi-meta {
+    font-size: 14px;
+    font-weight: 600;
+    color: #9CA3AF;
+  }
+
+  .metas-kpi-label {
+    font-size: 12.5px;
+    color: #6B7280;
+    margin: 4px 0 10px;
+  }
+
+  .metas-kpi-progress-track {
+    background: #F3F4F6;
+    border-radius: 999px;
+    height: 7px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+
+  .metas-kpi-progress-fill {
+    height: 100%;
+    width: 0;
+    background: #D67A52;
+    border-radius: 999px;
+  }
+
+  .metas-kpi-progress-fill.atingido { background: #16A34A; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .metas-kpi-progress-fill { transition: width 0.8s ease; }
+  }
+
+  .metas-kpi-pct {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #6B7280;
+    margin-bottom: 10px;
+  }
+
+  .metas-kpi-narrativa {
+    display: flex;
+    gap: 6px;
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: #D67A52;
+    padding-top: 10px;
+    border-top: 1px solid #F1EFEC;
+  }
+
+  .metas-kpi-narrativa svg { width: 11px; height: 11px; flex-shrink: 0; margin-top: 2px; }
+
+  /* ===== Linha 2: Previsão do Arnês ===== */
+  .metas-previsao-card {
+    background: #1E4D5C;
+    border-radius: 10px;
+    padding: 24px 26px;
+    color: #fff;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 28px;
+  }
+
+  @media (max-width: 900px) {
+    .metas-previsao-card { grid-template-columns: 1fr; }
+  }
+
+  .metas-previsao-titulo { font-size: 13px; font-weight: 700; color: #E8A583; margin-bottom: 12px; }
+  .metas-previsao-texto { font-size: 13.5px; line-height: 1.55; color: rgba(255, 255, 255, 0.85); margin-bottom: 10px; }
+
+  .metas-previsao-numero {
+    font-size: 28px;
+    font-weight: 700;
+    color: #D67A52;
+    letter-spacing: -0.02em;
+    margin-bottom: 14px;
+  }
+
+  .metas-previsao-meta { font-size: 13px; color: rgba(255, 255, 255, 0.75); margin-bottom: 4px; }
+
+  .metas-previsao-situacao {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #FCA5A5;
+  }
+
+  .metas-previsao-situacao svg { width: 14px; height: 14px; }
+
+  .metas-previsao-right { display: flex; flex-direction: column; gap: 10px; }
+
+  .metas-previsao-right-titulo {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 2px;
+  }
+
+  .metas-lead-item {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .metas-lead-nome { font-size: 13.5px; font-weight: 600; }
+  .metas-lead-meta { font-size: 11.5px; color: rgba(255, 255, 255, 0.65); margin-top: 2px; }
+
+  .btn-preparar-abordagem {
+    background: #fff;
+    color: #1E4D5C;
+    border: none;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 11px;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn-preparar-abordagem:hover { background: #F3F4F6; }
+
+  /* ===== Linha 3: performance por corretor ===== */
+  .corretores-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+  .corretores-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #6B7280;
+    padding: 10px 12px;
+    border-bottom: 1px solid #E5E7EB;
+  }
+
+  .corretores-table td { padding: 12px; color: #1F2937; border-bottom: 1px solid #F1EFEC; }
+  .corretores-table tr:last-child td { border-bottom: none; }
+  .corretor-row:nth-child(even) { background: #FAFAF9; }
+  .corretor-row--risco { cursor: pointer; }
+  .corretor-row--risco:hover { background: #FBEAE1; }
+
+  .corretor-situacao--ok { color: #16A34A; font-weight: 600; }
+  .corretor-situacao--risco { color: #DC2626; font-weight: 600; }
+  .corretor-situacao--ritmo { color: #1E4D5C; font-weight: 600; }
+
+  .corretor-analise-card {
+    margin-top: 14px;
+    background: #F8F7F5;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid #1E4D5C;
+    border-radius: 8px;
+    padding: 18px 20px;
+  }
+
+  .corretor-analise-titulo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1E4D5C;
+    margin-bottom: 10px;
+  }
+
+  .corretor-analise-titulo svg { width: 14px; height: 14px; }
+  .corretor-analise-card p { font-size: 13px; line-height: 1.6; color: #374151; margin-bottom: 10px; }
+
+  .btn-outline-petroleo {
+    background: #fff;
+    color: #1E4D5C;
+    border: 1px solid #C7D9DD;
+  }
+
+  .btn-outline-petroleo:hover { background: #EEF3F4; }
+
+  .btn-sm { padding: 7px 12px; font-size: 13px; }
+
+  /* ===== Linha 4: meta em risco ===== */
+  .meta-risco-card {
+    background: #FEF2F2;
+    border-left: 4px solid #DC2626;
+    border-radius: 8px;
+    padding: 20px 24px;
+  }
+
+  .meta-risco-titulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #B91C1C;
+    margin-bottom: 10px;
+  }
+
+  .meta-risco-titulo svg { width: 16px; height: 16px; }
+  .meta-risco-card p { font-size: 13.5px; line-height: 1.6; color: #7F1D1D; margin-bottom: 10px; }
+
+  .meta-risco-acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+
+  /* ===== Modal: aprovação individual/lote de abordagem ===== */
+  .modal-abordagem-topo { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+  .modal-abordagem-lista { display: flex; flex-direction: column; gap: 10px; }
+
+  .modal-lead-abordagem-item {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+
+  .modal-lead-abordagem-item.aprovado { opacity: 0.55; }
+
+  .modal-lead-abordagem-nome {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1F2937;
+    margin-bottom: 6px;
+  }
+
+  .modal-lead-abordagem-score { font-size: 11.5px; font-weight: 600; color: #6B7280; }
+
+  .modal-lead-abordagem-item textarea {
+    width: 100%;
+    min-height: 52px;
+    font-family: inherit;
+    font-size: 12.5px;
+    padding: 8px 10px;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    color: #374151;
+    resize: vertical;
+    margin-bottom: 8px;
+  }
+
+  .modal-lead-abordagem-item textarea:focus { outline: none; border-color: #D67A52; }
+
+  /* ===== Linha 5: histórico de metas ===== */
+  .metas-historico-narrativa { margin-top: 14px; }
+
+  .metas-historico-narrativa p {
+    display: flex;
+    gap: 6px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #374151;
+    margin-bottom: 12px;
+  }
+
+  .metas-historico-acoes { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .chart-legenda {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: #6B7280;
+    margin-top: 8px;
+  }
+
+  .chart-legenda span { display: inline-flex; align-items: center; gap: 6px; }
+
+  .chart-legenda-dot { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+
+  /* ===== Painel de ajuste de metas + botão fixo ===== */
+  .btn-ajustar-metas-fixo {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #1E4D5C;
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 13px 20px;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(16, 24, 40, 0.2);
+    z-index: 140;
+  }
+
+  .btn-ajustar-metas-fixo svg { width: 15px; height: 15px; color: #D67A52; }
+  .btn-ajustar-metas-fixo:hover { background: #173d49; }
+
+  body.painel-ajuste-open .btn-ajustar-metas-fixo,
+  body.ia-panel-open .btn-ajustar-metas-fixo,
+  body.onboarding-ativo .btn-ajustar-metas-fixo { display: none; }
+
+  body.painel-ajuste-open .page { margin-right: 400px; }
+
+  .painel-ajuste-intro {
+    font-size: 13px;
+    color: #6B7280;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  .painel-ajuste-confirmacao-acoes {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+</style>
+</head>
+  <!-- ===== Navbar ===== -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-logo">
+        <div class="logomark">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <defs>
+              <linearGradient id="starGradientNav" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#D67A52"/>
+                <stop offset="100%" stop-color="#1E4D5C"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#starGradientNav)" d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/>
+          </svg>
+        </div>
+        <span class="logo-text"><span class="logo-soma">Soma</span> <span class="logo-imob">Imob</span></span>
+        <span class="ia-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+          Arnês IA inclusa
+        </span>
+      </div>
+
+      <ul class="navbar-links" id="navbarLinks">
+        <span class="nav-indicator" id="navIndicator"></span>
+
+        <li data-page="Início">
+          <a href="index.html">Início</a>
+        </li>
+
+        <li class="nav-dropdown active" data-page="Indicadores">
+          <button class="nav-dropdown-trigger" type="button" aria-expanded="false">
+            Indicadores
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <a class="dropdown-item" href="dashboard.html">Dashboard</a>
+            <a class="dropdown-item" href="inteligencia_mercado.html">Inteligência de mercado</a>
+            <a class="dropdown-item active" href="metas.html">Metas e performance</a>
+            <button type="button" class="dropdown-item">Relatórios</button>
+          </div>
+        </li>
+
+        <li class="nav-dropdown" data-page="Atendimento">
+          <button class="nav-dropdown-trigger" type="button" aria-expanded="false">
+            Atendimento
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <a class="dropdown-item" href="clientes.html">Clientes <span class="nav-badge">307</span></a>
+            <a class="dropdown-item" href="atendimento.html">Pipeline de vendas</a>
+            <button type="button" class="dropdown-item">Distribuição automática</button>
+            <button type="button" class="dropdown-item">WhatsApp Omnichannel</button>
+            <button type="button" class="dropdown-item">Histórico</button>
+          </div>
+        </li>
+
+        <li class="nav-dropdown" data-page="Imóveis">
+          <button class="nav-dropdown-trigger" type="button" aria-expanded="false">
+            Imóveis
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <button type="button" class="dropdown-item dropdown-item--highlight" onclick="location.href='imoveis.html'">
+              <span class="dropdown-item-icon-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Novo imóvel
+              </span>
+            </button>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="imoveis.html">Imóveis</a>
+            <button type="button" class="dropdown-item">Condomínios</button>
+            <button type="button" class="dropdown-item">Portais de publicação</button>
+            <button type="button" class="dropdown-item">Captação de imóveis</button>
+            <button type="button" class="dropdown-item">Avaliação de imóveis</button>
+          </div>
+        </li>
+
+        <li class="nav-placeholder" data-page="Sites">
+          <span class="placeholder-link">Sites</span>
+        </li>
+
+        <li class="nav-ia-item">
+          <button class="ia-launcher" id="iaTrigger" type="button" aria-label="Peça à Arnês IA">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+          </button>
+        </li>
+      </ul>
+
+      <div class="navbar-actions">
+        <button class="icon-btn" title="Notificações">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <div class="avatar" title="Samuel W. — Corretor">SW</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== Banner de reconexão ===== -->
+  <div class="reconnect-banner" id="reconnectBanner" role="status">
+    ⚠ Arnês IA temporariamente indisponível. Os dados exibidos são os últimos carregados. Tentando reconectar...
+  </div>
+  <!-- ===== Página ===== -->
+  <div class="page">
+    <div class="content" hidden>
+
+      <!-- Estado 2: banner de calibração -->
+      <div class="metas-banner">
+        <div class="metas-banner-texto">
+          <p>✦ Metas configuradas com base nas suas respostas. O Arnês vai calibrando automaticamente conforme os dados reais chegam nos próximos meses.</p>
+          <p class="metas-banner-respostas" id="metasBannerRespostas"></p>
+        </div>
+        <button class="btn-reconfigurar" id="btnReconfigurar" type="button">Reconfigurar</button>
+      </div>
+
+      <!-- Linha 1: metas do mês -->
+      <div class="metas-kpi-grid">
+        <div class="metas-kpi-card">
+          <div class="metas-kpi-numero">9 <span class="metas-kpi-meta">/ 20</span></div>
+          <div class="metas-kpi-label">Vendas fechadas · Meta do mês</div>
+          <div class="metas-kpi-progress-track"><div class="metas-kpi-progress-fill" data-progresso="45"></div></div>
+          <div class="metas-kpi-pct">45%</div>
+          <div class="metas-kpi-narrativa">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+            <p>No ritmo atual, você fecha 16. Precisa acelerar 4 negócios.</p>
+          </div>
+        </div>
+        <div class="metas-kpi-card">
+          <div class="metas-kpi-numero">R$ 98k <span class="metas-kpi-meta">/ R$ 200k</span></div>
+          <div class="metas-kpi-label">Comissão acumulada · Meta do mês</div>
+          <div class="metas-kpi-progress-track"><div class="metas-kpi-progress-fill" data-progresso="49"></div></div>
+          <div class="metas-kpi-pct">49%</div>
+          <div class="metas-kpi-narrativa">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+            <p>Alinhado com as vendas. Ticket médio estável.</p>
+          </div>
+        </div>
+        <div class="metas-kpi-card">
+          <div class="metas-kpi-numero">3 <span class="metas-kpi-meta">/ 8</span></div>
+          <div class="metas-kpi-label">Captações · Meta do mês</div>
+          <div class="metas-kpi-progress-track"><div class="metas-kpi-progress-fill" data-progresso="37"></div></div>
+          <div class="metas-kpi-pct">37%</div>
+          <div class="metas-kpi-narrativa">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+            <p>Abaixo do ritmo. 5 captações em 12 dias é factível mas exige foco.</p>
+          </div>
+        </div>
+        <div class="metas-kpi-card">
+          <div class="metas-kpi-numero">87% <span class="metas-kpi-meta">/ 90%</span></div>
+          <div class="metas-kpi-label">Resposta em menos de 5 min</div>
+          <div class="metas-kpi-progress-track"><div class="metas-kpi-progress-fill" data-progresso="97"></div></div>
+          <div class="metas-kpi-pct">97%</div>
+          <div class="metas-kpi-narrativa">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+            <p>Quase lá. 3 leads do fim de semana puxaram a média para baixo.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Linha 2: previsão do Arnês -->
+      <div class="metas-previsao-card">
+        <div class="metas-previsao-left">
+          <div class="metas-previsao-titulo">✦ Arnês IA · Previsão para o fim do mês</div>
+          <p class="metas-previsao-texto">Com o pipeline atual e o ritmo dos últimos 18 dias, você vai fechar entre:</p>
+          <div class="metas-previsao-numero">16 – 19 vendas</div>
+          <div class="metas-previsao-meta">Meta: 20 vendas</div>
+          <div class="metas-previsao-situacao">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+            Situação: 1 a 4 abaixo
+          </div>
+        </div>
+        <div class="metas-previsao-right">
+          <div class="metas-previsao-right-titulo">Negócios mais próximos de fechar</div>
+          <div class="metas-lead-item">
+            <div>
+              <div class="metas-lead-nome">Marcos Andrade</div>
+              <div class="metas-lead-meta">Score 94 · Negociação</div>
+            </div>
+            <button class="btn-preparar-abordagem" data-nome="Marcos Andrade" data-mensagem="Olá Marcos! Passando para saber se ainda tem interesse na simulação que conversamos. Fico à disposição." type="button">Preparar abordagem</button>
+          </div>
+          <div class="metas-lead-item">
+            <div>
+              <div class="metas-lead-nome">Fernanda Lima</div>
+              <div class="metas-lead-meta">Score 91 · Proposta enviada</div>
+            </div>
+            <button class="btn-preparar-abordagem" data-nome="Fernanda Lima" data-mensagem="Olá Fernanda! Vi que a proposta está com você — posso esclarecer alguma dúvida antes da decisão final?" type="button">Preparar abordagem</button>
+          </div>
+          <div class="metas-lead-item">
+            <div>
+              <div class="metas-lead-nome">Ricardo Souza</div>
+              <div class="metas-lead-meta">Score 87 · Visita agendada</div>
+            </div>
+            <button class="btn-preparar-abordagem" data-nome="Ricardo Souza" data-mensagem="Olá Ricardo! Confirmando nossa visita — qualquer imprevisto me avise que reagendamos rapidinho." type="button">Preparar abordagem</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Linha 3: performance por corretor -->
+      <div class="panel-card">
+        <div class="panel-card-title">Como está cada corretor</div>
+        <table class="corretores-table">
+          <thead>
+            <tr><th>Corretor</th><th>Meta</th><th>Realizado</th><th>Progresso</th><th>Situação</th><th>Arnês</th></tr>
+          </thead>
+          <tbody>
+            <tr class="corretor-row">
+              <td>Ana Paula</td><td>4 vendas</td><td>4</td><td>100%</td>
+              <td class="corretor-situacao--ok">✓ Atingiu</td><td>—</td>
+            </tr>
+            <tr class="corretor-row corretor-row--risco" data-corretor="Carlos Lima" tabindex="0">
+              <td>Carlos Lima</td><td>4 vendas</td><td>2</td><td>50%</td>
+              <td class="corretor-situacao--risco">⚠ Em risco</td><td>Travamento em Visita→Proposta</td>
+            </tr>
+            <tr class="corretor-row">
+              <td>Fernanda</td><td>4 vendas</td><td>3</td><td>75%</td>
+              <td class="corretor-situacao--ritmo">→ No ritmo</td><td>—</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="corretor-analise-card" id="corretorAnaliseCard" hidden></div>
+      </div>
+
+      <!-- Linha 4: meta em risco -->
+      <div class="meta-risco-card">
+        <div class="meta-risco-titulo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+          Meta em risco — Arnês IA detectou desvio
+        </div>
+        <p>Para atingir 20 vendas até dia 31, você precisa fechar mais 11 em 12 dias. O pipeline atual comporta 7. Faltam 4.</p>
+        <p>O Arnês identificou 9 leads com score acima de 70 sem contato nos últimos 5 dias.</p>
+        <div class="meta-risco-acoes">
+          <button class="btn btn-primary" id="btnPrepararAbordagem9" type="button">✦ Preparar abordagem para os 9 leads</button>
+          <button class="btn btn-ghost" id="btnVerPipelineCompleto" type="button">Ver pipeline completo</button>
+        </div>
+      </div>
+
+      <!-- Linha 5: histórico de metas -->
+      <div class="panel-card">
+        <div class="panel-card-title">Seu histórico — meta vs realizado</div>
+        <div class="chart-canvas-wrap" style="height: 220px;">
+          <canvas id="chartHistoricoMetas"></canvas>
+          <div class="chart-tooltip" id="tooltipHistoricoMetas"></div>
+        </div>
+        <div class="chart-legenda">
+          <span><span class="chart-legenda-dot" style="background:#1E4D5C;"></span>Meta</span>
+          <span><span class="chart-legenda-dot" style="background:#D67A52;"></span>Realizado</span>
+        </div>
+        <div class="metas-historico-narrativa">
+          <p>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;color:#1E4D5C;flex-shrink:0;margin-top:2px;"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+            <span>Nos últimos 3 meses, você realizou em média 11 vendas/mês — acima da meta de 9 que configuramos no início. Quer que eu atualize a meta para 13?</span>
+          </p>
+          <div class="metas-historico-acoes">
+            <button class="btn btn-primary btn-sm" id="btnAtualizarMeta" type="button">Atualizar meta</button>
+            <button class="btn btn-ghost btn-sm" id="btnManterMeta" type="button">Manter atual</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== Estado 1: onboarding conversacional ===== -->
+  <div class="onboarding-wrap" id="onboardingWrap">
+    <div class="chat-window">
+      <div class="chat-header">
+        <span class="chat-header-brand">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+          Arnês IA
+        </span>
+        <span class="chat-header-status">online</span>
+      </div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input-area" id="chatInputArea"></div>
+    </div>
+  </div>
+
+  <!-- ===== Botão fixo + painel de ajuste de metas ===== -->
+  <button class="btn-ajustar-metas-fixo" id="btnAjustarMetasFixo" type="button">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+    Ajustar metas com o Arnês
+  </button>
+
+  <aside class="ia-panel" id="painelAjusteMetas" aria-hidden="true">
+    <div class="ia-panel-header">
+      <div class="ia-panel-brand">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px;color:#D67A52;"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+        <span>Ajustar metas</span>
+      </div>
+      <button class="ia-panel-close" id="painelAjusteClose" type="button" aria-label="Fechar painel de ajuste de metas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="ia-panel-body">
+      <p class="painel-ajuste-intro">Me diga em texto livre o que você quer mudar. Ex: "muda a meta de vendas para 25", "quero aumentar a meta de captações", "minha meta de comissão agora é 250k".</p>
+      <div class="ia-panel-history" id="painelAjusteHistory"></div>
+    </div>
+    <div class="ia-panel-footer">
+      <div class="ia-input-pill">
+        <input type="text" id="painelAjusteInput" placeholder="Ex: muda a meta de vendas para 25...">
+        <button class="ia-send-btn" id="painelAjusteSend" type="button" aria-label="Enviar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9 22 2Z"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== Modal genérico: confirmação de ações do Arnês IA ===== -->
+  <div class="modal-overlay" id="modalGenerico">
+    <div class="modal-generico" role="dialog" aria-modal="true" aria-labelledby="modalGenericoTitulo">
+      <div class="modal-header">
+        <h2 id="modalGenericoTitulo">Confirmar ação</h2>
+        <button class="modal-close" id="modalGenericoClose" type="button" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="modalGenericoBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="modalGenericoCancelar" type="button">Cancelar</button>
+        <button class="btn btn-primary" id="modalGenericoConfirmar" type="button">Confirmar</button>
+      </div>
+    </div>
+  </div>
+  <!-- ===== Painel lateral da Arnês IA (estilo Gemini) ===== -->
+  <aside class="ia-panel" id="iaPanel" aria-hidden="true">
+    <div class="ia-panel-header">
+      <div class="ia-panel-brand">
+        <div class="logomark">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <defs>
+              <linearGradient id="starGradientPanel" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#D67A52"/>
+                <stop offset="100%" stop-color="#1E4D5C"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#starGradientPanel)" d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/>
+          </svg>
+        </div>
+        <span>Arnês IA</span>
+      </div>
+      <button class="ia-panel-close" id="iaPanelClose" type="button" aria-label="Fechar painel da IA">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="ia-panel-body">
+      <div class="ia-greeting" id="iaGreeting">
+        <h2>Olá, Samuel</h2>
+        <p>Sou a Arnês IA. Como posso ajudar?</p>
+      </div>
+
+      <div class="ia-panel-history" id="iaHistory"></div>
+
+      <div class="ia-panel-suggestions" id="iaSuggestions">
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Qual lead tem mais chance de fechar hoje?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Tem alguma proposta vencendo essa semana?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Qual imóvel está parado há mais tempo?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Quais proprietários precisam de feedback?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Como foi a semana da imobiliária?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Gera relatório do mês</span></button>
+      </div>
+    </div>
+
+    <div class="ia-panel-footer">
+      <div class="ia-input-pill">
+        <input type="text" id="iaPanelInput" placeholder="Pergunte sobre sua carteira, leads ou imóveis...">
+        <button class="ia-send-btn" id="iaPanelSend" type="button" aria-label="Enviar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9 22 2Z"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== Toast genérico de erro de API ===== -->
+  <div class="toast" id="errorToast" role="status" aria-live="polite">
+    <span class="toast-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+    </span>
+    <div class="toast-body">
+      <p id="errorToastText">Ocorreu um erro.</p>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script>
+    // Indicador deslizante da navbar: acompanha o item ativo
+    (function () {
+      const navList = document.getElementById('navbarLinks');
+      const indicator = document.getElementById('navIndicator');
+
+      function moveIndicatorTo(li, animate) {
+        const listRect = navList.getBoundingClientRect();
+        const itemRect = li.getBoundingClientRect();
+        if (!animate) indicator.style.transition = 'none';
+        indicator.style.left = (itemRect.left - listRect.left) + 'px';
+        indicator.style.width = itemRect.width + 'px';
+        if (!animate) {
+          indicator.offsetHeight;
+          indicator.style.transition = '';
+        }
+      }
+
+      const activeLi = navList.querySelector('li.active');
+      if (activeLi) moveIndicatorTo(activeLi, false);
+
+      window.addEventListener('resize', function () {
+        const current = navList.querySelector('li.active');
+        if (current) moveIndicatorTo(current, false);
+      });
+
+      document.querySelectorAll('#navbarLinks li.nav-placeholder').forEach(function (item) {
+        item.addEventListener('click', function () {
+          document.querySelectorAll('#navbarLinks li').forEach(function (li) {
+            li.classList.remove('active');
+          });
+          item.classList.add('active');
+          moveIndicatorTo(item, true);
+        });
+      });
+    })();
+
+    // Menus dropdown da navbar: abrem no hover ou clique, fecham ao clicar fora
+    (function () {
+      const dropdowns = document.querySelectorAll('.nav-dropdown');
+
+      function closeAll(except) {
+        dropdowns.forEach(function (dd) {
+          if (dd !== except) {
+            dd.classList.remove('open');
+            const trigger = dd.querySelector('.nav-dropdown-trigger');
+            if (trigger) trigger.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+
+      dropdowns.forEach(function (dd) {
+        const trigger = dd.querySelector('.nav-dropdown-trigger');
+
+        dd.addEventListener('mouseenter', function () {
+          closeAll(dd);
+          dd.classList.add('open');
+          trigger.setAttribute('aria-expanded', 'true');
+        });
+
+        dd.addEventListener('mouseleave', function () {
+          dd.classList.remove('open');
+          trigger.setAttribute('aria-expanded', 'false');
+        });
+
+        trigger.addEventListener('click', function (e) {
+          e.stopPropagation();
+          const isOpen = dd.classList.contains('open');
+          closeAll(dd);
+          if (isOpen) {
+            dd.classList.remove('open');
+            trigger.setAttribute('aria-expanded', 'false');
+          } else {
+            dd.classList.add('open');
+            trigger.setAttribute('aria-expanded', 'true');
+          }
+        });
+      });
+
+      document.querySelectorAll('.dropdown-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+          closeAll(null);
+        });
+      });
+
+      document.addEventListener('click', function () {
+        closeAll(null);
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeAll(null);
+      });
+    })();
+    // ===== Health check / banner de reconexão (mesmo padrão das outras telas) =====
+    (function () {
+      window.apiDisponivel = false;
+      const banner = document.getElementById('reconnectBanner');
+      const errorToast = document.getElementById('errorToast');
+      let errorToastTimer = null;
+
+      window.mostrarErroToast = function (mensagem) {
+        document.getElementById('errorToastText').textContent = mensagem;
+        errorToast.classList.add('show');
+        clearTimeout(errorToastTimer);
+        errorToastTimer = setTimeout(function () { errorToast.classList.remove('show'); }, 4000);
+      };
+
+      function verificarConexao() {
+        apiFetch('/health')
+          .then(function () {
+            window.apiDisponivel = true;
+            banner.classList.remove('show');
+          })
+          .catch(function () {
+            window.apiDisponivel = false;
+            banner.classList.add('show');
+          });
+      }
+
+      verificarConexao();
+      setInterval(verificarConexao, 15000);
+    })();
+
+    // ===== Modal genérico: usado pelas ações desta tela =====
+    const modalGenerico = {
+      overlay: document.getElementById('modalGenerico'),
+      titulo: document.getElementById('modalGenericoTitulo'),
+      corpo: document.getElementById('modalGenericoBody'),
+      cancelar: document.getElementById('modalGenericoCancelar'),
+      confirmar: document.getElementById('modalGenericoConfirmar'),
+      close: document.getElementById('modalGenericoClose'),
+    };
+
+    function abrirModalGenerico(opcoes) {
+      modalGenerico.titulo.textContent = opcoes.titulo;
+      modalGenerico.corpo.innerHTML = opcoes.corpoHtml;
+      modalGenerico.confirmar.textContent = opcoes.textoConfirmar || 'Confirmar';
+      modalGenerico.cancelar.textContent = opcoes.textoCancelar || 'Cancelar';
+      modalGenerico.confirmar.style.display = opcoes.ocultarConfirmar ? 'none' : '';
+      modalGenerico.confirmar.onclick = function () {
+        if (opcoes.aoConfirmar) opcoes.aoConfirmar();
+        fecharModalGenerico();
+      };
+      modalGenerico.overlay.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function fecharModalGenerico() {
+      modalGenerico.overlay.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    modalGenerico.cancelar.addEventListener('click', fecharModalGenerico);
+    modalGenerico.close.addEventListener('click', fecharModalGenerico);
+    modalGenerico.overlay.addEventListener('click', function (e) {
+      if (e.target === modalGenerico.overlay) fecharModalGenerico();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && modalGenerico.overlay.classList.contains('show')) fecharModalGenerico();
+    });
+
+    // ===== Estado 1: onboarding conversacional =====
+    (function () {
+      const PERGUNTAS = [
+        {
+          id: 'boasVindas',
+          texto: 'Olá! Eu sou o Arnês IA.\n\nAntes de montar seu painel de metas, preciso te conhecer melhor. São só algumas perguntas rápidas — prometo que vale a pena.\n\nVamos começar?',
+          tipo: 'quickReply',
+          opcoes: ['Vamos lá!'],
+        },
+        {
+          id: 'vendasPorMes',
+          texto: 'Quantas vendas vocês costumam fechar por mês?\n\n(Pode ser uma estimativa — não precisa ser exato)',
+          tipo: 'texto',
+          placeholder: 'ex: entre 8 e 12...',
+        },
+        {
+          id: 'cicloVendas',
+          texto: 'Entendido. E quanto tempo leva em média do primeiro contato com o cliente até o fechamento do negócio?',
+          tipo: 'texto',
+          placeholder: 'ex: uns 45 dias...',
+        },
+        {
+          id: 'numCorretores',
+          texto: 'Quantos corretores trabalham na imobiliária hoje?',
+          tipo: 'numero',
+        },
+        {
+          id: 'foco',
+          texto: 'Vocês trabalham mais com venda, locação ou os dois?',
+          tipo: 'quickReply',
+          opcoes: ['Principalmente venda', 'Principalmente locação', 'Os dois'],
+        },
+        {
+          id: 'regiao',
+          texto: 'Qual cidade ou região vocês atendem?',
+          tipo: 'texto',
+          placeholder: 'ex: Valinhos e região...',
+        },
+      ];
+
+      const wrap = document.getElementById('onboardingWrap');
+      const messages = document.getElementById('chatMessages');
+      const inputArea = document.getElementById('chatInputArea');
+
+      let respostas = {};
+      let indiceAtual = 0;
+
+      function scrollParaFim() {
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      function mostrarMensagemArnes(texto, callback) {
+        const bolha = document.createElement('div');
+        bolha.className = 'chat-msg chat-msg--arnes';
+        bolha.innerHTML =
+          '<span class="chat-msg-icon">✦</span>' +
+          '<div class="chat-typing"><span></span><span></span><span></span></div>';
+        messages.appendChild(bolha);
+        scrollParaFim();
+
+        setTimeout(function () {
+          const typing = bolha.querySelector('.chat-typing');
+          const balao = document.createElement('div');
+          balao.className = 'chat-bubble';
+          balao.textContent = texto;
+          typing.replaceWith(balao);
+          scrollParaFim();
+          if (callback) callback();
+        }, 800);
+      }
+
+      function adicionarMensagemGestor(texto) {
+        const bolha = document.createElement('div');
+        bolha.className = 'chat-msg chat-msg--gestor';
+        const balao = document.createElement('div');
+        balao.className = 'chat-bubble';
+        balao.textContent = texto;
+        bolha.appendChild(balao);
+        messages.appendChild(bolha);
+        scrollParaFim();
+      }
+
+      function renderizarInput(pergunta) {
+        inputArea.innerHTML = '';
+
+        if (pergunta.tipo === 'quickReply') {
+          const grupo = document.createElement('div');
+          grupo.className = 'chat-quick-replies';
+          pergunta.opcoes.forEach(function (opcao) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'chat-quick-reply';
+            btn.textContent = opcao;
+            btn.addEventListener('click', function () { responder(pergunta, opcao); });
+            grupo.appendChild(btn);
+          });
+          inputArea.appendChild(grupo);
+          return;
+        }
+
+        const linha = document.createElement('div');
+        linha.className = 'chat-text-input-wrap';
+        const input = document.createElement('input');
+        input.type = pergunta.tipo === 'numero' ? 'number' : 'text';
+        if (pergunta.tipo === 'numero') { input.min = '0'; input.step = '1'; }
+        if (pergunta.placeholder) input.placeholder = pergunta.placeholder;
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn btn-primary btn-sm';
+        btn.textContent = 'Enviar';
+
+        function enviar() {
+          let valor = input.value.trim();
+          if (!valor) return;
+          if (pergunta.tipo === 'numero') {
+            const n = parseInt(valor, 10);
+            if (isNaN(n) || n < 0) return;
+            valor = String(n);
+          }
+          responder(pergunta, valor);
+        }
+
+        btn.addEventListener('click', enviar);
+        input.addEventListener('keydown', function (e) { if (e.key === 'Enter') enviar(); });
+
+        linha.appendChild(input);
+        linha.appendChild(btn);
+        inputArea.appendChild(linha);
+        setTimeout(function () { input.focus(); }, 50);
+      }
+
+      function responder(pergunta, valor) {
+        respostas[pergunta.id] = valor;
+        adicionarMensagemGestor(valor);
+        inputArea.innerHTML = '';
+        indiceAtual++;
+        perguntarProxima();
+      }
+
+      function perguntarProxima() {
+        if (indiceAtual >= PERGUNTAS.length) {
+          mostrarProcessamento();
+          return;
+        }
+        const pergunta = PERGUNTAS[indiceAtual];
+        mostrarMensagemArnes(pergunta.texto, function () {
+          renderizarInput(pergunta);
+        });
+      }
+
+      function mostrarProcessamento() {
+        const texto =
+          'Perfeito. Com ' + respostas.numCorretores + ' corretores, ritmo de ' +
+          respostas.vendasPorMes + ' vendas por mês e ciclo de ' + respostas.cicloVendas +
+          ', já consigo montar um ponto de partida real para vocês.\n\nPreparando seu painel agora...';
+        mostrarMensagemArnes(texto, function () {
+          mostrarBarraProgresso();
+        });
+      }
+
+      function mostrarBarraProgresso() {
+        inputArea.innerHTML = '';
+        const track = document.createElement('div');
+        track.className = 'chat-progress-track';
+        const fill = document.createElement('div');
+        fill.className = 'chat-progress-fill';
+        track.appendChild(fill);
+        inputArea.appendChild(track);
+
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReduced) {
+          fill.style.width = '100%';
+          setTimeout(finalizarOnboarding, 200);
+          return;
+        }
+
+        const duracao = 2500;
+        const inicio = performance.now();
+        function passo(agora) {
+          const t = Math.min((agora - inicio) / duracao, 1);
+          const suavizado = 1 - Math.pow(1 - t, 3);
+          fill.style.width = (suavizado * 100) + '%';
+          if (t < 1) requestAnimationFrame(passo);
+          else finalizarOnboarding();
+        }
+        requestAnimationFrame(passo);
+      }
+
+      function finalizarOnboarding() {
+        localStorage.setItem('arnes_metas_configurado', 'true');
+        localStorage.setItem('arnes_onboarding_respostas', JSON.stringify(respostas));
+        wrap.classList.add('fade-out');
+        setTimeout(function () {
+          wrap.style.display = 'none';
+          window.mostrarEstado2();
+        }, 400);
+      }
+
+      window.iniciarOnboarding = function () {
+        respostas = {};
+        indiceAtual = 0;
+        messages.innerHTML = '';
+        inputArea.innerHTML = '';
+        wrap.style.display = 'flex';
+        wrap.classList.remove('fade-out');
+        document.body.classList.add('onboarding-ativo');
+        perguntarProxima();
+      };
+    })();
+
+    // ===== Controle de estado: Onboarding (Estado 1) vs Dashboard (Estado 2) =====
+    (function () {
+      const onboardingWrap = document.getElementById('onboardingWrap');
+      const dashboardContent = document.querySelector('.page .content');
+
+      function popularRespostasNoBanner() {
+        const respostasSalvas = JSON.parse(localStorage.getItem('arnes_onboarding_respostas') || '{}');
+        const el = document.getElementById('metasBannerRespostas');
+        if (respostasSalvas.vendasPorMes) {
+          el.textContent =
+            'Com base no que você nos contou: ritmo de ' + respostasSalvas.vendasPorMes +
+            ' vendas/mês, ciclo de ' + respostasSalvas.cicloVendas + ', ' +
+            respostasSalvas.numCorretores + ' corretores.';
+        }
+      }
+
+      window.mostrarEstado2 = function () {
+        onboardingWrap.style.display = 'none';
+        dashboardContent.hidden = false;
+        document.body.classList.remove('onboarding-ativo');
+        popularRespostasNoBanner();
+      };
+
+      window.mostrarEstado1 = function () {
+        dashboardContent.hidden = true;
+        window.iniciarOnboarding();
+      };
+
+      if (localStorage.getItem('arnes_metas_configurado') === 'true') {
+        dashboardContent.hidden = false;
+        onboardingWrap.style.display = 'none';
+        popularRespostasNoBanner();
+      } else {
+        dashboardContent.hidden = true;
+        window.iniciarOnboarding();
+      }
+    })();
+
+    // ===== Reconfigurar metas =====
+    document.getElementById('btnReconfigurar').addEventListener('click', function () {
+      abrirModalGenerico({
+        titulo: 'Reconfigurar metas',
+        corpoHtml: '<p>Isso vai reiniciar a configuração de metas. Continuar?</p>',
+        textoConfirmar: 'Sim, reconfigurar',
+        textoCancelar: 'Cancelar',
+        aoConfirmar: function () {
+          localStorage.removeItem('arnes_metas_configurado');
+          localStorage.removeItem('arnes_onboarding_respostas');
+          window.mostrarEstado1();
+        },
+      });
+    });
+
+    // ===== Linha 1: animação das barras de progresso dos KPIs =====
+    (function () {
+      document.querySelectorAll('.metas-kpi-progress-fill').forEach(function (fill) {
+        const alvo = parseInt(fill.dataset.progresso, 10);
+        if (alvo >= 90) fill.classList.add('atingido');
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { fill.style.width = alvo + '%'; });
+        });
+      });
+    })();
+
+    // ===== Linha 2: preparar abordagem para leads próximos de fechar =====
+    document.querySelectorAll('.btn-preparar-abordagem').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const nome = btn.dataset.nome;
+        abrirModalGenerico({
+          titulo: 'Preparar abordagem — ' + nome,
+          corpoHtml: '<p>Mensagem sugerida pelo Arnês, revise antes de enviar:</p><textarea id="textoAbordagemLead">' + btn.dataset.mensagem + '</textarea>',
+          textoConfirmar: 'Enviar mensagem',
+          aoConfirmar: function () {
+            if (typeof mostrarErroToast === 'function') mostrarErroToast('Mensagem enviada para ' + nome + ' (simulado).');
+          },
+        });
+      });
+    });
+
+    // ===== Linha 3: análise expandida por corretor =====
+    (function () {
+      const ANALISES_CORRETORES = {
+        'Carlos Lima': {
+          titulo: 'Arnês · Análise de Carlos Lima',
+          paragrafos: [
+            'Carlos tem 8 leads ativos mas apenas 1 visita agendada essa semana.',
+            'O travamento está na passagem de Atendimento para Visita — ele chega no lead mas não está convertendo para visita.',
+            'Sugestão: conversar sobre técnica de agendamento de visita.',
+          ],
+        },
+      };
+
+      document.querySelectorAll('.corretor-row--risco').forEach(function (row) {
+        row.addEventListener('click', function () {
+          const nome = row.dataset.corretor;
+          const analise = ANALISES_CORRETORES[nome];
+          if (!analise) return;
+          const card = document.getElementById('corretorAnaliseCard');
+          const jaAberto = !card.hidden && card.dataset.corretor === nome;
+          if (jaAberto) { card.hidden = true; return; }
+
+          card.dataset.corretor = nome;
+          card.innerHTML =
+            '<div class="corretor-analise-titulo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>' + analise.titulo + '</div>' +
+            analise.paragrafos.map(function (p) { return '<p>' + p + '</p>'; }).join('') +
+            '<button class="btn btn-outline-petroleo btn-sm" id="btnVerLeadsCorretor" type="button">Ver leads de ' + nome + '</button>';
+          card.hidden = false;
+          document.getElementById('btnVerLeadsCorretor').addEventListener('click', function () {
+            location.href = 'atendimento.html';
+          });
+        });
+      });
+    })();
+
+    // ===== Linha 4: meta em risco — abordagem individual/lote =====
+    (function () {
+      const LEADS_RISCO = [
+        { nome: 'Beatriz Ramos', score: 78 },
+        { nome: 'Diego Fontes', score: 81 },
+        { nome: 'Larissa Melo', score: 74 },
+        { nome: 'Thiago Aquino', score: 88 },
+        { nome: 'Vanessa Cruz', score: 76 },
+        { nome: 'Rodrigo Peixoto', score: 92 },
+        { nome: 'Camila Duarte', score: 71 },
+        { nome: 'Eduardo Nogueira', score: 83 },
+        { nome: 'Patrícia Lemos', score: 79 },
+      ];
+
+      function aprovarItem(btn) {
+        if (btn.disabled) return;
+        btn.disabled = true;
+        btn.textContent = 'Aprovado ✓';
+        btn.closest('.modal-lead-abordagem-item').classList.add('aprovado');
+      }
+
+      document.getElementById('btnPrepararAbordagem9').addEventListener('click', function () {
+        const itensHtml = LEADS_RISCO.map(function (lead) {
+          const primeiroNome = lead.nome.split(' ')[0];
+          return (
+            '<div class="modal-lead-abordagem-item">' +
+            '<div class="modal-lead-abordagem-nome">' + lead.nome + ' <span class="modal-lead-abordagem-score">Score ' + lead.score + '</span></div>' +
+            '<textarea>Olá ' + primeiroNome + '! Notei que você demonstrou interesse recentemente — ainda estou à disposição para ajudar. Podemos conversar?</textarea>' +
+            '<button class="btn btn-outline-petroleo btn-sm" data-acao="aprovar-individual" type="button">Aprovar</button>' +
+            '</div>'
+          );
+        }).join('');
+
+        abrirModalGenerico({
+          titulo: 'Preparar abordagem — 9 leads sem contato',
+          corpoHtml:
+            '<div class="modal-abordagem-topo"><button class="btn btn-primary btn-sm" id="btnAprovarTodosLeads" type="button">Aprovar todos</button></div>' +
+            '<div class="modal-abordagem-lista">' + itensHtml + '</div>',
+          textoCancelar: 'Fechar',
+          ocultarConfirmar: true,
+        });
+
+        document.querySelectorAll('.modal-lead-abordagem-item [data-acao="aprovar-individual"]').forEach(function (btn) {
+          btn.addEventListener('click', function () { aprovarItem(btn); });
+        });
+
+        document.getElementById('btnAprovarTodosLeads').addEventListener('click', function () {
+          document.querySelectorAll('.modal-lead-abordagem-item [data-acao="aprovar-individual"]').forEach(aprovarItem);
+          if (typeof mostrarErroToast === 'function') mostrarErroToast('Mensagens aprovadas para os 9 leads (simulado).');
+        });
+      });
+
+      document.getElementById('btnVerPipelineCompleto').addEventListener('click', function () {
+        location.href = 'atendimento.html';
+      });
+    })();
+
+    // ===== Linha 5: gráfico histórico (Canvas, animação ao entrar na viewport) =====
+    (function () {
+      const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const canvas = document.getElementById('chartHistoricoMetas');
+      const tooltip = document.getElementById('tooltipHistoricoMetas');
+      if (!canvas) return;
+
+      const meses = ['Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul'];
+      const metas = [9, 9, 9, 9, 9, 9];
+      const realizado = [7, 8, 9, 11, 12, 10];
+      const maxValor = 14;
+      let animado = false;
+
+      function setupCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = Math.round(rect.width * dpr);
+        canvas.height = Math.round(rect.height * dpr);
+        const ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { ctx: ctx, w: rect.width, h: rect.height };
+      }
+
+      function draw(progress) {
+        const cv = setupCanvas();
+        const ctx = cv.ctx, w = cv.w, h = cv.h;
+        ctx.clearRect(0, 0, w, h);
+        const padding = { top: 10, right: 10, bottom: 26, left: 10 };
+        const plotW = w - padding.left - padding.right;
+        const plotH = h - padding.top - padding.bottom;
+        const groupW = plotW / meses.length;
+        const barW = groupW * 0.28;
+        const gap = groupW * 0.06;
+        const bars = [];
+
+        meses.forEach(function (mes, i) {
+          const groupX = padding.left + groupW * i;
+          const metaH = (metas[i] / maxValor) * plotH * progress;
+          const realH = (realizado[i] / maxValor) * plotH * progress;
+
+          const x1 = groupX + groupW / 2 - barW - gap / 2;
+          ctx.fillStyle = '#1E4D5C';
+          ctx.fillRect(x1, padding.top + plotH - metaH, barW, metaH);
+
+          const x2 = groupX + groupW / 2 + gap / 2;
+          ctx.fillStyle = '#D67A52';
+          ctx.fillRect(x2, padding.top + plotH - realH, barW, realH);
+
+          ctx.fillStyle = '#6B7280';
+          ctx.font = '10px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(mes, groupX + groupW / 2, h - 8);
+
+          bars.push({ x: x1, w: barW, label: mes + ' — meta', valor: metas[i] });
+          bars.push({ x: x2, w: barW, label: mes + ' — realizado', valor: realizado[i] });
+        });
+
+        canvas._chartData = { bars: bars };
+      }
+
+      function animar() {
+        if (animado) return;
+        animado = true;
+        if (REDUCED_MOTION) { draw(1); return; }
+        const duracao = 800;
+        const inicio = performance.now();
+        function passo(agora) {
+          const t = Math.min((agora - inicio) / duracao, 1);
+          const suavizado = 1 - Math.pow(1 - t, 3);
+          draw(suavizado);
+          if (t < 1) requestAnimationFrame(passo);
+        }
+        requestAnimationFrame(passo);
+      }
+
+      draw(0);
+
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) { animar(); observer.disconnect(); }
+          });
+        }, { threshold: 0.3 });
+        observer.observe(canvas);
+      } else {
+        animar();
+      }
+
+      canvas.addEventListener('mousemove', function (e) {
+        const info = canvas._chartData;
+        if (!info) return;
+        const hit = info.bars.find(function (b) { return e.offsetX >= b.x && e.offsetX <= b.x + b.w; });
+        if (hit) {
+          tooltip.textContent = hit.label + ': ' + hit.valor;
+          tooltip.style.left = e.offsetX + 'px';
+          tooltip.style.top = Math.max(e.offsetY - 8, 12) + 'px';
+          tooltip.classList.add('visible');
+        } else {
+          tooltip.classList.remove('visible');
+        }
+      });
+      canvas.addEventListener('mouseleave', function () { tooltip.classList.remove('visible'); });
+
+      window.addEventListener('resize', function () { draw(animado ? 1 : 0); });
+    })();
+
+    document.getElementById('btnAtualizarMeta').addEventListener('click', function () {
+      if (typeof mostrarErroToast === 'function') mostrarErroToast('Meta de vendas atualizada para 13 (simulado).');
+    });
+    document.getElementById('btnManterMeta').addEventListener('click', function () {
+      if (typeof mostrarErroToast === 'function') mostrarErroToast('Meta mantida em 9 vendas.');
+    });
+
+    // ===== Painel de ajuste de metas (novo, independente do painel padrão da Arnês IA) =====
+    (function () {
+      const btnFixo = document.getElementById('btnAjustarMetasFixo');
+      const painel = document.getElementById('painelAjusteMetas');
+      const closeBtn = document.getElementById('painelAjusteClose');
+      const history = document.getElementById('painelAjusteHistory');
+      const input = document.getElementById('painelAjusteInput');
+      const sendBtn = document.getElementById('painelAjusteSend');
+
+      function abrirPainelAjuste() {
+        document.body.classList.remove('ia-panel-open');
+        const iaPanel = document.getElementById('iaPanel');
+        if (iaPanel) {
+          iaPanel.classList.remove('show');
+          iaPanel.setAttribute('aria-hidden', 'true');
+        }
+        document.body.classList.add('painel-ajuste-open');
+        painel.classList.add('show');
+        painel.setAttribute('aria-hidden', 'false');
+      }
+
+      function fecharPainelAjuste() {
+        document.body.classList.remove('painel-ajuste-open');
+        painel.classList.remove('show');
+        painel.setAttribute('aria-hidden', 'true');
+      }
+
+      btnFixo.addEventListener('click', abrirPainelAjuste);
+      closeBtn.addEventListener('click', fecharPainelAjuste);
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && painel.classList.contains('show')) fecharPainelAjuste();
+      });
+
+      const iaTrigger = document.getElementById('iaTrigger');
+      if (iaTrigger) {
+        iaTrigger.addEventListener('click', function () {
+          if (painel.classList.contains('show')) fecharPainelAjuste();
+        });
+      }
+
+      function adicionarMensagem(texto, role) {
+        const msg = document.createElement('div');
+        msg.className = 'ia-message ia-message--' + role;
+        const p = document.createElement('p');
+        p.textContent = texto;
+        msg.appendChild(p);
+        history.appendChild(msg);
+        history.scrollTop = history.scrollHeight;
+        return msg;
+      }
+
+      // opcoes: { mensagem, label, valorNovo } — mesmo formato usado tanto
+      // pela resposta real do backend (CONFIGURAR_META) quanto pelo fallback
+      // offline (interpretarAjuste), pra não duplicar a UI do card.
+      function adicionarCardConfirmacao(opcoes) {
+        const msg = document.createElement('div');
+        msg.className = 'ia-message ia-message--ai';
+        const p = document.createElement('p');
+        p.textContent = opcoes.mensagem;
+        msg.appendChild(p);
+
+        const acoes = document.createElement('div');
+        acoes.className = 'painel-ajuste-confirmacao-acoes';
+
+        const btnConfirmar = document.createElement('button');
+        btnConfirmar.className = 'btn btn-primary btn-sm';
+        btnConfirmar.type = 'button';
+        btnConfirmar.textContent = 'Confirmar';
+
+        const btnCancelar = document.createElement('button');
+        btnCancelar.className = 'btn btn-ghost btn-sm';
+        btnCancelar.type = 'button';
+        btnCancelar.textContent = 'Cancelar';
+
+        btnConfirmar.addEventListener('click', function () {
+          acoes.remove();
+          adicionarMensagem('Pronto! ' + opcoes.label + ' atualizada para ' + opcoes.valorNovo + '.', 'ai');
+          if (typeof mostrarErroToast === 'function') mostrarErroToast(opcoes.label + ' atualizada para ' + opcoes.valorNovo + ' (simulado — ainda sem tabela de metas persistente no backend).');
+        });
+
+        btnCancelar.addEventListener('click', function () {
+          acoes.remove();
+          adicionarMensagem('Sem problemas, mantive como estava.', 'ai');
+        });
+
+        acoes.appendChild(btnConfirmar);
+        acoes.appendChild(btnCancelar);
+        msg.appendChild(acoes);
+        history.appendChild(msg);
+        history.scrollTop = history.scrollHeight;
+      }
+
+      // Fallback offline (mock por palavra-chave) — só usado se o backend
+      // estiver fora do ar ou a chamada real falhar.
+      function interpretarAjuste(texto) {
+        const t = texto.toLowerCase();
+        const numeros = texto.match(/\d+/g);
+        const valor = numeros ? numeros[numeros.length - 1] : null;
+        if (!valor) return null;
+
+        if (t.indexOf('venda') !== -1) {
+          return { label: 'meta de vendas', valorNovo: valor, mensagem: 'Entendi — você quer ajustar a meta de vendas de 20 para ' + valor + '. Confirma?' };
+        }
+        if (t.indexOf('capta') !== -1) {
+          return { label: 'meta de captações', valorNovo: valor, mensagem: 'Entendi — você quer ajustar a meta de captações de 8 para ' + valor + '. Confirma?' };
+        }
+        if (t.indexOf('comiss') !== -1) {
+          return { label: 'meta de comissão', valorNovo: 'R$ ' + valor + 'k', mensagem: 'Entendi — você quer ajustar a meta de comissão de R$ 200k para R$ ' + valor + 'k. Confirma?' };
+        }
+        return null;
+      }
+
+      // Traduz a resposta real do router (Bloco CONFIGURAR_META) pro mesmo
+      // formato de opcoes que adicionarCardConfirmacao espera.
+      function mapearRespostaMeta(dados) {
+        const labelPorCampo = { vendas: 'meta de vendas', captacoes: 'meta de captações', comissao: 'meta de comissão' };
+        return {
+          label: labelPorCampo[dados.campo_meta] || 'meta',
+          valorNovo: dados.novo_valor,
+          mensagem: dados.mensagem,
+        };
+      }
+
+      function enviar() {
+        const texto = input.value.trim();
+        if (!texto) return;
+        adicionarMensagem(texto, 'user');
+        input.value = '';
+
+        if (!window.apiDisponivel) {
+          setTimeout(function () {
+            const ajuste = interpretarAjuste(texto);
+            if (ajuste) {
+              adicionarCardConfirmacao(ajuste);
+            } else {
+              adicionarMensagem('Não entendi exatamente o que você quer mudar. Pode reformular? Ex: "mudar a meta de vendas para 25".', 'ai');
+            }
+          }, 500);
+          return;
+        }
+
+        apiFetch('/chat', {
+          method: 'POST',
+          body: JSON.stringify({ pergunta: texto, historico: [], fonte: 'texto' }),
+        })
+          .then(function (dados) {
+            if (dados.tipo === 'proposta_meta') {
+              adicionarCardConfirmacao(mapearRespostaMeta(dados));
+            } else if (dados.resposta) {
+              adicionarMensagem(dados.resposta, 'ai');
+            } else {
+              adicionarMensagem('Não entendi exatamente o que você quer mudar. Pode reformular? Ex: "mudar a meta de vendas para 25".', 'ai');
+            }
+          })
+          .catch(function (erro) {
+            console.error('Falha ao chamar /api/chat:', erro);
+            const ajuste = interpretarAjuste(texto);
+            if (ajuste) {
+              adicionarCardConfirmacao(ajuste);
+            } else {
+              adicionarMensagem('Não consegui falar com o Arnês agora. Tente de novo em instantes.', 'ai');
+            }
+            if (typeof mostrarErroToast === 'function') mostrarErroToast('Arnês IA indisponível no momento.');
+          });
+      }
+
+      sendBtn.addEventListener('click', enviar);
+      input.addEventListener('keydown', function (e) { if (e.key === 'Enter') enviar(); });
+    })();
+    // Painel lateral da Arnês IA (estilo Gemini): desliza da direita e empurra o conteúdo
+    (function () {
+      const trigger = document.getElementById('iaTrigger');
+      const panel = document.getElementById('iaPanel');
+      const closeBtn = document.getElementById('iaPanelClose');
+      const greeting = document.getElementById('iaGreeting');
+      const suggestions = document.getElementById('iaSuggestions');
+      const history = document.getElementById('iaHistory');
+      const input = document.getElementById('iaPanelInput');
+      const sendBtn = document.getElementById('iaPanelSend');
+
+      function openPanel() {
+        document.body.classList.add('ia-panel-open');
+        panel.classList.add('show');
+        panel.setAttribute('aria-hidden', 'false');
+      }
+
+      function closePanel() {
+        document.body.classList.remove('ia-panel-open');
+        panel.classList.remove('show');
+        panel.setAttribute('aria-hidden', 'true');
+      }
+
+      trigger.addEventListener('click', openPanel);
+      closeBtn.addEventListener('click', closePanel);
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && panel.classList.contains('show')) closePanel();
+      });
+
+      function addMessage(texto, role) {
+        greeting.style.display = 'none';
+        suggestions.style.display = 'none';
+        const msg = document.createElement('div');
+        msg.className = 'ia-message ia-message--' + role;
+        const p = document.createElement('p');
+        p.textContent = texto;
+        msg.appendChild(p);
+        history.appendChild(msg);
+        history.scrollTop = history.scrollHeight;
+      }
+
+      window.iaHistorico = window.iaHistorico || [];
+
+      // Nem toda intenção do backend devolve "resposta" (texto livre de
+      // Sonnet/Haiku) — CONFIGURAR_META (que é justamente o mais comum
+      // nesta tela), EDICAO_CADASTRO, CRIACAO_CADASTRO, ACAO_WHATSAPP e os
+      // casos de navegação sem resultado usam "mensagem" (ou "erro"). Sem
+      // isso, addMessage(dados.resposta, ...) recebia undefined pra essas
+      // intenções e a conversa ficava sem responder nada, dando a
+      // impressão de estar travada. (O painel dedicado "Ajustar metas com
+      // o Arnês" já trata dados.tipo === 'proposta_meta' com uma UI de
+      // confirmação própria via mapearRespostaMeta — este painel genérico
+      // só precisa não quebrar, não replica aquela UI.)
+      function extrairTextoResposta(dados) {
+        if (dados.resposta) return dados.resposta;
+        if (dados.mensagem) return dados.mensagem;
+        if (typeof dados.erro === 'string') return dados.erro;
+        return 'Não entendi — pode reformular?';
+      }
+
+      function enviarPergunta(texto) {
+        if (!texto.trim()) return;
+        addMessage(texto, 'user');
+        input.value = '';
+
+        if (!window.apiDisponivel) {
+          setTimeout(function () {
+            addMessage('A Arnês IA está temporariamente indisponível — tento de novo assim que reconectar.', 'ai');
+          }, 400);
+          return;
+        }
+
+        window.iaHistorico.push({ role: 'user', content: texto });
+
+        addMessage('Pensando...', 'ai');
+        const bolhaPensando = history.lastElementChild;
+
+        apiFetch('/chat', {
+          method: 'POST',
+          body: JSON.stringify({ pergunta: texto, historico: window.iaHistorico }),
+        })
+          .then(function (dados) {
+            const textoResposta = extrairTextoResposta(dados);
+            bolhaPensando.querySelector('p').textContent = textoResposta;
+            window.iaHistorico.push({ role: 'assistant', content: textoResposta });
+          })
+          .catch(function (erro) {
+            console.error('Falha ao chamar /api/chat:', erro);
+            bolhaPensando.querySelector('p').textContent = 'Não consegui falar com a Arnês IA agora. Tente de novo em instantes.';
+            if (typeof mostrarErroToast === 'function') mostrarErroToast('Arnês IA indisponível no momento.');
+          })
+          .finally(function () {
+            history.scrollTop = history.scrollHeight;
+          });
+      }
+
+      sendBtn.addEventListener('click', function () {
+        enviarPergunta(input.value);
+      });
+
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') enviarPergunta(input.value);
+      });
+
+      document.querySelectorAll('.ia-suggestion-chip').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          document.querySelectorAll('.ia-suggestion-chip').forEach(function (c) {
+            if (c !== chip) c.style.display = 'none';
+          });
+          chip.classList.add('pulsing');
+          const texto = chip.textContent.trim();
+          setTimeout(function () {
+            enviarPergunta(texto);
+          }, 350);
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>

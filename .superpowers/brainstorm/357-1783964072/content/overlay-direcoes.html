@@ -1,0 +1,755 @@
+<style>
+:root {
+  --primary: #E05A1E;
+  --bg: #F5F3F0;
+  --surface: #ffffff;
+  --border: #E2DDD7;
+  --border-2: #EDE9E4;
+  --text: #1A1917;
+  --text2: #534E4A;
+  --text3: #8A847F;
+  --text4: #B5AFA9;
+  --green: #38a169;
+  --red: #e53e3e;
+  --yellow: #d69e2e;
+  --radius: 10px;
+}
+
+h2 { margin-bottom: 6px; }
+.subtitle { margin-bottom: 28px; }
+
+.panels-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+/* Card wrapper */
+.panel-card {
+  border: 2px solid var(--border, #E2DDD7);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s, transform .1s;
+}
+.panel-card:hover { border-color: #E05A1E; box-shadow: 0 8px 24px rgba(0,0,0,.1); transform: translateY(-2px); }
+.panel-card.selected { border-color: #E05A1E; box-shadow: 0 0 0 3px rgba(224,90,30,.15); }
+
+.panel-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 10px;
+  border-top: 1px solid #E2DDD7;
+  background: #FAFAF9;
+}
+.panel-label h3 { font-size: 14px; color: #1A1917; margin: 0; }
+.panel-label p { font-size: 12px; color: #8A847F; margin: 3px 0 0; }
+.panel-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(224,90,30,.1);
+  color: #E05A1E;
+}
+
+/* ══ OPÇÃO A — Painel Reestruturado ══ */
+.ov-a {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  background: #fff;
+}
+.ov-a-topbar {
+  height: 3px;
+  background: var(--green);
+}
+.ov-a-head {
+  padding: 16px 18px 0;
+}
+.ov-a-breadcrumb {
+  font-size: 10px;
+  color: #B5AFA9;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 8px;
+}
+.ov-a-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #1A1917;
+  letter-spacing: -.4px;
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+.ov-a-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.ov-a-avatar {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  background: linear-gradient(135deg,#E05A1E,#ff8c5a);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 800; color: #fff;
+}
+.ov-a-resp { font-size: 11px; color: #534E4A; font-weight: 600; }
+.ov-a-status {
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 10px;
+  background: rgba(56,161,105,.12); color: #38a169;
+  margin-left: auto;
+}
+.ov-a-dates {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.ov-a-date {
+  flex: 1;
+  background: #F5F3F0;
+  border-radius: 7px;
+  padding: 6px 10px;
+}
+.ov-a-date-label {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: #B5AFA9;
+  margin-bottom: 2px;
+}
+.ov-a-date-val {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1A1917;
+}
+.ov-a-progress {
+  margin-bottom: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #EDE9E4;
+}
+.ov-a-prog-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #8A847F;
+  margin-bottom: 4px;
+}
+.ov-a-prog-bar {
+  height: 4px;
+  background: #EDE9E4;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.ov-a-prog-fill {
+  height: 100%;
+  width: 90%;
+  background: #38a169;
+  border-radius: 2px;
+}
+.ov-a-tabs {
+  display: flex;
+  border-bottom: 1px solid #EDE9E4;
+}
+.ov-a-tab {
+  flex: 1;
+  text-align: center;
+  padding: 9px 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #8A847F;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.ov-a-tab.active {
+  color: #E05A1E;
+  border-bottom-color: #E05A1E;
+}
+.ov-a-body {
+  padding: 14px 18px;
+}
+.ov-a-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.ov-a-av2 {
+  width: 28px; height: 28px; flex-shrink: 0;
+  border-radius: 8px;
+  background: linear-gradient(135deg,#E05A1E,#ff8c5a);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 800; color: #fff;
+}
+.ov-a-ta {
+  flex: 1;
+  background: #F5F3F0;
+  border: 1px solid #E2DDD7;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #8A847F;
+  min-height: 60px;
+  resize: none;
+}
+.ov-a-empty {
+  font-size: 12px;
+  color: #B5AFA9;
+  text-align: center;
+  padding: 16px 0;
+}
+.ov-a-footer {
+  padding: 10px 18px;
+  border-top: 1px solid #EDE9E4;
+}
+.ov-a-btn {
+  width: 100%;
+  padding: 9px;
+  background: #38a169;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  opacity: .8;
+}
+
+/* ══ OPÇÃO B — Painel Largo (2-col) ══ */
+.ov-b {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  background: #fff;
+}
+.ov-b-head {
+  background: #1A1917;
+  padding: 16px 18px;
+  color: #fff;
+}
+.ov-b-eyebrow {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: rgba(255,255,255,.4);
+  margin-bottom: 6px;
+}
+.ov-b-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -.3px;
+  margin-bottom: 10px;
+}
+.ov-b-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.ov-b-pill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.15);
+  color: rgba(255,255,255,.8);
+}
+.ov-b-pill.done {
+  background: rgba(56,161,105,.25);
+  border-color: rgba(56,161,105,.5);
+  color: #6ee7a0;
+}
+.ov-b-body {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  min-height: 200px;
+}
+.ov-b-sidebar {
+  background: #FAFAF9;
+  border-right: 1px solid #EDE9E4;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ov-b-meta {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: #B5AFA9;
+  margin-bottom: 3px;
+}
+.ov-b-val {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1A1917;
+}
+.ov-b-val.ok { color: #38a169; }
+.ov-b-main {
+  padding: 14px 16px;
+}
+.ov-b-prog-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.ov-b-prog-track {
+  flex: 1;
+  height: 5px;
+  background: #EDE9E4;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.ov-b-prog-fill {
+  height: 100%;
+  width: 90%;
+  background: linear-gradient(90deg,#E05A1E,#ff8c5a);
+  border-radius: 3px;
+}
+.ov-b-prog-lbl {
+  font-size: 10px;
+  color: #8A847F;
+  white-space: nowrap;
+}
+.ov-b-ta {
+  width: 100%;
+  background: #F5F3F0;
+  border: 1px solid #E2DDD7;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #8A847F;
+  resize: none;
+  min-height: 52px;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.ov-b-send {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+.ov-b-btn-sm {
+  padding: 5px 14px;
+  background: #E05A1E;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  opacity: .85;
+}
+.ov-b-empty {
+  font-size: 11px;
+  color: #B5AFA9;
+  text-align: center;
+  padding: 20px 0;
+}
+.ov-b-footer {
+  padding: 10px 18px;
+  border-top: 1px solid #EDE9E4;
+  background: #FAFAF9;
+}
+.ov-b-btn-full {
+  width: 100%;
+  padding: 8px;
+  background: transparent;
+  color: #38a169;
+  border: 1.5px solid #38a169;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  opacity: .85;
+}
+
+/* ══ OPÇÃO C — Modal Premium ══ */
+.ov-c {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  background: #fff;
+}
+.ov-c-stripe {
+  height: 4px;
+  background: linear-gradient(90deg, #38a169, #68d391);
+}
+.ov-c-head {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid #EDE9E4;
+}
+.ov-c-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: #38a169;
+  background: rgba(56,161,105,.1);
+  padding: 3px 8px;
+  border-radius: 5px;
+  margin-bottom: 8px;
+}
+.ov-c-tag-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #38a169;
+}
+.ov-c-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #1A1917;
+  letter-spacing: -.5px;
+  margin-bottom: 8px;
+}
+.ov-c-crumb {
+  font-size: 11px;
+  color: #B5AFA9;
+  font-weight: 500;
+}
+.ov-c-crumb strong {
+  color: #8A847F;
+  font-weight: 700;
+}
+.ov-c-kpis {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 0;
+  border-bottom: 1px solid #EDE9E4;
+}
+.ov-c-kpi {
+  padding: 10px 16px;
+  border-right: 1px solid #EDE9E4;
+}
+.ov-c-kpi:last-child { border-right: none; }
+.ov-c-kpi-label {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: #B5AFA9;
+  margin-bottom: 3px;
+}
+.ov-c-kpi-val {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1A1917;
+  letter-spacing: -.3px;
+}
+.ov-c-kpi-val.ok { color: #38a169; }
+.ov-c-body {
+  padding: 14px 20px;
+}
+.ov-c-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #EDE9E4;
+}
+.ov-c-tab {
+  padding: 7px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #8A847F;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+}
+.ov-c-tab.active {
+  color: #E05A1E;
+  border-bottom-color: #E05A1E;
+}
+.ov-c-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.ov-c-av {
+  width: 26px; height: 26px; flex-shrink: 0;
+  border-radius: 7px;
+  background: linear-gradient(135deg,#E05A1E,#ff8c5a);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 800; color: #fff;
+  margin-top: 1px;
+}
+.ov-c-ta {
+  flex: 1;
+  background: #F5F3F0;
+  border: 1.5px solid #E2DDD7;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #8A847F;
+  resize: none;
+  min-height: 52px;
+  box-sizing: border-box;
+  font-family: inherit;
+  line-height: 1.5;
+}
+.ov-c-ta:focus { border-color: #E05A1E; outline: none; }
+.ov-c-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ov-c-btn-reg {
+  padding: 6px 16px;
+  background: #E05A1E;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  opacity: .85;
+}
+.ov-c-hint {
+  font-size: 10px;
+  color: #B5AFA9;
+}
+.ov-c-empty {
+  font-size: 12px;
+  color: #B5AFA9;
+  text-align: center;
+  padding: 18px 0 4px;
+}
+.ov-c-footer {
+  padding: 10px 20px;
+  border-top: 1px solid #EDE9E4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #FAFAF9;
+}
+.ov-c-btn-done {
+  padding: 8px 20px;
+  background: #38a169;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  opacity: .85;
+}
+.ov-c-prog-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #8A847F;
+  flex: 1;
+}
+.ov-c-prog-track {
+  height: 4px;
+  background: #EDE9E4;
+  border-radius: 2px;
+  overflow: hidden;
+  width: 70px;
+}
+.ov-c-prog-fill {
+  height: 100%;
+  width: 90%;
+  background: #38a169;
+  border-radius: 2px;
+}
+</style>
+
+<h2>Direções visuais para o overlay de atividade</h2>
+<p class="subtitle">Três abordagens diferentes para o painel de detalhe. Clique na que mais agrada para selecionar.</p>
+
+<div class="panels-row">
+
+  <!-- ── OPÇÃO A ─────────────────────────────────── -->
+  <div class="panel-card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="ov-a">
+      <div class="ov-a-topbar"></div>
+      <div class="ov-a-head">
+        <div class="ov-a-breadcrumb">Implantação NX &rsaquo; Kickoff</div>
+        <div class="ov-a-title">Kickoff</div>
+        <div class="ov-a-row">
+          <div class="ov-a-avatar">P</div>
+          <span class="ov-a-resp">priscila</span>
+          <span class="ov-a-status">Concluída</span>
+        </div>
+        <div class="ov-a-dates">
+          <div class="ov-a-date">
+            <div class="ov-a-date-label">Início</div>
+            <div class="ov-a-date-val">01/10/2025</div>
+          </div>
+          <div class="ov-a-date">
+            <div class="ov-a-date-label">Meta (fim)</div>
+            <div class="ov-a-date-val">15/10/2025</div>
+          </div>
+        </div>
+        <div class="ov-a-progress">
+          <div class="ov-a-prog-label">
+            <span>Progresso do playbook</span>
+            <span style="font-weight:700;color:#38a169">9/10</span>
+          </div>
+          <div class="ov-a-prog-bar">
+            <div class="ov-a-prog-fill"></div>
+          </div>
+        </div>
+      </div>
+      <div class="ov-a-tabs">
+        <div class="ov-a-tab active">Registro</div>
+        <div class="ov-a-tab">Checklist</div>
+        <div class="ov-a-tab">Anotação</div>
+      </div>
+      <div class="ov-a-body">
+        <div class="ov-a-input-row">
+          <div class="ov-a-av2">P</div>
+          <textarea class="ov-a-ta" placeholder="Adicionar registro..." readonly></textarea>
+        </div>
+        <div class="ov-a-empty">Nenhum registro ainda.</div>
+      </div>
+      <div class="ov-a-footer">
+        <button class="ov-a-btn">✓ Concluída</button>
+      </div>
+    </div>
+    <div class="panel-label">
+      <div>
+        <h3>A — Painel Reestruturado</h3>
+        <p>Mesmo formato, hierarquia clara. Breadcrumb, datas como cards, barra de progresso do playbook.</p>
+      </div>
+      <span class="panel-badge">Evolução</span>
+    </div>
+  </div>
+
+  <!-- ── OPÇÃO B ─────────────────────────────────── -->
+  <div class="panel-card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="ov-b">
+      <div class="ov-b-head">
+        <div class="ov-b-eyebrow">Implantação NX</div>
+        <div class="ov-b-title">Kickoff</div>
+        <div class="ov-b-pills">
+          <span class="ov-b-pill done">✓ Concluída</span>
+          <span class="ov-b-pill">priscila</span>
+          <span class="ov-b-pill">15/10/2025</span>
+        </div>
+      </div>
+      <div class="ov-b-body">
+        <div class="ov-b-sidebar">
+          <div>
+            <div class="ov-b-meta">Status</div>
+            <div class="ov-b-val ok">Concluída</div>
+          </div>
+          <div>
+            <div class="ov-b-meta">Responsável</div>
+            <div class="ov-b-val">Priscila</div>
+          </div>
+          <div>
+            <div class="ov-b-meta">Início</div>
+            <div class="ov-b-val">01/10/25</div>
+          </div>
+          <div>
+            <div class="ov-b-meta">Prazo</div>
+            <div class="ov-b-val">15/10/25</div>
+          </div>
+          <div>
+            <div class="ov-b-meta">Playbook</div>
+            <div class="ov-b-val" style="font-size:11px">Implantação NX</div>
+          </div>
+        </div>
+        <div class="ov-b-main">
+          <div class="ov-b-prog-row">
+            <div class="ov-b-prog-track">
+              <div class="ov-b-prog-fill"></div>
+            </div>
+            <span class="ov-b-prog-lbl" style="color:#E05A1E;font-weight:700">9/10 concluídas</span>
+          </div>
+          <textarea class="ov-b-ta" placeholder="Adicionar registro..." readonly></textarea>
+          <div class="ov-b-send">
+            <button class="ov-b-btn-sm">Registrar</button>
+          </div>
+          <div class="ov-b-empty">Nenhum registro ainda.</div>
+        </div>
+      </div>
+      <div class="ov-b-footer">
+        <button class="ov-b-btn-full">✓ Concluída</button>
+      </div>
+    </div>
+    <div class="panel-label">
+      <div>
+        <h3>B — Sidebar Escura + 2 Colunas</h3>
+        <p>Header dark com título grande. Sidebar de metadados à esquerda, feed de registro à direita.</p>
+      </div>
+      <span class="panel-badge">Ruptura</span>
+    </div>
+  </div>
+
+  <!-- ── OPÇÃO C ─────────────────────────────────── -->
+  <div class="panel-card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="ov-c">
+      <div class="ov-c-stripe"></div>
+      <div class="ov-c-head">
+        <div class="ov-c-tag">
+          <span class="ov-c-tag-dot"></span>
+          Concluída
+        </div>
+        <div class="ov-c-title">Kickoff</div>
+        <div class="ov-c-crumb">Implantação NX &rsaquo; <strong>Kickoff</strong> &nbsp;·&nbsp; priscila</div>
+      </div>
+      <div class="ov-c-kpis">
+        <div class="ov-c-kpi">
+          <div class="ov-c-kpi-label">Início</div>
+          <div class="ov-c-kpi-val">01/10/25</div>
+        </div>
+        <div class="ov-c-kpi">
+          <div class="ov-c-kpi-label">Prazo</div>
+          <div class="ov-c-kpi-val">15/10/25</div>
+        </div>
+        <div class="ov-c-kpi">
+          <div class="ov-c-kpi-label">Progresso</div>
+          <div class="ov-c-kpi-val ok">9 / 10</div>
+        </div>
+      </div>
+      <div class="ov-c-body">
+        <div class="ov-c-tabs">
+          <div class="ov-c-tab active">Registro</div>
+          <div class="ov-c-tab">Checklist</div>
+          <div class="ov-c-tab">Anotação</div>
+        </div>
+        <div class="ov-c-input-row">
+          <div class="ov-c-av">P</div>
+          <textarea class="ov-c-ta" placeholder="Adicionar registro..." readonly></textarea>
+        </div>
+        <div class="ov-c-actions">
+          <span class="ov-c-hint">Enter para registrar</span>
+          <button class="ov-c-btn-reg">Registrar</button>
+        </div>
+        <div class="ov-c-empty">Nenhum registro ainda.</div>
+      </div>
+      <div class="ov-c-footer">
+        <div class="ov-c-prog-inline">
+          <div class="ov-c-prog-track">
+            <div class="ov-c-prog-fill"></div>
+          </div>
+          9 de 10 atividades
+        </div>
+        <button class="ov-c-btn-done">✓ Concluída</button>
+      </div>
+    </div>
+    <div class="panel-label">
+      <div>
+        <h3>C — Minimal Premium</h3>
+        <p>Header limpo com tag de status, KPI strip horizontal, footer com progresso inline.</p>
+      </div>
+      <span class="panel-badge">Refinamento</span>
+    </div>
+  </div>
+
+</div>

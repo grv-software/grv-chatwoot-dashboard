@@ -1,0 +1,2440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soma Imob — Inteligência de Mercado</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%231F2937'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23D67A52'/%3E%3Cstop offset='100%25' stop-color='%231E4D5C'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== Reset & base ===== */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    min-width: 900px;
+    font-family: 'Inter', sans-serif;
+    background: #F8F7F5;
+    color: #1F2937;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline: 2px solid #D67A52;
+    outline-offset: 2px;
+  }
+
+  /* ===== Navbar horizontal fixa ===== */
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid #EDE8E3;
+    z-index: 100;
+  }
+
+  .navbar-inner {
+    max-width: 1200px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .navbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
+  .logomark {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logomark svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .logo-text {
+    letter-spacing: -0.02em;
+  }
+
+  .logo-soma {
+    font-weight: 700;
+    color: #1F2937;
+  }
+
+  .logo-imob {
+    font-weight: 600;
+    color: #1E4D5C;
+    letter-spacing: 0.06em;
+    margin-left: 2px;
+  }
+
+  .ia-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #E4EDEF;
+    color: #1E4D5C;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .ia-pill svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  /* ===== Navegação: dropdowns ===== */
+  .navbar-links {
+    position: relative;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .nav-indicator {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: #FBEAE1;
+    border-radius: 8px;
+    z-index: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .nav-indicator {
+      transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  }
+
+  .navbar-links li {
+    position: relative;
+    z-index: 1;
+  }
+
+  .navbar-links a,
+  .navbar-links .placeholder-link,
+  .nav-dropdown-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: none;
+    border: none;
+    color: #374151;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .navbar-links li:not(.active) a:hover,
+  .navbar-links li:not(.active) .placeholder-link:hover,
+  .navbar-links li:not(.active) .nav-dropdown-trigger:hover {
+    background: #F3F4F6;
+  }
+
+  .navbar-links li.active a,
+  .navbar-links li.active .placeholder-link,
+  .navbar-links li.active .nav-dropdown-trigger {
+    color: #D67A52;
+    font-weight: 600;
+  }
+
+  .nav-dropdown.open .nav-dropdown-trigger {
+    background: #F3F4F6;
+  }
+
+  .chevron {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.2s ease;
+  }
+
+  .nav-dropdown.open .chevron {
+    transform: rotate(180deg);
+  }
+
+  .nav-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 240px;
+    background: #fff;
+    border: 1px solid #EDE8E3;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
+    padding: 6px;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .nav-dropdown-menu {
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+  }
+
+  .nav-dropdown.open .nav-dropdown-menu {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 14px;
+    color: #374151;
+    text-decoration: none;
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .dropdown-item:hover {
+    background: #F3F4F6;
+  }
+
+  .dropdown-item.active {
+    background: #FBEAE1;
+    color: #D67A52;
+    font-weight: 600;
+  }
+
+  .dropdown-item--highlight {
+    color: #D67A52;
+    font-weight: 600;
+  }
+
+  .dropdown-item--highlight:hover {
+    background: #FBEAE1;
+  }
+
+  .dropdown-item-icon-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dropdown-item-icon-label svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .dropdown-divider {
+    height: 1px;
+    background: #EDE8E3;
+    margin: 6px 4px;
+  }
+
+  .nav-badge {
+    background: #DC2626;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 999px;
+    line-height: 1.5;
+  }
+
+  /* Botão de disparo do painel Arnês IA, estilo Gemini */
+  .ia-launcher {
+    position: relative;
+    overflow: hidden;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: #fff;
+    background: #1E4D5C;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.1s ease;
+  }
+
+  .ia-launcher:active {
+    transform: scale(0.97);
+  }
+
+  .ia-launcher svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .ia-launcher::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    transform: skewX(-20deg);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ia-launcher:hover::after {
+      animation: iaShimmer 600ms ease-out;
+    }
+  }
+
+  @keyframes iaShimmer {
+    from { left: -75%; }
+    to { left: 125%; }
+  }
+
+  .navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #D67A52;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .icon-btn {
+    background: none;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #374151;
+  }
+
+  .icon-btn:hover {
+    background: #F3F4F6;
+  }
+
+  .icon-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .btn {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 9px 16px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  .btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .btn-primary {
+    background: #D67A52;
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: #B66846;
+  }
+
+  .btn-outline-petroleo {
+    background: #fff;
+    color: #1E4D5C;
+    border-color: #C7D9DD;
+  }
+
+  .btn-outline-petroleo:hover {
+    background: #EEF3F4;
+  }
+
+  /* ===== Página: coluna central ===== */
+  .page {
+    padding-top: 64px;
+    transition: margin-right 0.3s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page {
+      transition: margin-right 0.01s linear;
+    }
+  }
+
+  body.ia-panel-open .page {
+    margin-right: 400px;
+  }
+
+  .content {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 32px 32px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* ===== Seletor de mês ===== */
+  .month-select {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1F2937;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+
+  /* ===== Grid de KPIs ===== */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .kpi-card {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 18px 20px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  }
+
+  .kpi-card .value {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .kpi-card .label {
+    font-size: 13px;
+    color: #6B7280;
+    margin-top: 4px;
+  }
+
+  .kpi-card .delta {
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 8px;
+  }
+
+  .delta-green { color: #16A34A; }
+  .delta-yellow { color: #CA8A04; }
+  .delta-gray { color: #6B7280; }
+
+  /* ===== Cartão genérico de conteúdo ===== */
+  .panel-card {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  }
+
+  .panel-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1F2937;
+    margin-bottom: 16px;
+  }
+
+  /* ===== Funil de conversão ===== */
+  .funnel-row {
+    display: grid;
+    grid-template-columns: 130px 1fr 70px 60px;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .funnel-row:last-child { margin-bottom: 0; }
+
+  .funnel-label {
+    font-size: 13px;
+    color: #374151;
+    font-weight: 500;
+  }
+
+  .funnel-bar-track {
+    background: #F3F4F6;
+    border-radius: 6px;
+    height: 22px;
+    overflow: hidden;
+  }
+
+  .funnel-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    width: 0;
+    background: #1E4D5C;
+  }
+
+  .funnel-row--final .funnel-bar-fill {
+    background: #D67A52;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .funnel-bar-fill {
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  }
+
+  .funnel-valor {
+    font-size: 13px;
+    font-weight: 700;
+    text-align: right;
+  }
+
+  .funnel-pct {
+    font-size: 12px;
+    color: #6B7280;
+    text-align: right;
+  }
+
+  /* ===== Gráficos lado a lado ===== */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .charts-row { grid-template-columns: 1fr; }
+  }
+
+  .chart-canvas-wrap {
+    position: relative;
+    width: 100%;
+    height: 200px;
+  }
+
+  .chart-canvas-wrap canvas {
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+  }
+
+  .chart-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: #1F2937;
+    color: #fff;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translate(-50%, -100%);
+    transition: opacity 0.1s ease;
+    z-index: 5;
+  }
+
+  .chart-tooltip.visible {
+    opacity: 1;
+  }
+
+  /* ===== Pontos fortes / de atenção ===== */
+  .insight-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .insight-grid { grid-template-columns: 1fr; }
+  }
+
+  .insight-panel {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid transparent;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  }
+
+  .insight-panel--strength {
+    border-left-color: #16A34A;
+  }
+
+  .insight-panel--weakness {
+    border-left-color: #D67A52;
+  }
+
+  .insight-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .insight-panel--strength .insight-panel-title { color: #16A34A; }
+  .insight-panel--weakness .insight-panel-title { color: #D67A52; }
+
+  .insight-panel-title svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .insight-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .insight-list li {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #374151;
+    padding-left: 14px;
+    position: relative;
+  }
+
+  .insight-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 7px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #9CA3AF;
+  }
+
+  /* ===== Recomendações da Arnês IA ===== */
+  /* ===== Banner de reconexão (fallback quando a API está fora) ===== */
+  .reconnect-banner {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: #FEF3C7;
+    color: #92400E;
+    font-size: 13px;
+    text-align: center;
+    padding: 8px 16px;
+    z-index: 90;
+    display: none;
+  }
+
+  .reconnect-banner.show {
+    display: block;
+  }
+
+  /* ===== Toast genérico de erro de API ===== */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    max-width: 340px;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    box-shadow: 0 4px 16px rgba(17, 24, 39, 0.08);
+    opacity: 0;
+    transform: translateX(16px);
+    pointer-events: none;
+    transition: opacity 200ms ease-in, transform 200ms ease-in;
+    z-index: 200;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    transition: opacity 200ms ease-out, transform 200ms ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toast,
+    .toast.show {
+      transform: none;
+      transition: opacity 120ms linear;
+    }
+  }
+
+  .toast-icon {
+    color: #D67A52;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .toast-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .toast-body {
+    flex: 1;
+  }
+
+  .toast-body p {
+    font-size: 13px;
+    color: #1F2937;
+    line-height: 1.5;
+  }
+
+  /* ===== Painel lateral da Arnês IA (estilo Gemini, empurra o conteúdo) ===== */
+  .ia-panel {
+    position: fixed;
+    top: 64px;
+    right: 0;
+    bottom: 0;
+    width: 400px;
+    background: #F8F7F5;
+    border-left: 1px solid #EDE8E3;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    z-index: 150;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ia-panel {
+      transition: transform 0.3s ease-out;
+    }
+  }
+
+  .ia-panel.show {
+    transform: translateX(0);
+  }
+
+  .ia-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-bottom: 1px solid #EDE8E3;
+    flex-shrink: 0;
+  }
+
+  .ia-panel-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.02em;
+  }
+
+  .ia-panel-close {
+    background: none;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #374151;
+    cursor: pointer;
+  }
+
+  .ia-panel-close:hover {
+    background: #F3F4F6;
+  }
+
+  .ia-panel-close svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .ia-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ia-greeting {
+    margin-bottom: 24px;
+  }
+
+  .ia-greeting h2 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #1E4D5C;
+    margin-bottom: 6px;
+  }
+
+  .ia-greeting p {
+    font-size: 15px;
+    color: #6B7280;
+  }
+
+  .ia-panel-suggestions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .ia-suggestion-chip {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    text-align: left;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #374151;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+  }
+
+  .ia-suggestion-chip svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #D67A52;
+  }
+
+  .ia-suggestion-chip:hover {
+    background: #FBEAE1;
+    border-color: #D67A52;
+    color: #D67A52;
+  }
+
+  .ia-suggestion-chip:active {
+    transform: scale(0.97);
+  }
+
+  .ia-suggestion-chip.pulsing {
+    pointer-events: none;
+    background: #FBEAE1;
+    border-color: #D67A52;
+    color: #D67A52;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ia-suggestion-chip.pulsing {
+      animation: chipPulse 1s ease-in-out infinite;
+    }
+  }
+
+  @keyframes chipPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+
+  .ia-panel-history {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .ia-panel-history:not(:empty) {
+    margin-bottom: 14px;
+  }
+
+  .ia-message {
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .ia-message--ai {
+    align-self: flex-start;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    color: #374151;
+  }
+
+  .ia-message--user {
+    align-self: flex-end;
+    background: #1E4D5C;
+    color: #fff;
+  }
+
+  .ia-panel-footer {
+    padding: 14px 20px 20px;
+    flex-shrink: 0;
+  }
+
+  .ia-input-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 999px;
+    padding: 6px 6px 6px 16px;
+  }
+
+  .ia-input-pill:focus-within {
+    border-color: #1E4D5C;
+  }
+
+  .ia-input-pill input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 14px;
+    color: #1F2937;
+  }
+
+  .ia-input-pill input:focus {
+    outline: none;
+  }
+
+  .ia-send-btn {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #1E4D5C, #3A7686);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .ia-send-btn:active {
+    transform: scale(0.92);
+  }
+
+  .ia-send-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+  .anchor-highlight {
+    animation: anchorFlash 1.2s ease;
+  }
+
+  @keyframes anchorFlash {
+    0%, 100% { box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04); }
+    30% { box-shadow: 0 0 0 3px rgba(214, 122, 82, 0.45); }
+  }
+
+  /* ===== Pergunta livre ao Arnês ===== */
+  .arnes-pergunta-row {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .arnes-pergunta-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 6px 6px 6px 16px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  }
+
+  .arnes-pergunta-input-wrap svg {
+    width: 16px;
+    height: 16px;
+    color: #D67A52;
+    flex-shrink: 0;
+  }
+
+  .arnes-pergunta-input-wrap input {
+    flex: 1;
+    border: none;
+    font-family: inherit;
+    font-size: 14px;
+    color: #1F2937;
+    background: none;
+  }
+
+  .arnes-pergunta-input-wrap input:focus {
+    outline: none;
+  }
+
+  .arnes-resposta-card {
+    background: #fff;
+    border: 1px solid #D67A52;
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+
+  .arnes-resposta-titulo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #D67A52;
+    margin-bottom: 8px;
+  }
+
+  .arnes-resposta-titulo svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .arnes-resposta-card p {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #374151;
+  }
+  .btn-sm {
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+
+  /* ===== Modal genérico (confirmação de ações do Arnês) ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 250;
+    transition: opacity 0.15s ease;
+  }
+
+  .modal-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .modal-overlay { transition: none; }
+  }
+
+  .modal-generico {
+    background: #F8F7F5;
+    border-radius: 12px;
+    width: min(520px, 100%);
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 16px 48px rgba(16, 24, 40, 0.2);
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1px solid #E5E7EB;
+    flex-shrink: 0;
+  }
+
+  .modal-header h2 {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .modal-close {
+    background: none;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #374151;
+    cursor: pointer;
+  }
+
+  .modal-close:hover { background: #F3F4F6; }
+  .modal-close svg { width: 14px; height: 14px; }
+
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 22px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #374151;
+  }
+
+  .modal-body p { margin-bottom: 10px; }
+  .modal-body p:last-child { margin-bottom: 0; }
+
+  .modal-body textarea {
+    width: 100%;
+    min-height: 90px;
+    font-family: inherit;
+    font-size: 13.5px;
+    padding: 10px 12px;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    color: #1F2937;
+    resize: vertical;
+    margin-top: 8px;
+  }
+
+  .modal-body textarea:focus {
+    outline: none;
+    border-color: #D67A52;
+  }
+
+  .modal-body ul.modal-lead-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 10px 0;
+  }
+
+  .modal-body ul.modal-lead-list li {
+    font-size: 13px;
+    color: #1F2937;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    padding: 7px 10px;
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 22px;
+    border-top: 1px solid #E5E7EB;
+    background: #fff;
+    border-radius: 0 0 12px 12px;
+    flex-shrink: 0;
+  }
+
+  .btn-ghost {
+    background: none;
+    color: #374151;
+    border-color: #E5E7EB;
+  }
+
+  .btn-ghost:hover { background: #F3F4F6; }
+
+  /* ===== Header: Inteligência de Mercado ===== */
+  .mercado-header {
+    background: #1E4D5C;
+    border-radius: 10px;
+    padding: 22px 26px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .mercado-header-titulo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .mercado-header-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .mercado-header-eyebrow svg {
+    width: 15px;
+    height: 15px;
+    color: #D67A52;
+  }
+
+  .mercado-header-sub {
+    font-size: 12.5px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .mercado-header-filtros {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .mercado-select {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1F2937;
+    background: #fff;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+
+  /* ===== Utilitário: entrada sequencial de cards ===== */
+  .fade-in-seq {
+    opacity: 0;
+    transform: translateY(8px);
+    animation: fadeInSeq 0.4s ease forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fade-in-seq { opacity: 1; transform: none; animation: none; }
+  }
+
+  @keyframes fadeInSeq {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1F2937;
+    margin-bottom: 14px;
+  }
+
+  .section-title svg {
+    width: 17px;
+    height: 17px;
+    color: #1E4D5C;
+    flex-shrink: 0;
+  }
+
+  /* ===== Seção 1: diagnóstico de preço da carteira ===== */
+  .diag-table-wrap {
+    overflow-x: auto;
+  }
+
+  .diag-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .diag-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #6B7280;
+    padding: 10px 12px;
+    border-bottom: 1px solid #E5E7EB;
+    white-space: nowrap;
+  }
+
+  .diag-table td {
+    padding: 12px;
+    border-bottom: 1px solid #F1EFEC;
+    color: #1F2937;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  .diag-table tr:last-child td { border-bottom: none; }
+
+  .diag-imovel-nome { font-weight: 600; }
+  .diag-imovel-codigo { color: #9CA3AF; font-size: 12px; }
+
+  .diag-diff-acima { color: #B91C1C; font-weight: 600; }
+  .diag-diff-abaixo { color: #16A34A; font-weight: 600; }
+
+  .diag-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    white-space: normal;
+  }
+
+  .diag-status svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  .diag-status--ok { color: #16A34A; }
+  .diag-status--atencao { color: #D67A52; }
+  .diag-status--acao { color: #B91C1C; }
+
+  .diag-acao-btn {
+    background: none;
+    border: 1px solid #E5E7EB;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1E4D5C;
+    padding: 6px 10px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .diag-acao-btn:hover {
+    background: #EEF3F4;
+  }
+
+  /* ===== Seção 2: gaps de demanda ===== */
+  .gap-subtitulo {
+    font-size: 13px;
+    color: #6B7280;
+    margin-top: -8px;
+    margin-bottom: 16px;
+  }
+
+  .gap-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .gap-grid { grid-template-columns: 1fr; }
+  }
+
+  .gap-card {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid #D67A52;
+    border-radius: 10px;
+    padding: 18px 20px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .gap-card-titulo {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1F2937;
+    margin-bottom: 4px;
+    line-height: 1.35;
+  }
+
+  .gap-card-titulo .gap-icone {
+    font-size: 16px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .gap-card-local {
+    font-size: 12px;
+    color: #D67A52;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .gap-card-corpo {
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: #6B7280;
+    margin-bottom: 14px;
+    flex: 1;
+  }
+
+  .gap-card-corpo strong { color: #1F2937; }
+
+  .btn-criar-alerta {
+    background: #fff;
+    border: 1px solid #1E4D5C;
+    color: #1E4D5C;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+  }
+
+  .btn-criar-alerta:hover { background: #EEF3F4; }
+  .btn-criar-alerta svg { width: 13px; height: 13px; }
+
+  .btn-criar-alerta:disabled {
+    opacity: 0.6;
+    cursor: default;
+    background: #fff;
+  }
+
+  /* ===== Seção 3: performance por portal ===== */
+  .portal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .portal-grid { grid-template-columns: 1fr; }
+  }
+
+  .portal-card {
+    background: #1E4D5C;
+    border-radius: 10px;
+    padding: 20px 22px;
+    color: #fff;
+  }
+
+  .portal-logo-placeholder {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .portal-nome {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+
+  .portal-metricas {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .portal-metrica-linha {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12.5px;
+  }
+
+  .portal-metrica-label { color: rgba(255, 255, 255, 0.65); }
+  .portal-metrica-valor { font-weight: 600; }
+
+  .portal-narrativa {
+    display: flex;
+    gap: 6px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .portal-narrativa svg {
+    width: 12px;
+    height: 12px;
+    color: #E8A583;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .portal-recomendacao {
+    background: #D67A52;
+    border-radius: 10px;
+    padding: 20px 24px;
+    color: #fff;
+  }
+
+  .portal-recomendacao-titulo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .portal-recomendacao-titulo svg { width: 14px; height: 14px; }
+
+  .portal-recomendacao p {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 16px;
+  }
+
+  .portal-recomendacao-acoes {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .portal-recomendacao .btn-primary {
+    background: #fff;
+    color: #D67A52;
+  }
+
+  .portal-recomendacao .btn-primary:hover {
+    background: #F3F4F6;
+  }
+
+  .btn-portal-outline {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #fff;
+    color: #fff;
+  }
+
+  .btn-portal-outline:hover { background: rgba(255, 255, 255, 0.2); }
+
+  /* ===== Seção 4: índice FIPE ZAP ===== */
+  .fipe-fonte {
+    font-size: 12.5px;
+    color: #6B7280;
+    margin-top: -8px;
+    margin-bottom: 16px;
+  }
+
+  .fipe-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+
+  @media (max-width: 900px) {
+    .fipe-grid { grid-template-columns: 1fr; }
+  }
+
+  .fipe-card {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 18px 20px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  }
+
+  .fipe-card-label {
+    font-size: 12.5px;
+    color: #6B7280;
+    margin-bottom: 6px;
+  }
+
+  .fipe-card-valor {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1F2937;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+
+  .fipe-card-delta {
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .delta-green { color: #16A34A; }
+  .delta-gray { color: #6B7280; }
+
+  .fipe-nota-rodape {
+    font-size: 11.5px;
+    color: #9CA3AF;
+    line-height: 1.5;
+  }
+</style>
+</head>
+  <!-- ===== Navbar ===== -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-logo">
+        <div class="logomark">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <defs>
+              <linearGradient id="starGradientNav" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#D67A52"/>
+                <stop offset="100%" stop-color="#1E4D5C"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#starGradientNav)" d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/>
+          </svg>
+        </div>
+        <span class="logo-text"><span class="logo-soma">Soma</span> <span class="logo-imob">Imob</span></span>
+        <span class="ia-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+          Arnês IA inclusa
+        </span>
+      </div>
+
+      <ul class="navbar-links" id="navbarLinks">
+        <span class="nav-indicator" id="navIndicator"></span>
+
+        <li data-page="Início">
+          <a href="index.html">Início</a>
+        </li>
+
+        <li class="nav-dropdown active" data-page="Indicadores">
+          <button class="nav-dropdown-trigger" type="button" aria-expanded="false">
+            Indicadores
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <a class="dropdown-item" href="dashboard.html">Dashboard</a>
+            <a class="dropdown-item active" href="inteligencia_mercado.html">Inteligência de mercado</a>
+            <a class="dropdown-item" href="metas.html">Metas e performance</a>
+            <button type="button" class="dropdown-item">Relatórios</button>
+          </div>
+        </li>
+
+        <li class="nav-dropdown" data-page="Atendimento">
+          <button class="nav-dropdown-trigger" type="button" aria-expanded="false">
+            Atendimento
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <a class="dropdown-item" href="clientes.html">Clientes <span class="nav-badge">307</span></a>
+            <a class="dropdown-item" href="atendimento.html">Pipeline de vendas</a>
+            <button type="button" class="dropdown-item">Distribuição automática</button>
+            <button type="button" class="dropdown-item">WhatsApp Omnichannel</button>
+            <button type="button" class="dropdown-item">Histórico</button>
+          </div>
+        </li>
+
+        <li class="nav-dropdown" data-page="Imóveis">
+          <button class="nav-dropdown-trigger" type="button" aria-expanded="false">
+            Imóveis
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <button type="button" class="dropdown-item dropdown-item--highlight" onclick="location.href='imoveis.html'">
+              <span class="dropdown-item-icon-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Novo imóvel
+              </span>
+            </button>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="imoveis.html">Imóveis</a>
+            <button type="button" class="dropdown-item">Condomínios</button>
+            <button type="button" class="dropdown-item">Portais de publicação</button>
+            <button type="button" class="dropdown-item">Captação de imóveis</button>
+            <button type="button" class="dropdown-item">Avaliação de imóveis</button>
+          </div>
+        </li>
+
+        <li class="nav-placeholder" data-page="Sites">
+          <span class="placeholder-link">Sites</span>
+        </li>
+
+        <li class="nav-ia-item">
+          <button class="ia-launcher" id="iaTrigger" type="button" aria-label="Peça à Arnês IA">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+          </button>
+        </li>
+      </ul>
+
+      <div class="navbar-actions">
+        <button class="icon-btn" title="Notificações">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <div class="avatar" title="Samuel W. — Corretor">SW</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== Banner de reconexão ===== -->
+  <div class="reconnect-banner" id="reconnectBanner" role="status">
+    ⚠ Arnês IA temporariamente indisponível. Os dados exibidos são os últimos carregados. Tentando reconectar...
+  </div>
+  <!-- ===== Página ===== -->
+  <div class="page">
+    <div class="content">
+
+      <!-- Header: Inteligência de Mercado -->
+      <div class="mercado-header">
+        <div class="mercado-header-titulo">
+          <span class="mercado-header-eyebrow">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+            Arnês IA · Inteligência de Mercado
+          </span>
+          <span class="mercado-header-sub">Valinhos, SP · Atualizado agora · Fontes: carteira interna + FIPE ZAP + portais</span>
+        </div>
+        <div class="mercado-header-filtros">
+          <select class="mercado-select" id="filtroCidade">
+            <option>Valinhos, SP</option>
+            <option>Campinas, SP</option>
+            <option>Vinhedo, SP</option>
+            <option>Todas as regiões</option>
+          </select>
+          <select class="mercado-select" id="filtroTipo">
+            <option>Todos os tipos</option>
+            <option>Apartamento</option>
+            <option>Casa</option>
+            <option>Comercial</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Seção 1: Diagnóstico de Preço da Carteira -->
+      <div class="panel-card">
+        <h3 class="section-title">Como sua carteira está precificada vs o mercado</h3>
+        <div class="diag-table-wrap">
+          <table class="diag-table">
+            <thead>
+              <tr>
+                <th>Imóvel</th>
+                <th>Seu preço</th>
+                <th>Mediana do mercado</th>
+                <th>Diferença</th>
+                <th>Dias sem visita</th>
+                <th>Diagnóstico do Arnês</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="diagTableBody">
+              <tr data-imovel="1067">
+                <td><div class="diag-imovel-nome">Ap. 3q Palmeiras</div><div class="diag-imovel-codigo">#1067</div></td>
+                <td>R$ 710k</td>
+                <td>R$ 648k</td>
+                <td class="diag-diff-acima">+9,6% acima</td>
+                <td>88 dias</td>
+                <td>
+                  <span class="diag-status diag-status--acao">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+                    Precificado acima — ajuste sugerido
+                  </span>
+                </td>
+                <td><button class="diag-acao-btn" data-preco-atual="710000" data-preco-sugerido="648000" data-texto-arnes="Reduzir para R$ 648k coloca o imóvel dentro da faixa dos últimos 4 fechamentos similares no bairro. Estimativa: 3x mais interesse nos portais." type="button">Sugerir ajuste de preço</button></td>
+              </tr>
+              <tr data-imovel="1023">
+                <td><div class="diag-imovel-nome">Ap. 2q Centro</div><div class="diag-imovel-codigo">#1023</div></td>
+                <td>R$ 480k</td>
+                <td>R$ 495k</td>
+                <td class="diag-diff-abaixo">-3% abaixo</td>
+                <td>12 dias</td>
+                <td>
+                  <span class="diag-status diag-status--ok">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    Competitivo — manter
+                  </span>
+                </td>
+                <td></td>
+              </tr>
+              <tr data-imovel="1044">
+                <td><div class="diag-imovel-nome">Casa 3q Jardins</div><div class="diag-imovel-codigo">#1044</div></td>
+                <td>R$ 620k</td>
+                <td>R$ 590k</td>
+                <td class="diag-diff-acima">+5% acima</td>
+                <td>45 dias</td>
+                <td>
+                  <span class="diag-status diag-status--atencao">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+                    Levemente acima — monitorar
+                  </span>
+                </td>
+                <td><button class="diag-acao-btn" data-preco-atual="620000" data-preco-sugerido="590000" data-texto-arnes="Reduzir para R$ 590k aproxima o imóvel da faixa dos imóveis similares no bairro. Estimativa: mais visibilidade nos portais." type="button">Sugerir ajuste de preço</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Seção 2: Gaps de demanda -->
+      <div>
+        <h3 class="section-title">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+          Gaps de demanda detectados pelo Arnês
+        </h3>
+        <p class="gap-subtitulo">Baseado nas buscas dos seus leads + tendências dos portais</p>
+        <div class="gap-grid">
+          <div class="gap-card fade-in-seq">
+            <div class="gap-card-titulo"><span class="gap-icone" aria-hidden="true">🔍</span> Apartamento 2 quartos até R$ 380k</div>
+            <div class="gap-card-local">Valinhos · Alta demanda</div>
+            <div class="gap-card-corpo">
+              <strong>14 leads</strong> seus buscaram esse perfil esse mês.<br>
+              Você tem <strong>0 imóveis</strong> nessa faixa.<br>
+              Nos portais: <strong>8 imóveis</strong> disponíveis — todos de concorrentes.
+            </div>
+            <button class="btn-criar-alerta" type="button">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+              Criar alerta de captação
+            </button>
+          </div>
+          <div class="gap-card fade-in-seq">
+            <div class="gap-card-titulo"><span class="gap-icone" aria-hidden="true">🔍</span> Casa com quintal até R$ 550k</div>
+            <div class="gap-card-local">Valinhos/Campinas · Demanda crescente</div>
+            <div class="gap-card-corpo">
+              <strong>9 leads</strong> mencionaram "quintal" ou "área externa".<br>
+              Você tem <strong>2 imóveis</strong> — ambos acima de R$ 700k.<br>
+              Gap: faixa <strong>R$ 450k–550k</strong> descoberta.
+            </div>
+            <button class="btn-criar-alerta" type="button">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+              Criar alerta de captação
+            </button>
+          </div>
+          <div class="gap-card fade-in-seq">
+            <div class="gap-card-titulo"><span class="gap-icone" aria-hidden="true">🔍</span> Imóvel comercial sala/loja</div>
+            <div class="gap-card-local">Centro · Demanda estável</div>
+            <div class="gap-card-corpo">
+              <strong>6 leads</strong> buscaram comercial esse mês.<br>
+              Você tem <strong>1 imóvel comercial</strong> — já reservado.<br>
+              Oportunidade de captação imediata.
+            </div>
+            <button class="btn-criar-alerta" type="button">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+              Criar alerta de captação
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 3: Performance por portal -->
+      <div>
+        <h3 class="section-title">Qual portal está te dando retorno de verdade</h3>
+        <div class="portal-grid">
+          <div class="portal-card fade-in-seq">
+            <div class="portal-logo-placeholder">ZAP</div>
+            <div class="portal-nome">ZAP Imóveis</div>
+            <div class="portal-metricas">
+              <div class="portal-metrica-linha"><span class="portal-metrica-label">Leads gerados</span><span class="portal-metrica-valor">31</span></div>
+              <div class="portal-metrica-linha"><span class="portal-metrica-label">Visitas geradas</span><span class="portal-metrica-valor">18</span></div>
+              <div class="portal-metrica-linha"><span class="portal-metrica-label">Fechamentos</span><span class="portal-metrica-valor">2</span></div>
+              <div class="portal-metrica-linha"><span class="portal-metrica-label">Taxa de conversão</span><span class="portal-metrica-valor">6,4%</span></div>
+              <div class="portal-metrica-linha"><span class="portal-metrica-label">Custo por fechamento</span><span class="portal-metrica-valor">~R$ 890</span></div>
+            </div>
+            <div class="portal-narrativa">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+              <span>Arnês: canal mais eficiente em leads totais, mas OLX converte melhor por real investido.</span>
+            </div>
+          </div>
+          <div class="portal-card fade-in-seq">
+            <div class="portal-logo-placeholder">OLX</div>
+            <div class="portal-nome">OLX</div>
+            <div class="portal-metricas">
+              <div class="portal-metrica-linha"><span class="portal-metrica-label">Leads gerados</span><span class="portal-metrica-valor">19</span></div>
+              <div class="portal-metrica-linha"><span class="portal-metrica-label">Visitas geradas</span><span class="portal-metrica-valor">13</span></div>
+              <div class="portal-metrica-linha"><span class="portal-metrica-label">Fechamentos</span><span class="portal-metrica-valor">2</span></div>
+              <div class="portal-metrica-linha"><span class="portal-metrica-label">Taxa de conversão</span><span class="portal-metrica-valor">10,5%</span></div>
+              <div class="portal-metrica-linha"><span class="portal-metrica-label">Custo por fechamento</span><span class="portal-metrica-valor">~R$ 540</span></div>
+            </div>
+            <div class="portal-narrativa">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+              <span>Arnês: melhor custo por fechamento do mês — 40% mais barato que o ZAP.</span>
+            </div>
+          </div>
+          <div class="portal-card fade-in-seq">
+            <div class="portal-logo-placeholder">VR</div>
+            <div class="portal-nome">VivaReal</div>
+            <div class="portal-metricas">
+              <div class="portal-metrica-linha"><span class="portal-metrica-label">Leads gerados</span><span class="portal-metrica-valor">22</span></div>
+              <div class="portal-metrica-linha"><span class="portal-metrica-label">Visitas geradas</span><span class="portal-metrica-valor">11</span></div>
+              <div class="portal-metrica-linha"><span class="portal-metrica-label">Fechamentos</span><span class="portal-metrica-valor">1</span></div>
+              <div class="portal-metrica-linha"><span class="portal-metrica-label">Taxa de conversão</span><span class="portal-metrica-valor">4,5%</span></div>
+              <div class="portal-metrica-linha"><span class="portal-metrica-label">Custo por fechamento</span><span class="portal-metrica-valor">~R$ 1.120</span></div>
+            </div>
+            <div class="portal-narrativa">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+              <span>Arnês: menor volume dos três — pode ser reforçado com mais fotos e descrição.</span>
+            </div>
+          </div>
+        </div>
+        <div class="portal-recomendacao fade-in-seq">
+          <div class="portal-recomendacao-titulo">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+            Recomendação do Arnês
+          </div>
+          <p>OLX tem custo por fechamento 40% menor que ZAP esse mês. Seus 3 imóveis exclusivos não estão publicados no OLX. Publicar agora pode gerar 2 contatos qualificados na semana.</p>
+          <div class="portal-recomendacao-acoes">
+            <button class="btn btn-primary" id="btnPublicarOlx" type="button">Publicar no OLX</button>
+            <button class="btn btn-portal-outline" id="btnVerExclusivos" type="button">Ver imóveis exclusivos</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 4: Índice FIPE ZAP -->
+      <div class="panel-card">
+        <h3 class="section-title">Mercado de Valinhos · Referência FIPE ZAP</h3>
+        <p class="fipe-fonte">Fonte: FIPE ZAP · Atualizado junho 2026</p>
+        <div class="fipe-grid">
+          <div class="fipe-card fade-in-seq">
+            <div class="fipe-card-label">Preço médio m² Valinhos</div>
+            <div class="fipe-card-valor">R$ 5.840/m²</div>
+            <div class="fipe-card-delta delta-green">↑ 3,2% vs ano anterior</div>
+          </div>
+          <div class="fipe-card fade-in-seq">
+            <div class="fipe-card-label">Preço médio m² Campinas</div>
+            <div class="fipe-card-valor">R$ 7.120/m²</div>
+            <div class="fipe-card-delta delta-green">↑ 4,8% vs ano anterior</div>
+          </div>
+          <div class="fipe-card fade-in-seq">
+            <div class="fipe-card-label">Tempo médio de venda</div>
+            <div class="fipe-card-valor">67 dias</div>
+            <div class="fipe-card-delta delta-gray">Mercado aquecido abaixo de 45 dias</div>
+          </div>
+          <div class="fipe-card fade-in-seq">
+            <div class="fipe-card-label">Absorção do mercado</div>
+            <div class="fipe-card-valor">2,1 meses de estoque</div>
+            <div class="fipe-card-delta delta-gray">Equilíbrio comprador/vendedor</div>
+          </div>
+        </div>
+        <p class="fipe-nota-rodape">Dados FIPE ZAP são referência de mercado. Preços reais dos portais são atualizados diariamente pelo Arnês.</p>
+      </div>
+
+      <!-- Seção 5: Pergunta livre ao Arnês -->
+      <div class="arnes-pergunta-row">
+        <div class="arnes-pergunta-input-wrap">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+          <input type="text" id="arnesPerguntaInput" placeholder="Pergunte sobre o mercado... ex: qual bairro está valorizando mais?">
+          <button class="btn btn-primary" id="btnArnesPerguntar" type="button">Perguntar</button>
+        </div>
+        <div class="arnes-resposta-card" id="arnesRespostaCard" hidden>
+          <div class="arnes-resposta-titulo">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+            Arnês IA respondeu:
+          </div>
+          <p id="arnesRespostaTexto"></p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== Modal genérico: confirmação de ações do Arnês IA ===== -->
+  <div class="modal-overlay" id="modalGenerico">
+    <div class="modal-generico" role="dialog" aria-modal="true" aria-labelledby="modalGenericoTitulo">
+      <div class="modal-header">
+        <h2 id="modalGenericoTitulo">Confirmar ação</h2>
+        <button class="modal-close" id="modalGenericoClose" type="button" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="modalGenericoBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="modalGenericoCancelar" type="button">Cancelar</button>
+        <button class="btn btn-primary" id="modalGenericoConfirmar" type="button">Confirmar</button>
+      </div>
+    </div>
+  </div>
+  <!-- ===== Painel lateral da Arnês IA (estilo Gemini) ===== -->
+  <aside class="ia-panel" id="iaPanel" aria-hidden="true">
+    <div class="ia-panel-header">
+      <div class="ia-panel-brand">
+        <div class="logomark">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <defs>
+              <linearGradient id="starGradientPanel" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#D67A52"/>
+                <stop offset="100%" stop-color="#1E4D5C"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#starGradientPanel)" d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/>
+          </svg>
+        </div>
+        <span>Arnês IA</span>
+      </div>
+      <button class="ia-panel-close" id="iaPanelClose" type="button" aria-label="Fechar painel da IA">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="ia-panel-body">
+      <div class="ia-greeting" id="iaGreeting">
+        <h2>Olá, Samuel</h2>
+        <p>Sou a Arnês IA. Como posso ajudar?</p>
+      </div>
+
+      <div class="ia-panel-history" id="iaHistory"></div>
+
+      <div class="ia-panel-suggestions" id="iaSuggestions">
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Qual lead tem mais chance de fechar hoje?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Tem alguma proposta vencendo essa semana?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Qual imóvel está parado há mais tempo?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Quais proprietários precisam de feedback?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Como foi a semana da imobiliária?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Gera relatório do mês</span></button>
+      </div>
+    </div>
+
+    <div class="ia-panel-footer">
+      <div class="ia-input-pill">
+        <input type="text" id="iaPanelInput" placeholder="Pergunte sobre sua carteira, leads ou imóveis...">
+        <button class="ia-send-btn" id="iaPanelSend" type="button" aria-label="Enviar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9 22 2Z"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== Toast genérico de erro de API ===== -->
+  <div class="toast" id="errorToast" role="status" aria-live="polite">
+    <span class="toast-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+    </span>
+    <div class="toast-body">
+      <p id="errorToastText">Ocorreu um erro.</p>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script>
+    // Indicador deslizante da navbar: acompanha o item ativo
+    (function () {
+      const navList = document.getElementById('navbarLinks');
+      const indicator = document.getElementById('navIndicator');
+
+      function moveIndicatorTo(li, animate) {
+        const listRect = navList.getBoundingClientRect();
+        const itemRect = li.getBoundingClientRect();
+        if (!animate) indicator.style.transition = 'none';
+        indicator.style.left = (itemRect.left - listRect.left) + 'px';
+        indicator.style.width = itemRect.width + 'px';
+        if (!animate) {
+          indicator.offsetHeight;
+          indicator.style.transition = '';
+        }
+      }
+
+      const activeLi = navList.querySelector('li.active');
+      if (activeLi) moveIndicatorTo(activeLi, false);
+
+      window.addEventListener('resize', function () {
+        const current = navList.querySelector('li.active');
+        if (current) moveIndicatorTo(current, false);
+      });
+
+      document.querySelectorAll('#navbarLinks li.nav-placeholder').forEach(function (item) {
+        item.addEventListener('click', function () {
+          document.querySelectorAll('#navbarLinks li').forEach(function (li) {
+            li.classList.remove('active');
+          });
+          item.classList.add('active');
+          moveIndicatorTo(item, true);
+        });
+      });
+    })();
+
+    // Menus dropdown da navbar: abrem no hover ou clique, fecham ao clicar fora
+    (function () {
+      const dropdowns = document.querySelectorAll('.nav-dropdown');
+
+      function closeAll(except) {
+        dropdowns.forEach(function (dd) {
+          if (dd !== except) {
+            dd.classList.remove('open');
+            const trigger = dd.querySelector('.nav-dropdown-trigger');
+            if (trigger) trigger.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+
+      dropdowns.forEach(function (dd) {
+        const trigger = dd.querySelector('.nav-dropdown-trigger');
+
+        dd.addEventListener('mouseenter', function () {
+          closeAll(dd);
+          dd.classList.add('open');
+          trigger.setAttribute('aria-expanded', 'true');
+        });
+
+        dd.addEventListener('mouseleave', function () {
+          dd.classList.remove('open');
+          trigger.setAttribute('aria-expanded', 'false');
+        });
+
+        trigger.addEventListener('click', function (e) {
+          e.stopPropagation();
+          const isOpen = dd.classList.contains('open');
+          closeAll(dd);
+          if (isOpen) {
+            dd.classList.remove('open');
+            trigger.setAttribute('aria-expanded', 'false');
+          } else {
+            dd.classList.add('open');
+            trigger.setAttribute('aria-expanded', 'true');
+          }
+        });
+      });
+
+      document.querySelectorAll('.dropdown-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+          closeAll(null);
+        });
+      });
+
+      document.addEventListener('click', function () {
+        closeAll(null);
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeAll(null);
+      });
+    })();
+    // ===== Health check / banner de reconexão (mesmo padrão das outras telas) =====
+    (function () {
+      window.apiDisponivel = false;
+      const banner = document.getElementById('reconnectBanner');
+      const errorToast = document.getElementById('errorToast');
+      let errorToastTimer = null;
+
+      window.mostrarErroToast = function (mensagem) {
+        document.getElementById('errorToastText').textContent = mensagem;
+        errorToast.classList.add('show');
+        clearTimeout(errorToastTimer);
+        errorToastTimer = setTimeout(function () { errorToast.classList.remove('show'); }, 4000);
+      };
+
+      function verificarConexao() {
+        apiFetch('/health')
+          .then(function () {
+            window.apiDisponivel = true;
+            banner.classList.remove('show');
+          })
+          .catch(function () {
+            window.apiDisponivel = false;
+            banner.classList.add('show');
+          });
+      }
+
+      verificarConexao();
+      setInterval(verificarConexao, 15000);
+    })();
+
+    // ===== Modal genérico: usado pelas ações desta tela =====
+    const modalGenerico = {
+      overlay: document.getElementById('modalGenerico'),
+      titulo: document.getElementById('modalGenericoTitulo'),
+      corpo: document.getElementById('modalGenericoBody'),
+      cancelar: document.getElementById('modalGenericoCancelar'),
+      confirmar: document.getElementById('modalGenericoConfirmar'),
+      close: document.getElementById('modalGenericoClose'),
+    };
+
+    function abrirModalGenerico(opcoes) {
+      modalGenerico.titulo.textContent = opcoes.titulo;
+      modalGenerico.corpo.innerHTML = opcoes.corpoHtml;
+      modalGenerico.confirmar.textContent = opcoes.textoConfirmar || 'Confirmar';
+      modalGenerico.cancelar.textContent = opcoes.textoCancelar || 'Cancelar';
+      modalGenerico.confirmar.onclick = function () {
+        if (opcoes.aoConfirmar) opcoes.aoConfirmar();
+        fecharModalGenerico();
+      };
+      modalGenerico.overlay.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function fecharModalGenerico() {
+      modalGenerico.overlay.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    modalGenerico.cancelar.addEventListener('click', fecharModalGenerico);
+    modalGenerico.close.addEventListener('click', fecharModalGenerico);
+    modalGenerico.overlay.addEventListener('click', function (e) {
+      if (e.target === modalGenerico.overlay) fecharModalGenerico();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && modalGenerico.overlay.classList.contains('show')) fecharModalGenerico();
+    });
+
+    // ===== Animação de entrada sequencial (100ms entre cards, por seção) =====
+    [
+      document.querySelectorAll('.gap-grid .fade-in-seq'),
+      document.querySelectorAll('.portal-grid .fade-in-seq, .portal-recomendacao.fade-in-seq'),
+      document.querySelectorAll('.fipe-grid .fade-in-seq'),
+    ].forEach(function (grupo) {
+      grupo.forEach(function (el, index) {
+        el.style.animationDelay = (index * 0.1) + 's';
+      });
+    });
+
+    // ===== Seção 1: sugerir ajuste de preço =====
+    document.querySelectorAll('.diag-acao-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const precoAtual = parseInt(btn.dataset.precoAtual, 10);
+        const precoSugerido = parseInt(btn.dataset.precoSugerido, 10);
+        const textoArnes = btn.dataset.textoArnes;
+        const linha = btn.closest('tr');
+        const nomeImovel = linha.querySelector('.diag-imovel-nome').textContent;
+
+        abrirModalGenerico({
+          titulo: 'Sugerir ajuste de preço — ' + nomeImovel,
+          corpoHtml:
+            '<p><strong>Preço atual:</strong> R$ ' + precoAtual.toLocaleString('pt-BR') + '</p>' +
+            '<p><strong>Preço sugerido:</strong> R$ ' + precoSugerido.toLocaleString('pt-BR') + '</p>' +
+            '<p>' + textoArnes + '</p>',
+          textoConfirmar: 'Aprovar ajuste',
+          textoCancelar: 'Ignorar',
+          aoConfirmar: function () {
+            if (typeof mostrarErroToast === 'function') mostrarErroToast('Ajuste de preço aprovado para ' + nomeImovel + ' (simulado).');
+          },
+        });
+      });
+    });
+
+    // ===== Seção 2: criar alerta de captação =====
+    document.querySelectorAll('.btn-criar-alerta').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        btn.disabled = true;
+        btn.textContent = 'Alerta criado';
+        if (typeof mostrarErroToast === 'function') {
+          mostrarErroToast('Arnês vai monitorar captações com esse perfil e avisar quando aparecer oportunidade.');
+        }
+      });
+    });
+
+    // ===== Seção 3: ações da recomendação de portal =====
+    document.getElementById('btnPublicarOlx').addEventListener('click', function () {
+      if (typeof mostrarErroToast === 'function') mostrarErroToast('Imóveis exclusivos publicados no OLX (simulado).');
+    });
+    document.getElementById('btnVerExclusivos').addEventListener('click', function () {
+      location.href = 'imoveis.html';
+    });
+
+    // ===== Seção 5: pergunta livre ao Arnês — chamada real ao /api/chat,
+    // com fallback pro texto mock só quando o backend está fora do ar =====
+    (function () {
+      const input = document.getElementById('arnesPerguntaInput');
+      const btn = document.getElementById('btnArnesPerguntar');
+      const respostaCard = document.getElementById('arnesRespostaCard');
+      const respostaTexto = document.getElementById('arnesRespostaTexto');
+
+      function respostaMockOffline(pergunta) {
+        const p = pergunta.toLowerCase();
+        if (p.indexOf('bairro') !== -1 || p.indexOf('valoriz') !== -1) {
+          return 'Palmeiras valorizou 4,1% nos últimos 12 meses segundo FIPE ZAP. Você tem 8 imóveis lá — 3 captados há mais de 1 ano estão com potencial de valorização não refletido no preço.';
+        }
+        if (p.indexOf('concorrente') !== -1 || p.indexOf('mercado') !== -1) {
+          return 'Nos portais, há 143 imóveis similares aos seus anunciados em Valinhos. 31 estão há mais de 90 dias sem baixar preço — sinal de mercado ainda firme.';
+        }
+        return 'Com base nos dados de junho, o mercado de Valinhos está em equilíbrio — nem vendedor nem comprador em vantagem clara. Momento favorável para captações exclusivas.';
+      }
+
+      function perguntar() {
+        const texto = input.value.trim();
+        if (!texto) return;
+
+        respostaCard.hidden = false;
+        respostaTexto.textContent = 'Pensando...';
+        btn.disabled = true;
+
+        if (!window.apiDisponivel) {
+          setTimeout(function () {
+            respostaTexto.textContent = respostaMockOffline(texto);
+            btn.disabled = false;
+          }, 400);
+          return;
+        }
+
+        apiFetch('/chat', {
+          method: 'POST',
+          body: JSON.stringify({ pergunta: texto, historico: [] }),
+        })
+          .then(function (dados) {
+            respostaTexto.textContent = dados.resposta || dados.mensagem || respostaMockOffline(texto);
+          })
+          .catch(function (erro) {
+            console.error('Falha ao chamar /api/chat:', erro);
+            respostaTexto.textContent = respostaMockOffline(texto);
+            if (typeof mostrarErroToast === 'function') mostrarErroToast('Arnês IA indisponível no momento — mostrando estimativa offline.');
+          })
+          .finally(function () {
+            btn.disabled = false;
+          });
+      }
+
+      btn.addEventListener('click', perguntar);
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') perguntar();
+      });
+    })();
+    // Painel lateral da Arnês IA (estilo Gemini): desliza da direita e empurra o conteúdo
+    (function () {
+      const trigger = document.getElementById('iaTrigger');
+      const panel = document.getElementById('iaPanel');
+      const closeBtn = document.getElementById('iaPanelClose');
+      const greeting = document.getElementById('iaGreeting');
+      const suggestions = document.getElementById('iaSuggestions');
+      const history = document.getElementById('iaHistory');
+      const input = document.getElementById('iaPanelInput');
+      const sendBtn = document.getElementById('iaPanelSend');
+
+      function openPanel() {
+        document.body.classList.add('ia-panel-open');
+        panel.classList.add('show');
+        panel.setAttribute('aria-hidden', 'false');
+      }
+
+      function closePanel() {
+        document.body.classList.remove('ia-panel-open');
+        panel.classList.remove('show');
+        panel.setAttribute('aria-hidden', 'true');
+      }
+
+      trigger.addEventListener('click', openPanel);
+      closeBtn.addEventListener('click', closePanel);
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && panel.classList.contains('show')) closePanel();
+      });
+
+      function addMessage(texto, role) {
+        greeting.style.display = 'none';
+        suggestions.style.display = 'none';
+        const msg = document.createElement('div');
+        msg.className = 'ia-message ia-message--' + role;
+        const p = document.createElement('p');
+        p.textContent = texto;
+        msg.appendChild(p);
+        history.appendChild(msg);
+        history.scrollTop = history.scrollHeight;
+      }
+
+      window.iaHistorico = window.iaHistorico || [];
+
+      // Nem toda intenção do backend devolve "resposta" (texto livre de
+      // Sonnet/Haiku) — EDICAO_CADASTRO, CRIACAO_CADASTRO, CONFIGURAR_META,
+      // ACAO_WHATSAPP e os casos de navegação sem resultado usam "mensagem"
+      // (ou "erro"). Sem isso, addMessage(dados.resposta, ...) recebia
+      // undefined pra essas intenções e a conversa ficava sem responder
+      // nada, dando a impressão de estar travada. (A barra "Pergunta livre
+      // ao Arnês" desta mesma tela já trata esse fallback — este painel
+      // lateral tinha ficado de fora da correção.)
+      function extrairTextoResposta(dados) {
+        if (dados.resposta) return dados.resposta;
+        if (dados.mensagem) return dados.mensagem;
+        if (typeof dados.erro === 'string') return dados.erro;
+        return 'Não entendi — pode reformular?';
+      }
+
+      function enviarPergunta(texto) {
+        if (!texto.trim()) return;
+        addMessage(texto, 'user');
+        input.value = '';
+
+        if (!window.apiDisponivel) {
+          setTimeout(function () {
+            addMessage('A Arnês IA está temporariamente indisponível — tento de novo assim que reconectar.', 'ai');
+          }, 400);
+          return;
+        }
+
+        window.iaHistorico.push({ role: 'user', content: texto });
+
+        addMessage('Pensando...', 'ai');
+        const bolhaPensando = history.lastElementChild;
+
+        apiFetch('/chat', {
+          method: 'POST',
+          body: JSON.stringify({ pergunta: texto, historico: window.iaHistorico }),
+        })
+          .then(function (dados) {
+            const textoResposta = extrairTextoResposta(dados);
+            bolhaPensando.querySelector('p').textContent = textoResposta;
+            window.iaHistorico.push({ role: 'assistant', content: textoResposta });
+          })
+          .catch(function (erro) {
+            console.error('Falha ao chamar /api/chat:', erro);
+            bolhaPensando.querySelector('p').textContent = 'Não consegui falar com a Arnês IA agora. Tente de novo em instantes.';
+            if (typeof mostrarErroToast === 'function') mostrarErroToast('Arnês IA indisponível no momento.');
+          })
+          .finally(function () {
+            history.scrollTop = history.scrollHeight;
+          });
+      }
+
+      sendBtn.addEventListener('click', function () {
+        enviarPergunta(input.value);
+      });
+
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') enviarPergunta(input.value);
+      });
+
+      document.querySelectorAll('.ia-suggestion-chip').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          document.querySelectorAll('.ia-suggestion-chip').forEach(function (c) {
+            if (c !== chip) c.style.display = 'none';
+          });
+          chip.classList.add('pulsing');
+          const texto = chip.textContent.trim();
+          setTimeout(function () {
+            enviarPergunta(texto);
+          }, 350);
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>

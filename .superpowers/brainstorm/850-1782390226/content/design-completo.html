@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Design Completo — GRV CS</title>
+<style>
+/* ── RESET ── */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f0f2f5;min-height:100vh}
+
+/* ── NAVEGAÇÃO DO DEMO ── */
+.demo-nav{background:#1a202c;padding:10px 24px;display:flex;align-items:center;gap:6px;position:sticky;top:0;z-index:999}
+.demo-nav span{font-size:11px;color:#718096;margin-right:6px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.dnav-btn{padding:6px 14px;border-radius:20px;border:none;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;color:#a0aec0;background:transparent}
+.dnav-btn.active{background:#E05A1E;color:#fff}
+.dnav-btn:hover:not(.active){background:#2d3748;color:#e2e8f0}
+
+/* ── APP SHELL ── */
+.screen{display:none;height:calc(100vh - 42px)}
+.screen.active{display:flex}
+
+/* ── SIDEBAR SAG ── */
+.sidebar{width:210px;background:#fff;border-right:1px solid #e8ecf0;display:flex;flex-direction:column;flex-shrink:0;height:100%;overflow:hidden}
+.sb-logo{padding:18px 16px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f0f2f5}
+.sb-gicon{width:32px;height:32px;flex-shrink:0}
+.sb-brand{font-size:12px;font-weight:700;color:#1a202c;line-height:1.3}
+.sb-sub{font-size:9px;color:#a0aec0;margin-top:1px}
+.sb-nav{padding:10px 10px;flex:1;display:flex;flex-direction:column;gap:1px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;font-size:12px;font-weight:500;color:#4a5568;cursor:pointer;transition:all .12s}
+.sb-item:hover{background:#f7f8fa;color:#1a202c}
+.sb-item.active{background:#FFF3EE;color:#E05A1E;font-weight:700}
+.sb-ico{width:16px;height:16px;flex-shrink:0;opacity:.45}
+.sb-item.active .sb-ico{opacity:1}
+.sb-bottom{padding:12px 14px;border-top:1px solid #f0f2f5}
+.sb-consul-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#a0aec0;margin-bottom:5px;font-weight:700}
+.sb-consul{display:flex;align-items:center;gap:8px;background:#f7f8fa;border-radius:9px;padding:7px 10px}
+.sb-avatar{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#E05A1E,#ff8c5a);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0}
+.sb-cname{font-size:11px;color:#2d3748;font-weight:600}
+
+/* ── MAIN AREA ── */
+.main{flex:1;background:#f8f9fb;overflow-y:auto;display:flex;flex-direction:column}
+.main-header{padding:20px 24px 0;flex-shrink:0}
+.main-h1{font-size:20px;font-weight:800;color:#1a202c;margin-bottom:2px}
+.main-sub{font-size:12px;color:#718096}
+
+/* ── TOOLBAR ── */
+.toolbar{padding:12px 24px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #e8ecf0;background:#f8f9fb}
+.tb-search{flex:1;max-width:260px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:7px 12px}
+.tb-search input{border:none;outline:none;font-size:12px;color:#1a202c;width:100%;background:transparent}
+.tb-filter{display:flex;align-items:center;gap:6px;padding:7px 12px;background:#fff;border:1px solid #e2e8f0;border-radius:9px;font-size:12px;color:#4a5568;cursor:pointer}
+.view-toggle{display:flex;background:#fff;border:1px solid #e2e8f0;border-radius:9px;overflow:hidden;margin-left:auto}
+.vt-btn{padding:6px 12px;font-size:11px;font-weight:600;color:#718096;cursor:pointer;border:none;background:transparent;display:flex;align-items:center;gap:5px}
+.vt-btn.active{background:#FFF3EE;color:#E05A1E}
+
+/* ── FEED ── */
+.feed-wrap{padding:16px 24px;display:flex;flex-direction:column;gap:7px}
+.feed-card{display:flex;align-items:center;gap:12px;background:#fff;border-radius:12px;padding:12px 16px;border:1px solid #e8ecf0;cursor:pointer;transition:all .12s;position:relative;overflow:hidden}
+.feed-card:hover{border-color:#E05A1E;box-shadow:0 2px 12px rgba(224,90,30,.08)}
+.fc-stripe{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:12px 0 0 12px}
+.fc-content{display:flex;align-items:center;gap:12px;flex:1;margin-left:4px}
+.fc-avatar{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0}
+.fc-info{flex:1}
+.fc-name{font-size:13px;font-weight:700;color:#1a202c;margin-bottom:2px}
+.fc-meta{font-size:11px;color:#718096}
+.fc-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.fc-badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700}
+.b-red{background:#FFF5F5;color:#e53e3e}
+.b-green{background:#F0FFF4;color:#38a169}
+.b-orange{background:#FFF3EE;color:#E05A1E}
+.b-blue{background:#EBF8FF;color:#3182ce}
+.b-gray{background:#f7f8fa;color:#718096}
+.fc-csat{font-size:10px;color:#718096}
+.fc-prog{width:64px;height:4px;background:#e2e8f0;border-radius:2px;margin-top:2px}
+.fc-progbar{height:4px;border-radius:2px;background:#38a169}
+
+/* ── KANBAN ── */
+.kanban-wrap{padding:16px 24px;display:flex;gap:14px;overflow-x:auto;flex:1;align-items:flex-start}
+.kol{flex-shrink:0;width:220px;display:flex;flex-direction:column;gap:0}
+.kol-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.kol-lbl{font-size:11px;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.06em}
+.kol-cnt{width:20px;height:20px;border-radius:6px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#718096}
+.kcard{background:#fff;border-radius:12px;padding:11px 13px;border:1px solid #e8ecf0;margin-bottom:8px;position:relative;overflow:hidden;cursor:pointer;transition:border-color .12s}
+.kcard:hover{border-color:#E05A1E}
+.kc-stripe{position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0}
+.kc-name{font-size:12px;font-weight:700;color:#1a202c;margin-bottom:3px;margin-top:5px}
+.kc-fase{font-size:10px;color:#718096;margin-bottom:6px}
+.kc-foot{display:flex;align-items:center;justify-content:space-between}
+.kc-pct{font-size:10px;font-weight:700;color:#38a169}
+.kc-badge{padding:2px 7px;border-radius:20px;font-size:9px;font-weight:700}
+
+/* ── DETALHE DO CLIENTE ── */
+.dcliente{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.dc-header{padding:20px 24px 14px;display:flex;align-items:center;gap:14px;border-bottom:1px solid #e8ecf0;background:#fff}
+.dc-back{width:30px;height:30px;border-radius:8px;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#718096;font-size:14px;flex-shrink:0}
+.dc-avatar{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;flex-shrink:0}
+.dc-info{flex:1}
+.dc-name{font-size:17px;font-weight:800;color:#1a202c}
+.dc-meta{font-size:11px;color:#718096;margin-top:1px}
+.dc-chips{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
+.chip{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700}
+
+/* tabs */
+.dc-tabs{display:flex;border-bottom:1px solid #e8ecf0;padding:0 24px;background:#fff}
+.dc-tab{padding:10px 16px;font-size:12px;font-weight:600;color:#718096;cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;white-space:nowrap}
+.dc-tab.active{color:#E05A1E;border-bottom-color:#E05A1E}
+.dc-body{flex:1;overflow-y:auto;padding:20px 24px}
+
+/* 360 */
+.g360{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.card360{background:#fff;border-radius:12px;padding:16px;border:1px solid #e8ecf0}
+.c360-lbl{font-size:10px;font-weight:700;color:#a0aec0;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.c360-title{font-size:18px;font-weight:800;color:#1a202c;margin-bottom:2px}
+.c360-sub{font-size:11px;color:#718096}
+.prog-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.prog-label{font-size:11px;color:#4a5568;width:90px;flex-shrink:0}
+.prog-bar-wrap{flex:1;height:6px;background:#e8ecf0;border-radius:3px;overflow:hidden}
+.prog-bar{height:100%;border-radius:3px}
+.prog-pct{font-size:11px;font-weight:700;width:32px;text-align:right;flex-shrink:0}
+
+/* atividades */
+.pb-layout{display:grid;grid-template-columns:220px 1fr;gap:16px;height:100%;align-items:start}
+.pb-list{display:flex;flex-direction:column;gap:6px}
+.pb-item{background:#fff;border-radius:10px;padding:10px 12px;border:1px solid #e8ecf0;cursor:pointer;transition:all .12s}
+.pb-item.active{border-color:#E05A1E;box-shadow:0 2px 8px rgba(224,90,30,.1)}
+.pb-iname{font-size:12px;font-weight:700;color:#1a202c}
+.pb-imeta{font-size:10px;color:#718096;margin-top:2px}
+.pb-iprog{height:3px;background:#e8ecf0;border-radius:2px;margin-top:6px;overflow:hidden}
+.pb-iprogbar{height:100%;border-radius:2px;background:#E05A1E}
+.at-panel{background:#fff;border-radius:12px;border:1px solid #e8ecf0;overflow:hidden}
+.at-panel-hd{padding:12px 16px;border-bottom:1px solid #f0f2f5;display:flex;align-items:center;justify-content:space-between}
+.at-panel-title{font-size:13px;font-weight:800;color:#1a202c}
+.at-list{display:flex;flex-direction:column}
+.at-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #f0f2f5;cursor:pointer;transition:background .1s}
+.at-row:hover{background:#f8f9fb}
+.at-row.sel{background:#FFF3EE}
+.at-check{width:16px;height:16px;border-radius:4px;border:1.5px solid #cbd5e0;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.at-check.done{background:#38a169;border-color:#38a169;color:#fff}
+.at-name{font-size:12px;font-weight:600;color:#1a202c;flex:1}
+.at-status{font-size:10px;font-weight:700}
+
+/* notas */
+.nota-card{background:#fff;border-radius:12px;padding:14px 16px;border:1px solid #e8ecf0;margin-bottom:8px}
+.nota-date{font-size:10px;color:#a0aec0;margin-bottom:4px}
+.nota-text{font-size:12px;color:#2d3748;line-height:1.6}
+.nota-form{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px;display:flex;flex-direction:column;gap:8px}
+.nota-textarea{border:none;outline:none;font-size:12px;color:#1a202c;resize:none;font-family:inherit;width:100%;height:60px}
+.nota-actions{display:flex;justify-content:flex-end;gap:6px}
+.btn-sm{padding:6px 14px;border-radius:8px;font-size:11px;font-weight:700;border:none;cursor:pointer}
+.btn-primary{background:#E05A1E;color:#fff}
+.btn-ghost{background:#f7f8fa;color:#4a5568}
+
+/* ── PROJETOS GRV ── */
+.projetos-wrap{padding:16px 24px;display:flex;flex-direction:column;gap:18px}
+.pg-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.pg-kpi{background:#fff;border-radius:12px;padding:14px 16px;border:1px solid #e8ecf0}
+.pk-label{font-size:10px;font-weight:700;color:#a0aec0;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.pk-val{font-size:22px;font-weight:800;color:#1a202c;margin-bottom:2px}
+.pk-sub{font-size:10px;color:#718096}
+
+.pg-charts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.pg-chart-card{background:#fff;border-radius:12px;padding:16px;border:1px solid #e8ecf0}
+.pgc-title{font-size:12px;font-weight:700;color:#1a202c;margin-bottom:14px}
+
+/* donut simples */
+.donut-wrap{position:relative;width:100px;height:100px;margin:0 auto 12px}
+.donut-svg{width:100%;height:100%}
+.donut-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.donut-pct{font-size:16px;font-weight:800;color:#1a202c}
+.donut-lbl{font-size:9px;color:#718096}
+.donut-legend{display:flex;flex-direction:column;gap:5px}
+.dl-row{display:flex;align-items:center;gap:7px;font-size:10px;color:#4a5568}
+.dl-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* bar chart simples */
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:80px;padding-bottom:0}
+.bc-col{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1}
+.bc-bar{width:100%;border-radius:4px 4px 0 0;min-height:4px;transition:opacity .15s}
+.bc-lbl{font-size:9px;color:#718096;text-align:center;white-space:nowrap}
+.bc-val{font-size:9px;font-weight:700;color:#4a5568}
+
+/* gauge simples */
+.gauge-wrap{display:flex;flex-direction:column;gap:10px}
+.gauge-row{display:flex;align-items:center;gap:10px}
+.gauge-lbl{font-size:11px;color:#4a5568;width:80px;flex-shrink:0}
+.gauge-track{flex:1;height:8px;background:#e8ecf0;border-radius:4px;overflow:hidden}
+.gauge-fill{height:100%;border-radius:4px}
+.gauge-val{font-size:11px;font-weight:700;width:36px;text-align:right;flex-shrink:0}
+
+.pg-agents{background:#fff;border-radius:12px;border:1px solid #e8ecf0;overflow:hidden}
+.pga-head{padding:12px 16px;border-bottom:1px solid #f0f2f5;font-size:12px;font-weight:800;color:#1a202c}
+.pga-table{width:100%;border-collapse:collapse;font-size:11px}
+.pga-table th{padding:8px 16px;text-align:left;color:#a0aec0;font-weight:700;text-transform:uppercase;font-size:9px;letter-spacing:.07em;border-bottom:1px solid #f0f2f5}
+.pga-table td{padding:9px 16px;border-bottom:1px solid #f7f8fa;color:#2d3748;vertical-align:middle}
+.pga-table tr:last-child td{border-bottom:none}
+.pga-name{font-weight:700;color:#1a202c}
+.stars{color:#F59E0B;font-size:11px}
+.dot-green{display:inline-block;width:7px;height:7px;border-radius:50%;background:#38a169;margin-right:4px}
+
+/* ── OVERLAY ATIVIDADE ── */
+.ov-backdrop{position:fixed;inset:0;background:rgba(15,20,30,.35);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}
+.ov-backdrop.open{opacity:1;pointer-events:all}
+.ov-panel{position:fixed;top:42px;right:0;bottom:0;width:420px;background:#fff;border-left:1px solid #e8ecf0;z-index:201;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s cubic-bezier(.4,0,.2,1);box-shadow:-4px 0 24px rgba(0,0,0,.08)}
+.ov-panel.open{transform:translateX(0)}
+.ov-hd{padding:14px 16px 0;border-bottom:1px solid #f0f2f5;flex-shrink:0}
+.ov-hd-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.ov-title{font-size:14px;font-weight:800;color:#1a202c;line-height:1.3;flex:1;margin-right:12px}
+.ov-close{width:28px;height:28px;border-radius:7px;border:1px solid #e2e8f0;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:#718096;flex-shrink:0}
+.ov-close:hover{background:#f7f8fa}
+.ov-meta{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.ov-assignee{display:flex;align-items:center;gap:6px;font-size:11px;color:#4a5568}
+.ov-av{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff}
+.ov-tabs{display:flex;gap:0}
+.ov-tab{padding:8px 14px;font-size:12px;font-weight:600;color:#718096;cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;white-space:nowrap}
+.ov-tab.active{color:#E05A1E;border-bottom-color:#E05A1E}
+.ov-body{flex:1;overflow-y:auto;padding:16px}
+.ov-dates{display:flex;gap:10px;padding:8px 0 4px}
+.ov-date-field{flex:1;display:flex;flex-direction:column;gap:3px}
+.ov-date-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#a0aec0}
+.ov-date-input{border:1px solid #e8ecf0;border-radius:6px;padding:5px 8px;font-size:11px;color:#1a202c;background:#f8f9fb;outline:none;cursor:pointer;width:100%}
+.ov-footer{padding:12px 16px;border-top:1px solid #f0f2f5;flex-shrink:0;background:#fff}
+.ov-btn-concluir{width:100%;padding:10px;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .15s}
+.ov-btn-concluir.pending{background:#38a169;color:#fff}
+.ov-btn-concluir.pending:hover{opacity:.88}
+.ov-btn-concluir.done{background:#f0f2f5;color:#a0aec0;cursor:default}
+
+/* registro timeline */
+.reg-form{display:flex;gap:8px;margin-bottom:16px}
+.reg-av{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#E05A1E,#ff8c5a);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;margin-top:2px}
+.reg-input-wrap{flex:1;background:#f8f9fb;border:1px solid #e8ecf0;border-radius:9px;padding:8px 12px;display:flex;flex-direction:column;gap:8px}
+.reg-input{border:none;outline:none;font-size:12px;color:#1a202c;background:transparent;width:100%;resize:none;font-family:inherit;min-height:40px}
+.reg-send{align-self:flex-end;padding:5px 12px;background:#E05A1E;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer}
+.reg-item{display:flex;gap:10px;margin-bottom:14px;position:relative}
+.reg-item-av{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0}
+.reg-item-body{flex:1}
+.reg-item-who{font-size:11px;font-weight:700;color:#1a202c;margin-bottom:2px}
+.reg-item-when{font-size:10px;color:#a0aec0}
+.reg-item-text{font-size:12px;color:#2d3748;line-height:1.6;margin-top:4px;background:#f8f9fb;border-radius:8px;padding:8px 10px}
+.reg-event{display:flex;align-items:center;gap:6px;font-size:11px;color:#718096;margin-bottom:12px;padding-left:4px}
+.reg-event-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+/* checklist */
+.cl-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f7f8fa}
+.cl-check{width:17px;height:17px;border-radius:4px;border:1.5px solid #cbd5e0;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer}
+.cl-check.done{background:#38a169;border-color:#38a169;color:#fff;font-size:9px}
+.cl-label{font-size:12px;color:#2d3748;flex:1}
+.cl-label.done{text-decoration:line-through;color:#a0aec0}
+.cl-add{display:flex;align-items:center;gap:8px;margin-top:10px;padding:8px 0;font-size:12px;color:#a0aec0;cursor:pointer}
+.cl-add:hover{color:#E05A1E}
+
+/* anotação */
+.ano-form{background:#f8f9fb;border:1px solid #e8ecf0;border-radius:9px;padding:10px 12px;margin-bottom:14px}
+.ano-input{border:none;outline:none;font-size:12px;color:#1a202c;background:transparent;width:100%;resize:none;font-family:inherit;height:70px}
+.ano-foot{display:flex;justify-content:flex-end;margin-top:6px}
+.ano-card{background:#FFFBEB;border:1px solid #fde68a;border-radius:9px;padding:10px 12px;margin-bottom:8px}
+.ano-date{font-size:10px;color:#a0aec0;margin-bottom:4px}
+.ano-text{font-size:12px;color:#2d3748;line-height:1.6}
+
+/* scrollbar subtle */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#cbd5e0}
+</style>
+</head>
+<body>
+
+<!-- NAV DO DEMO -->
+<nav class="demo-nav">
+  <span>Telas</span>
+  <button class="dnav-btn active" onclick="show('carteira-feed')">Carteira · Feed</button>
+  <button class="dnav-btn" onclick="show('carteira-kanban')">Carteira · Kanban</button>
+  <button class="dnav-btn" onclick="show('cliente-360')">Cliente · 360°</button>
+  <button class="dnav-btn" onclick="show('cliente-at')">Cliente · Atividades</button>
+  <button class="dnav-btn" onclick="show('cliente-notas')">Cliente · Notas</button>
+  <button class="dnav-btn" onclick="show('projetos')">Projetos GRV</button>
+</nav>
+
+<!-- ═══ TELA 1: CARTEIRA FEED ═══ -->
+<div id="carteira-feed" class="screen active">
+  <!-- sidebar -->
+  <div class="sidebar">
+    <div class="sb-logo">
+      <svg class="sb-gicon" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#E05A1E"/><text x="16" y="22" text-anchor="middle" font-size="17" font-weight="900" fill="white" font-family="system-ui">G</text></svg>
+      <div><div class="sb-brand">GRV Software</div><div class="sb-sub">CS · Jornada do Cliente</div></div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-item">
+        <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+        Projetos GRV
+      </div>
+      <div class="sb-item active">
+        <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Minha Carteira
+      </div>
+      <div class="sb-item">
+        <svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+        Criar Playbook
+      </div>
+    </div>
+    <div class="sb-bottom">
+      <div class="sb-consul-lbl">Consultor ativo</div>
+      <div class="sb-consul">
+        <div class="sb-avatar">S</div>
+        <div class="sb-cname">Severiano Rocha</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- main -->
+  <div class="main">
+    <div class="main-header" style="padding-bottom:14px">
+      <div class="main-h1">Minha Carteira</div>
+      <div class="main-sub">Severiano Rocha · 7 clientes ativos</div>
+    </div>
+    <div class="toolbar">
+      <div class="tb-search">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#a0aec0" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Buscar cliente..." />
+      </div>
+      <div class="tb-filter">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+        Todos os status
+      </div>
+      <div class="view-toggle">
+        <button class="vt-btn active">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Feed
+        </button>
+        <button class="vt-btn" onclick="show('carteira-kanban')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="13" rx="1"/><rect x="17" y="3" width="5" height="9" rx="1"/></svg>
+          Kanban
+        </button>
+      </div>
+    </div>
+    <div class="feed-wrap">
+      <div class="feed-card" onclick="show('cliente-360')">
+        <div class="fc-stripe" style="background:#e53e3e"></div>
+        <div class="fc-content">
+          <div class="fc-avatar" style="background:linear-gradient(135deg,#E05A1E,#ff8c5a)">R</div>
+          <div class="fc-info">
+            <div class="fc-name">ROBOTIX Automação</div>
+            <div class="fc-meta">🏁 Fase: Conclusão · Playbook GRV Full</div>
+          </div>
+          <div class="fc-right">
+            <span class="fc-badge b-red">Atrasado</span>
+            <div class="fc-csat">CSAT ★ 4.1</div>
+            <div class="fc-prog"><div class="fc-progbar" style="width:78%;background:#e53e3e"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="feed-card">
+        <div class="fc-stripe" style="background:#38a169"></div>
+        <div class="fc-content">
+          <div class="fc-avatar" style="background:linear-gradient(135deg,#2c7a7b,#4fd1c5)">A</div>
+          <div class="fc-info">
+            <div class="fc-name">AUTOMIND Tecnologia</div>
+            <div class="fc-meta">📈 Fase: Evolução · Playbook Básico</div>
+          </div>
+          <div class="fc-right">
+            <span class="fc-badge b-green">Em ordem</span>
+            <div class="fc-csat">CSAT ★ 4.8</div>
+            <div class="fc-prog"><div class="fc-progbar" style="width:56%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="feed-card">
+        <div class="fc-stripe" style="background:#38a169"></div>
+        <div class="fc-content">
+          <div class="fc-avatar" style="background:linear-gradient(135deg,#553c9a,#9f7aea)">U</div>
+          <div class="fc-info">
+            <div class="fc-name">USINAGEM3D Ltda</div>
+            <div class="fc-meta">🤝 Fase: 1ª Reunião · Playbook GRV Full</div>
+          </div>
+          <div class="fc-right">
+            <span class="fc-badge b-green">Em ordem</span>
+            <div class="fc-csat">CSAT —</div>
+            <div class="fc-prog"><div class="fc-progbar" style="width:6%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="feed-card">
+        <div class="fc-stripe" style="background:#d69e2e"></div>
+        <div class="fc-content">
+          <div class="fc-avatar" style="background:linear-gradient(135deg,#d69e2e,#f6e05e)">K</div>
+          <div class="fc-info">
+            <div class="fc-name">KMSIL Metalurgia</div>
+            <div class="fc-meta">⚙️ Fase: Implantação · Playbook GRV Full</div>
+          </div>
+          <div class="fc-right">
+            <span class="fc-badge b-orange">Atenção</span>
+            <div class="fc-csat">CSAT ★ 3.9</div>
+            <div class="fc-prog"><div class="fc-progbar" style="width:34%;background:#d69e2e"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="feed-card">
+        <div class="fc-stripe" style="background:#38a169"></div>
+        <div class="fc-content">
+          <div class="fc-avatar" style="background:linear-gradient(135deg,#1a365d,#4a90d9)">M</div>
+          <div class="fc-info">
+            <div class="fc-name">MECANIK Soluções</div>
+            <div class="fc-meta">📊 Fase: Evolução · Playbook Básico</div>
+          </div>
+          <div class="fc-right">
+            <span class="fc-badge b-green">Em ordem</span>
+            <div class="fc-csat">CSAT ★ 4.6</div>
+            <div class="fc-prog"><div class="fc-progbar" style="width:62%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TELA 2: CARTEIRA KANBAN ═══ -->
+<div id="carteira-kanban" class="screen">
+  <div class="sidebar">
+    <div class="sb-logo">
+      <svg class="sb-gicon" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#E05A1E"/><text x="16" y="22" text-anchor="middle" font-size="17" font-weight="900" fill="white" font-family="system-ui">G</text></svg>
+      <div><div class="sb-brand">GRV Software</div><div class="sb-sub">CS · Jornada do Cliente</div></div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-item"><svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>Projetos GRV</div>
+      <div class="sb-item active"><svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Minha Carteira</div>
+      <div class="sb-item"><svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3"/></svg>Criar Playbook</div>
+    </div>
+    <div class="sb-bottom">
+      <div class="sb-consul-lbl">Consultor ativo</div>
+      <div class="sb-consul"><div class="sb-avatar">S</div><div class="sb-cname">Severiano Rocha</div></div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="main-header" style="padding-bottom:14px">
+      <div class="main-h1">Minha Carteira</div>
+      <div class="main-sub">Severiano Rocha · 7 clientes ativos</div>
+    </div>
+    <div class="toolbar">
+      <div class="tb-search"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#a0aec0" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Buscar cliente..."/></div>
+      <div class="view-toggle">
+        <button class="vt-btn" onclick="show('carteira-feed')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>Feed</button>
+        <button class="vt-btn active"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="13" rx="1"/><rect x="17" y="3" width="5" height="9" rx="1"/></svg>Kanban</button>
+      </div>
+    </div>
+    <div class="kanban-wrap">
+      <!-- col 1 -->
+      <div class="kol">
+        <div class="kol-head"><span class="kol-lbl">1ª Reunião</span><span class="kol-cnt">1</span></div>
+        <div class="kcard"><div class="kc-stripe" style="background:#3182ce"></div><div class="kc-name">USINAGEM3D Ltda</div><div class="kc-fase">Playbook GRV Full</div><div class="kc-foot"><span class="kc-pct">6%</span><span class="kc-badge b-blue">Início</span></div></div>
+      </div>
+      <!-- col 2 -->
+      <div class="kol">
+        <div class="kol-head"><span class="kol-lbl">Implantação</span><span class="kol-cnt">2</span></div>
+        <div class="kcard"><div class="kc-stripe" style="background:#d69e2e"></div><div class="kc-name">KMSIL Metalurgia</div><div class="kc-fase">Playbook GRV Full</div><div class="kc-foot"><span class="kc-pct" style="color:#d69e2e">34%</span><span class="kc-badge b-orange">Atenção</span></div></div>
+        <div class="kcard"><div class="kc-stripe" style="background:#38a169"></div><div class="kc-name">RAS METAL</div><div class="kc-fase">Playbook Básico</div><div class="kc-foot"><span class="kc-pct">41%</span><span class="kc-badge b-green">OK</span></div></div>
+      </div>
+      <!-- col 3 -->
+      <div class="kol">
+        <div class="kol-head"><span class="kol-lbl">Evolução</span><span class="kol-cnt">2</span></div>
+        <div class="kcard"><div class="kc-stripe" style="background:#38a169"></div><div class="kc-name">AUTOMIND Tec.</div><div class="kc-fase">Playbook Básico</div><div class="kc-foot"><span class="kc-pct">56%</span><span class="kc-badge b-green">Em ordem</span></div></div>
+        <div class="kcard"><div class="kc-stripe" style="background:#38a169"></div><div class="kc-name">MECANIK Sol.</div><div class="kc-fase">Playbook Básico</div><div class="kc-foot"><span class="kc-pct">62%</span><span class="kc-badge b-green">Em ordem</span></div></div>
+      </div>
+      <!-- col 4 -->
+      <div class="kol">
+        <div class="kol-head"><span class="kol-lbl">Conclusão</span><span class="kol-cnt">1</span></div>
+        <div class="kcard"><div class="kc-stripe" style="background:#e53e3e"></div><div class="kc-name">ROBOTIX Aut.</div><div class="kc-fase">Playbook GRV Full</div><div class="kc-foot"><span class="kc-pct" style="color:#e53e3e">78%</span><span class="kc-badge b-red">Atrasado</span></div></div>
+      </div>
+      <!-- col 5 -->
+      <div class="kol">
+        <div class="kol-head"><span class="kol-lbl">Entregue</span><span class="kol-cnt">1</span></div>
+        <div class="kcard"><div class="kc-stripe" style="background:#718096"></div><div class="kc-name">PRODVITTA Ind.</div><div class="kc-fase">Playbook GRV Full</div><div class="kc-foot"><span class="kc-pct" style="color:#718096">100%</span><span class="kc-badge b-gray">Encerrado</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TELA 3: CLIENTE 360° ═══ -->
+<div id="cliente-360" class="screen">
+  <div class="sidebar">
+    <div class="sb-logo">
+      <svg class="sb-gicon" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#E05A1E"/><text x="16" y="22" text-anchor="middle" font-size="17" font-weight="900" fill="white" font-family="system-ui">G</text></svg>
+      <div><div class="sb-brand">GRV Software</div><div class="sb-sub">CS · Jornada do Cliente</div></div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-item"><svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>Projetos GRV</div>
+      <div class="sb-item active"><svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Minha Carteira</div>
+      <div class="sb-item"><svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3"/></svg>Criar Playbook</div>
+    </div>
+    <div class="sb-bottom">
+      <div class="sb-consul-lbl">Consultor ativo</div>
+      <div class="sb-consul"><div class="sb-avatar">S</div><div class="sb-cname">Severiano Rocha</div></div>
+    </div>
+  </div>
+  <div class="main" style="padding:0">
+    <div class="dcliente">
+      <div class="dc-header">
+        <div class="dc-back" onclick="show('carteira-feed')">←</div>
+        <div class="dc-avatar" style="background:linear-gradient(135deg,#E05A1E,#ff8c5a)">R</div>
+        <div class="dc-info">
+          <div class="dc-name">ROBOTIX Automação</div>
+          <div class="dc-meta">CNPJ 12.345.678/0001-99 · Severiano Rocha</div>
+          <div class="dc-chips">
+            <span class="chip b-red">Atrasado</span>
+            <span class="chip b-orange">Indústria</span>
+            <span class="chip b-blue">GRV Full</span>
+          </div>
+        </div>
+      </div>
+      <div class="dc-tabs">
+        <div class="dc-tab active">Visão 360°</div>
+        <div class="dc-tab" onclick="show('cliente-at')">Atividades</div>
+        <div class="dc-tab" onclick="show('cliente-notas')">Notas</div>
+      </div>
+      <div class="dc-body">
+        <div class="g360">
+          <div class="card360">
+            <div class="c360-lbl">Progresso geral</div>
+            <div class="c360-title">78%</div>
+            <div class="c360-sub" style="margin-bottom:10px">Fase: Conclusão</div>
+            <div class="prog-row"><span class="prog-label">Implantação</span><div class="prog-bar-wrap"><div class="prog-bar" style="width:100%;background:#38a169"></div></div><span class="prog-pct" style="color:#38a169">100%</span></div>
+            <div class="prog-row"><span class="prog-label">Evolução</span><div class="prog-bar-wrap"><div class="prog-bar" style="width:85%;background:#38a169"></div></div><span class="prog-pct" style="color:#38a169">85%</span></div>
+            <div class="prog-row"><span class="prog-label">Conclusão</span><div class="prog-bar-wrap"><div class="prog-bar" style="width:30%;background:#e53e3e"></div></div><span class="prog-pct" style="color:#e53e3e">30%</span></div>
+          </div>
+          <div class="card360">
+            <div class="c360-lbl">CSAT</div>
+            <div class="c360-title">4.1 <span style="font-size:14px;color:#F59E0B">★</span></div>
+            <div class="c360-sub" style="margin-bottom:10px">Baseado em 9 avaliações</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#4a5568"><span style="width:12px;text-align:right">5★</span><div style="flex:1;height:5px;background:#e8ecf0;border-radius:3px;overflow:hidden"><div style="width:30%;height:100%;background:#F59E0B;border-radius:3px"></div></div><span style="width:20px;text-align:right;color:#718096">3</span></div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#4a5568"><span style="width:12px;text-align:right">4★</span><div style="flex:1;height:5px;background:#e8ecf0;border-radius:3px;overflow:hidden"><div style="width:40%;height:100%;background:#F59E0B;border-radius:3px"></div></div><span style="width:20px;text-align:right;color:#718096">4</span></div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#4a5568"><span style="width:12px;text-align:right">3★</span><div style="flex:1;height:5px;background:#e8ecf0;border-radius:3px;overflow:hidden"><div style="width:20%;height:100%;background:#F59E0B;border-radius:3px"></div></div><span style="width:20px;text-align:right;color:#718096">2</span></div>
+            </div>
+          </div>
+          <div class="card360" style="grid-column:1/-1">
+            <div class="c360-lbl">Checklist — Conclusão</div>
+            <div style="display:flex;flex-direction:column;gap:6px;margin-top:2px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#38a169"><span style="width:16px;height:16px;background:#38a169;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0">✓</span>Treinamento de usuários concluído</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#38a169"><span style="width:16px;height:16px;background:#38a169;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;flex-shrink:0">✓</span>Relatório de implantação enviado</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#e53e3e"><span style="width:16px;height:16px;background:#FFF5F5;border:1.5px solid #feb2b2;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"></span>Pesquisa de satisfação final pendente</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#e53e3e"><span style="width:16px;height:16px;background:#FFF5F5;border:1.5px solid #feb2b2;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"></span>Reunião de encerramento agendada</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TELA 4: ATIVIDADES ═══ -->
+<div id="cliente-at" class="screen">
+  <div class="sidebar">
+    <div class="sb-logo">
+      <svg class="sb-gicon" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#E05A1E"/><text x="16" y="22" text-anchor="middle" font-size="17" font-weight="900" fill="white" font-family="system-ui">G</text></svg>
+      <div><div class="sb-brand">GRV Software</div><div class="sb-sub">CS · Jornada do Cliente</div></div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-item"><svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>Projetos GRV</div>
+      <div class="sb-item active"><svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Minha Carteira</div>
+      <div class="sb-item"><svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3"/></svg>Criar Playbook</div>
+    </div>
+    <div class="sb-bottom">
+      <div class="sb-consul-lbl">Consultor ativo</div>
+      <div class="sb-consul"><div class="sb-avatar">S</div><div class="sb-cname">Severiano Rocha</div></div>
+    </div>
+  </div>
+  <div class="main" style="padding:0">
+    <div class="dcliente">
+      <div class="dc-header">
+        <div class="dc-back" onclick="show('carteira-feed')">←</div>
+        <div class="dc-avatar" style="background:linear-gradient(135deg,#E05A1E,#ff8c5a)">R</div>
+        <div class="dc-info">
+          <div class="dc-name">ROBOTIX Automação</div>
+          <div class="dc-meta">CNPJ 12.345.678/0001-99 · Severiano Rocha</div>
+          <div class="dc-chips"><span class="chip b-red">Atrasado</span><span class="chip b-orange">Indústria</span><span class="chip b-blue">GRV Full</span></div>
+        </div>
+      </div>
+      <div class="dc-tabs">
+        <div class="dc-tab" onclick="show('cliente-360')">Visão 360°</div>
+        <div class="dc-tab active">Atividades</div>
+        <div class="dc-tab" onclick="show('cliente-notas')">Notas</div>
+      </div>
+      <div class="dc-body">
+        <div class="pb-layout">
+          <!-- painel esq: playbooks -->
+          <div class="pb-list">
+            <div style="font-size:10px;font-weight:700;color:#a0aec0;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Playbooks</div>
+            <div class="pb-item active">
+              <div class="pb-iname">Playbook GRV Full</div>
+              <div class="pb-imeta">12 atividades · 8 concluídas</div>
+              <div class="pb-iprog"><div class="pb-iprogbar" style="width:66%"></div></div>
+            </div>
+            <div class="pb-item">
+              <div class="pb-iname">Onboarding Técnico</div>
+              <div class="pb-imeta">5 atividades · 5 concluídas</div>
+              <div class="pb-iprog"><div class="pb-iprogbar" style="width:100%;background:#38a169"></div></div>
+            </div>
+            <div style="margin-top:8px">
+              <button class="btn-sm btn-ghost" style="width:100%;border:1px dashed #cbd5e0">+ Novo Playbook</button>
+            </div>
+          </div>
+          <!-- painel dir: atividades do playbook -->
+          <div>
+            <div class="at-panel">
+              <div class="at-panel-hd">
+                <span class="at-panel-title">Playbook GRV Full</span>
+                <button class="btn-sm btn-primary">+ Atividade</button>
+              </div>
+              <div class="at-list">
+                <div class="at-row" onclick="openAt('Kickoff com equipe do cliente','Severiano','#E05A1E','done')"><div class="at-check done">✓</div><span class="at-name">Kickoff com equipe do cliente</span><div style="display:flex;align-items:center;gap:6px;margin-left:auto"><span style="font-size:10px;color:#a0aec0">Severiano</span><span class="at-status" style="color:#38a169">Concluída</span></div></div>
+                <div class="at-row" onclick="openAt('Mapeamento de processos','João','#3182ce','done')"><div class="at-check done">✓</div><span class="at-name">Mapeamento de processos</span><div style="display:flex;align-items:center;gap:6px;margin-left:auto"><span style="font-size:10px;color:#a0aec0">João</span><span class="at-status" style="color:#38a169">Concluída</span></div></div>
+                <div class="at-row" onclick="openAt('Configuração do ambiente','Gabriel','#553c9a','done')"><div class="at-check done">✓</div><span class="at-name">Configuração do ambiente</span><div style="display:flex;align-items:center;gap:6px;margin-left:auto"><span style="font-size:10px;color:#a0aec0">Gabriel</span><span class="at-status" style="color:#38a169">Concluída</span></div></div>
+                <div class="at-row" onclick="openAt('Treinamento módulo SAG','Severiano','#E05A1E','done')"><div class="at-check done">✓</div><span class="at-name">Treinamento módulo SAG</span><div style="display:flex;align-items:center;gap:6px;margin-left:auto"><span style="font-size:10px;color:#a0aec0">Severiano</span><span class="at-status" style="color:#38a169">Concluída</span></div></div>
+                <div class="at-row" onclick="openAt('Pesquisa de satisfação','Severiano','#E05A1E','late')"><div class="at-check"></div><span class="at-name">Pesquisa de satisfação</span><div style="display:flex;align-items:center;gap:6px;margin-left:auto"><span style="font-size:10px;color:#a0aec0">Severiano</span><span class="at-status" style="color:#e53e3e">Atrasada</span></div></div>
+                <div class="at-row" onclick="openAt('Reunião de encerramento','João','#3182ce','late')"><div class="at-check"></div><span class="at-name">Reunião de encerramento</span><div style="display:flex;align-items:center;gap:6px;margin-left:auto"><span style="font-size:10px;color:#a0aec0">João</span><span class="at-status" style="color:#e53e3e">Atrasada</span></div></div>
+                <div class="at-row" onclick="openAt('Relatório final entregue','Gabriel','#553c9a','pending')"><div class="at-check"></div><span class="at-name">Relatório final entregue</span><div style="display:flex;align-items:center;gap:6px;margin-left:auto"><span style="font-size:10px;color:#a0aec0">Gabriel</span><span class="at-status" style="color:#718096">Pendente</span></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TELA 5: NOTAS ═══ -->
+<div id="cliente-notas" class="screen">
+  <div class="sidebar">
+    <div class="sb-logo">
+      <svg class="sb-gicon" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#E05A1E"/><text x="16" y="22" text-anchor="middle" font-size="17" font-weight="900" fill="white" font-family="system-ui">G</text></svg>
+      <div><div class="sb-brand">GRV Software</div><div class="sb-sub">CS · Jornada do Cliente</div></div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-item"><svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>Projetos GRV</div>
+      <div class="sb-item active"><svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Minha Carteira</div>
+      <div class="sb-item"><svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3"/></svg>Criar Playbook</div>
+    </div>
+    <div class="sb-bottom">
+      <div class="sb-consul-lbl">Consultor ativo</div>
+      <div class="sb-consul"><div class="sb-avatar">S</div><div class="sb-cname">Severiano Rocha</div></div>
+    </div>
+  </div>
+  <div class="main" style="padding:0">
+    <div class="dcliente">
+      <div class="dc-header">
+        <div class="dc-back" onclick="show('carteira-feed')">←</div>
+        <div class="dc-avatar" style="background:linear-gradient(135deg,#E05A1E,#ff8c5a)">R</div>
+        <div class="dc-info">
+          <div class="dc-name">ROBOTIX Automação</div>
+          <div class="dc-meta">CNPJ 12.345.678/0001-99 · Severiano Rocha</div>
+          <div class="dc-chips"><span class="chip b-red">Atrasado</span><span class="chip b-orange">Indústria</span><span class="chip b-blue">GRV Full</span></div>
+        </div>
+      </div>
+      <div class="dc-tabs">
+        <div class="dc-tab" onclick="show('cliente-360')">Visão 360°</div>
+        <div class="dc-tab" onclick="show('cliente-at')">Atividades</div>
+        <div class="dc-tab active">Notas</div>
+      </div>
+      <div class="dc-body">
+        <div class="nota-form">
+          <textarea class="nota-textarea" placeholder="Adicione uma nota sobre este cliente..."></textarea>
+          <div class="nota-actions">
+            <button class="btn-sm btn-ghost">Cancelar</button>
+            <button class="btn-sm btn-primary">Salvar nota</button>
+          </div>
+        </div>
+        <div class="nota-card">
+          <div class="nota-date">19 jun 2026 · Severiano Rocha</div>
+          <div class="nota-text">Cliente solicitou extensão de prazo para a pesquisa de satisfação. Confirmado para semana que vem — agendar lembrete.</div>
+        </div>
+        <div class="nota-card">
+          <div class="nota-date">15 jun 2026 · Severiano Rocha</div>
+          <div class="nota-text">Reunião de treinamento concluída com sucesso. Equipe do cliente demonstrou boa assimilação. Próximo passo: followup em 15 dias.</div>
+        </div>
+        <div class="nota-card">
+          <div class="nota-date">02 jun 2026 · Severiano Rocha</div>
+          <div class="nota-text">Configuração do ambiente finalizada. Pendência: atualizar credenciais de acesso ao módulo de relatórios com o TI do cliente.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TELA 6: PROJETOS GRV ═══ -->
+<div id="projetos" class="screen">
+  <div class="sidebar">
+    <div class="sb-logo">
+      <svg class="sb-gicon" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#E05A1E"/><text x="16" y="22" text-anchor="middle" font-size="17" font-weight="900" fill="white" font-family="system-ui">G</text></svg>
+      <div><div class="sb-brand">GRV Software</div><div class="sb-sub">CS · Jornada do Cliente</div></div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-item active"><svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>Projetos GRV</div>
+      <div class="sb-item"><svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Minha Carteira</div>
+      <div class="sb-item"><svg class="sb-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3"/></svg>Criar Playbook</div>
+    </div>
+    <div class="sb-bottom">
+      <div class="sb-consul-lbl">Consultor ativo</div>
+      <div class="sb-consul"><div class="sb-avatar">S</div><div class="sb-cname">Severiano Rocha</div></div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="main-header" style="padding-bottom:14px">
+      <div class="main-h1">Projetos GRV</div>
+      <div class="main-sub">Visão geral de toda a equipe de CS</div>
+    </div>
+    <div class="projetos-wrap">
+
+      <!-- KPIs -->
+      <div class="pg-kpis">
+        <div class="pg-kpi">
+          <div class="pk-label">Clientes ativos</div>
+          <div class="pk-val">38</div>
+          <div class="pk-sub">+3 este mês</div>
+        </div>
+        <div class="pg-kpi">
+          <div class="pk-label">CSAT médio</div>
+          <div class="pk-val" style="color:#F59E0B">4.4 ★</div>
+          <div class="pk-sub">↑ 0.2 vs mês passado</div>
+        </div>
+        <div class="pg-kpi">
+          <div class="pk-label">Atrasados</div>
+          <div class="pk-val" style="color:#e53e3e">7</div>
+          <div class="pk-sub">18% da carteira</div>
+        </div>
+        <div class="pg-kpi">
+          <div class="pk-label">Progresso médio</div>
+          <div class="pk-val">54%</div>
+          <div class="pk-sub">Todas as fases</div>
+        </div>
+      </div>
+
+      <!-- Gráficos -->
+      <div class="pg-charts">
+
+        <!-- Donut: status da carteira -->
+        <div class="pg-chart-card">
+          <div class="pgc-title">Status da Carteira</div>
+          <div class="donut-wrap">
+            <svg class="donut-svg" viewBox="0 0 100 100">
+              <!-- fundo -->
+              <circle cx="50" cy="50" r="36" fill="none" stroke="#e8ecf0" stroke-width="14"/>
+              <!-- em ordem: 57% → 127.9° → stroke-dasharray: (2π×36×0.57, resto) = (128.6, 97.7) -->
+              <circle cx="50" cy="50" r="36" fill="none" stroke="#38a169" stroke-width="14" stroke-dasharray="128.7 97.9" stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
+              <!-- atrasado: 18% → stroke-dasharray: (40.6, 186) offset -128.7 -->
+              <circle cx="50" cy="50" r="36" fill="none" stroke="#e53e3e" stroke-width="14" stroke-dasharray="40.6 186" stroke-dashoffset="-128.7" transform="rotate(-90 50 50)"/>
+              <!-- atenção: 13% → 29.3 -->
+              <circle cx="50" cy="50" r="36" fill="none" stroke="#d69e2e" stroke-width="14" stroke-dasharray="29.3 197.3" stroke-dashoffset="-169.3" transform="rotate(-90 50 50)"/>
+              <!-- inicio: 12% → 27.1 -->
+              <circle cx="50" cy="50" r="36" fill="none" stroke="#3182ce" stroke-width="14" stroke-dasharray="27.1 199.5" stroke-dashoffset="-198.6" transform="rotate(-90 50 50)"/>
+            </svg>
+            <div class="donut-center">
+              <div class="donut-pct">38</div>
+              <div class="donut-lbl">clientes</div>
+            </div>
+          </div>
+          <div class="donut-legend">
+            <div class="dl-row"><span class="dl-dot" style="background:#38a169"></span>Em ordem — 22 (57%)</div>
+            <div class="dl-row"><span class="dl-dot" style="background:#e53e3e"></span>Atrasado — 7 (18%)</div>
+            <div class="dl-row"><span class="dl-dot" style="background:#d69e2e"></span>Atenção — 5 (13%)</div>
+            <div class="dl-row"><span class="dl-dot" style="background:#3182ce"></span>Início — 4 (12%)</div>
+          </div>
+        </div>
+
+        <!-- Bar chart: ativações por mês -->
+        <div class="pg-chart-card">
+          <div class="pgc-title">Ativações por Mês</div>
+          <div class="bar-chart">
+            <div class="bc-col"><div class="bc-val">3</div><div class="bc-bar" style="height:36px;background:#E05A1E"></div><div class="bc-lbl">Jan</div></div>
+            <div class="bc-col"><div class="bc-val">5</div><div class="bc-bar" style="height:60px;background:#E05A1E"></div><div class="bc-lbl">Fev</div></div>
+            <div class="bc-col"><div class="bc-val">4</div><div class="bc-bar" style="height:48px;background:#E05A1E"></div><div class="bc-lbl">Mar</div></div>
+            <div class="bc-col"><div class="bc-val">7</div><div class="bc-bar" style="height:84px;background:#E05A1E"></div><div class="bc-lbl">Abr</div></div>
+            <div class="bc-col"><div class="bc-val">6</div><div class="bc-bar" style="height:72px;background:#E05A1E"></div><div class="bc-lbl">Mai</div></div>
+            <div class="bc-col"><div class="bc-val" style="color:#E05A1E">8</div><div class="bc-bar" style="height:96px;background:#E05A1E;opacity:1"></div><div class="bc-lbl" style="font-weight:700;color:#E05A1E">Jun</div></div>
+          </div>
+          <div style="margin-top:12px;padding-top:10px;border-top:1px solid #f0f2f5;display:flex;gap:16px">
+            <div style="font-size:10px;color:#718096">Total no semestre: <strong style="color:#1a202c">33</strong></div>
+            <div style="font-size:10px;color:#718096">Média mensal: <strong style="color:#1a202c">5.5</strong></div>
+          </div>
+        </div>
+
+        <!-- Gauge: indicadores CS -->
+        <div class="pg-chart-card">
+          <div class="pgc-title">Indicadores CS</div>
+          <div class="gauge-wrap">
+            <div class="gauge-row">
+              <span class="gauge-lbl">CSAT médio</span>
+              <div class="gauge-track"><div class="gauge-fill" style="width:88%;background:#F59E0B"></div></div>
+              <span class="gauge-val" style="color:#F59E0B">4.4★</span>
+            </div>
+            <div class="gauge-row">
+              <span class="gauge-lbl">SLA compliance</span>
+              <div class="gauge-track"><div class="gauge-fill" style="width:72%;background:#38a169"></div></div>
+              <span class="gauge-val" style="color:#38a169">72%</span>
+            </div>
+            <div class="gauge-row">
+              <span class="gauge-lbl">Engajamento</span>
+              <div class="gauge-track"><div class="gauge-fill" style="width:81%;background:#3182ce"></div></div>
+              <span class="gauge-val" style="color:#3182ce">81%</span>
+            </div>
+            <div class="gauge-row">
+              <span class="gauge-lbl">Em atraso</span>
+              <div class="gauge-track"><div class="gauge-fill" style="width:18%;background:#e53e3e"></div></div>
+              <span class="gauge-val" style="color:#e53e3e">18%</span>
+            </div>
+            <div class="gauge-row">
+              <span class="gauge-lbl">Conclusões</span>
+              <div class="gauge-track"><div class="gauge-fill" style="width:54%;background:#E05A1E"></div></div>
+              <span class="gauge-val" style="color:#E05A1E">54%</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tabela de agentes -->
+      <div class="pg-agents">
+        <div class="pga-head">Consultores</div>
+        <table class="pga-table">
+          <thead>
+            <tr>
+              <th>Consultor</th>
+              <th>Clientes</th>
+              <th>CSAT</th>
+              <th>Atrasados</th>
+              <th>Progresso</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="pga-name">Severiano Rocha</span></td>
+              <td>7</td>
+              <td><span class="stars">★★★★</span><span style="font-size:11px;color:#4a5568"> 4.4</span></td>
+              <td><span style="color:#e53e3e;font-weight:700">1</span></td>
+              <td><div style="width:80px;height:5px;background:#e8ecf0;border-radius:3px;overflow:hidden"><div style="width:58%;height:100%;background:#E05A1E;border-radius:3px"></div></div></td>
+            </tr>
+            <tr>
+              <td><span class="pga-name">Carla Menezes</span></td>
+              <td>9</td>
+              <td><span class="stars">★★★★★</span><span style="font-size:11px;color:#4a5568"> 4.8</span></td>
+              <td><span style="color:#38a169;font-weight:700">0</span></td>
+              <td><div style="width:80px;height:5px;background:#e8ecf0;border-radius:3px;overflow:hidden"><div style="width:72%;height:100%;background:#38a169;border-radius:3px"></div></div></td>
+            </tr>
+            <tr>
+              <td><span class="pga-name">Paulo Braga</span></td>
+              <td>6</td>
+              <td><span class="stars">★★★★</span><span style="font-size:11px;color:#4a5568"> 3.9</span></td>
+              <td><span style="color:#e53e3e;font-weight:700">3</span></td>
+              <td><div style="width:80px;height:5px;background:#e8ecf0;border-radius:3px;overflow:hidden"><div style="width:41%;height:100%;background:#d69e2e;border-radius:3px"></div></div></td>
+            </tr>
+            <tr>
+              <td><span class="pga-name">Larissa Pinto</span></td>
+              <td>8</td>
+              <td><span class="stars">★★★★★</span><span style="font-size:11px;color:#4a5568"> 4.6</span></td>
+              <td><span style="color:#e53e3e;font-weight:700">2</span></td>
+              <td><div style="width:80px;height:5px;background:#e8ecf0;border-radius:3px;overflow:hidden"><div style="width:65%;height:100%;background:#E05A1E;border-radius:3px"></div></div></td>
+            </tr>
+            <tr>
+              <td><span class="pga-name">Marcos Vieira</span></td>
+              <td>8</td>
+              <td><span class="stars">★★★★</span><span style="font-size:11px;color:#4a5568"> 4.2</span></td>
+              <td><span style="color:#e53e3e;font-weight:700">1</span></td>
+              <td><div style="width:80px;height:5px;background:#e8ecf0;border-radius:3px;overflow:hidden"><div style="width:49%;height:100%;background:#E05A1E;border-radius:3px"></div></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── OVERLAY DE ATIVIDADE ── -->
+<div class="ov-backdrop" id="ovBackdrop" onclick="closeAt()"></div>
+<div class="ov-panel" id="ovPanel">
+  <div class="ov-hd">
+    <div class="ov-hd-top">
+      <div class="ov-title" id="ovTitle">Atividade</div>
+      <div class="ov-close" onclick="closeAt()">✕</div>
+    </div>
+    <div class="ov-meta">
+      <span class="ov-assignee">
+        <span class="ov-av" id="ovAv" style="background:#E05A1E">S</span>
+        <span id="ovAssignee">Severiano</span>
+      </span>
+      <span class="fc-badge" id="ovBadge" style="background:#F0FFF4;color:#38a169">Concluída</span>
+    </div>
+    <div class="ov-dates">
+      <div class="ov-date-field">
+        <div class="ov-date-lbl">Início</div>
+        <input type="date" id="ovDataInicio" class="ov-date-input">
+      </div>
+      <div class="ov-date-field">
+        <div class="ov-date-lbl">Meta (fim)</div>
+        <input type="date" id="ovDataFim" class="ov-date-input">
+      </div>
+    </div>
+    <div class="ov-tabs">
+      <div class="ov-tab active" onclick="ovTab('registro',this)">Registro</div>
+      <div class="ov-tab" onclick="ovTab('checklist',this)">Checklist</div>
+      <div class="ov-tab" onclick="ovTab('anotacao',this)">Anotação</div>
+    </div>
+  </div>
+  <div class="ov-body">
+    <!-- TAB: REGISTRO -->
+    <div id="ov-registro">
+      <div class="reg-form">
+        <div class="reg-av">S</div>
+        <div class="reg-input-wrap">
+          <textarea class="reg-input" placeholder="Adicionar registro..."></textarea>
+          <button class="reg-send">Registrar</button>
+        </div>
+      </div>
+      <!-- timeline -->
+      <div class="reg-event">
+        <span class="reg-event-dot" style="background:#38a169"></span>
+        Severiano marcou como <strong style="color:#38a169;margin-left:2px">Concluída</strong>
+        <span style="margin-left:auto;font-size:10px;color:#a0aec0">15 jun · 14h22</span>
+      </div>
+      <div class="reg-item">
+        <div class="reg-item-av" style="background:linear-gradient(135deg,#E05A1E,#ff8c5a)">S</div>
+        <div class="reg-item-body">
+          <div style="display:flex;justify-content:space-between">
+            <div class="reg-item-who">Severiano Rocha</div>
+            <div class="reg-item-when">15 jun · 14h20</div>
+          </div>
+          <div class="reg-item-text">Treinamento concluído com 8 participantes. Material enviado por e-mail. Equipe demonstrou boa absorção — apenas 2 dúvidas pontuais sobre o módulo de relatórios.</div>
+        </div>
+      </div>
+      <div class="reg-event">
+        <span class="reg-event-dot" style="background:#3182ce"></span>
+        Atividade criada por <strong style="margin-left:2px">Severiano</strong>
+        <span style="margin-left:auto;font-size:10px;color:#a0aec0">02 jun · 09h10</span>
+      </div>
+      <div class="reg-item">
+        <div class="reg-item-av" style="background:linear-gradient(135deg,#3182ce,#63b3ed)">J</div>
+        <div class="reg-item-body">
+          <div style="display:flex;justify-content:space-between">
+            <div class="reg-item-who">João Credendio</div>
+            <div class="reg-item-when">05 jun · 10h45</div>
+          </div>
+          <div class="reg-item-text">Material de treinamento preparado e enviado para revisão do cliente. Aguardando confirmação de data.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: CHECKLIST -->
+    <div id="ov-checklist" style="display:none">
+      <div style="font-size:11px;color:#a0aec0;margin-bottom:10px">3 de 4 itens concluídos</div>
+      <div style="width:100%;height:4px;background:#e8ecf0;border-radius:2px;margin-bottom:16px;overflow:hidden"><div style="width:75%;height:100%;background:#38a169;border-radius:2px"></div></div>
+      <div class="cl-item"><div class="cl-check done">✓</div><span class="cl-label done">Agendar data com cliente</span></div>
+      <div class="cl-item"><div class="cl-check done">✓</div><span class="cl-label done">Preparar material de treinamento</span></div>
+      <div class="cl-item"><div class="cl-check done">✓</div><span class="cl-label done">Realizar sessão de treinamento</span></div>
+      <div class="cl-item"><div class="cl-check"></div><span class="cl-label">Enviar certificado de participação</span></div>
+      <div class="cl-add">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Adicionar item
+      </div>
+    </div>
+
+    <!-- TAB: ANOTAÇÃO -->
+    <div id="ov-anotacao" style="display:none">
+      <div class="ano-form">
+        <textarea class="ano-input" placeholder="Escreva uma anotação privada sobre esta atividade..."></textarea>
+        <div class="ano-foot"><button class="btn-sm btn-primary">Salvar</button></div>
+      </div>
+      <div class="ano-card">
+        <div class="ano-date">15 jun 2026 · Severiano Rocha</div>
+        <div class="ano-text">Cliente pediu para repetir o treinamento do módulo financeiro em julho. Marcar no calendário.</div>
+      </div>
+      <div class="ano-card">
+        <div class="ano-date">03 jun 2026 · Severiano Rocha</div>
+        <div class="ano-text">Contato do cliente para treinamento: Ana Paula (TI) — anapaula@robotix.com.br · (11) 99999-0001</div>
+      </div>
+    </div>
+
+  </div>
+  <div class="ov-footer">
+    <button class="ov-btn-concluir pending" id="ovBtnConcluir" onclick="concluirAt()">✓ Marcar como Concluída</button>
+  </div>
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.dnav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const map = {
+    'carteira-feed': 0, 'carteira-kanban': 1,
+    'cliente-360': 2, 'cliente-at': 3, 'cliente-notas': 4,
+    'projetos': 5
+  };
+  document.querySelectorAll('.dnav-btn')[map[id]]?.classList.add('active');
+}
+
+const statusMap = {
+  done:    {label:'Concluída', bg:'#F0FFF4', color:'#38a169'},
+  late:    {label:'Atrasada',  bg:'#FFF5F5', color:'#e53e3e'},
+  pending: {label:'Pendente',  bg:'#f7f8fa', color:'#718096'}
+};
+
+function openAt(title, assignee, color, status) {
+  document.getElementById('ovTitle').textContent = title;
+  document.getElementById('ovAssignee').textContent = assignee;
+  const av = document.getElementById('ovAv');
+  av.textContent = assignee[0];
+  av.style.background = color;
+  const s = statusMap[status];
+  const badge = document.getElementById('ovBadge');
+  badge.textContent = s.label;
+  badge.style.background = s.bg;
+  badge.style.color = s.color;
+
+  // Datas demo (início fixo, fim varia por status)
+  const hoje = new Date();
+  const fmt = d => d.toISOString().split('T')[0];
+  const inicio = new Date(hoje); inicio.setDate(inicio.getDate() - 14);
+  document.getElementById('ovDataInicio').value = fmt(inicio);
+  if (status === 'done') {
+    const fim = new Date(hoje); fim.setDate(fim.getDate() - 2);
+    document.getElementById('ovDataFim').value = fmt(fim);
+  } else if (status === 'late') {
+    const fim = new Date(hoje); fim.setDate(fim.getDate() - 5);
+    document.getElementById('ovDataFim').value = fmt(fim);
+  } else {
+    const fim = new Date(hoje); fim.setDate(fim.getDate() + 10);
+    document.getElementById('ovDataFim').value = fmt(fim);
+  }
+
+  // Botão Concluir
+  const btn = document.getElementById('ovBtnConcluir');
+  if (status === 'done') {
+    btn.textContent = '✓ Concluída';
+    btn.className = 'ov-btn-concluir done';
+    btn.onclick = null;
+  } else {
+    btn.textContent = '✓ Marcar como Concluída';
+    btn.className = 'ov-btn-concluir pending';
+    btn.onclick = concluirAt;
+  }
+
+  // reset to first tab
+  ovTab('registro', document.querySelector('.ov-tab'));
+  document.getElementById('ovBackdrop').classList.add('open');
+  document.getElementById('ovPanel').classList.add('open');
+}
+
+function concluirAt() {
+  const badge = document.getElementById('ovBadge');
+  badge.textContent = 'Concluída';
+  badge.style.background = '#F0FFF4';
+  badge.style.color = '#38a169';
+  const btn = document.getElementById('ovBtnConcluir');
+  btn.textContent = '✓ Concluída';
+  btn.className = 'ov-btn-concluir done';
+  btn.onclick = null;
+  // Registra evento na timeline
+  const reg = document.getElementById('ov-registro');
+  const ev = document.createElement('div');
+  ev.className = 'reg-event';
+  ev.innerHTML = '<span class="reg-event-dot" style="background:#38a169"></span>' +
+    document.getElementById('ovAssignee').textContent + ' marcou como <strong style="color:#38a169;margin-left:2px">Concluída</strong>' +
+    '<span style="margin-left:auto;font-size:10px;color:#a0aec0">agora</span>';
+  reg.insertBefore(ev, reg.querySelector('.reg-form').nextSibling);
+}
+
+function closeAt() {
+  document.getElementById('ovBackdrop').classList.remove('open');
+  document.getElementById('ovPanel').classList.remove('open');
+}
+
+function ovTab(name, el) {
+  ['registro','checklist','anotacao'].forEach(t => {
+    document.getElementById('ov-'+t).style.display = t === name ? 'block' : 'none';
+  });
+  document.querySelectorAll('.ov-tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+</script>
+</body>
+</html>

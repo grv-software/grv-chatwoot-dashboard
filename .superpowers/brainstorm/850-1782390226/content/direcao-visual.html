@@ -1,0 +1,309 @@
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, 'Segoe UI', sans-serif; background: #f8f9fa; }
+
+h2 { font-size: 22px; font-weight: 700; color: #1a202c; margin-bottom: 6px; }
+.subtitle { font-size: 14px; color: #718096; margin-bottom: 32px; }
+
+.dirs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+
+.dir-card {
+  background: #fff;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.dir-card:hover { border-color: #E05A1E; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+.dir-card.selected { border-color: #E05A1E; box-shadow: 0 0 0 4px rgba(224,90,30,0.12); }
+
+.dir-preview { padding: 20px; min-height: 320px; }
+.dir-label { padding: 16px 20px; border-top: 1px solid #e2e8f0; }
+.dir-label h3 { font-size: 15px; font-weight: 700; color: #1a202c; margin-bottom: 4px; }
+.dir-label p { font-size: 12px; color: #718096; line-height: 1.5; }
+.dir-tag { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
+
+/* ── Opção A: Cards Gallery ── */
+.preview-a { background: linear-gradient(135deg, #fafbff 0%, #f0f4ff 100%); }
+
+.a-search {
+  display: flex; align-items: center; gap: 8px;
+  background: #fff; border-radius: 50px; padding: 8px 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 16px;
+  font-size: 12px; color: #718096;
+}
+.a-search svg { flex-shrink: 0; }
+.a-chips { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.a-chip { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: pointer; }
+.a-chip.act { background: #E05A1E; color: #fff; }
+.a-chip.def { background: #fff; color: #4a5568; border: 1px solid #e2e8f0; }
+.a-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.a-card {
+  background: #fff; border-radius: 14px; padding: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.a-card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.a-avatar { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #fff; flex-shrink: 0; }
+.a-name { font-size: 12px; font-weight: 700; color: #1a202c; }
+.a-proj { font-size: 10px; color: #E05A1E; font-weight: 600; }
+.a-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.a-status { display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 600; color: #4a5568; margin-bottom: 8px; }
+.a-prog-wrap { height: 5px; background: #edf2f7; border-radius: 3px; overflow: hidden; }
+.a-prog-fill { height: 100%; border-radius: 3px; }
+.a-pct { font-size: 10px; color: #718096; text-align: right; margin-top: 3px; }
+
+/* ── Opção B: Feed / List moderna ── */
+.preview-b { background: #fff; }
+
+.b-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.b-title { font-size: 14px; font-weight: 700; color: #1a202c; }
+.b-count { font-size: 11px; color: #718096; }
+.b-chips { display: flex; gap: 6px; margin-bottom: 14px; }
+.b-chip { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 600; }
+.b-chip.act { background: #FFF3EE; color: #E05A1E; border: 1px solid #E05A1E; }
+.b-chip.def { background: #f7fafc; color: #718096; border: 1px solid #e2e8f0; }
+.b-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: 12px; margin-bottom: 6px;
+  cursor: pointer; transition: background .15s;
+}
+.b-item:hover { background: #f7fafc; }
+.b-stripe { width: 4px; height: 36px; border-radius: 2px; flex-shrink: 0; }
+.b-avatar2 { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #fff; flex-shrink: 0; }
+.b-info { flex: 1; min-width: 0; }
+.b-iname { font-size: 12px; font-weight: 700; color: #1a202c; }
+.b-isub { font-size: 10px; color: #718096; }
+.b-right { text-align: right; }
+.b-badge { padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+.b-dias { font-size: 10px; color: #718096; margin-top: 2px; }
+.b-prog { width: 60px; height: 4px; background: #edf2f7; border-radius: 2px; margin: 4px 0 0 auto; }
+.b-prog-fill { height: 100%; border-radius: 2px; }
+
+/* ── Opção C: Kanban Redesenhado ── */
+.preview-c { background: #f0f2f5; padding: 14px; }
+
+.c-cols { display: flex; gap: 10px; height: 280px; overflow: hidden; }
+.c-col { flex: 1; min-width: 0; }
+.c-col-hdr {
+  padding: 8px 10px; border-radius: 10px 10px 0 0;
+  font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em;
+  color: #fff; margin-bottom: 6px;
+}
+.c-card {
+  background: #fff; border-radius: 10px; padding: 10px; margin-bottom: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.c-cname { font-size: 11px; font-weight: 700; color: #1a202c; margin-bottom: 4px; }
+.c-csub { font-size: 9px; color: #718096; margin-bottom: 6px; }
+.c-cprog { height: 4px; background: #edf2f7; border-radius: 2px; overflow: hidden; margin-bottom: 4px; }
+.c-cprog-fill { height: 100%; border-radius: 2px; }
+.c-cfoot { display: flex; justify-content: space-between; align-items: center; }
+.c-cdot { width: 7px; height: 7px; border-radius: 50%; }
+.c-cdays { font-size: 9px; color: #a0aec0; }
+</style>
+
+<h2>Qual direção visual faz sentido?</h2>
+<p class="subtitle">Três abordagens para transformar o "Minha Carteira" — mesma informação, visual completamente diferente</p>
+
+<div class="dirs">
+
+  <!-- OPÇÃO A -->
+  <div class="dir-card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="dir-preview preview-a">
+      <div class="a-search">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#718096" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Buscar cliente...
+      </div>
+      <div class="a-chips">
+        <span class="a-chip act">Todos</span>
+        <span class="a-chip def">Em ordem</span>
+        <span class="a-chip def">Atrasados</span>
+        <span class="a-chip def">Pausados</span>
+      </div>
+      <div class="a-grid">
+        <div class="a-card">
+          <div class="a-card-top">
+            <div class="a-avatar" style="background:linear-gradient(135deg,#E05A1E,#ff8c5a)">K</div>
+            <div><div class="a-name">KMSIL</div><div class="a-proj">SAGP-00036</div></div>
+          </div>
+          <div class="a-status"><span class="a-dot" style="background:#E05A1E"></span>⚡ Engajamento</div>
+          <div class="a-prog-wrap"><div class="a-prog-fill" style="width:50%;background:linear-gradient(90deg,#E05A1E,#ff8c5a)"></div></div>
+          <div class="a-pct">50%</div>
+        </div>
+        <div class="a-card">
+          <div class="a-card-top">
+            <div class="a-avatar" style="background:linear-gradient(135deg,#e53e3e,#fc8181)">R</div>
+            <div><div class="a-name">RAS METAL</div><div class="a-proj">SAGP-00091</div></div>
+          </div>
+          <div class="a-status"><span class="a-dot" style="background:#e53e3e"></span>📈 Evolução</div>
+          <div class="a-prog-wrap"><div class="a-prog-fill" style="width:63%;background:linear-gradient(90deg,#e53e3e,#fc8181)"></div></div>
+          <div class="a-pct">63%</div>
+        </div>
+        <div class="a-card">
+          <div class="a-card-top">
+            <div class="a-avatar" style="background:linear-gradient(135deg,#38a169,#68d391)">A</div>
+            <div><div class="a-name">AXONE</div><div class="a-proj">SAGP-00059</div></div>
+          </div>
+          <div class="a-status"><span class="a-dot" style="background:#38a169"></span>⚡ Engajamento</div>
+          <div class="a-prog-wrap"><div class="a-prog-fill" style="width:38%;background:linear-gradient(90deg,#38a169,#68d391)"></div></div>
+          <div class="a-pct">38%</div>
+        </div>
+        <div class="a-card">
+          <div class="a-card-top">
+            <div class="a-avatar" style="background:linear-gradient(135deg,#805ad5,#b794f4)">F</div>
+            <div><div class="a-name">FRAY</div><div class="a-proj">SAGP-00039</div></div>
+          </div>
+          <div class="a-status"><span class="a-dot" style="background:#718096"></span>🤝 1ª Reunião</div>
+          <div class="a-prog-wrap"><div class="a-prog-fill" style="width:0%;background:#805ad5"></div></div>
+          <div class="a-pct">0%</div>
+        </div>
+      </div>
+    </div>
+    <div class="dir-label">
+      <span class="dir-tag" style="background:#FFF3EE;color:#E05A1E">A — Galeria de Cards</span>
+      <h3>Fluido e visual</h3>
+      <p>Cada cliente é um card com avatar, cor própria e progresso. Grid respirado, sem tabelas. Sensação de painel moderno.</p>
+    </div>
+  </div>
+
+  <!-- OPÇÃO B -->
+  <div class="dir-card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="dir-preview preview-b" style="padding:16px">
+      <div class="b-header">
+        <span class="b-title">Minha Carteira</span>
+        <span class="b-count">8 clientes</span>
+      </div>
+      <div class="b-chips">
+        <span class="b-chip act">Todos</span>
+        <span class="b-chip def">Em ordem</span>
+        <span class="b-chip def">Atrasados</span>
+        <span class="b-chip def">Pausados</span>
+      </div>
+
+      <div class="b-item">
+        <div class="b-stripe" style="background:#E05A1E"></div>
+        <div class="b-avatar2" style="background:linear-gradient(135deg,#E05A1E,#ff8c5a)">K</div>
+        <div class="b-info">
+          <div class="b-iname">KMSIL</div>
+          <div class="b-isub">⚡ Engajamento · Acompanhar uso do módulo</div>
+        </div>
+        <div class="b-right">
+          <div class="b-badge" style="background:#FFF3EE;color:#E05A1E">Em ordem</div>
+          <div class="b-dias">42 dias</div>
+          <div class="b-prog"><div class="b-prog-fill" style="width:50%;background:#E05A1E"></div></div>
+        </div>
+      </div>
+
+      <div class="b-item">
+        <div class="b-stripe" style="background:#e53e3e"></div>
+        <div class="b-avatar2" style="background:linear-gradient(135deg,#e53e3e,#fc8181)">R</div>
+        <div class="b-info">
+          <div class="b-iname">RAS METAL</div>
+          <div class="b-isub">📈 Evolução · Resolver importação de dados</div>
+        </div>
+        <div class="b-right">
+          <div class="b-badge" style="background:#FFF5F5;color:#e53e3e">Atrasado</div>
+          <div class="b-dias">87 dias</div>
+          <div class="b-prog"><div class="b-prog-fill" style="width:63%;background:#e53e3e"></div></div>
+        </div>
+      </div>
+
+      <div class="b-item">
+        <div class="b-stripe" style="background:#38a169"></div>
+        <div class="b-avatar2" style="background:linear-gradient(135deg,#38a169,#68d391)">A</div>
+        <div class="b-info">
+          <div class="b-iname">AXONE</div>
+          <div class="b-isub">⚡ Engajamento · Treinamento avançado</div>
+        </div>
+        <div class="b-right">
+          <div class="b-badge" style="background:#F0FFF4;color:#38a169">Em ordem</div>
+          <div class="b-dias">12 dias</div>
+          <div class="b-prog"><div class="b-prog-fill" style="width:38%;background:#38a169"></div></div>
+        </div>
+      </div>
+
+      <div class="b-item">
+        <div class="b-stripe" style="background:#718096"></div>
+        <div class="b-avatar2" style="background:linear-gradient(135deg,#718096,#a0aec0)">F</div>
+        <div class="b-info">
+          <div class="b-iname">FRAY</div>
+          <div class="b-isub">🤝 1ª Reunião · Agendar kickoff</div>
+        </div>
+        <div class="b-right">
+          <div class="b-badge" style="background:#F7FAFC;color:#718096">Em ordem</div>
+          <div class="b-dias">5 dias</div>
+          <div class="b-prog"><div class="b-prog-fill" style="width:0%;background:#718096"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="dir-label">
+      <span class="dir-tag" style="background:#EBF8FF;color:#3182ce">B — Feed com faixa de status</span>
+      <h3>Rápido e escaneável</h3>
+      <p>Lista moderna com faixa colorida por urgência, próxima ação visível direto, sem precisar abrir o cliente. Muito legível.</p>
+    </div>
+  </div>
+
+  <!-- OPÇÃO C -->
+  <div class="dir-card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="dir-preview preview-c">
+      <div class="c-cols">
+        <div class="c-col">
+          <div class="c-col-hdr" style="background:linear-gradient(135deg,#718096,#a0aec0)">🤝 1ª Reunião <span style="opacity:.8">(2)</span></div>
+          <div class="c-card">
+            <div class="c-cname">FRAY</div>
+            <div class="c-csub">CPS · 5 dias</div>
+            <div class="c-cprog"><div class="c-cprog-fill" style="width:0%;background:#718096"></div></div>
+            <div class="c-cfoot"><div class="c-cdot" style="background:#38a169"></div><span class="c-cdays">Em ordem</span></div>
+          </div>
+          <div class="c-card">
+            <div class="c-cname">USIMAZA</div>
+            <div class="c-csub">CPS · 2 dias</div>
+            <div class="c-cprog"><div class="c-cprog-fill" style="width:0%;background:#718096"></div></div>
+            <div class="c-cfoot"><div class="c-cdot" style="background:#38a169"></div><span class="c-cdays">Em ordem</span></div>
+          </div>
+        </div>
+        <div class="c-col">
+          <div class="c-col-hdr" style="background:linear-gradient(135deg,#E05A1E,#ff8c5a)">⚡ Engajamento <span style="opacity:.8">(3)</span></div>
+          <div class="c-card">
+            <div class="c-cname">KMSIL</div>
+            <div class="c-csub">CPS · 42 dias</div>
+            <div class="c-cprog"><div class="c-cprog-fill" style="width:50%;background:#E05A1E"></div></div>
+            <div class="c-cfoot"><div class="c-cdot" style="background:#38a169"></div><span class="c-cdays">Em ordem</span></div>
+          </div>
+          <div class="c-card" style="border-left:3px solid #e53e3e">
+            <div class="c-cname">AÇO ART</div>
+            <div class="c-csub">CPS · 12 dias</div>
+            <div class="c-cprog"><div class="c-cprog-fill" style="width:31%;background:#e53e3e"></div></div>
+            <div class="c-cfoot"><div class="c-cdot" style="background:#e53e3e"></div><span class="c-cdays" style="color:#e53e3e">Atrasado</span></div>
+          </div>
+        </div>
+        <div class="c-col">
+          <div class="c-col-hdr" style="background:linear-gradient(135deg,#3182ce,#63b3ed)">📈 Evolução <span style="opacity:.8">(2)</span></div>
+          <div class="c-card" style="border-left:3px solid #e53e3e">
+            <div class="c-cname">RAS METAL</div>
+            <div class="c-csub">CPS · 87 dias</div>
+            <div class="c-cprog"><div class="c-cprog-fill" style="width:63%;background:#e53e3e"></div></div>
+            <div class="c-cfoot"><div class="c-cdot" style="background:#e53e3e"></div><span class="c-cdays" style="color:#e53e3e">Atrasado</span></div>
+          </div>
+          <div class="c-card">
+            <div class="c-cname">AXONE</div>
+            <div class="c-csub">CPS · 10 dias</div>
+            <div class="c-cprog"><div class="c-cprog-fill" style="width:38%;background:#3182ce"></div></div>
+            <div class="c-cfoot"><div class="c-cdot" style="background:#38a169"></div><span class="c-cdays">Em ordem</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="dir-label">
+      <span class="dir-tag" style="background:#F0FFF4;color:#38a169">C — Pipeline visual</span>
+      <h3>Espacial e intuitivo</h3>
+      <p>Kanban redesenhado como view padrão única. Colunas coloridas por etapa, cards com borda vermelha para atrasados. Muito visual.</p>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:24px;padding:16px;background:#FFFBF5;border:1px solid #fbd38d;border-radius:12px;font-size:13px;color:#744210">
+  <strong>Nota:</strong> Qualquer direção escolhida se aplica também ao detalhe do cliente — a linguagem visual (cards arredondados, faixas coloridas, etc.) vai permear todas as telas.
+</div>

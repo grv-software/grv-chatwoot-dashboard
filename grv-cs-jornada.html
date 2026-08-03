@@ -520,11 +520,16 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
 .ov-head-row2{padding:0 18px 12px;font-size:11px;color:var(--text4);display:flex;align-items:center;gap:5px;flex-wrap:wrap;line-height:1.4}
 .ov-head-row2 b{color:var(--text3);font-weight:600}
 .ov-head-av{width:16px;height:16px;border-radius:4px;background:linear-gradient(135deg,var(--primary),#ff8c5a);display:inline-flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;color:#fff;flex-shrink:0;vertical-align:middle}
-.ov-kpi-strip{display:grid;grid-template-columns:1fr 1fr 1fr}
-.ov-kpi-cell{padding:10px 14px;border-right:1px solid var(--border-2);border-top:1px solid var(--border-2)}
+.ov-kpi-strip{display:grid;grid-template-columns:1fr 1fr 1fr 1fr}
+.ov-kpi-cell{padding:10px 14px;border-right:1px solid var(--border-2);border-top:1px solid var(--border-2);transition:background .12s}
 .ov-kpi-cell:last-child{border-right:none}
-.ov-kpi-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--text4);margin-bottom:3px}
+.ov-kpi-cell[onclick]:hover{background:var(--bg)}
+.ov-kpi-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--text4);margin-bottom:3px;display:flex;align-items:center;gap:4px}
+.ov-kpi-label-edit{font-size:9px;opacity:0;transition:opacity .12s;color:var(--text4)}
+.ov-kpi-cell[onclick]:hover .ov-kpi-label-edit{opacity:1}
 .ov-kpi-val{font-size:13px;font-weight:800;color:var(--text);letter-spacing:-.2px}
+.ov-kpi-cell[onclick] .ov-kpi-val{border-bottom:1.5px dashed transparent;transition:border-color .12s}
+.ov-kpi-cell[onclick]:hover .ov-kpi-val{border-bottom-color:var(--border)}
 .ov-kpi-urgency{font-size:9px;font-weight:700;margin-top:2px}
 .ov-kpi-input{display:none}
 .ov-kpi-prog-track{height:3px;background:var(--border-2);border-radius:2px;overflow:hidden;margin-top:5px}
@@ -1040,15 +1045,20 @@ body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:var(-
     <!-- Zona 3: KPI Strip -->
     <div class="ov-kpi-strip">
       <div class="ov-kpi-cell" onclick="document.getElementById('ov-data-inicio').showPicker&&document.getElementById('ov-data-inicio').showPicker()" style="cursor:pointer">
-        <div class="ov-kpi-label">Início</div>
+        <div class="ov-kpi-label">Início <span class="ov-kpi-label-edit">✎</span></div>
         <div class="ov-kpi-val" id="ov-kpi-inicio">—</div>
         <input type="date" id="ov-data-inicio" class="ov-kpi-input" onchange="saveOvDatas()">
       </div>
       <div class="ov-kpi-cell" onclick="document.getElementById('ov-data-fim').showPicker&&document.getElementById('ov-data-fim').showPicker()" style="cursor:pointer">
-        <div class="ov-kpi-label">Prazo</div>
+        <div class="ov-kpi-label">Prazo <span class="ov-kpi-label-edit">✎</span></div>
         <div class="ov-kpi-val" id="ov-kpi-prazo">—</div>
         <div class="ov-kpi-urgency" id="ov-kpi-urgency"></div>
         <input type="date" id="ov-data-fim" class="ov-kpi-input" onchange="saveOvDatas()">
+      </div>
+      <div class="ov-kpi-cell">
+        <div class="ov-kpi-label">Ult. Contato</div>
+        <div class="ov-kpi-val" id="ov-kpi-contato">—</div>
+        <div class="ov-kpi-urgency" id="ov-kpi-contato-sub"></div>
       </div>
       <div class="ov-kpi-cell">
         <div class="ov-kpi-label">Progresso</div>
@@ -1907,17 +1917,17 @@ const SEED_CLIENTES = [
     ativPlaybooks:[{
       id:'pb_nor1', nome:'Implantação NX', fase:'implantacao', donoId:'priscila', estado:'ativo',
       atividades:[
-        {id:'at_nor1',nome:'Kickoff',status:'concluida',dataLimite:'2025-10-15',dataConclusao:'2025-10-14',registros:[]},
-        {id:'at_nor2',nome:'Levantamento',status:'concluida',dataLimite:'2025-11-01',dataConclusao:'2025-10-30',registros:[]},
-        {id:'at_nor3',nome:'Configuração',status:'concluida',dataLimite:'2025-12-01',dataConclusao:'2025-11-28',registros:[]},
-        {id:'at_nor4',nome:'Treinamento',status:'concluida',dataLimite:'2026-02-01',dataConclusao:'2026-01-28',registros:[]},
-        {id:'at_nor5',nome:'Testes UAT',status:'concluida',dataLimite:'2026-04-01',dataConclusao:'2026-03-28',registros:[]},
-        {id:'at_nor6',nome:'Go-live',status:'concluida',dataLimite:'2026-06-01',dataConclusao:'2026-05-30',registros:[]},
-        {id:'at_nor7',nome:'Ajustes pós go-live',status:'concluida',dataLimite:'2026-06-30',dataConclusao:'2026-06-28',registros:[]},
-        {id:'at_nor8',nome:'Treinamento avançado',status:'concluida',dataLimite:'2026-07-15',dataConclusao:'2026-07-05',registros:[]},
-        {id:'at_nor9',nome:'Documentação',status:'concluida',dataLimite:'2026-07-20',dataConclusao:'2026-07-06',
+        {id:'at_nor1',nome:'Kickoff',status:'concluida',dataInicio:'2025-10-01',dataLimite:'2025-10-15',dataConclusao:'2025-10-14',registros:[{id:'r_nor_k',tipo:'registro',data:'2025-10-14T10:00:00',texto:'Kickoff realizado com equipe técnica NORDIK. Ambiente de homologação configurado.'}]},
+        {id:'at_nor2',nome:'Levantamento',status:'concluida',dataInicio:'2025-10-15',dataLimite:'2025-11-01',dataConclusao:'2025-10-30',registros:[{id:'r_nor_l',tipo:'registro',data:'2025-10-30T14:00:00',texto:'Levantamento de processos concluído. 3 integrações mapeadas para desenvolvimento.'}]},
+        {id:'at_nor3',nome:'Configuração',status:'concluida',dataInicio:'2025-11-01',dataLimite:'2025-12-01',dataConclusao:'2025-11-28',registros:[]},
+        {id:'at_nor4',nome:'Treinamento',status:'concluida',dataInicio:'2025-12-02',dataLimite:'2026-02-01',dataConclusao:'2026-01-28',registros:[]},
+        {id:'at_nor5',nome:'Testes UAT',status:'concluida',dataInicio:'2026-02-01',dataLimite:'2026-04-01',dataConclusao:'2026-03-28',registros:[]},
+        {id:'at_nor6',nome:'Go-live',status:'concluida',dataInicio:'2026-04-01',dataLimite:'2026-06-01',dataConclusao:'2026-05-30',registros:[]},
+        {id:'at_nor7',nome:'Ajustes pós go-live',status:'concluida',dataInicio:'2026-06-01',dataLimite:'2026-06-30',dataConclusao:'2026-06-28',registros:[]},
+        {id:'at_nor8',nome:'Treinamento avançado',status:'concluida',dataInicio:'2026-07-01',dataLimite:'2026-07-15',dataConclusao:'2026-07-05',registros:[]},
+        {id:'at_nor9',nome:'Documentação',status:'concluida',dataInicio:'2026-07-06',dataLimite:'2026-07-20',dataConclusao:'2026-07-06',
           registros:[{id:'r_nor1',tipo:'contato',data:'2026-07-04',obs:'Validação final pré-handoff'}]},
-        {id:'at_nor10',nome:'Handoff CS',status:'pendente',registros:[],checklist:[],anotacoes:[]}
+        {id:'at_nor10',nome:'Handoff CS',status:'pendente',dataInicio:'2026-07-21',dataLimite:'2026-07-29',registros:[],checklist:[],anotacoes:[]}
       ]
     }]
   },
@@ -2251,6 +2261,12 @@ function initData() {
           if (!at.checklist) { at.checklist = []; dirty = true; }
           if (!at.anotacoes) { at.anotacoes = []; dirty = true; }
           if (!at.registros) { at.registros = []; dirty = true; }
+          // Popula dataInicio ausente: 14 dias antes do prazo/conclusão
+          if (!at.dataInicio && (at.dataLimite || at.dataConclusao)) {
+            var _ref = at.dataLimite || at.dataConclusao;
+            var _d = new Date(_ref + 'T00:00:00'); _d.setDate(_d.getDate() - 14);
+            at.dataInicio = _d.toISOString().split('T')[0]; dirty = true;
+          }
         });
       });
       if (!c.csatRespostas) {
@@ -6230,12 +6246,27 @@ function openAtividade(cId, pbId, atId) {
   const inicioEl   = document.getElementById('ov-kpi-inicio');
   const prazoEl    = document.getElementById('ov-kpi-prazo');
   const urgencyEl  = document.getElementById('ov-kpi-urgency');
+  const contatoEl  = document.getElementById('ov-kpi-contato');
+  const contatoSub = document.getElementById('ov-kpi-contato-sub');
   const progEl     = document.getElementById('ov-kpi-prog');
   const progFillEl = document.getElementById('ov-kpi-prog-fill');
   const diInput    = document.getElementById('ov-data-inicio');
   const dfInput    = document.getElementById('ov-data-fim');
   if (inicioEl) inicioEl.textContent = at.dataInicio ? fmt(at.dataInicio) : '—';
   if (prazoEl)  prazoEl.textContent  = at.dataLimite ? fmt(at.dataLimite) : '—';
+  // Último contato (nível cliente)
+  const ltDias = getDiasUltimoContato(c);
+  const ltClr  = ltDias === null ? 'var(--text3)' : ltDias === 0 ? '#22c55e' : ltDias <= 7 ? 'var(--text)' : ltDias <= 14 ? '#d69e2e' : '#e53e3e';
+  if (contatoEl) {
+    contatoEl.textContent = ltDias === null ? '—' : ltDias === 0 ? 'Hoje' : ltDias + 'd';
+    contatoEl.style.color = ltClr;
+  }
+  if (contatoSub) {
+    contatoSub.innerHTML = ltDias === null ? '' : ltDias === 0 ? '<span style="color:#22c55e">contato hoje</span>' :
+      ltDias <= 7 ? '<span style="color:var(--text3)">esta semana</span>' :
+      ltDias <= 14 ? '<span style="color:#d69e2e">há ' + ltDias + ' dias</span>' :
+      '<span style="color:#e53e3e">há ' + ltDias + ' dias</span>';
+  }
   if (diInput)  diInput.value        = at.dataInicio ? at.dataInicio.split('T')[0] : '';
   if (dfInput)  dfInput.value        = at.dataLimite ? at.dataLimite.split('T')[0] : '';
   if (urgencyEl) {
@@ -6364,7 +6395,7 @@ function addOvRegistro() {
 }
 
 function saveOvDatas() {
-  const { c, at } = _getOvAt();
+  const { c, pb, at } = _getOvAt();
   if (!at) return;
   const di = document.getElementById('ov-data-inicio')?.value;
   const df = document.getElementById('ov-data-fim')?.value;

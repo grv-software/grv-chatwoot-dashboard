@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mockup — Detalhe do Cliente</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  background:#F5F3F0;
+  color:#1A1917;
+  font-size:14px;
+  padding:24px;
+  min-height:100vh;
+}
+
+/* ── label intro ── */
+.intro{
+  text-align:center;
+  margin-bottom:20px;
+}
+.intro-badge{
+  display:inline-block;
+  background:#E05A1E;
+  color:#fff;
+  font-size:10px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  padding:4px 12px;
+  border-radius:20px;
+  margin-bottom:8px;
+}
+.intro-title{font-size:15px;font-weight:600;color:#1A1917;margin-bottom:2px}
+.intro-sub{font-size:12px;color:#8A847F}
+
+/* ── card container ── */
+.mockup-shell{
+  max-width:960px;
+  margin:0 auto;
+  background:#fff;
+  border-radius:14px;
+  border:1px solid #E2DDD7;
+  box-shadow:0 4px 14px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
+  overflow:hidden;
+}
+
+/* ── header do cliente ── */
+.dc-header{
+  background:#fff;
+  border-bottom:1px solid #E2DDD7;
+  padding:16px 20px 0;
+}
+.dc-top{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:12px;
+}
+.dc-back{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  font-size:11px;
+  color:#8A847F;
+  cursor:pointer;
+  padding:4px 6px;
+  border-radius:6px;
+  margin-right:4px;
+  white-space:nowrap;
+  margin-top:2px;
+}
+.dc-back:hover{background:#F5F3F0;color:#534E4A}
+.dc-avatar{
+  width:42px;height:42px;border-radius:50%;
+  background:linear-gradient(135deg,#E05A1E,#c44a10);
+  color:#fff;font-size:16px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;letter-spacing:-.5px;
+}
+.dc-info{flex:1}
+.dc-name{font-size:17px;font-weight:800;color:#1A1917;letter-spacing:-.3px;line-height:1.2}
+.dc-sub{font-size:12px;color:#8A847F;margin-top:1px}
+.dc-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.chip{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;
+}
+.chip-green{background:rgba(22,163,74,.1);color:#16A34A}
+.chip-orange{background:rgba(224,90,30,.1);color:#E05A1E}
+.chip-blue{background:rgba(37,99,235,.1);color:#2563EB}
+.chip-gray{background:#F5F3F0;color:#534E4A;border:1px solid #E2DDD7}
+
+/* ── KPI strip no header ── */
+.dc-kpi-strip{
+  display:flex;
+  gap:0;
+  border-top:1px solid #EDE9E4;
+  margin-top:10px;
+}
+.dc-kpi{
+  flex:1;
+  padding:10px 14px;
+  border-right:1px solid #EDE9E4;
+  position:relative;
+}
+.dc-kpi:last-child{border-right:none;flex:2}
+.dc-kpi-label{
+  font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;color:#B5AFA9;margin-bottom:4px;
+}
+.dc-kpi-val{
+  font-size:22px;font-weight:800;line-height:1;
+  font-variant-numeric:tabular-nums;letter-spacing:-.8px;
+}
+.dc-kpi-sub{font-size:10px;color:#8A847F;margin-top:2px}
+.dc-kpi-next-val{font-size:13px;font-weight:700;color:#1A1917;margin-top:2px}
+
+/* ── tabs ── */
+.cliente-tabs{
+  display:flex;
+  background:#fff;
+  border-bottom:1px solid #E2DDD7;
+  padding:0 20px;
+}
+.cliente-tab{
+  padding:11px 14px;
+  font-size:13px;
+  font-weight:600;
+  color:#8A847F;
+  border-bottom:2px solid transparent;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  transition:color .12s,border-color .12s;
+  user-select:none;
+}
+.cliente-tab:hover{color:#534E4A}
+.cliente-tab.active{color:#E05A1E;border-bottom-color:#E05A1E}
+.tab-badge{
+  font-size:10px;font-weight:700;
+  background:#DC2626;color:#fff;
+  padding:1px 5px;border-radius:10px;
+  line-height:1.4;
+}
+
+/* ── tab bodies ── */
+.tab-body{display:none;padding:20px;background:#F5F3F0;min-height:440px}
+.tab-body.active{display:block}
+
+/* ── Visão 360 ── */
+.v360-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-bottom:14px;
+}
+.v360-card{
+  background:#fff;
+  border:1px solid #E2DDD7;
+  border-radius:10px;
+  padding:12px 14px;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+}
+.v360-label{
+  font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;color:#B5AFA9;margin-bottom:5px;
+}
+.v360-val{font-size:14px;font-weight:700;color:#1A1917}
+.v360-sub{font-size:11px;color:#8A847F;margin-top:1px}
+
+.card-block{
+  background:#fff;
+  border:1px solid #E2DDD7;
+  border-radius:10px;
+  padding:14px 16px;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+  margin-bottom:10px;
+}
+.sec-title{
+  font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;color:#B5AFA9;margin-bottom:12px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.sec-title-btn{
+  font-size:11px;font-weight:600;color:#E05A1E;
+  text-transform:none;letter-spacing:0;cursor:pointer;
+}
+
+/* datas */
+.dates-row{display:flex;gap:24px}
+.date-item{}
+.date-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#B5AFA9;margin-bottom:3px}
+.date-val{font-size:13px;font-weight:600;color:#1A1917}
+
+/* contatos */
+.contato-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 0;border-bottom:1px solid #EDE9E4;
+}
+.contato-row:last-child{border-bottom:none}
+.contato-avatar{
+  width:30px;height:30px;border-radius:50%;
+  background:#F5F3F0;border:1px solid #E2DDD7;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#534E4A;flex-shrink:0;
+}
+.contato-info{flex:1}
+.contato-nome{font-size:13px;font-weight:600;color:#1A1917}
+.contato-cargo{font-size:11px;color:#8A847F}
+.contato-links{display:flex;gap:6px;margin-top:3px}
+.contato-link{
+  font-size:10px;font-weight:600;color:#8A847F;
+  display:flex;align-items:center;gap:3px;
+  padding:2px 6px;border-radius:5px;background:#F5F3F0;
+  cursor:pointer;
+  text-decoration:none;
+}
+.contato-link:hover{background:#EDE9E4;color:#534E4A}
+
+/* CSAT/NPS */
+.score-display{
+  display:flex;align-items:baseline;gap:6px;margin-bottom:12px;
+}
+.score-big{font-size:36px;font-weight:800;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.score-denom{font-size:14px;color:#8A847F;font-weight:500}
+.score-label{font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px}
+.score-label-green{background:rgba(22,163,74,.1);color:#16A34A}
+.score-label-yellow{background:rgba(217,119,6,.1);color:#D97706}
+.score-label-red{background:rgba(220,38,38,.1);color:#DC2626}
+
+.resp-row{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 0;border-bottom:1px solid #EDE9E4;
+  font-size:12px;
+}
+.resp-row:last-child{border-bottom:none}
+.resp-score{
+  width:28px;height:28px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:800;flex-shrink:0;
+  font-variant-numeric:tabular-nums;
+}
+.resp-score-green{background:rgba(22,163,74,.12);color:#16A34A}
+.resp-score-yellow{background:rgba(217,119,6,.12);color:#D97706}
+.resp-score-red{background:rgba(220,38,38,.12);color:#DC2626}
+.resp-info{flex:1}
+.resp-date{font-size:11px;color:#B5AFA9}
+.resp-obs{font-size:11px;color:#534E4A;margin-top:1px;font-style:italic}
+
+/* ── Atividades ── */
+.alert-bar{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(220,38,38,.05);
+  border:1px solid rgba(220,38,38,.15);
+  border-radius:8px;
+  padding:8px 12px;
+  margin-bottom:12px;
+  font-size:12px;
+}
+.alert-bar-icon{
+  width:20px;height:20px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.alert-bar-text{flex:1;font-weight:600;color:#B91C1C}
+.alert-bar-sub{color:#8A847F;font-weight:400}
+.alert-bar-link{font-size:11px;font-weight:700;color:#DC2626;cursor:pointer;white-space:nowrap}
+.alert-bar-link:hover{text-decoration:underline}
+
+.at-cols{display:flex;gap:12px}
+.at-left{
+  width:220px;flex-shrink:0;
+  display:flex;flex-direction:column;gap:6px;
+}
+.at-left-label{
+  font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;color:#B5AFA9;padding:0 2px;margin-bottom:2px;
+}
+.pb-card{
+  background:#fff;border:1px solid #E2DDD7;border-radius:8px;
+  padding:10px 12px;cursor:pointer;
+  transition:border-color .12s,box-shadow .12s;
+}
+.pb-card:hover{border-color:#B5AFA9;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.pb-card.sel{border-color:#E05A1E;box-shadow:0 0 0 2px rgba(224,90,30,.1)}
+.pb-card-name{
+  font-size:12px;font-weight:700;color:#1A1917;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:4px;
+}
+.pb-badge-alert{
+  font-size:9px;font-weight:700;
+  background:rgba(220,38,38,.1);color:#DC2626;
+  padding:1px 5px;border-radius:4px;
+}
+.pb-meta{font-size:10px;color:#8A847F;margin-bottom:6px}
+.pb-bar{height:3px;background:#EDE9E4;border-radius:2px;overflow:hidden}
+.pb-bar-fill{height:100%;border-radius:2px;transition:width .3s}
+.pb-bar-fill-green{background:#16A34A}
+.pb-bar-fill-orange{background:#E05A1E}
+.pb-add{
+  background:transparent;border:1.5px dashed #B5AFA9;border-radius:8px;
+  padding:8px;font-size:11px;font-weight:600;color:#8A847F;
+  text-align:center;cursor:pointer;
+  transition:border-color .12s,color .12s;
+}
+.pb-add:hover{border-color:#E05A1E;color:#E05A1E}
+
+.at-right{
+  flex:1;
+  background:#fff;
+  border:1px solid #E2DDD7;
+  border-radius:10px;
+  overflow:hidden;
+}
+.at-right-hd{
+  display:flex;align-items:center;
+  padding:10px 14px;
+  border-bottom:1px solid #EDE9E4;
+  gap:8px;
+}
+.at-right-title{font-size:13px;font-weight:700;color:#1A1917;flex:1}
+.at-dono-select{
+  font-size:11px;color:#534E4A;
+  background:#F5F3F0;border:1px solid #E2DDD7;
+  border-radius:6px;padding:4px 8px;
+  cursor:pointer;font-weight:500;
+}
+.at-add-btn{
+  font-size:11px;font-weight:700;color:#E05A1E;
+  background:rgba(224,90,30,.08);border:1px solid rgba(224,90,30,.15);
+  border-radius:6px;padding:4px 10px;cursor:pointer;
+  transition:background .12s;
+}
+.at-add-btn:hover{background:rgba(224,90,30,.15)}
+
+.at-list{padding:4px 0}
+.at-row{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 14px;
+  border-bottom:1px solid #EDE9E4;
+  border-left:3px solid transparent;
+  transition:background .1s;
+}
+.at-row:last-child{border-bottom:none}
+.at-row:hover{background:#FAFAFA}
+.at-row.crit{border-left-color:#DC2626;background:rgba(220,38,38,.02)}
+.at-row.hoje{border-left-color:#E05A1E;background:rgba(224,90,30,.02)}
+.at-row.done{opacity:.65}
+
+.at-check{
+  width:16px;height:16px;border-radius:4px;
+  border:1.5px solid #B5AFA9;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+}
+.at-check.done{
+  background:#16A34A;border-color:#16A34A;
+  color:#fff;font-size:10px;font-weight:700;
+}
+.at-row-icon{
+  width:26px;height:26px;border-radius:6px;
+  background:#F5F3F0;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;color:#8A847F;
+}
+.at-row-name{flex:1;font-size:12px;color:#1A1917;font-weight:500}
+.at-row-name.done{text-decoration:line-through;color:#B5AFA9}
+.at-row-right{display:flex;align-items:center;gap:6px}
+.at-sla{font-size:10px;font-weight:700;padding:2px 6px;border-radius:5px}
+.at-sla-red{background:rgba(220,38,38,.1);color:#DC2626}
+.at-sla-yellow{background:rgba(217,119,6,.1);color:#D97706}
+.at-sla-green{background:rgba(22,163,74,.1);color:#16A34A}
+.at-sla-gray{background:#F5F3F0;color:#8A847F;border:1px solid #E2DDD7}
+.at-resp{font-size:10px;color:#8A847F;background:#F5F3F0;border-radius:5px;padding:2px 6px}
+.at-status-tag{font-size:10px;font-weight:600;padding:2px 6px;border-radius:5px}
+.at-status-concluida{background:rgba(22,163,74,.08);color:#16A34A}
+.at-status-atrasada{background:rgba(220,38,38,.08);color:#DC2626}
+.at-status-em_andamento{background:rgba(224,90,30,.08);color:#E05A1E}
+.at-status-pendente{background:#F5F3F0;color:#8A847F;border:1px solid #E2DDD7}
+
+/* ── Notas ── */
+.notas-header{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.notas-title{font-size:15px;font-weight:700;color:#1A1917;flex:1}
+.notas-add-btn{
+  display:flex;align-items:center;gap:5px;
+  font-size:12px;font-weight:700;color:#E05A1E;
+  background:rgba(224,90,30,.08);border:1px solid rgba(224,90,30,.15);
+  border-radius:7px;padding:6px 12px;cursor:pointer;
+  transition:background .12s;
+}
+.notas-add-btn:hover{background:rgba(224,90,30,.15)}
+
+.nota-card{
+  background:#fff;
+  border:1px solid #E2DDD7;
+  border-radius:10px;
+  padding:14px 16px;
+  margin-bottom:8px;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+  border-left:3px solid #E2DDD7;
+}
+.nota-card.tipo-alerta{border-left-color:#DC2626}
+.nota-card.tipo-decisao{border-left-color:#2563EB}
+.nota-card.tipo-observacao{border-left-color:#8A847F}
+
+.nota-top{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px}
+.nota-tipo{
+  font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;padding:2px 7px;border-radius:5px;
+  flex-shrink:0;
+}
+.nota-tipo-alerta{background:rgba(220,38,38,.1);color:#DC2626}
+.nota-tipo-decisao{background:rgba(37,99,235,.1);color:#2563EB}
+.nota-tipo-observacao{background:#F5F3F0;color:#8A847F}
+.nota-meta{flex:1;display:flex;align-items:center;justify-content:flex-end;gap:6px}
+.nota-autor{font-size:11px;font-weight:600;color:#534E4A}
+.nota-data{font-size:11px;color:#B5AFA9}
+.nota-texto{font-size:13px;color:#1A1917;line-height:1.55}
+
+.nota-form{
+  background:#fff;
+  border:1px solid #E2DDD7;
+  border-radius:10px;
+  padding:14px 16px;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+.nota-form-row{display:flex;gap:8px;margin-bottom:10px;align-items:center}
+.nota-form-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#B5AFA9;flex-shrink:0}
+.nota-tipo-select{
+  font-size:12px;font-weight:600;
+  background:#F5F3F0;border:1px solid #E2DDD7;
+  border-radius:6px;padding:5px 8px;cursor:pointer;color:#534E4A;
+}
+.nota-textarea{
+  width:100%;border:1px solid #E2DDD7;border-radius:7px;
+  padding:8px 10px;font-size:13px;color:#1A1917;
+  background:#fff;resize:vertical;min-height:72px;
+  font-family:inherit;line-height:1.5;
+  outline:none;
+}
+.nota-textarea:focus{border-color:#B5AFA9}
+.nota-textarea::placeholder{color:#B5AFA9}
+.nota-form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+.btn-cancel{font-size:12px;font-weight:600;color:#8A847F;background:transparent;border:none;padding:6px 10px;cursor:pointer;border-radius:6px}
+.btn-cancel:hover{background:#F5F3F0}
+.btn-save{font-size:12px;font-weight:700;color:#fff;background:#E05A1E;border:none;border-radius:7px;padding:6px 16px;cursor:pointer;transition:opacity .12s}
+.btn-save:hover{opacity:.88}
+
+/* ── 2-col layout para Visão 360 ── */
+.v360-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.v360-col{}
+
+/* ── health sparkline mini ── */
+.health-row{display:flex;align-items:center;gap:12px}
+.health-score-big{font-size:36px;font-weight:800;letter-spacing:-1px}
+.health-trend{flex:1}
+.health-trend-label{font-size:10px;color:#8A847F;margin-bottom:4px}
+
+/* Selected state feedback */
+.pb-card.sel .pb-card-name{color:#E05A1E}
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <div class="intro-badge">Opção A — Mockup completo</div>
+  <div class="intro-title">Detalhe do cliente com header rico + tabs focadas</div>
+  <div class="intro-sub">Navegue pelas 3 abas abaixo para ver o redesign completo</div>
+</div>
+
+<div class="mockup-shell">
+
+  <!-- ── HEADER ── -->
+  <div class="dc-header">
+    <div class="dc-top">
+      <div class="dc-back">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Minha Carteira
+      </div>
+      <div class="dc-avatar">KM</div>
+      <div class="dc-info">
+        <div class="dc-name">KMSIL — Kimball Industrial</div>
+        <div class="dc-sub">SAGP-00036 · 287 dias como cliente</div>
+        <div class="dc-chips">
+          <span class="chip chip-green">CS Ativo</span>
+          <span class="chip chip-orange">Engajamento</span>
+          <span class="chip chip-gray">Saúde</span>
+          <span class="chip chip-gray">CPS</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-left:auto;align-items:flex-start">
+        <button style="font-size:11px;font-weight:600;color:#534E4A;background:#F5F3F0;border:1px solid #E2DDD7;border-radius:7px;padding:6px 12px;cursor:pointer">Editar</button>
+        <button style="font-size:11px;font-weight:700;color:#fff;background:#E05A1E;border:none;border-radius:7px;padding:6px 12px;cursor:pointer">+ Atividade</button>
+      </div>
+    </div>
+
+    <!-- KPI strip -->
+    <div class="dc-kpi-strip">
+      <div class="dc-kpi">
+        <div class="dc-kpi-label">Health Score</div>
+        <div class="dc-kpi-val" style="color:#16A34A">82</div>
+        <div class="dc-kpi-sub">↑ +4 vs mês anterior</div>
+      </div>
+      <div class="dc-kpi">
+        <div class="dc-kpi-label">CSAT</div>
+        <div class="dc-kpi-val" style="color:#16A34A">4.2<span style="font-size:13px;color:#B5AFA9;font-weight:500">/5</span></div>
+        <div class="dc-kpi-sub">Última resposta: 03/07</div>
+      </div>
+      <div class="dc-kpi">
+        <div class="dc-kpi-label">NPS</div>
+        <div class="dc-kpi-val" style="color:#D97706">32</div>
+        <div class="dc-kpi-sub">Bom · Promotores: 3</div>
+      </div>
+      <div class="dc-kpi">
+        <div class="dc-kpi-label">Próxima ação</div>
+        <div class="dc-kpi-next-val">QBR mensal</div>
+        <div class="dc-kpi-sub" style="display:flex;align-items:center;gap:4px">
+          <span style="color:#D97706;font-weight:600">Amanhã · 14h</span>
+          <span>· Ana Costa</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TABS ── -->
+  <div class="cliente-tabs">
+    <div class="cliente-tab" id="tab-360" onclick="showTab('360')">Visão 360</div>
+    <div class="cliente-tab active" id="tab-at" onclick="showTab('at')">
+      Atividades
+      <span class="tab-badge">2</span>
+    </div>
+    <div class="cliente-tab" id="tab-notas" onclick="showTab('notas')">Notas</div>
+  </div>
+
+  <!-- ══ VISÃO 360 ══ -->
+  <div class="tab-body" id="body-360">
+
+    <!-- 4 cards de referência -->
+    <div class="v360-grid">
+      <div class="v360-card">
+        <div class="v360-label">Segmento</div>
+        <div class="v360-val">Saúde</div>
+        <div class="v360-sub">Hospitalar</div>
+      </div>
+      <div class="v360-card">
+        <div class="v360-label">Produto</div>
+        <div class="v360-val">CPS</div>
+        <div class="v360-sub">Módulo relatórios ativo</div>
+      </div>
+      <div class="v360-card">
+        <div class="v360-label">CS Responsável</div>
+        <div class="v360-val">Ana Costa</div>
+        <div class="v360-sub">ana@grv.net.br</div>
+      </div>
+      <div class="v360-card">
+        <div class="v360-label">Consultor Digital</div>
+        <div class="v360-val">Pedro Lima</div>
+        <div class="v360-sub">pedro@grv.net.br</div>
+      </div>
+    </div>
+
+    <div class="v360-cols">
+      <div class="v360-col">
+
+        <!-- Datas -->
+        <div class="card-block">
+          <div class="sec-title">Ciclo de vida</div>
+          <div class="dates-row">
+            <div class="date-item">
+              <div class="date-label">Início implantação</div>
+              <div class="date-val">12/01/2024</div>
+            </div>
+            <div class="date-item">
+              <div class="date-label">Entrada no CS</div>
+              <div class="date-val">28/03/2024</div>
+            </div>
+            <div class="date-item">
+              <div class="date-label">Tempo como cliente</div>
+              <div class="date-val" style="color:#E05A1E">287 dias</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contatos -->
+        <div class="card-block">
+          <div class="sec-title">
+            Contatos
+            <span class="sec-title-btn">+ Adicionar</span>
+          </div>
+          <div class="contato-row">
+            <div class="contato-avatar">JS</div>
+            <div class="contato-info">
+              <div class="contato-nome">João Silva</div>
+              <div class="contato-cargo">Diretor de TI</div>
+              <div class="contato-links">
+                <a class="contato-link" href="#">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></svg>
+                  E-mail
+                </a>
+                <a class="contato-link" href="#">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.06 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16"/></svg>
+                  WhatsApp
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="contato-row">
+            <div class="contato-avatar">MC</div>
+            <div class="contato-info">
+              <div class="contato-nome">Maria Carvalho</div>
+              <div class="contato-cargo">Analista de Operações</div>
+              <div class="contato-links">
+                <a class="contato-link" href="#">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></svg>
+                  E-mail
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="v360-col">
+
+        <!-- CSAT -->
+        <div class="card-block">
+          <div class="sec-title">
+            CSAT
+            <span class="sec-title-btn">+ Registrar</span>
+          </div>
+          <div class="score-display">
+            <div class="score-big" style="color:#16A34A">4.2</div>
+            <div class="score-denom">/5</div>
+            <div class="score-label score-label-green">Excelente</div>
+          </div>
+          <div class="resp-row">
+            <div class="resp-score resp-score-green">4.5</div>
+            <div class="resp-info">
+              <div class="resp-date">03/07/2024</div>
+              <div class="resp-obs">"Interface muito melhorou no último mês."</div>
+            </div>
+          </div>
+          <div class="resp-row">
+            <div class="resp-score resp-score-yellow">4.0</div>
+            <div class="resp-info">
+              <div class="resp-date">05/06/2024</div>
+              <div class="resp-obs">"Suporte poderia ser mais rápido."</div>
+            </div>
+          </div>
+          <div class="resp-row">
+            <div class="resp-score resp-score-green">4.2</div>
+            <div class="resp-info">
+              <div class="resp-date">02/05/2024</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NPS -->
+        <div class="card-block">
+          <div class="sec-title">
+            NPS
+            <span class="sec-title-btn">+ Registrar</span>
+          </div>
+          <div class="score-display">
+            <div class="score-big" style="color:#D97706">32</div>
+            <div class="score-label score-label-yellow">Bom</div>
+          </div>
+          <div class="resp-row">
+            <div class="resp-score resp-score-green">9</div>
+            <div class="resp-info">
+              <div style="font-size:10px;font-weight:600;color:#16A34A;margin-bottom:1px">Promotor</div>
+              <div class="resp-date">01/07/2024</div>
+              <div class="resp-obs">"Sistema mudou nossa operação."</div>
+            </div>
+          </div>
+          <div class="resp-row">
+            <div class="resp-score resp-score-yellow">7</div>
+            <div class="resp-info">
+              <div style="font-size:10px;font-weight:600;color:#D97706;margin-bottom:1px">Neutro</div>
+              <div class="resp-date">03/06/2024</div>
+            </div>
+          </div>
+          <div class="resp-row">
+            <div class="resp-score resp-score-green">10</div>
+            <div class="resp-info">
+              <div style="font-size:10px;font-weight:600;color:#16A34A;margin-bottom:1px">Promotor</div>
+              <div class="resp-date">05/05/2024</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ATIVIDADES ══ -->
+  <div class="tab-body active" id="body-at">
+
+    <!-- Alerta consolidado -->
+    <div class="alert-bar">
+      <div class="alert-bar-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div class="alert-bar-text">
+        2 atividades atrasadas
+        <span class="alert-bar-sub"> · 1 vence hoje</span>
+      </div>
+      <div class="alert-bar-link">Ver todas</div>
+    </div>
+
+    <div class="at-cols">
+
+      <!-- Playbooks -->
+      <div class="at-left">
+        <div class="at-left-label">Playbooks</div>
+
+        <div class="pb-card sel" onclick="selectPb(this,'Onboarding Q3')">
+          <div class="pb-card-name">
+            Onboarding Q3
+            <span class="pb-badge-alert">2 atraso</span>
+          </div>
+          <div class="pb-meta">4 atividades · 1 concluída</div>
+          <div class="pb-bar"><div class="pb-bar-fill pb-bar-fill-orange" style="width:25%"></div></div>
+        </div>
+
+        <div class="pb-card" onclick="selectPb(this,'QBR Mensal')">
+          <div class="pb-card-name">QBR Mensal</div>
+          <div class="pb-meta">3 atividades · 2 concluídas</div>
+          <div class="pb-bar"><div class="pb-bar-fill pb-bar-fill-green" style="width:67%"></div></div>
+        </div>
+
+        <div class="pb-card" onclick="selectPb(this,'Health Check')">
+          <div class="pb-card-name">Health Check</div>
+          <div class="pb-meta">2 atividades · 0 concluídas</div>
+          <div class="pb-bar"><div class="pb-bar-fill pb-bar-fill-orange" style="width:0%"></div></div>
+        </div>
+
+        <div class="pb-add">+ Novo playbook</div>
+      </div>
+
+      <!-- Atividades do playbook selecionado -->
+      <div class="at-right">
+        <div class="at-right-hd">
+          <div class="at-right-title" id="pb-title">Onboarding Q3</div>
+          <select class="at-dono-select"><option>Ana Costa</option><option>Pedro Lima</option></select>
+          <div class="at-add-btn">+ Atividade</div>
+        </div>
+
+        <div class="at-list">
+          <div class="at-row crit">
+            <div class="at-check"></div>
+            <div class="at-row-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </div>
+            <div class="at-row-name">Enviar relatório de acompanhamento Q2</div>
+            <div class="at-row-right">
+              <span class="at-sla at-sla-red">3d atrás</span>
+              <span class="at-resp">Ana Costa</span>
+              <span class="at-status-tag at-status-atrasada">Atrasada</span>
+            </div>
+          </div>
+
+          <div class="at-row hoje">
+            <div class="at-check"></div>
+            <div class="at-row-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            </div>
+            <div class="at-row-name">Agendar QBR mensal de agosto</div>
+            <div class="at-row-right">
+              <span class="at-sla" style="background:rgba(224,90,30,.1);color:#E05A1E;font-weight:700">Hoje</span>
+              <span class="at-resp">Ana Costa</span>
+              <span class="at-status-tag at-status-em_andamento">Em andamento</span>
+            </div>
+          </div>
+
+          <div class="at-row">
+            <div class="at-check"></div>
+            <div class="at-row-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div class="at-row-name">Aplicar pesquisa NPS trimestral</div>
+            <div class="at-row-right">
+              <span class="at-sla at-sla-yellow">+5 dias</span>
+              <span class="at-resp">Pedro Lima</span>
+              <span class="at-status-tag at-status-pendente">Pendente</span>
+            </div>
+          </div>
+
+          <div class="at-row done">
+            <div class="at-check done">✓</div>
+            <div class="at-row-icon" style="opacity:.5">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            </div>
+            <div class="at-row-name done">Reunião kick-off com equipe técnica</div>
+            <div class="at-row-right">
+              <span class="at-sla at-sla-green">Concluída 28/06</span>
+              <span class="at-resp">Ana Costa</span>
+              <span class="at-status-tag at-status-concluida">Concluída</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ NOTAS ══ -->
+  <div class="tab-body" id="body-notas">
+
+    <div class="notas-header">
+      <div class="notas-title">Notas</div>
+      <div class="notas-add-btn" onclick="toggleNoteForm()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nova nota
+      </div>
+    </div>
+
+    <!-- Formulário (oculto por padrão) -->
+    <div class="nota-form" id="nota-form" style="display:none;margin-bottom:12px">
+      <div class="nota-form-row">
+        <div class="nota-form-label">Tipo</div>
+        <select class="nota-tipo-select">
+          <option>Observação</option>
+          <option>Alerta</option>
+          <option>Decisão</option>
+        </select>
+      </div>
+      <textarea class="nota-textarea" placeholder="Escreva sua nota aqui..."></textarea>
+      <div class="nota-form-actions">
+        <button class="btn-cancel" onclick="toggleNoteForm()">Cancelar</button>
+        <button class="btn-save">Salvar nota</button>
+      </div>
+    </div>
+
+    <!-- Notas existentes -->
+    <div class="nota-card tipo-alerta">
+      <div class="nota-top">
+        <span class="nota-tipo nota-tipo-alerta">Alerta</span>
+        <div class="nota-meta">
+          <span class="nota-autor">Ana Costa</span>
+          <span class="nota-data">07/07/2024</span>
+        </div>
+      </div>
+      <div class="nota-texto">Cliente sinalizou insatisfação com o tempo de resposta do suporte técnico. Mencionou dois tickets abertos há mais de 72h sem resolução. Acompanhar com time de suporte antes do QBR.</div>
+    </div>
+
+    <div class="nota-card tipo-decisao">
+      <div class="nota-top">
+        <span class="nota-tipo nota-tipo-decisao">Decisão</span>
+        <div class="nota-meta">
+          <span class="nota-autor">Pedro Lima</span>
+          <span class="nota-data">03/07/2024</span>
+        </div>
+      </div>
+      <div class="nota-texto">Alinhado com João Silva: ciclo de QBR passará a ser trimestral a partir de agosto. Reuniões mensais convertidas em check-ins de 30 min por videoconferência.</div>
+    </div>
+
+    <div class="nota-card tipo-observacao">
+      <div class="nota-top">
+        <span class="nota-tipo nota-tipo-observacao">Observação</span>
+        <div class="nota-meta">
+          <span class="nota-autor">Ana Costa</span>
+          <span class="nota-data">28/06/2024</span>
+        </div>
+      </div>
+      <div class="nota-texto">Reunião muito produtiva. Cliente demonstrou grande interesse na nova funcionalidade de relatórios customizados — pedir ao time produto para incluir no roadmap.</div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+function showTab(tab) {
+  document.querySelectorAll('.cliente-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-body').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('body-' + tab).classList.add('active');
+}
+
+function selectPb(el, nome) {
+  document.querySelectorAll('.pb-card').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('pb-title').textContent = nome;
+}
+
+function toggleNoteForm() {
+  var f = document.getElementById('nota-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+</script>
+
+</body>
+</html>

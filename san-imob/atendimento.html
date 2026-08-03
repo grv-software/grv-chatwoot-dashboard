@@ -1,0 +1,2935 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soma Imob — Atendimento</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%231F2937'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23D67A52'/%3E%3Cstop offset='100%25' stop-color='%231E4D5C'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23g)' d='M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== Reset & base ===== */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    min-width: 900px;
+    font-family: 'Inter', sans-serif;
+    background: #F8F7F5;
+    color: #1F2937;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid #D67A52;
+    outline-offset: 2px;
+  }
+
+  /* ===== Navbar horizontal fixa ===== */
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid #EDE8E3;
+    z-index: 100;
+  }
+
+  .navbar-inner {
+    max-width: 1200px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .navbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
+  .logomark {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logomark svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .logo-text {
+    letter-spacing: -0.02em;
+  }
+
+  .logo-soma {
+    font-weight: 700;
+    color: #1F2937;
+  }
+
+  .logo-imob {
+    font-weight: 600;
+    color: #1E4D5C;
+    letter-spacing: 0.06em;
+    margin-left: 2px;
+  }
+
+  .ia-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #E4EDEF;
+    color: #1E4D5C;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .ia-pill svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  /* ===== Navegação: dropdowns ===== */
+  .navbar-links {
+    position: relative;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .nav-indicator {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: #FBEAE1;
+    border-radius: 8px;
+    z-index: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .nav-indicator {
+      transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  }
+
+  .navbar-links li {
+    position: relative;
+    z-index: 1;
+  }
+
+  .navbar-links a,
+  .navbar-links .placeholder-link,
+  .nav-dropdown-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: none;
+    border: none;
+    color: #374151;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .navbar-links li:not(.active) a:hover,
+  .navbar-links li:not(.active) .placeholder-link:hover,
+  .navbar-links li:not(.active) .nav-dropdown-trigger:hover {
+    background: #F3F4F6;
+  }
+
+  .navbar-links li.active a,
+  .navbar-links li.active .placeholder-link,
+  .navbar-links li.active .nav-dropdown-trigger {
+    color: #D67A52;
+    font-weight: 600;
+  }
+
+  .nav-dropdown.open .nav-dropdown-trigger {
+    background: #F3F4F6;
+  }
+
+  .chevron {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.2s ease;
+  }
+
+  .nav-dropdown.open .chevron {
+    transform: rotate(180deg);
+  }
+
+  .nav-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 240px;
+    background: #fff;
+    border: 1px solid #EDE8E3;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
+    padding: 6px;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .nav-dropdown-menu {
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+  }
+
+  .nav-dropdown.open .nav-dropdown-menu {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 14px;
+    color: #374151;
+    text-decoration: none;
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .dropdown-item:hover {
+    background: #F3F4F6;
+  }
+
+  .dropdown-item.active {
+    background: #FBEAE1;
+    color: #D67A52;
+    font-weight: 600;
+  }
+
+  .dropdown-item--highlight {
+    color: #D67A52;
+    font-weight: 600;
+  }
+
+  .dropdown-item--highlight:hover {
+    background: #FBEAE1;
+  }
+
+  .dropdown-item-icon-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dropdown-item-icon-label svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .dropdown-divider {
+    height: 1px;
+    background: #EDE8E3;
+    margin: 6px 4px;
+  }
+
+  .nav-badge {
+    background: #DC2626;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 999px;
+    line-height: 1.5;
+  }
+
+  .navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #D67A52;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .icon-btn {
+    background: none;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #374151;
+  }
+
+  .icon-btn:hover {
+    background: #F3F4F6;
+  }
+
+  .icon-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Botão de disparo do painel Arnês IA, estilo Gemini */
+  .ia-launcher {
+    position: relative;
+    overflow: hidden;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: #fff;
+    background: #1E4D5C;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.1s ease;
+  }
+
+  .ia-launcher:active {
+    transform: scale(0.97);
+  }
+
+  .ia-launcher svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .ia-launcher::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    transform: skewX(-20deg);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ia-launcher:hover::after {
+      animation: iaShimmer 600ms ease-out;
+    }
+  }
+
+  @keyframes iaShimmer {
+    from { left: -75%; }
+    to { left: 125%; }
+  }
+
+  .btn {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 9px 16px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  }
+
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  .btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .btn-primary {
+    background: #D67A52;
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: #B66846;
+  }
+
+  .btn-outline {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    color: #374151;
+  }
+
+  .btn-outline:hover {
+    border-color: #D67A52;
+    color: #D67A52;
+  }
+
+  .btn-outline-orange {
+    background: #fff;
+    border: 1px solid #D67A52;
+    color: #D67A52;
+  }
+
+  .btn-outline-orange:hover {
+    background: #FBEAE1;
+  }
+
+  .btn-whatsapp {
+    background: #16A34A;
+    color: #fff;
+  }
+
+  .btn-whatsapp:hover {
+    background: #128239;
+  }
+
+  .btn-sm {
+    font-size: 13px;
+    padding: 7px 12px;
+  }
+
+  /* ===== Página: layout cheio (Kanban precisa de largura total) ===== */
+  .page {
+    padding-top: 64px;
+    transition: margin-right 0.3s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page {
+      transition: margin-right 0.01s linear;
+    }
+  }
+
+  body.ia-panel-open .page {
+    margin-right: 400px;
+  }
+
+  body.lead-panel-open .page {
+    margin-right: 420px;
+  }
+
+  .atendimento-content {
+    padding: 24px 32px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    height: calc(100vh - 64px);
+  }
+
+  /* ===== Cabeçalho da página ===== */
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .page-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+
+  .page-header p {
+    font-size: 14px;
+    color: #6B7280;
+  }
+
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+
+  .chip {
+    font-family: inherit;
+    font-size: 13px;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 999px;
+    padding: 6px 14px;
+    cursor: pointer;
+    color: #374151;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  }
+
+  .chip:hover {
+    border-color: #D67A52;
+    color: #D67A52;
+  }
+
+  .chip:active {
+    transform: scale(0.97);
+  }
+
+  .chip.active {
+    background: #D67A52;
+    border-color: #D67A52;
+    color: #fff;
+  }
+
+  /* ===== Board Kanban ===== */
+  .kanban-board {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    flex: 1;
+    min-height: 0;
+    padding-bottom: 20px;
+  }
+
+  .kanban-column {
+    width: 280px;
+    flex-shrink: 0;
+    background: #EDECEA;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    transition: background 0.15s ease;
+  }
+
+  .kanban-column.drag-over {
+    background: #E3E1DD;
+  }
+
+  .kanban-column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    flex-shrink: 0;
+  }
+
+  .kanban-column-header h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+  }
+
+  .column-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #E5E7EB;
+    color: #374151;
+  }
+
+  .column-badge--concluido {
+    background: #DCFCE7;
+    color: #16A34A;
+  }
+
+  .column-badge--arquivado {
+    background: #F3F4F6;
+    color: #6B7280;
+  }
+
+  .kanban-cards {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 8px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* ===== Card do Kanban ===== */
+  .lead-card {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-left: 3px solid transparent;
+    border-radius: 8px;
+    padding: 12px;
+    cursor: grab;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  }
+
+  .lead-card:hover {
+    border-left-color: #D67A52;
+    box-shadow: 0 4px 12px rgba(16, 24, 40, 0.08);
+  }
+
+  .lead-card.dragging {
+    opacity: 0.4;
+    cursor: grabbing;
+  }
+
+  .lead-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .lead-card-name {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #1F2937;
+  }
+
+  .temp-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 999px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .temp-quente {
+    background: #FEE2E2;
+    color: #DC2626;
+  }
+
+  .temp-morno {
+    background: #FEF9C3;
+    color: #CA8A04;
+  }
+
+  .temp-frio {
+    background: #DBEAFE;
+    color: #2563EB;
+  }
+
+  .lead-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #6B7280;
+    margin-bottom: 4px;
+  }
+
+  .lead-card-meta svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    color: #9CA3AF;
+  }
+
+  .lead-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #F3F4F6;
+  }
+
+  .card-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #D67A52;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .card-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .card-action-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: none;
+    background: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #9CA3AF;
+  }
+
+  .card-action-btn:hover {
+    background: #F3F4F6;
+  }
+
+  .card-action-btn.whatsapp {
+    color: #16A34A;
+  }
+
+  .card-action-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* ===== Painel de detalhes do lead ===== */
+  .lead-panel {
+    position: fixed;
+    top: 64px;
+    right: 0;
+    bottom: 0;
+    width: 420px;
+    background: #fff;
+    border-left: 1px solid #E5E7EB;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    z-index: 150;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .lead-panel {
+      transition: transform 0.3s ease-out;
+    }
+  }
+
+  .lead-panel.show {
+    transform: translateX(0);
+  }
+
+  .lead-panel-header {
+    padding: 20px 20px 0;
+    flex-shrink: 0;
+  }
+
+  .lead-panel-header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .lead-panel-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #D67A52;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-bottom: 10px;
+  }
+
+  .lead-panel-name {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+
+  .lead-panel-badges {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .stage-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: #E4EDEF;
+    color: #1E4D5C;
+  }
+
+  .lead-panel-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid #E5E7EB;
+  }
+
+  .lead-tab {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    background: none;
+    border: none;
+    padding: 10px 6px;
+    margin-right: 14px;
+    color: #6B7280;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .lead-tab.active {
+    color: #D67A52;
+    border-bottom-color: #D67A52;
+  }
+
+  .lead-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .lead-tab-panel {
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .lead-tab-panel.active {
+    display: flex;
+  }
+
+  .info-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13.5px;
+    color: #374151;
+  }
+
+  .info-row svg {
+    width: 15px;
+    height: 15px;
+    color: #9CA3AF;
+    flex-shrink: 0;
+  }
+
+  .quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .ia-alert {
+    background: #F8F7F5;
+    border: 1px solid #E5E7EB;
+    border-left: 3px solid #D67A52;
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+
+  .ia-alert-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #D67A52;
+    margin-bottom: 6px;
+  }
+
+  .ia-alert-header svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .ia-alert p {
+    font-size: 13.5px;
+    color: #374151;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+
+  .notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .note-item {
+    background: #F8F7F5;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #374151;
+    line-height: 1.5;
+  }
+
+  .note-item strong {
+    color: #1F2937;
+  }
+
+  .note-input-area {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .note-input-area.show {
+    display: flex;
+  }
+
+  .note-input-area textarea {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 10px 12px;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    resize: vertical;
+    min-height: 60px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #9CA3AF;
+    margin-bottom: 10px;
+  }
+
+  .property-row {
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #F3F4F6;
+  }
+
+  .property-row:last-child {
+    border-bottom: none;
+  }
+
+  .property-thumb {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #F3F4F6;
+    color: #9CA3AF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .property-thumb svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .property-info p {
+    font-size: 13px;
+    color: #1F2937;
+    font-weight: 600;
+  }
+
+  .property-info span {
+    font-size: 12px;
+    color: #6B7280;
+  }
+
+  .visit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #F3F4F6;
+    font-size: 13px;
+  }
+
+  .visit-row:last-child {
+    border-bottom: none;
+  }
+
+  .visit-status {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #DCFCE7;
+    color: #16A34A;
+  }
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .timeline-item {
+    display: flex;
+    gap: 12px;
+  }
+
+  .timeline-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #E4EDEF;
+    color: #1E4D5C;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .timeline-icon svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .timeline-content p {
+    font-size: 13.5px;
+    color: #1F2937;
+    margin-bottom: 2px;
+  }
+
+  .timeline-content span {
+    font-size: 12px;
+    color: #9CA3AF;
+  }
+
+  /* ===== Modal de agendamento ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 400;
+  }
+
+  .modal-overlay.show {
+    display: flex;
+  }
+
+  .modal-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    width: 380px;
+    box-shadow: 0 16px 40px rgba(16, 24, 40, 0.16);
+  }
+
+  .modal-box h3 {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+
+  .modal-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .modal-field label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6B7280;
+  }
+
+  .modal-field input,
+  .modal-field select,
+  .modal-field textarea {
+    font-family: inherit;
+    font-size: 14px;
+    padding: 9px 12px;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    color: #1F2937;
+  }
+
+  .modal-field textarea {
+    resize: vertical;
+    min-height: 50px;
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  /* ===== Toast genérico ===== */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    max-width: 320px;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 16px rgba(17, 24, 39, 0.08);
+    opacity: 0;
+    transform: translateX(16px);
+    pointer-events: none;
+    transition: opacity 200ms ease-in, transform 200ms ease-in;
+    z-index: 500;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 200ms ease-out, transform 200ms ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toast,
+    .toast.show {
+      transform: none;
+      transition: opacity 120ms linear;
+    }
+  }
+
+  .toast-icon {
+    color: #D67A52;
+    flex-shrink: 0;
+    display: flex;
+  }
+
+  .toast-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .toast p {
+    font-size: 13px;
+    color: #1F2937;
+  }
+
+  /* ===== Banner de reconexão (fallback quando a API está fora) ===== */
+  .reconnect-banner {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: #FEF3C7;
+    color: #92400E;
+    font-size: 13px;
+    text-align: center;
+    padding: 8px 16px;
+    z-index: 90;
+    display: none;
+  }
+
+  .reconnect-banner.show {
+    display: block;
+  }
+
+  /* ===== Skeleton de carregamento ===== */
+  .skeleton {
+    color: transparent !important;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .skeleton {
+      animation: skeletonPulse 1.4s ease-in-out infinite;
+    }
+  }
+
+  @keyframes skeletonPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+
+  /* ===== Painel lateral da Arnês IA (estilo Gemini, empurra o conteúdo) ===== */
+  .ia-panel {
+    position: fixed;
+    top: 64px;
+    right: 0;
+    bottom: 0;
+    width: 400px;
+    background: #F8F7F5;
+    border-left: 1px solid #EDE8E3;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    z-index: 150;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ia-panel {
+      transition: transform 0.3s ease-out;
+    }
+  }
+
+  .ia-panel.show {
+    transform: translateX(0);
+  }
+
+  .ia-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-bottom: 1px solid #EDE8E3;
+    flex-shrink: 0;
+  }
+
+  .ia-panel-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.02em;
+  }
+
+  .ia-panel-close {
+    background: none;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #374151;
+    cursor: pointer;
+  }
+
+  .ia-panel-close:hover {
+    background: #F3F4F6;
+  }
+
+  .ia-panel-close svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .ia-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ia-greeting {
+    margin-bottom: 24px;
+  }
+
+  .ia-greeting h2 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #1E4D5C;
+    margin-bottom: 6px;
+  }
+
+  .ia-greeting p {
+    font-size: 15px;
+    color: #6B7280;
+  }
+
+  .ia-panel-suggestions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .ia-suggestion-chip {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    text-align: left;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #374151;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+  }
+
+  .ia-suggestion-chip svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #D67A52;
+  }
+
+  .ia-suggestion-chip:hover {
+    background: #FBEAE1;
+    border-color: #D67A52;
+    color: #D67A52;
+  }
+
+  .ia-suggestion-chip:active {
+    transform: scale(0.97);
+  }
+
+  .ia-suggestion-chip.pulsing {
+    pointer-events: none;
+    background: #FBEAE1;
+    border-color: #D67A52;
+    color: #D67A52;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ia-suggestion-chip.pulsing {
+      animation: chipPulse 1s ease-in-out infinite;
+    }
+  }
+
+  @keyframes chipPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+
+  .ia-panel-history {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .ia-panel-history:not(:empty) {
+    margin-bottom: 14px;
+  }
+
+  .ia-message {
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .ia-message--ai {
+    align-self: flex-start;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    color: #374151;
+  }
+
+  .ia-message--user {
+    align-self: flex-end;
+    background: #1E4D5C;
+    color: #fff;
+  }
+
+  .ia-panel-footer {
+    padding: 14px 20px 20px;
+    flex-shrink: 0;
+  }
+
+  .ia-input-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 999px;
+    padding: 6px 6px 6px 16px;
+  }
+
+  .ia-input-pill:focus-within {
+    border-color: #1E4D5C;
+  }
+
+  .ia-input-pill input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 14px;
+    color: #1F2937;
+  }
+
+  .ia-input-pill input:focus {
+    outline: none;
+  }
+
+  .ia-send-btn {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #1E4D5C, #3A7686);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .ia-send-btn:active {
+    transform: scale(0.92);
+  }
+
+  .ia-send-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===== Navbar ===== -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-logo">
+        <div class="logomark">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <defs>
+              <linearGradient id="starGradientNav" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#D67A52"/>
+                <stop offset="100%" stop-color="#1E4D5C"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#starGradientNav)" d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/>
+          </svg>
+        </div>
+        <span class="logo-text"><span class="logo-soma">Soma</span> <span class="logo-imob">Imob</span></span>
+        <span class="ia-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+          Arnês IA inclusa
+        </span>
+      </div>
+
+      <ul class="navbar-links" id="navbarLinks">
+        <span class="nav-indicator" id="navIndicator"></span>
+
+        <li data-page="Início">
+          <a href="index.html">Início</a>
+        </li>
+
+        <li class="nav-dropdown" data-page="Indicadores">
+          <button class="nav-dropdown-trigger" type="button" aria-expanded="false">
+            Indicadores
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <a class="dropdown-item" href="dashboard.html">Dashboard</a>
+            <a class="dropdown-item" href="inteligencia_mercado.html">Inteligência de mercado</a>
+            <a class="dropdown-item" href="metas.html">Metas e performance</a>
+            <button type="button" class="dropdown-item">Relatórios</button>
+          </div>
+        </li>
+
+        <li class="nav-dropdown active" data-page="Atendimento">
+          <button class="nav-dropdown-trigger" type="button" aria-expanded="false">
+            Atendimento
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <a class="dropdown-item" href="clientes.html">Clientes <span class="nav-badge">307</span></a>
+            <a class="dropdown-item active" href="atendimento.html">Pipeline de vendas</a>
+            <button type="button" class="dropdown-item">Distribuição automática</button>
+            <button type="button" class="dropdown-item">WhatsApp Omnichannel</button>
+            <button type="button" class="dropdown-item">Histórico</button>
+          </div>
+        </li>
+
+        <li class="nav-dropdown" data-page="Imóveis">
+          <button class="nav-dropdown-trigger" type="button" aria-expanded="false">
+            Imóveis
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-menu">
+            <button type="button" class="dropdown-item dropdown-item--highlight" onclick="location.href='imoveis.html'">
+              <span class="dropdown-item-icon-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                Novo imóvel
+              </span>
+            </button>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="imoveis.html">Imóveis</a>
+            <button type="button" class="dropdown-item">Condomínios</button>
+            <button type="button" class="dropdown-item">Portais de publicação</button>
+            <button type="button" class="dropdown-item">Captação de imóveis</button>
+            <button type="button" class="dropdown-item">Avaliação de imóveis</button>
+          </div>
+        </li>
+
+        <li class="nav-placeholder" data-page="Sites">
+          <span class="placeholder-link">Sites</span>
+        </li>
+
+        <li class="nav-ia-item">
+          <button class="ia-launcher" id="iaTrigger" type="button" aria-label="Peça à Arnês IA">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+          </button>
+        </li>
+      </ul>
+
+      <div class="navbar-actions">
+        <button class="icon-btn" title="Notificações">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <div class="avatar" title="Samuel W. — Corretor">SW</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== Banner de reconexão ===== -->
+  <div class="reconnect-banner" id="reconnectBanner" role="status">
+    ⚠ Arnês IA temporariamente indisponível. Os dados exibidos são os últimos carregados. Tentando reconectar...
+  </div>
+
+  <!-- ===== Página ===== -->
+  <div class="page">
+    <div class="atendimento-content">
+
+      <!-- Cabeçalho -->
+      <div class="page-header">
+        <div>
+          <h2>Pipeline de vendas</h2>
+          <p>47 leads ativos · ordenados por chance de fechamento</p>
+        </div>
+        <button class="btn btn-outline-orange btn-sm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          Novo lead
+        </button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filter-bar" id="filterChips">
+        <button class="chip active" data-filter="todos">Todos</button>
+        <button class="chip" data-filter="quente">Quentes</button>
+        <button class="chip" data-filter="morno">Mornos</button>
+        <button class="chip" data-filter="frio">Frios</button>
+        <button class="chip" data-filter="sem-contato">Sem contato há +7 dias</button>
+      </div>
+
+      <!-- Board Kanban -->
+      <div class="kanban-board" id="kanbanBoard">
+
+        <div class="kanban-column" data-column="aberto">
+          <div class="kanban-column-header">
+            <h3>Aberto</h3>
+            <span class="column-badge" data-count>5</span>
+          </div>
+          <div class="kanban-cards" data-dropzone>
+
+            <div class="lead-card" draggable="true" data-nome="Ana Beatriz Costa" data-temp="quente" data-dias="0" data-origem="whatsapp" data-etapa="Aberto">
+              <div class="lead-card-top">
+                <span class="lead-card-name">Ana Beatriz Costa</span>
+                <span class="temp-badge temp-quente">Quente</span>
+              </div>
+              <div class="lead-card-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                <span>WhatsApp · há 1 hora</span>
+              </div>
+              <div class="lead-card-meta">3 imóveis de interesse</div>
+              <div class="lead-card-footer">
+                <div class="card-avatar">SW</div>
+                <div class="card-actions">
+                  <button class="card-action-btn whatsapp" title="WhatsApp" onclick="event.stopPropagation(); window.open('https://wa.me/5519999991234','_blank')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                  </button>
+                  <button class="card-action-btn" title="Agendar visita" onclick="event.stopPropagation()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="lead-card" draggable="true" data-nome="Pedro Henrique" data-temp="morno" data-dias="0" data-origem="portal" data-etapa="Aberto">
+              <div class="lead-card-top">
+                <span class="lead-card-name">Pedro Henrique</span>
+                <span class="temp-badge temp-morno">Morno</span>
+              </div>
+              <div class="lead-card-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9"/></svg>
+                <span>Portal · há 4 horas</span>
+              </div>
+              <div class="lead-card-meta">1 imóvel de interesse</div>
+              <div class="lead-card-footer">
+                <div class="card-avatar">SW</div>
+                <div class="card-actions">
+                  <button class="card-action-btn whatsapp" title="WhatsApp" onclick="event.stopPropagation(); window.open('https://wa.me/5519999991234','_blank')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                  </button>
+                  <button class="card-action-btn" title="Agendar visita" onclick="event.stopPropagation()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="lead-card" draggable="true" data-nome="Larissa Mendes" data-temp="frio" data-dias="2" data-origem="facebook" data-etapa="Aberto">
+              <div class="lead-card-top">
+                <span class="lead-card-name">Larissa Mendes</span>
+                <span class="temp-badge temp-frio">Frio</span>
+              </div>
+              <div class="lead-card-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5 15.4 17.5M15.4 6.5 8.6 10.5"/></svg>
+                <span>Facebook · há 2 dias</span>
+              </div>
+              <div class="lead-card-meta">2 imóveis de interesse</div>
+              <div class="lead-card-footer">
+                <div class="card-avatar">SW</div>
+                <div class="card-actions">
+                  <button class="card-action-btn whatsapp" title="WhatsApp" onclick="event.stopPropagation(); window.open('https://wa.me/5519999991234','_blank')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                  </button>
+                  <button class="card-action-btn" title="Agendar visita" onclick="event.stopPropagation()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="lead-card" draggable="true" data-nome="Roberto Almeida" data-temp="morno" data-dias="1" data-origem="site" data-etapa="Aberto">
+              <div class="lead-card-top">
+                <span class="lead-card-name">Roberto Almeida</span>
+                <span class="temp-badge temp-morno">Morno</span>
+              </div>
+              <div class="lead-card-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.5 2.5 15.5 0 18"/><path d="M12 3c-2.5 2.5-2.5 15.5 0 18"/></svg>
+                <span>Site · há 1 dia</span>
+              </div>
+              <div class="lead-card-meta">1 imóvel de interesse</div>
+              <div class="lead-card-footer">
+                <div class="card-avatar">SW</div>
+                <div class="card-actions">
+                  <button class="card-action-btn whatsapp" title="WhatsApp" onclick="event.stopPropagation(); window.open('https://wa.me/5519999991234','_blank')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                  </button>
+                  <button class="card-action-btn" title="Agendar visita" onclick="event.stopPropagation()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="lead-card" draggable="true" data-nome="Tatiane Ferreira" data-temp="quente" data-dias="0" data-origem="whatsapp" data-etapa="Aberto">
+              <div class="lead-card-top">
+                <span class="lead-card-name">Tatiane Ferreira</span>
+                <span class="temp-badge temp-quente">Quente</span>
+              </div>
+              <div class="lead-card-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                <span>WhatsApp · há 30 min</span>
+              </div>
+              <div class="lead-card-meta">4 imóveis de interesse</div>
+              <div class="lead-card-footer">
+                <div class="card-avatar">SW</div>
+                <div class="card-actions">
+                  <button class="card-action-btn whatsapp" title="WhatsApp" onclick="event.stopPropagation(); window.open('https://wa.me/5519999991234','_blank')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                  </button>
+                  <button class="card-action-btn" title="Agendar visita" onclick="event.stopPropagation()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="kanban-column" data-column="em-atendimento">
+          <div class="kanban-column-header">
+            <h3>Em atendimento</h3>
+            <span class="column-badge" data-count>4</span>
+          </div>
+          <div class="kanban-cards" data-dropzone>
+
+            <div class="lead-card" draggable="true" data-nome="Marcos Andrade" data-temp="quente" data-dias="3" data-origem="whatsapp" data-etapa="Em atendimento">
+              <div class="lead-card-top">
+                <span class="lead-card-name">Marcos Andrade</span>
+                <span class="temp-badge temp-quente">Quente</span>
+              </div>
+              <div class="lead-card-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                <span>WhatsApp · há 3 dias</span>
+              </div>
+              <div class="lead-card-meta">2 imóveis de interesse</div>
+              <div class="lead-card-footer">
+                <div class="card-avatar">SW</div>
+                <div class="card-actions">
+                  <button class="card-action-btn whatsapp" title="WhatsApp" onclick="event.stopPropagation(); window.open('https://wa.me/5519999991234','_blank')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                  </button>
+                  <button class="card-action-btn" title="Agendar visita" onclick="event.stopPropagation()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="lead-card" draggable="true" data-nome="Fernanda Lima" data-temp="quente" data-dias="1" data-origem="portal" data-etapa="Em atendimento">
+              <div class="lead-card-top">
+                <span class="lead-card-name">Fernanda Lima</span>
+                <span class="temp-badge temp-quente">Quente</span>
+              </div>
+              <div class="lead-card-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9"/></svg>
+                <span>Portal · há 1 dia</span>
+              </div>
+              <div class="lead-card-meta">1 imóvel de interesse</div>
+              <div class="lead-card-footer">
+                <div class="card-avatar">SW</div>
+                <div class="card-actions">
+                  <button class="card-action-btn whatsapp" title="WhatsApp" onclick="event.stopPropagation(); window.open('https://wa.me/5519999991234','_blank')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                  </button>
+                  <button class="card-action-btn" title="Agendar visita" onclick="event.stopPropagation()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="lead-card" draggable="true" data-nome="Ricardo Souza" data-temp="morno" data-dias="2" data-origem="site" data-etapa="Em atendimento">
+              <div class="lead-card-top">
+                <span class="lead-card-name">Ricardo Souza</span>
+                <span class="temp-badge temp-morno">Morno</span>
+              </div>
+              <div class="lead-card-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.5 2.5 15.5 0 18"/><path d="M12 3c-2.5 2.5-2.5 15.5 0 18"/></svg>
+                <span>Site · há 2 dias</span>
+              </div>
+              <div class="lead-card-meta">3 imóveis de interesse</div>
+              <div class="lead-card-footer">
+                <div class="card-avatar">SW</div>
+                <div class="card-actions">
+                  <button class="card-action-btn whatsapp" title="WhatsApp" onclick="event.stopPropagation(); window.open('https://wa.me/5519999991234','_blank')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                  </button>
+                  <button class="card-action-btn" title="Agendar visita" onclick="event.stopPropagation()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="lead-card" draggable="true" data-nome="Juliana Prado" data-temp="morno" data-dias="5" data-origem="facebook" data-etapa="Em atendimento">
+              <div class="lead-card-top">
+                <span class="lead-card-name">Juliana Prado</span>
+                <span class="temp-badge temp-morno">Morno</span>
+              </div>
+              <div class="lead-card-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5 15.4 17.5M15.4 6.5 8.6 10.5"/></svg>
+                <span>Facebook · há 5 dias</span>
+              </div>
+              <div class="lead-card-meta">2 imóveis de interesse</div>
+              <div class="lead-card-footer">
+                <div class="card-avatar">SW</div>
+                <div class="card-actions">
+                  <button class="card-action-btn whatsapp" title="WhatsApp" onclick="event.stopPropagation(); window.open('https://wa.me/5519999991234','_blank')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                  </button>
+                  <button class="card-action-btn" title="Agendar visita" onclick="event.stopPropagation()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="kanban-column" data-column="visita">
+          <div class="kanban-column-header">
+            <h3>Visita</h3>
+            <span class="column-badge" data-count>3</span>
+          </div>
+          <div class="kanban-cards" data-dropzone>
+
+            <div class="lead-card" draggable="true" data-nome="Carlos Eduardo" data-temp="morno" data-dias="8" data-origem="portal" data-etapa="Visita">
+              <div class="lead-card-top">
+                <span class="lead-card-name">Carlos Eduardo</span>
+                <span class="temp-badge temp-morno">Morno</span>
+              </div>
+              <div class="lead-card-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9"/></svg>
+                <span>Portal · há 8 dias</span>
+              </div>
+              <div class="lead-card-meta">1 imóvel de interesse</div>
+              <div class="lead-card-footer">
+                <div class="card-avatar">SW</div>
+                <div class="card-actions">
+                  <button class="card-action-btn whatsapp" title="WhatsApp" onclick="event.stopPropagation(); window.open('https://wa.me/5519999991234','_blank')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                  </button>
+                  <button class="card-action-btn" title="Agendar visita" onclick="event.stopPropagation()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="lead-card" draggable="true" data-nome="Patrícia Nunes" data-temp="quente" data-dias="5" data-origem="whatsapp" data-etapa="Visita">
+              <div class="lead-card-top">
+                <span class="lead-card-name">Patrícia Nunes</span>
+                <span class="temp-badge temp-quente">Quente</span>
+              </div>
+              <div class="lead-card-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                <span>WhatsApp · há 5 dias</span>
+              </div>
+              <div class="lead-card-meta">2 imóveis de interesse</div>
+              <div class="lead-card-footer">
+                <div class="card-avatar">SW</div>
+                <div class="card-actions">
+                  <button class="card-action-btn whatsapp" title="WhatsApp" onclick="event.stopPropagation(); window.open('https://wa.me/5519999991234','_blank')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                  </button>
+                  <button class="card-action-btn" title="Agendar visita" onclick="event.stopPropagation()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="lead-card" draggable="true" data-nome="Diego Ramos" data-temp="frio" data-dias="12" data-origem="site" data-etapa="Visita">
+              <div class="lead-card-top">
+                <span class="lead-card-name">Diego Ramos</span>
+                <span class="temp-badge temp-frio">Frio</span>
+              </div>
+              <div class="lead-card-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.5 2.5 15.5 0 18"/><path d="M12 3c-2.5 2.5-2.5 15.5 0 18"/></svg>
+                <span>Site · há 12 dias</span>
+              </div>
+              <div class="lead-card-meta">1 imóvel de interesse</div>
+              <div class="lead-card-footer">
+                <div class="card-avatar">SW</div>
+                <div class="card-actions">
+                  <button class="card-action-btn whatsapp" title="WhatsApp" onclick="event.stopPropagation(); window.open('https://wa.me/5519999991234','_blank')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                  </button>
+                  <button class="card-action-btn" title="Agendar visita" onclick="event.stopPropagation()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="kanban-column" data-column="proposta">
+          <div class="kanban-column-header">
+            <h3>Proposta</h3>
+            <span class="column-badge" data-count>2</span>
+          </div>
+          <div class="kanban-cards" data-dropzone>
+
+            <div class="lead-card" draggable="true" data-nome="Família Souza" data-temp="quente" data-dias="14" data-origem="portal" data-etapa="Proposta">
+              <div class="lead-card-top">
+                <span class="lead-card-name">Família Souza</span>
+                <span class="temp-badge temp-quente">Quente</span>
+              </div>
+              <div class="lead-card-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9"/></svg>
+                <span>Portal · há 14 dias</span>
+              </div>
+              <div class="lead-card-meta">1 imóvel de interesse</div>
+              <div class="lead-card-footer">
+                <div class="card-avatar">SW</div>
+                <div class="card-actions">
+                  <button class="card-action-btn whatsapp" title="WhatsApp" onclick="event.stopPropagation(); window.open('https://wa.me/5519999991234','_blank')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                  </button>
+                  <button class="card-action-btn" title="Agendar visita" onclick="event.stopPropagation()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="lead-card" draggable="true" data-nome="Renata Oliveira" data-temp="morno" data-dias="10" data-origem="whatsapp" data-etapa="Proposta">
+              <div class="lead-card-top">
+                <span class="lead-card-name">Renata Oliveira</span>
+                <span class="temp-badge temp-morno">Morno</span>
+              </div>
+              <div class="lead-card-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                <span>WhatsApp · há 10 dias</span>
+              </div>
+              <div class="lead-card-meta">1 imóvel de interesse</div>
+              <div class="lead-card-footer">
+                <div class="card-avatar">SW</div>
+                <div class="card-actions">
+                  <button class="card-action-btn whatsapp" title="WhatsApp" onclick="event.stopPropagation(); window.open('https://wa.me/5519999991234','_blank')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                  </button>
+                  <button class="card-action-btn" title="Agendar visita" onclick="event.stopPropagation()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="kanban-column" data-column="documentacao">
+          <div class="kanban-column-header">
+            <h3>Documentação</h3>
+            <span class="column-badge" data-count>2</span>
+          </div>
+          <div class="kanban-cards" data-dropzone>
+
+            <div class="lead-card" draggable="true" data-nome="Gustavo Martins" data-temp="quente" data-dias="18" data-origem="portal" data-etapa="Documentação">
+              <div class="lead-card-top">
+                <span class="lead-card-name">Gustavo Martins</span>
+                <span class="temp-badge temp-quente">Quente</span>
+              </div>
+              <div class="lead-card-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9"/></svg>
+                <span>Portal · há 18 dias</span>
+              </div>
+              <div class="lead-card-meta">1 imóvel de interesse</div>
+              <div class="lead-card-footer">
+                <div class="card-avatar">SW</div>
+                <div class="card-actions">
+                  <button class="card-action-btn whatsapp" title="WhatsApp" onclick="event.stopPropagation(); window.open('https://wa.me/5519999991234','_blank')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                  </button>
+                  <button class="card-action-btn" title="Agendar visita" onclick="event.stopPropagation()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="lead-card" draggable="true" data-nome="Camila Rocha" data-temp="morno" data-dias="15" data-origem="facebook" data-etapa="Documentação">
+              <div class="lead-card-top">
+                <span class="lead-card-name">Camila Rocha</span>
+                <span class="temp-badge temp-morno">Morno</span>
+              </div>
+              <div class="lead-card-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5 15.4 17.5M15.4 6.5 8.6 10.5"/></svg>
+                <span>Facebook · há 15 dias</span>
+              </div>
+              <div class="lead-card-meta">1 imóvel de interesse</div>
+              <div class="lead-card-footer">
+                <div class="card-avatar">SW</div>
+                <div class="card-actions">
+                  <button class="card-action-btn whatsapp" title="WhatsApp" onclick="event.stopPropagation(); window.open('https://wa.me/5519999991234','_blank')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                  </button>
+                  <button class="card-action-btn" title="Agendar visita" onclick="event.stopPropagation()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="kanban-column" data-column="concluido">
+          <div class="kanban-column-header">
+            <h3>Concluído</h3>
+            <span class="column-badge column-badge--concluido" data-count>1</span>
+          </div>
+          <div class="kanban-cards" data-dropzone>
+
+            <div class="lead-card" draggable="true" data-nome="Bruno Tavares" data-temp="" data-dias="25" data-origem="whatsapp" data-etapa="Concluído">
+              <div class="lead-card-top">
+                <span class="lead-card-name">Bruno Tavares</span>
+              </div>
+              <div class="lead-card-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                <span>WhatsApp · há 25 dias</span>
+              </div>
+              <div class="lead-card-meta">1 imóvel de interesse</div>
+              <div class="lead-card-footer">
+                <div class="card-avatar">SW</div>
+                <div class="card-actions">
+                  <button class="card-action-btn whatsapp" title="WhatsApp" onclick="event.stopPropagation(); window.open('https://wa.me/5519999991234','_blank')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                  </button>
+                  <button class="card-action-btn" title="Agendar visita" onclick="event.stopPropagation()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="kanban-column" data-column="arquivado">
+          <div class="kanban-column-header">
+            <h3>Arquivado</h3>
+            <span class="column-badge column-badge--arquivado" data-count>1</span>
+          </div>
+          <div class="kanban-cards" data-dropzone>
+
+            <div class="lead-card" draggable="true" data-nome="Sílvio Pereira" data-temp="" data-dias="45" data-origem="site" data-etapa="Arquivado">
+              <div class="lead-card-top">
+                <span class="lead-card-name">Sílvio Pereira</span>
+              </div>
+              <div class="lead-card-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.5 2.5 15.5 0 18"/><path d="M12 3c-2.5 2.5-2.5 15.5 0 18"/></svg>
+                <span>Site · há 45 dias</span>
+              </div>
+              <div class="lead-card-meta">2 imóveis de interesse</div>
+              <div class="lead-card-footer">
+                <div class="card-avatar">SW</div>
+                <div class="card-actions">
+                  <button class="card-action-btn whatsapp" title="WhatsApp" onclick="event.stopPropagation(); window.open('https://wa.me/5519999991234','_blank')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+                  </button>
+                  <button class="card-action-btn" title="Agendar visita" onclick="event.stopPropagation()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Painel de detalhes do lead ===== -->
+  <aside class="lead-panel" id="leadPanel" aria-hidden="true">
+    <div class="lead-panel-header">
+      <div class="lead-panel-header-top">
+        <div>
+          <div class="lead-panel-avatar" id="leadAvatar">MA</div>
+          <div class="lead-panel-name" id="leadName">Marcos Andrade</div>
+          <div class="lead-panel-badges">
+            <span class="temp-badge temp-quente" id="leadTempBadge">Quente</span>
+            <span class="stage-badge" id="leadStageBadge">Em atendimento</span>
+          </div>
+        </div>
+        <button class="ia-panel-close" id="leadPanelClose" type="button" aria-label="Fechar painel do lead">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="lead-panel-tabs">
+        <button class="lead-tab active" data-tab="resumo" type="button">Resumo</button>
+        <button class="lead-tab" data-tab="imoveis" type="button">Imóveis</button>
+        <button class="lead-tab" data-tab="visitas" type="button">Visitas</button>
+        <button class="lead-tab" data-tab="historico" type="button">Histórico</button>
+      </div>
+    </div>
+
+    <div class="lead-panel-body">
+
+      <!-- Aba Resumo -->
+      <div class="lead-tab-panel active" data-tab-panel="resumo">
+        <div class="info-rows">
+          <div class="info-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <span>(19) 99999-1234</span>
+          </div>
+          <div class="info-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+            <span>cliente@email.com</span>
+          </div>
+          <div class="info-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+            <span id="leadOrigem">WhatsApp</span>
+          </div>
+          <div class="info-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <span>Entrou em 26 jul 2026</span>
+          </div>
+          <div class="info-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+            <span>Corretor: Samuel W.</span>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <button class="btn btn-whatsapp btn-sm" id="btnWhatsapp" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+            WhatsApp
+          </button>
+          <button class="btn btn-outline btn-sm" id="btnAgendar" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            Agendar visita
+          </button>
+          <button class="btn btn-outline btn-sm" id="btnProposta" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
+            Criar proposta
+          </button>
+          <button class="btn btn-outline btn-sm" id="btnAnotacao" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
+            Anotação
+          </button>
+        </div>
+
+        <div>
+          <div class="section-label">Alerta da Arnês IA</div>
+          <div class="ia-alert">
+            <div class="ia-alert-header">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg>
+              Arnês IA
+            </div>
+            <p>Sem contato há 3 dias. Probabilidade de fechamento: Alta (87%). Recomendo retomar contato hoje.</p>
+            <button class="btn btn-primary btn-sm" id="btnEnviarAgora" type="button">Enviar mensagem agora</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-label">Anotações</div>
+          <div class="note-input-area" id="noteInputArea">
+            <textarea id="noteTextarea" placeholder="Digite sua anotação..."></textarea>
+            <div class="modal-actions">
+              <button class="btn btn-outline btn-sm" id="btnCancelarNota" type="button">Cancelar</button>
+              <button class="btn btn-primary btn-sm" id="btnSalvarNota" type="button">Salvar</button>
+            </div>
+          </div>
+          <div class="notes-list" id="notesList">
+            <div class="note-item"><strong>26/07</strong> — Cliente prefere apartamento no térreo por causa do filho pequeno.</div>
+            <div class="note-item"><strong>25/07</strong> — Demonstrou interesse no ap. Palmeiras mas achou caro. Verificar financiamento.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aba Imóveis -->
+      <div class="lead-tab-panel" data-tab-panel="imoveis">
+        <div>
+          <div class="property-row">
+            <div class="property-thumb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9"/></svg>
+            </div>
+            <div class="property-info">
+              <p>#1023 — Ap. 2q</p>
+              <span>Palmeiras · R$ 480.000</span>
+            </div>
+            <button class="btn btn-outline btn-sm">Ver imóvel</button>
+          </div>
+          <div class="property-row">
+            <div class="property-thumb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9"/></svg>
+            </div>
+            <div class="property-info">
+              <p>#1044 — Casa 3q</p>
+              <span>Centro · R$ 620.000</span>
+            </div>
+            <button class="btn btn-outline btn-sm">Ver imóvel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aba Visitas -->
+      <div class="lead-tab-panel" data-tab-panel="visitas">
+        <button class="btn btn-outline btn-sm" id="btnNovaVisita" type="button" style="align-self:flex-start;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          Nova visita
+        </button>
+        <div>
+          <div class="visit-row">
+            <span>29 jul · Ap. 2q Palmeiras</span>
+            <span class="visit-status">Realizada</span>
+          </div>
+          <div class="visit-row">
+            <span>02 ago · Casa 3q Centro</span>
+            <span class="visit-status">Agendada</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aba Histórico -->
+      <div class="lead-tab-panel" data-tab-panel="historico">
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>
+            </div>
+            <div class="timeline-content">
+              <p>WhatsApp recebido</p>
+              <span>26/07 · 14:32</span>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
+            </div>
+            <div class="timeline-content">
+              <p>Anotação adicionada</p>
+              <span>26/07 · 15:10</span>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            </div>
+            <div class="timeline-content">
+              <p>Visita realizada — Ap. 2q Palmeiras</p>
+              <span>29/07 · 10:00</span>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
+            </div>
+            <div class="timeline-content">
+              <p>Proposta enviada</p>
+              <span>30/07 · 09:15</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- ===== Modal de agendamento de visita ===== -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+      <h3>Agendar visita</h3>
+      <div class="modal-field">
+        <label for="visitaData">Data</label>
+        <input type="date" id="visitaData">
+      </div>
+      <div class="modal-field">
+        <label for="visitaHora">Horário</label>
+        <input type="time" id="visitaHora">
+      </div>
+      <div class="modal-field">
+        <label for="visitaImovel">Imóvel</label>
+        <select id="visitaImovel">
+          <option>#1023 — Ap. 2q Palmeiras</option>
+          <option>#1044 — Casa 3q Centro</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label for="visitaObs">Observações</label>
+        <textarea id="visitaObs" placeholder="Opcional"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" id="btnCancelarModal" type="button">Cancelar</button>
+        <button class="btn btn-primary" id="btnConfirmarVisita" type="button">Confirmar visita</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Toast genérico ===== -->
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <span class="toast-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+    </span>
+    <p id="toastText">Ação concluída.</p>
+  </div>
+
+  <!-- ===== Painel lateral da Arnês IA (estilo Gemini) ===== -->
+  <aside class="ia-panel" id="iaPanel" aria-hidden="true">
+    <div class="ia-panel-header">
+      <div class="ia-panel-brand">
+        <div class="logomark">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <defs>
+              <linearGradient id="starGradientPanel" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#D67A52"/>
+                <stop offset="100%" stop-color="#1E4D5C"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#starGradientPanel)" d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/>
+          </svg>
+        </div>
+        <span>Arnês IA</span>
+      </div>
+      <button class="ia-panel-close" id="iaPanelClose" type="button" aria-label="Fechar painel da IA">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="ia-panel-body">
+      <div class="ia-greeting" id="iaGreeting">
+        <h2>Olá, Samuel</h2>
+        <p>Sou a Arnês IA. Como posso ajudar?</p>
+      </div>
+
+      <div class="ia-panel-history" id="iaHistory"></div>
+
+      <div class="ia-panel-suggestions" id="iaSuggestions">
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Qual lead tem mais chance de fechar hoje?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Tem alguma proposta vencendo essa semana?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Qual imóvel está parado há mais tempo?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Quais proprietários precisam de feedback?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Como foi a semana da imobiliária?</span></button>
+        <button class="ia-suggestion-chip" type="button"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z"/></svg><span>Gera relatório do mês</span></button>
+      </div>
+    </div>
+
+    <div class="ia-panel-footer">
+      <div class="ia-input-pill">
+        <input type="text" id="iaPanelInput" placeholder="Pergunte sobre sua carteira, leads ou imóveis...">
+        <button class="ia-send-btn" id="iaPanelSend" type="button" aria-label="Enviar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9 22 2Z"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <script src="js/config.js"></script>
+  <script>
+    // ===== Toast genérico =====
+    let toastTimer = null;
+    function mostrarToast(texto) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastText').textContent = texto;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // ===== Indicador deslizante da navbar =====
+    (function () {
+      const navList = document.getElementById('navbarLinks');
+      const indicator = document.getElementById('navIndicator');
+
+      function moveIndicatorTo(li, animate) {
+        const listRect = navList.getBoundingClientRect();
+        const itemRect = li.getBoundingClientRect();
+        if (!animate) indicator.style.transition = 'none';
+        indicator.style.left = (itemRect.left - listRect.left) + 'px';
+        indicator.style.width = itemRect.width + 'px';
+        if (!animate) {
+          indicator.offsetHeight;
+          indicator.style.transition = '';
+        }
+      }
+
+      const activeLi = navList.querySelector('li.active');
+      if (activeLi) moveIndicatorTo(activeLi, false);
+
+      window.addEventListener('resize', function () {
+        const current = navList.querySelector('li.active');
+        if (current) moveIndicatorTo(current, false);
+      });
+
+      document.querySelectorAll('#navbarLinks li.nav-placeholder').forEach(function (item) {
+        item.addEventListener('click', function () {
+          document.querySelectorAll('#navbarLinks li').forEach(function (li) {
+            li.classList.remove('active');
+          });
+          item.classList.add('active');
+          moveIndicatorTo(item, true);
+        });
+      });
+    })();
+
+    // ===== Menus dropdown da navbar =====
+    (function () {
+      const dropdowns = document.querySelectorAll('.nav-dropdown');
+
+      function closeAll(except) {
+        dropdowns.forEach(function (dd) {
+          if (dd !== except) {
+            dd.classList.remove('open');
+            const trigger = dd.querySelector('.nav-dropdown-trigger');
+            if (trigger) trigger.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+
+      dropdowns.forEach(function (dd) {
+        const trigger = dd.querySelector('.nav-dropdown-trigger');
+
+        dd.addEventListener('mouseenter', function () {
+          closeAll(dd);
+          dd.classList.add('open');
+          trigger.setAttribute('aria-expanded', 'true');
+        });
+
+        dd.addEventListener('mouseleave', function () {
+          dd.classList.remove('open');
+          trigger.setAttribute('aria-expanded', 'false');
+        });
+
+        trigger.addEventListener('click', function (e) {
+          e.stopPropagation();
+          const isOpen = dd.classList.contains('open');
+          closeAll(dd);
+          if (isOpen) {
+            dd.classList.remove('open');
+            trigger.setAttribute('aria-expanded', 'false');
+          } else {
+            dd.classList.add('open');
+            trigger.setAttribute('aria-expanded', 'true');
+          }
+        });
+      });
+
+      document.querySelectorAll('.dropdown-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+          closeAll(null);
+        });
+      });
+
+      document.addEventListener('click', function () {
+        closeAll(null);
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeAll(null);
+      });
+    })();
+
+    // ===== Filtros por temperatura =====
+    // A lista de cards é consultada de novo a cada clique (não capturada
+    // uma vez fora do handler) porque os cards são recriados dinamicamente
+    // quando o pipeline vem da API — uma NodeList capturada antes do
+    // primeiro carregarPipeline() ficaria com referências obsoletas.
+    (function () {
+      const chips = document.querySelectorAll('#filterChips .chip');
+
+      chips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          chips.forEach(function (c) { c.classList.remove('active'); });
+          chip.classList.add('active');
+          const filtro = chip.getAttribute('data-filter');
+          const cards = document.querySelectorAll('.lead-card');
+
+          cards.forEach(function (card) {
+            let mostra = true;
+            if (filtro === 'quente' || filtro === 'morno' || filtro === 'frio') {
+              mostra = card.getAttribute('data-temp') === filtro;
+            } else if (filtro === 'sem-contato') {
+              mostra = parseInt(card.getAttribute('data-dias'), 10) >= 7;
+            }
+            card.style.opacity = mostra ? '1' : '0.3';
+          });
+        });
+      });
+    })();
+
+    // ===== Drag & drop entre colunas (delegado em #kanbanBoard) =====
+    // Delegação em vez de listener por card: os cards são substituídos
+    // a cada carregarPipeline() bem-sucedido, e um listener preso
+    // diretamente no elemento antigo não existiria mais no novo.
+    const ETAPA_PARA_COLUNA = {
+      aberto: 'aberto', em_atendimento: 'em-atendimento', visita: 'visita',
+      proposta: 'proposta', documentacao: 'documentacao',
+      concluido: 'concluido', arquivado: 'arquivado',
+    };
+    const COLUNA_PARA_ETAPA = {};
+    Object.keys(ETAPA_PARA_COLUNA).forEach(function (etapa) {
+      COLUNA_PARA_ETAPA[ETAPA_PARA_COLUNA[etapa]] = etapa;
+    });
+
+    (function () {
+      const board = document.getElementById('kanbanBoard');
+      const columns = document.querySelectorAll('.kanban-column');
+
+      function atualizarContagem(coluna) {
+        const badge = coluna.querySelector('[data-count]');
+        const total = coluna.querySelectorAll('.lead-card').length;
+        badge.textContent = total;
+      }
+
+      board.addEventListener('dragstart', function (e) {
+        const card = e.target.closest('.lead-card');
+        if (card) card.classList.add('dragging');
+      });
+
+      board.addEventListener('dragend', function (e) {
+        const card = e.target.closest('.lead-card');
+        if (card) card.classList.remove('dragging');
+      });
+
+      columns.forEach(function (coluna) {
+        const dropzone = coluna.querySelector('[data-dropzone]');
+
+        coluna.addEventListener('dragover', function (e) {
+          e.preventDefault();
+          coluna.classList.add('drag-over');
+        });
+
+        coluna.addEventListener('dragleave', function () {
+          coluna.classList.remove('drag-over');
+        });
+
+        coluna.addEventListener('drop', function (e) {
+          e.preventDefault();
+          coluna.classList.remove('drag-over');
+          const dragging = document.querySelector('.lead-card.dragging');
+          if (!dragging) return;
+          const colunaOrigem = dragging.closest('.kanban-column');
+          if (colunaOrigem === coluna) return;
+
+          dropzone.appendChild(dragging);
+          atualizarContagem(colunaOrigem);
+          atualizarContagem(coluna);
+
+          const clienteId = dragging.getAttribute('data-id');
+          const novaEtapa = COLUNA_PARA_ETAPA[coluna.getAttribute('data-column')];
+          if (window.apiDisponivel && clienteId && novaEtapa) {
+            apiFetch('/pipeline/' + clienteId + '/etapa', {
+              method: 'PATCH',
+              body: JSON.stringify({ nova_etapa: novaEtapa }),
+            }).catch(function (erro) {
+              console.error('Falha ao mover lead no pipeline:', erro);
+              mostrarToast('Não consegui salvar a mudança de etapa agora.');
+            });
+          }
+        });
+      });
+    })();
+
+    // ===== Conexão com a API: pipeline real no board Kanban =====
+    const ETAPA_LABEL = {
+      aberto: 'Aberto', em_atendimento: 'Em atendimento', visita: 'Visita',
+      proposta: 'Proposta', documentacao: 'Documentação',
+      concluido: 'Concluído', arquivado: 'Arquivado',
+    };
+
+    const ICONES_ORIGEM = {
+      whatsapp: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>',
+      portal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9"/></svg>',
+      facebook: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5 15.4 17.5M15.4 6.5 8.6 10.5"/></svg>',
+      site: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.5 2.5 15.5 0 18"/><path d="M12 3c-2.5 2.5-2.5 15.5 0 18"/></svg>',
+    };
+
+    const NOMES_ORIGEM_CARD = { whatsapp: 'WhatsApp', portal: 'Portal', facebook: 'Facebook', site: 'Site' };
+
+    function iniciaisNomeLead(nome) {
+      const partes = nome.trim().split(' ');
+      const primeira = partes[0][0] || '';
+      const ultima = partes.length > 1 ? partes[partes.length - 1][0] : '';
+      return (primeira + ultima).toUpperCase();
+    }
+
+    function formatarTempoLead(dias) {
+      if (dias === null || dias === undefined) return 'sem registro';
+      if (dias === 0) return 'hoje';
+      if (dias === 1) return 'há 1 dia';
+      return 'há ' + dias + ' dias';
+    }
+
+    function criarCardHTML(lead, etapaSlug) {
+      const temp = lead.temperatura || '';
+      const tempBadge = temp
+        ? '<span class="temp-badge temp-' + temp + '">' + temp.charAt(0).toUpperCase() + temp.slice(1) + '</span>'
+        : '';
+      const origemIcone = ICONES_ORIGEM[lead.origem] || ICONES_ORIGEM.site;
+      const origemTexto = NOMES_ORIGEM_CARD[lead.origem] || lead.origem;
+      const qtdImoveis = lead.imoveis_interesse || 0;
+
+      return (
+        '<div class="lead-card" draggable="true" data-id="' + lead.id + '" data-nome="' + lead.nome +
+        '" data-temp="' + temp + '" data-dias="' + lead.ultimo_contato_dias +
+        '" data-origem="' + lead.origem + '" data-etapa="' + (ETAPA_LABEL[etapaSlug] || '') + '">' +
+          '<div class="lead-card-top">' +
+            '<span class="lead-card-name">' + lead.nome + '</span>' +
+            tempBadge +
+          '</div>' +
+          '<div class="lead-card-meta">' + origemIcone + '<span>' + origemTexto + ' · ' + formatarTempoLead(lead.ultimo_contato_dias) + '</span></div>' +
+          '<div class="lead-card-meta">' + qtdImoveis + ' imóve' + (qtdImoveis === 1 ? 'l' : 'is') + ' de interesse</div>' +
+          '<div class="lead-card-footer">' +
+            '<div class="card-avatar">SW</div>' +
+            '<div class="card-actions">' +
+              '<button class="card-action-btn whatsapp" title="WhatsApp" onclick="event.stopPropagation(); window.open(\'https://wa.me/5519999991234\',\'_blank\')">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H8l-4 4Z"/></svg>' +
+              '</button>' +
+              '<button class="card-action-btn" title="Agendar visita" onclick="event.stopPropagation()">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>' +
+              '</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    function renderizarPipeline(colunas) {
+      Object.keys(colunas).forEach(function (etapaSlug) {
+        const domColuna = ETAPA_PARA_COLUNA[etapaSlug];
+        if (!domColuna) return;
+        const colunaEl = document.querySelector('.kanban-column[data-column="' + domColuna + '"]');
+        if (!colunaEl) return;
+
+        const dropzone = colunaEl.querySelector('[data-dropzone]');
+        dropzone.innerHTML = colunas[etapaSlug].leads
+          .map(function (lead) { return criarCardHTML(lead, etapaSlug); })
+          .join('');
+        colunaEl.querySelector('[data-count]').textContent = colunas[etapaSlug].total;
+      });
+    }
+
+    function carregarPipeline() {
+      if (!window.apiDisponivel) return;
+      const board = document.getElementById('kanbanBoard');
+      board.classList.add('skeleton');
+      apiFetch('/pipeline')
+        .then(function (dados) {
+          board.classList.remove('skeleton');
+          renderizarPipeline(dados.colunas);
+        })
+        .catch(function (erro) {
+          board.classList.remove('skeleton');
+          console.error('Falha ao carregar pipeline:', erro);
+          mostrarToast('Não consegui atualizar o pipeline agora.');
+        });
+    }
+
+    // ===== Health check / banner de reconexão (mesmo padrão das outras telas) =====
+    (function () {
+      window.apiDisponivel = false;
+      const banner = document.getElementById('reconnectBanner');
+
+      function verificarConexao() {
+        apiFetch('/health')
+          .then(function () {
+            const reconectou = !window.apiDisponivel;
+            window.apiDisponivel = true;
+            banner.classList.remove('show');
+            if (reconectou) carregarPipeline();
+          })
+          .catch(function () {
+            window.apiDisponivel = false;
+            banner.classList.add('show');
+          });
+      }
+
+      verificarConexao();
+      setInterval(verificarConexao, 15000);
+    })();
+
+    // ===== Painel de detalhes do lead =====
+    (function () {
+      const panel = document.getElementById('leadPanel');
+      const closeBtn = document.getElementById('leadPanelClose');
+      const nameEl = document.getElementById('leadName');
+      const avatarEl = document.getElementById('leadAvatar');
+      const tempBadgeEl = document.getElementById('leadTempBadge');
+      const stageBadgeEl = document.getElementById('leadStageBadge');
+      const origemEl = document.getElementById('leadOrigem');
+
+      const nomesOrigem = {
+        whatsapp: 'WhatsApp',
+        portal: 'Portal (Zap/OLX)',
+        facebook: 'Facebook',
+        site: 'Site'
+      };
+
+      function iniciais(nome) {
+        const partes = nome.trim().split(' ');
+        const primeira = partes[0][0] || '';
+        const ultima = partes.length > 1 ? partes[partes.length - 1][0] : '';
+        return (primeira + ultima).toUpperCase();
+      }
+
+      function openLeadPanel(card) {
+        if (document.getElementById('iaPanel').classList.contains('show')) {
+          closeIaPanel();
+        }
+        const nome = card.getAttribute('data-nome');
+        const temp = card.getAttribute('data-temp');
+        const etapa = card.getAttribute('data-etapa');
+        const origem = card.getAttribute('data-origem');
+
+        nameEl.textContent = nome;
+        avatarEl.textContent = iniciais(nome);
+        stageBadgeEl.textContent = etapa;
+        origemEl.textContent = nomesOrigem[origem] || origem;
+
+        tempBadgeEl.className = 'temp-badge';
+        if (temp === 'quente') {
+          tempBadgeEl.classList.add('temp-quente');
+          tempBadgeEl.textContent = 'Quente';
+          tempBadgeEl.style.display = '';
+        } else if (temp === 'morno') {
+          tempBadgeEl.classList.add('temp-morno');
+          tempBadgeEl.textContent = 'Morno';
+          tempBadgeEl.style.display = '';
+        } else if (temp === 'frio') {
+          tempBadgeEl.classList.add('temp-frio');
+          tempBadgeEl.textContent = 'Frio';
+          tempBadgeEl.style.display = '';
+        } else {
+          tempBadgeEl.style.display = 'none';
+        }
+
+        document.body.classList.add('lead-panel-open');
+        panel.classList.add('show');
+        panel.setAttribute('aria-hidden', 'false');
+      }
+
+      function closeLeadPanel() {
+        document.body.classList.remove('lead-panel-open');
+        panel.classList.remove('show');
+        panel.setAttribute('aria-hidden', 'true');
+      }
+
+      window.closeLeadPanelGlobal = closeLeadPanel;
+
+      // Delegado em #kanbanBoard pelo mesmo motivo do drag & drop: os
+      // cards são recriados a cada carregarPipeline() bem-sucedido.
+      document.getElementById('kanbanBoard').addEventListener('click', function (e) {
+        const card = e.target.closest('.lead-card');
+        if (card) openLeadPanel(card);
+      });
+
+      closeBtn.addEventListener('click', closeLeadPanel);
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && panel.classList.contains('show')) closeLeadPanel();
+      });
+
+      // Abas do painel
+      document.querySelectorAll('.lead-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          document.querySelectorAll('.lead-tab').forEach(function (t) { t.classList.remove('active'); });
+          document.querySelectorAll('.lead-tab-panel').forEach(function (p) { p.classList.remove('active'); });
+          tab.classList.add('active');
+          document.querySelector('[data-tab-panel="' + tab.getAttribute('data-tab') + '"]').classList.add('active');
+        });
+      });
+
+      // Ações rápidas
+      document.getElementById('btnWhatsapp').addEventListener('click', function () {
+        window.open('https://wa.me/5519999991234', '_blank');
+      });
+
+      document.getElementById('btnProposta').addEventListener('click', function () {
+        mostrarToast('Gerando proposta com a Arnês IA...');
+      });
+
+      document.getElementById('btnEnviarAgora').addEventListener('click', function () {
+        window.open('https://wa.me/5519999991234', '_blank');
+      });
+
+      // Anotação inline
+      const noteArea = document.getElementById('noteInputArea');
+      const noteTextarea = document.getElementById('noteTextarea');
+      const notesList = document.getElementById('notesList');
+
+      document.getElementById('btnAnotacao').addEventListener('click', function () {
+        noteArea.classList.add('show');
+        noteTextarea.focus();
+      });
+
+      document.getElementById('btnCancelarNota').addEventListener('click', function () {
+        noteArea.classList.remove('show');
+        noteTextarea.value = '';
+      });
+
+      document.getElementById('btnSalvarNota').addEventListener('click', function () {
+        const texto = noteTextarea.value.trim();
+        if (!texto) return;
+        const nota = document.createElement('div');
+        nota.className = 'note-item';
+        nota.innerHTML = '<strong>Hoje</strong> — ' + texto.replace(/</g, '&lt;');
+        notesList.insertBefore(nota, notesList.firstChild);
+        noteTextarea.value = '';
+        noteArea.classList.remove('show');
+      });
+    })();
+
+    // ===== Modal de agendamento de visita =====
+    (function () {
+      const overlay = document.getElementById('modalOverlay');
+
+      document.getElementById('btnAgendar').addEventListener('click', function () {
+        overlay.classList.add('show');
+      });
+
+      document.getElementById('btnNovaVisita').addEventListener('click', function () {
+        overlay.classList.add('show');
+      });
+
+      document.getElementById('btnCancelarModal').addEventListener('click', function () {
+        overlay.classList.remove('show');
+      });
+
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) overlay.classList.remove('show');
+      });
+
+      document.getElementById('btnConfirmarVisita').addEventListener('click', function () {
+        overlay.classList.remove('show');
+        mostrarToast('Visita agendada com sucesso!');
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && overlay.classList.contains('show')) {
+          overlay.classList.remove('show');
+        }
+      });
+    })();
+
+    // ===== Painel lateral da Arnês IA (estilo Gemini) =====
+    let closeIaPanel = function () {};
+    (function () {
+      const trigger = document.getElementById('iaTrigger');
+      const panel = document.getElementById('iaPanel');
+      const closeBtn = document.getElementById('iaPanelClose');
+      const greeting = document.getElementById('iaGreeting');
+      const suggestions = document.getElementById('iaSuggestions');
+      const history = document.getElementById('iaHistory');
+      const input = document.getElementById('iaPanelInput');
+      const sendBtn = document.getElementById('iaPanelSend');
+
+      function openPanel() {
+        if (typeof window.closeLeadPanelGlobal === 'function') {
+          window.closeLeadPanelGlobal();
+        }
+        document.body.classList.add('ia-panel-open');
+        panel.classList.add('show');
+        panel.setAttribute('aria-hidden', 'false');
+      }
+
+      function closePanel() {
+        document.body.classList.remove('ia-panel-open');
+        panel.classList.remove('show');
+        panel.setAttribute('aria-hidden', 'true');
+      }
+
+      closeIaPanel = closePanel;
+
+      trigger.addEventListener('click', openPanel);
+      closeBtn.addEventListener('click', closePanel);
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && panel.classList.contains('show')) closePanel();
+      });
+
+      function addMessage(texto, role) {
+        greeting.style.display = 'none';
+        suggestions.style.display = 'none';
+        const msg = document.createElement('div');
+        msg.className = 'ia-message ia-message--' + role;
+        const p = document.createElement('p');
+        p.textContent = texto;
+        msg.appendChild(p);
+        history.appendChild(msg);
+        history.scrollTop = history.scrollHeight;
+      }
+
+      window.iaHistorico = window.iaHistorico || [];
+
+      // Nem toda intenção do backend devolve "resposta" (texto livre de
+      // Sonnet/Haiku) — EDICAO_CADASTRO, CRIACAO_CADASTRO, CONFIGURAR_META,
+      // ACAO_WHATSAPP e os casos de navegação sem resultado usam "mensagem"
+      // (ou "erro"). Sem isso, addMessage(dados.resposta, ...) recebia
+      // undefined pra essas intenções e a conversa ficava sem responder
+      // nada, dando a impressão de estar travada.
+      function extrairTextoResposta(dados) {
+        if (dados.resposta) return dados.resposta;
+        if (dados.mensagem) return dados.mensagem;
+        if (typeof dados.erro === 'string') return dados.erro;
+        return 'Não entendi — pode reformular?';
+      }
+
+      function enviarPergunta(texto) {
+        if (!texto.trim()) return;
+        addMessage(texto, 'user');
+        input.value = '';
+
+        if (!window.apiDisponivel) {
+          setTimeout(function () {
+            addMessage('A Arnês IA está temporariamente indisponível — tento de novo assim que reconectar.', 'ai');
+          }, 400);
+          return;
+        }
+
+        window.iaHistorico.push({ role: 'user', content: texto });
+
+        addMessage('Pensando...', 'ai');
+        const bolhaPensando = history.lastElementChild;
+
+        apiFetch('/chat', {
+          method: 'POST',
+          body: JSON.stringify({ pergunta: texto, historico: window.iaHistorico }),
+        })
+          .then(function (dados) {
+            const textoResposta = extrairTextoResposta(dados);
+            bolhaPensando.querySelector('p').textContent = textoResposta;
+            window.iaHistorico.push({ role: 'assistant', content: textoResposta });
+          })
+          .catch(function (erro) {
+            console.error('Falha ao chamar /api/chat:', erro);
+            bolhaPensando.querySelector('p').textContent = 'Não consegui falar com a Arnês IA agora. Tente de novo em instantes.';
+            mostrarToast('Arnês IA indisponível no momento.');
+          })
+          .finally(function () {
+            history.scrollTop = history.scrollHeight;
+          });
+      }
+
+      sendBtn.addEventListener('click', function () {
+        enviarPergunta(input.value);
+      });
+
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') enviarPergunta(input.value);
+      });
+
+      document.querySelectorAll('.ia-suggestion-chip').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          document.querySelectorAll('.ia-suggestion-chip').forEach(function (c) {
+            if (c !== chip) c.style.display = 'none';
+          });
+          chip.classList.add('pulsing');
+          const texto = chip.textContent.trim();
+          setTimeout(function () {
+            enviarPergunta(texto);
+          }, 350);
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>

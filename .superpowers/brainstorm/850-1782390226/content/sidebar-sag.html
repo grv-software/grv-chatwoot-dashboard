@@ -1,0 +1,147 @@
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, 'Segoe UI', sans-serif; }
+h2 { font-size: 22px; font-weight: 700; color: #1a202c; margin-bottom: 6px; }
+.subtitle { font-size: 14px; color: #718096; margin-bottom: 28px; }
+
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+
+.app-shell { display: flex; border: 1.5px solid #e2e8f0; border-radius: 16px; overflow: hidden; height: 520px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+
+/* ── SIDEBAR DARK (antes) ── */
+.sidebar-dark { width: 200px; background: #1a202c; display: flex; flex-direction: column; flex-shrink: 0; }
+.sd-logo { padding: 18px 16px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.sd-g { width: 30px; height: 30px; background: #E05A1E; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; color: #fff; }
+.sd-brand { font-size: 11px; font-weight: 700; color: #fff; line-height: 1.3; }
+.sd-brand-sub { font-size: 9px; color: rgba(255,255,255,0.4); }
+.sd-nav { padding: 12px 10px; flex: 1; }
+.sd-item { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 7px; margin-bottom: 2px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.55); cursor: pointer; }
+.sd-item.active { background: rgba(224,90,30,0.2); color: #ff8c5a; }
+.sd-bottom { padding: 12px 14px; border-top: 1px solid rgba(255,255,255,0.08); }
+.sd-consul-label { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,0.3); margin-bottom: 5px; font-weight: 700; }
+.sd-consul-val { display: flex; align-items: center; gap: 7px; background: rgba(255,255,255,0.06); border-radius: 7px; padding: 7px 9px; }
+.sd-cavatar { width: 22px; height: 22px; border-radius: 5px; background: linear-gradient(135deg,#E05A1E,#ff8c5a); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; color: #fff; }
+.sd-cname { font-size: 10px; color: rgba(255,255,255,0.75); font-weight: 600; }
+
+/* ── SIDEBAR SAG (nova) ── */
+.sidebar-sag { width: 200px; background: #fff; border-right: 1px solid #e8ecf0; display: flex; flex-direction: column; flex-shrink: 0; }
+.ss-logo { padding: 18px 16px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #f0f2f5; }
+.ss-icon { width: 30px; height: 30px; flex-shrink: 0; }
+.ss-brand { font-size: 12px; font-weight: 700; color: #1a202c; line-height: 1.3; }
+.ss-brand-sub { font-size: 9px; color: #a0aec0; }
+.ss-nav { padding: 10px 10px; flex: 1; }
+.ss-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; margin-bottom: 1px; font-size: 12px; font-weight: 500; color: #4a5568; cursor: pointer; transition: all .12s; }
+.ss-item:hover { background: #f7f8fa; color: #1a202c; }
+.ss-item.active { background: #FFF3EE; color: #E05A1E; font-weight: 700; }
+.ss-icon-item { width: 16px; height: 16px; opacity: .5; flex-shrink: 0; }
+.ss-item.active .ss-icon-item { opacity: 1; }
+.ss-bottom { padding: 12px 14px; border-top: 1px solid #f0f2f5; }
+.ss-consul-label { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: #a0aec0; margin-bottom: 5px; font-weight: 700; }
+.ss-consul-val { display: flex; align-items: center; gap: 8px; background: #f7f8fa; border-radius: 8px; padding: 7px 10px; }
+.ss-cavatar { width: 24px; height: 24px; border-radius: 6px; background: linear-gradient(135deg,#E05A1E,#ff8c5a); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #fff; }
+.ss-cname { font-size: 11px; color: #2d3748; font-weight: 600; }
+
+/* conteúdo genérico */
+.main { flex: 1; background: #f8f9fb; overflow-y: auto; }
+.main-inner { padding: 22px; }
+.feed-item { display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 10px; padding: 11px 14px; margin-bottom: 6px; border: 1px solid #e2e8f0; }
+.f-stripe { width: 4px; height: 38px; border-radius: 2px; flex-shrink: 0; }
+.f-avatar { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #fff; flex-shrink: 0; }
+.f-name { font-size: 13px; font-weight: 700; color: #1a202c; }
+.f-meta { font-size: 11px; color: #718096; }
+.f-badge { margin-left: auto; padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+.badge-red { background: #FFF5F5; color: #e53e3e; }
+.badge-green { background: #F0FFF4; color: #38a169; }
+.badge-orange { background: #FFF3EE; color: #E05A1E; }
+
+.label-before { font-size: 11px; font-weight: 700; color: #a0aec0; text-transform: uppercase; letter-spacing: .08em; text-align: center; margin-bottom: 8px; }
+</style>
+
+<h2>Sidebar — SAG vs. atual</h2>
+<p class="subtitle">Comparando a sidebar escura (que eu tinha) com a sidebar no estilo SAG (branca, limpa). O conteúdo é idêntico nos dois.</p>
+
+<div class="split">
+
+  <!-- ANTES: dark -->
+  <div>
+    <div class="label-before" style="color:#a0aec0">❌ Antes — Dark (não combina com o SAG)</div>
+    <div class="app-shell">
+      <div class="sidebar-dark">
+        <div class="sd-logo">
+          <div class="sd-g">G</div>
+          <div><div class="sd-brand">GRV Software</div><div class="sd-brand-sub">CS · Jornada do Cliente</div></div>
+        </div>
+        <div class="sd-nav">
+          <div class="sd-item">🌐 Projetos GRV</div>
+          <div class="sd-item active">📋 Minha Carteira</div>
+          <div class="sd-item">＋ Criar Playbook</div>
+        </div>
+        <div class="sd-bottom">
+          <div class="sd-consul-label">Consultor ativo</div>
+          <div class="sd-consul-val"><div class="sd-cavatar">S</div><div class="sd-cname">Severiano Rocha</div></div>
+        </div>
+      </div>
+      <div class="main">
+        <div class="main-inner">
+          <div style="font-size:17px;font-weight:800;color:#1a202c;margin-bottom:4px">Minha Carteira</div>
+          <div style="font-size:12px;color:#718096;margin-bottom:14px">Severiano Rocha · 7 clientes</div>
+          <div class="feed-item"><div class="f-stripe" style="background:#e53e3e"></div><div class="f-avatar" style="background:linear-gradient(135deg,#E05A1E,#ff8c5a)">R</div><div><div class="f-name">ROBOTIX</div><div class="f-meta">🏁 Conclusão · 100%</div></div><span class="f-badge badge-red">Atrasado</span></div>
+          <div class="feed-item"><div class="f-stripe" style="background:#38a169"></div><div class="f-avatar" style="background:linear-gradient(135deg,#38a169,#68d391)">A</div><div><div class="f-name">AUTOMIND</div><div class="f-meta">📈 Evolução · 56%</div></div><span class="f-badge badge-green">Em ordem</span></div>
+          <div class="feed-item"><div class="f-stripe" style="background:#718096"></div><div class="f-avatar" style="background:linear-gradient(135deg,#718096,#a0aec0)">U</div><div><div class="f-name">USINAGEM3D</div><div class="f-meta">🤝 1ª Reunião · 6%</div></div><span class="f-badge badge-green">Em ordem</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEPOIS: SAG -->
+  <div>
+    <div class="label-before" style="color:#38a169">✅ Agora — Estilo SAG (branca, consistente)</div>
+    <div class="app-shell">
+      <div class="sidebar-sag">
+        <div class="ss-logo">
+          <!-- GRV icon SVG-like com quadrado laranja -->
+          <svg class="ss-icon" viewBox="0 0 30 30" fill="none">
+            <rect width="30" height="30" rx="7" fill="#E05A1E"/>
+            <text x="15" y="21" text-anchor="middle" font-size="16" font-weight="900" fill="white" font-family="system-ui">G</text>
+          </svg>
+          <div><div class="ss-brand">GRV Software</div><div class="ss-brand-sub">CS · Jornada do Cliente</div></div>
+        </div>
+        <div class="ss-nav">
+          <div class="ss-item">
+            <svg class="ss-icon-item" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
+            Projetos GRV
+          </div>
+          <div class="ss-item active">
+            <svg class="ss-icon-item" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            Minha Carteira
+          </div>
+          <div class="ss-item">
+            <svg class="ss-icon-item" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            Criar Playbook
+          </div>
+        </div>
+        <div class="ss-bottom">
+          <div class="ss-consul-label">Consultor ativo</div>
+          <div class="ss-consul-val">
+            <div class="ss-cavatar">S</div>
+            <div class="ss-cname">Severiano Rocha</div>
+          </div>
+        </div>
+      </div>
+      <div class="main">
+        <div class="main-inner">
+          <div style="font-size:17px;font-weight:800;color:#1a202c;margin-bottom:4px">Minha Carteira</div>
+          <div style="font-size:12px;color:#718096;margin-bottom:14px">Severiano Rocha · 7 clientes</div>
+          <div class="feed-item"><div class="f-stripe" style="background:#e53e3e"></div><div class="f-avatar" style="background:linear-gradient(135deg,#E05A1E,#ff8c5a)">R</div><div><div class="f-name">ROBOTIX</div><div class="f-meta">🏁 Conclusão · 100%</div></div><span class="f-badge badge-red">Atrasado</span></div>
+          <div class="feed-item"><div class="f-stripe" style="background:#38a169"></div><div class="f-avatar" style="background:linear-gradient(135deg,#38a169,#68d391)">A</div><div><div class="f-name">AUTOMIND</div><div class="f-meta">📈 Evolução · 56%</div></div><span class="f-badge badge-green">Em ordem</span></div>
+          <div class="feed-item"><div class="f-stripe" style="background:#718096"></div><div class="f-avatar" style="background:linear-gradient(135deg,#718096,#a0aec0)">U</div><div><div class="f-name">USINAGEM3D</div><div class="f-meta">🤝 1ª Reunião · 6%</div></div><span class="f-badge badge-green">Em ordem</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="background:#F0FFF4;border:1px solid #c6f6d5;border-radius:12px;padding:14px 18px;font-size:13px;color:#276749">
+  <strong>Resumo da mudança:</strong> Sidebar branca com borda direita sutil, ícones outline cinza, item ativo em fundo <span style="background:#FFF3EE;color:#E05A1E;padding:1px 6px;border-radius:4px;font-weight:700">laranja suave + texto laranja</span> — idêntico ao SAG. O conteúdo principal continua no fundo cinza claro (#f8f9fb).
+</div>
