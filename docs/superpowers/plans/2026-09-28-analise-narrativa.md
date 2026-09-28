@@ -52,7 +52,7 @@ Localizar a linha `.auth-limited .chart-auth-overlay { display:flex; }` e inseri
 .an-dist-row { display:grid; grid-template-columns:58px 1fr 52px; align-items:center; gap:10px; font-size:12px; }
 .an-dist-star { letter-spacing:1px; white-space:nowrap; font-size:13px; }
 .an-dist-bar { height:18px; border-radius:4px; background:var(--bg3); overflow:hidden; }
-.an-dist-fill { height:100%; border-radius:4px; transition:width .3s ease-out; }
+.an-dist-fill { display:block; height:100%; border-radius:4px; transition:width .3s ease-out; }
 .an-dist-num { text-align:right; font-variant-numeric:tabular-nums; color:var(--text2); }
 
 .an-coment { max-height:320px; overflow-y:auto; margin-top:12px; }
@@ -1042,6 +1042,89 @@ Esperado: `filtro` com um id e `cardVisivel:false`. Limpar com `clearChartInboxF
 ```bash
 git add index.html
 git commit -m "feat(analise): capitulo 4 — tabela de contribuicao por equipe, ordenada por volume"
+```
+
+---
+
+### Task 8: Tirar os números repetidos dos cards dos capítulos
+
+Decidido no checkpoint visual depois da Task 4: a faixa de abertura mostra `entraram`,
+`resolvidos` e `1ª resposta`, e os cards logo abaixo repetiam exatamente os mesmos três números a
+150px de distância. Com a abertura no ar, o `metric-card` de cada gráfico virou eco. A abertura
+passa a ser a única camada de números grandes; os cards ficam título + gráfico.
+
+O `25hr 30min` do "até resolver" sai da camada de destaque junto — proposital: é a métrica volátil
+que a spec decidiu não dar manchete, e ela continua legível no próprio gráfico e no eixo.
+
+**Files:**
+- Modify: `index.html` — os quatro `<div class="metric-card">` dentro de `#graficos-page`; as
+  chamadas de `setMetric`/`metricTrend` dos ids `mv-*`/`mt-*` em `renderCharts()`
+
+**Interfaces:**
+- Consumes: faixa de abertura da Task 3 (que passa a ser a única fonte desses números).
+- Produces: nada novo.
+
+- [ ] **Step 1: Remover os quatro blocos `metric-card`**
+
+Em cada um dos quatro cards de `#graficos-page` (volume, resolvidos, 1ª resposta, até resolver),
+deletar o bloco `<div class="metric-card"> … </div>` inteiro — são 4 blocos, cada um com um
+`metric-value` (`mv-vol`, `mv-fcr`, `mv-tmr`, `mv-tma`) e um `metric-trend-up` (`mt-vol`, `mt-fcr`,
+`mt-tmr`, `mt-tma`).
+
+Em seguida, no `chart-card-hdr` que sobra em cada card, remover o `style="margin-top:10px"` — ele
+existia só para separar do `metric-card` que agora não está mais lá.
+
+- [ ] **Step 2: Remover as chamadas que alimentavam esses elementos**
+
+Em `renderCharts()`, apagar as linhas que escrevem nesses ids, que agora não existem:
+
+```js
+    setMetric('mv-vol', last != null ? last.toLocaleString('pt-BR') : '—');
+    metricTrend('mt-vol', last, prev, false);
+```
+```js
+    setMetric('mv-tma', fmtSec(last));
+    metricTrend('mt-tma', last, prev, true);
+```
+```js
+      setMetric('mv-tmr', fmtSec(last));
+      metricTrend('mt-tmr', last, prev, true);
+```
+```js
+    setMetric('mv-fcr', resolvAbs != null ? resolvAbs.toLocaleString('pt-BR') : '—');
+    metricTrend('mt-fcr', resolvAbs, trendPrev('resolutions_count'), false);
+```
+
+Atenção: as variáveis `last` e `prev` de cada bloco ainda são usadas pelos gráficos e pelos
+tooltips — remova **apenas** as duas linhas de cada par. Se depois da remoção alguma variável ficar
+sem nenhum uso, remova também.
+
+- [ ] **Step 3: Verificar sintaxe**
+
+```bash
+node -e "const fs=require('fs');const m=fs.readFileSync('index.html','utf8').match(/<script>([\s\S]*)<\/script>/);fs.writeFileSync(process.env.TMP+'/c.js',m[1]);"
+node --check "$TMP/c.js" && echo OK
+```
+Esperado: `OK`.
+
+- [ ] **Step 4: Dirigir e confirmar que nada quebrou**
+
+```js
+JSON.stringify({
+  metricCards: document.querySelectorAll('#graficos-page .metric-card').length,
+  heroTiles:   document.querySelectorAll('.an-hero-tile').length,
+  charts:      Object.keys(_charts),
+  orfaos:      ['mv-vol','mv-fcr','mv-tmr','mv-tma','mt-vol','mt-fcr','mt-tmr','mt-tma'].filter(id=>document.getElementById(id))
+})
+```
+Esperado: `metricCards: 0`, `heroTiles: 4`, os gráficos todos presentes, `orfaos: []` e console sem
+exceções.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add index.html
+git commit -m "refactor(analise): abertura vira a unica camada de numeros grandes"
 ```
 
 ---
