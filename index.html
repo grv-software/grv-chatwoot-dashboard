@@ -862,19 +862,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
       <div class="chart-auth-overlay"><span style="font-size:18px">🔒</span><span style="font-size:12px;color:var(--text3)">Dados históricos requerem permissão de Administrador no Chatwoot<br>(Perfil → Função → Administrador).<br>Os dados ao vivo continuam disponíveis.</span></div>
     </div>
   </div>
-  <!-- TMR por equipe (full) -->
-  <div class="chart-card chart-full" style="margin-top:12px" id="tmr-team-card">
-    <div class="metric-card">
-      <div><div class="metric-value" id="mv-tmr-team" style="font-size:17px;word-break:break-word">—</div><div class="metric-label">equipe com menor tempo de 1ª resposta</div></div>
-      <span class="badge-live" id="tmr-team-badge">período selecionado</span>
-    </div>
-    <div class="chart-card-hdr" style="margin-top:10px">
-      <div><div class="chart-card-title">Velocidade de resposta por equipe</div><div class="chart-card-sub">Tempo médio até a 1ª resposta por caixa de entrada · Quanto menor, melhor</div></div>
-    </div>
-    <div class="chart-wrap" style="height:220px"><canvas id="chart-tmr-team"></canvas></div>
-    <div id="chart-tmr-team-na" class="chart-na" style="display:none">Dados de TMR por equipe não disponíveis</div>
-  </div>
-
   <!-- ── 3 · O QUE O CLIENTE DISSE ── -->
   <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">3 · O que o cliente disse</span></div>
   <div class="chart-grid-2">
@@ -899,19 +886,17 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     </div>
   </div>
 
-  <!-- ── EQUIPES ── -->
-  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">Equipes</span></div>
-  <div class="chart-card chart-full" id="teams-card">
-    <div class="metric-card">
-      <div><div class="metric-value" id="mv-teams" style="font-size:17px;word-break:break-word">—</div><div class="metric-label">equipe com menor TMA no último mês</div></div>
-      <span id="teams-coverage" style="font-size:10px;color:var(--text3)"></span>
+  <!-- ── 4 · COMO CADA EQUIPE CONTRIBUIU ── -->
+  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">4 · Como cada equipe contribuiu</span></div>
+  <div class="chart-card chart-full" id="an-equipes-card">
+    <div class="chart-card-hdr">
+      <div>
+        <div class="chart-card-title">Contribuição por equipe</div>
+        <div class="chart-card-sub" id="an-equipes-sub">Ordenado por volume atendido no último mês do período</div>
+      </div>
+      <span id="an-equipes-cobertura" style="font-size:10px;color:var(--text3)"></span>
     </div>
-    <div class="chart-card-hdr" style="margin-top:10px">
-      <div><div class="chart-card-title">Qual equipe resolve mais rápido?</div><div class="chart-card-sub">TMA e TMR por equipe/inbox no último mês do período</div></div>
-    </div>
-    <div class="chart-wrap" style="height:240px"><canvas id="chart-teams"></canvas></div>
-    <div id="chart-teams-na" class="chart-na" style="display:none">Dados por equipe não disponíveis com este token</div>
-    <div id="chart-teams-partial" style="display:none;font-size:11px;color:var(--yellow);margin-top:6px;padding:4px 0">⚠ Dados parciais — algumas equipes podem não ter retornado resultados completos</div>
+    <div id="an-equipes-wrap"></div>
   </div>
 
 </div>
@@ -3598,6 +3583,58 @@ function renderAnaliseCsat() {
       }).join('');
 }
 
+/* Capítulo 4 — contribuição por equipe. Ordena por volume, não por
+   velocidade: ordenar por velocidade cria pódio, e esta tela é da equipe
+   inteira se vendo, não um ranking. */
+function renderAnaliseEquipes() {
+  const wrap  = document.getElementById('an-equipes-wrap');
+  const card  = document.getElementById('an-equipes-card');
+  const cobEl = document.getElementById('an-equipes-cobertura');
+  if (!wrap || !card) return;
+
+  const itens = (_teamCompData?.items || []).slice()
+    .sort((a, b) => (b.conversations_count || 0) - (a.conversations_count || 0));
+
+  /* Com uma equipe filtrada não há comparação a fazer */
+  if (_chartTeamFilter && _chartTeamFilter.size === 1) { card.style.display = 'none'; return; }
+  card.style.display = '';
+
+  if (!itens.length) {
+    wrap.innerHTML = '<div class="chart-na">Dados por equipe não disponíveis com este token</div>';
+    if (cobEl) cobEl.textContent = '';
+    return;
+  }
+
+  if (cobEl) cobEl.textContent = `${itens.length} equipe${itens.length > 1 ? 's' : ''} com dados`;
+
+  wrap.innerHTML = `
+    <table class="an-team-table">
+      <thead>
+        <tr>
+          <th>Equipe</th>
+          <th>Atendimentos</th>
+          <th>1ª resposta</th>
+          <th>Até resolver</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itens.map(t => `
+          <tr>
+            <td>${esc(t.name)}</td>
+            <td>${(t.conversations_count || 0).toLocaleString('pt-BR')}</td>
+            <td>${t.tmr_min == null
+                  ? '<span class="agent-badge badge-na">—</span>'
+                  : agentBadge(t.tmr_min, t.tmr_min < 60 ? `${Math.round(t.tmr_min)}min` : `${(t.tmr_min / 60).toFixed(1)}hr`, _SLA_TMR, 'min', true)}</td>
+            <td>${t.tma_h == null
+                  ? '<span class="agent-badge badge-na">—</span>'
+                  : agentBadge(t.tma_h, `${t.tma_h.toFixed(1)}hr`, _SLA_TMA, 'h', true)}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+  wrap.setAttribute('aria-label',
+    `Contribuição de ${itens.length} equipes, da que mais atendeu para a que menos atendeu. ${itens[0].name} lidera com ${itens[0].conversations_count} atendimentos.`);
+}
+
 function renderCharts() {
   if (!window.Chart || !_chartData.length) return;
   if (document.getElementById('graficos-page')?.style.display === 'none') {
@@ -3753,116 +3790,10 @@ function renderCharts() {
     });
   }
 
-  /* ── 7. TMR POR EQUIPE ── */
+  /* ── 4 · CONTRIBUIÇÃO POR EQUIPE ── */
   destroyChart('tmr-team');
-  {
-    const naEl  = document.getElementById('chart-tmr-team-na');
-    const items = (_teamCompData?.items || []).filter(t => t.tmr_min != null).sort((a, b) => a.tmr_min - b.tmr_min);
-    if (items.length > 0) {
-      if (naEl) naEl.style.display = 'none';
-      const best = items[0];
-      const bestLabel = `${best.name} — ${best.tmr_min < 60 ? best.tmr_min.toFixed(1) + 'min' : (best.tmr_min / 60).toFixed(1) + 'hr'}`;
-      setMetric('mv-tmr-team', bestLabel);
-      const barColors = items.map(t => t.tmr_min < 30 ? '#22c55e' : t.tmr_min < 60 ? '#eab308' : '#ef4444');
-      const teamNames = items.map(t => t.name.length > 22 ? t.name.slice(0, 20) + '…' : t.name);
-      const opts = {
-        responsive: true, maintainAspectRatio: false, animation: false, indexAxis: 'y',
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: c.tooltipBg, titleColor: c.labels, bodyColor: c.labels, borderColor: c.grid, borderWidth: 1,
-            callbacks: {
-              title: items => items[0].label,
-              label: item => {
-                const mins = item.raw;
-                const h = Math.floor(mins / 60), m = Math.round(mins % 60);
-                return h > 0 ? `${h}hr ${String(m).padStart(2,'0')}min de tempo médio de 1ª resposta` : `${mins.toFixed(1)}min de tempo médio de 1ª resposta`;
-              }
-            }
-          },
-          annotation: { annotations: { sla30: { type: 'line', xMin: _SLA_TMR, xMax: _SLA_TMR, borderColor: 'rgba(239,68,68,0.7)', borderWidth: 1.5, borderDash: [6,4], label: { content: `Meta ${_SLA_TMR}min`, display: true, position: 'end', font: { size: 10 }, color: '#ef4444', backgroundColor: 'transparent' } } } }
-        },
-        scales: {
-          x: { grid: { color: c.grid }, ticks: { color: c.labels, font: { size: 11 }, callback: v => `${v}min` } },
-          y: { grid: { display: false }, ticks: { color: c.labels, font: { size: 11 } } }
-        }
-      };
-      _charts['tmr-team'] = new Chart(document.getElementById('chart-tmr-team'), {
-        type: 'bar',
-        data: { labels: teamNames, datasets: [{ data: items.map(t => t.tmr_min), backgroundColor: barColors, borderRadius: 3 }] },
-        options: opts
-      });
-    } else {
-      if (naEl) naEl.style.display = '';
-      setMetric('mv-tmr-team', '—');
-    }
-  }
-
-  /* ── 8. COMPARATIVO EQUIPES ── */
   destroyChart('teams');
-  {
-    const naEl      = document.getElementById('chart-teams-na');
-    const partialEl = document.getElementById('chart-teams-partial');
-    const coverEl   = document.getElementById('teams-coverage');
-    const cardEl    = document.getElementById('teams-card');
-    const td        = _teamCompData;
-    const items     = td?.items || [];
-
-    if (td && items.length > 0) {
-      if (naEl) naEl.style.display = 'none';
-
-      /* Indicador de completude */
-      const pct = td.total > 0 ? td.withData / td.total : 1;
-      if (coverEl) coverEl.textContent = `${td.withData} de ${td.total} equipes com dados`;
-      if (cardEl) cardEl.style.borderColor = pct < 0.8 ? 'var(--yellow)' : '';
-
-      /* Validação cruzada: TMA agregado vs account-level do mesmo mês */
-      if (partialEl) {
-        const acctTma = _chartData[n - 1]?.avg_resolution_time;
-        if (acctTma != null && acctTma > 0) {
-          const wSum = items.reduce((s, t) => s + (t.tma_h != null ? t.tma_h * (t.conversations_count || 1) : 0), 0);
-          const wCnt = items.reduce((s, t) => s + (t.tma_h != null ? (t.conversations_count || 1) : 0), 0);
-          const aggTma = wCnt > 0 ? wSum / wCnt : null;
-          const acctTmaH = acctTma / 3600;
-          const diverge = aggTma != null && acctTmaH > 0 ? Math.abs(aggTma - acctTmaH) / acctTmaH : 0;
-          partialEl.style.display = (diverge > 0.10 || pct < 0.8) ? '' : 'none';
-        } else {
-          partialEl.style.display = pct < 0.8 ? '' : 'none';
-        }
-      }
-
-      const best = [...items].filter(t => t.tma_h != null).sort((a, b) => a.tma_h - b.tma_h)[0];
-      setMetric('mv-teams', best?.name || '—');
-      const teamLabels = items.map(t => t.name.length > 20 ? t.name.slice(0, 18) + '…' : t.name);
-      const opts = {
-        responsive: true, maintainAspectRatio: false, animation: false, indexAxis: 'y',
-        plugins: {
-          legend: { display: true, position: 'top', labels: { color: c.labels, font: { size: 11 }, boxWidth: 12 } },
-          tooltip: { backgroundColor: c.tooltipBg, titleColor: c.labels, bodyColor: c.labels, borderColor: c.grid, borderWidth: 1,
-            callbacks: { label: item => item.datasetIndex === 0 ? `Tempo médio de resolução: ${item.raw?.toFixed(1)}hr` : `Tempo médio de 1ª resposta: ${item.raw?.toFixed(1)}min` }
-          }
-        },
-        scales: {
-          x: { grid: { color: c.grid }, ticks: { color: c.labels, font: { size: 11 } } },
-          y: { grid: { display: false }, ticks: { color: c.labels, font: { size: 11 } } }
-        }
-      };
-      _charts.teams = new Chart(document.getElementById('chart-teams'), {
-        type: 'bar',
-        data: { labels: teamLabels, datasets: [
-          { label: 'TMA (horas)',   data: items.map(t => t.tma_h),   backgroundColor: 'rgba(139,92,246,0.7)', borderRadius: 3 },
-          { label: 'TMR (minutos)', data: items.map(t => t.tmr_min), backgroundColor: 'rgba(20,184,166,0.7)', borderRadius: 3 }
-        ]},
-        options: opts
-      });
-    } else {
-      if (naEl) naEl.style.display = '';
-      if (partialEl) partialEl.style.display = 'none';
-      if (coverEl)  coverEl.textContent = '';
-      if (cardEl)   cardEl.style.borderColor = '';
-      setMetric('mv-teams', '—');
-    }
-  }
+  renderAnaliseEquipes();
 
 }
 
