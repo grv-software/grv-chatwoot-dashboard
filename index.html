@@ -506,6 +506,38 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
   .triage-cards { gap:6px; }
   .triage-card { min-width:110px; }
 }
+
+/* ── ASSISTENTE (harness) ──────────────────────────────── */
+#harness-toggle { position:fixed; right:20px; bottom:20px; width:52px; height:52px; border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),#8b5cf6); border:none; cursor:pointer; z-index:500;
+  display:flex; align-items:center; justify-content:center; font-size:22px; color:#fff;
+  box-shadow:0 4px 16px rgba(0,0,0,.35); transition:transform .15s; }
+#harness-toggle:hover { transform:scale(1.06); }
+#harness-panel { position:fixed; top:0; right:-420px; width:400px; height:100vh; background:var(--bg2);
+  border-left:1px solid var(--border); box-shadow:-8px 0 24px rgba(0,0,0,.3); z-index:499;
+  display:flex; flex-direction:column; transition:right .22s ease-out; }
+#harness-panel.open { right:0; }
+.harness-head { display:flex; align-items:center; justify-content:space-between; padding:14px 16px;
+  border-bottom:1px solid var(--border); flex-shrink:0; }
+.harness-head-title { font-size:14px; font-weight:700; color:var(--text); }
+.harness-close { background:none; border:none; color:var(--text3); font-size:18px; cursor:pointer; }
+.harness-close:hover { color:var(--text); }
+.harness-body { flex:1; overflow-y:auto; padding:14px 16px; display:flex; flex-direction:column; gap:10px; }
+.harness-msg { max-width:85%; padding:9px 12px; border-radius:12px; font-size:13px; line-height:1.45; white-space:pre-wrap; }
+.harness-msg.user { align-self:flex-end; background:var(--accent); color:#fff; border-bottom-right-radius:3px; }
+.harness-msg.assistant { align-self:flex-start; background:var(--bg3); color:var(--text); border-bottom-left-radius:3px; }
+.harness-suggestions { display:flex; flex-wrap:wrap; gap:6px; padding:0 16px 12px; }
+.harness-chip { padding:5px 10px; border-radius:14px; border:1px solid var(--border); background:var(--bg3);
+  color:var(--text2); font-size:11px; cursor:pointer; }
+.harness-chip:hover { border-color:var(--accent); color:var(--accent); }
+.harness-foot { display:flex; gap:8px; padding:12px 16px; border-top:1px solid var(--border); flex-shrink:0; }
+.harness-input { flex:1; padding:9px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg3);
+  color:var(--text); font-size:13px; outline:none; }
+.harness-input:focus { border-color:var(--accent); }
+.harness-send { padding:9px 14px; border-radius:8px; border:none; background:var(--accent); color:#fff;
+  font-size:13px; font-weight:600; cursor:pointer; }
+.harness-send:hover { opacity:.88; }
+@media (max-width:480px) { #harness-panel { width:100vw; right:-100vw; } }
 </style>
 </head>
 <body>
@@ -974,6 +1006,22 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 
 <!-- TOAST -->
 <div id="toast" role="alert" aria-live="assertive"></div>
+
+<!-- ASSISTENTE (harness) -->
+<button id="harness-toggle" onclick="harnessOpen()" aria-label="Abrir assistente" title="Assistente">✨</button>
+<div id="harness-panel" role="dialog" aria-label="Assistente do dashboard">
+  <div class="harness-head">
+    <span class="harness-head-title">Assistente</span>
+    <button class="harness-close" onclick="harnessClose()" aria-label="Fechar">✕</button>
+  </div>
+  <div class="harness-body" id="harness-messages"></div>
+  <div class="harness-suggestions" id="harness-suggestions"></div>
+  <div class="harness-foot">
+    <input type="text" class="harness-input" id="harness-input" placeholder="Pergunte algo…"
+      onkeydown="if(event.key==='Enter') harnessSend();">
+    <button class="harness-send" onclick="harnessSend()">Enviar</button>
+  </div>
+</div>
 
 <!-- COLUMN FILTER POPUP -->
 <div id="cfp" class="hidden" role="dialog" aria-modal="true">
@@ -4123,6 +4171,68 @@ new MutationObserver(() => {
   if (document.getElementById('graficos-page').style.display !== 'none' && _chartData.length) renderCharts();
   if (document.getElementById('agentes-page').style.display !== 'none' && _agentPerfData) renderAgentTab();
 }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+/* ── ASSISTENTE (harness) ──────────────────────────────── */
+let _harnessOpen = false;
+
+function harnessOpen() {
+  _harnessOpen = true;
+  document.getElementById('harness-panel')?.classList.add('open');
+  if (!document.getElementById('harness-messages').children.length) {
+    harnessAppendMessage('assistant', 'Oi! Pergunte sobre volume, tempo de resposta, resolução, CSAT, ranking, ou peça pra filtrar/navegar. Ex: "Como está a equipe 2 este mês?"');
+    harnessRenderSuggestions();
+  }
+  setTimeout(() => document.getElementById('harness-input')?.focus(), 250);
+}
+
+function harnessClose() {
+  _harnessOpen = false;
+  document.getElementById('harness-panel')?.classList.remove('open');
+}
+
+function harnessRenderSuggestions() {
+  const el = document.getElementById('harness-suggestions');
+  if (!el) return;
+  const exemplos = [
+    'Como está a equipe 2 este mês?',
+    'Quantas conversas estão abertas agora?',
+    'Mostra só a equipe 2',
+    'Quem atendeu mais esse mês?'
+  ];
+  el.innerHTML = exemplos.map(ex => `<button class="harness-chip" onclick="harnessSubmit(${JSON.stringify(ex)})">${esc(ex)}</button>`).join('');
+}
+
+function harnessAppendMessage(role, text) {
+  const el = document.getElementById('harness-messages');
+  if (!el) return;
+  const bubble = document.createElement('div');
+  bubble.className = `harness-msg ${role}`;
+  bubble.textContent = text;
+  el.appendChild(bubble);
+  el.scrollTop = el.scrollHeight;
+}
+
+function harnessSend() {
+  const input = document.getElementById('harness-input');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  harnessSubmit(text);
+}
+
+function harnessSubmit(text) {
+  const sugEl = document.getElementById('harness-suggestions');
+  if (sugEl) sugEl.innerHTML = '';
+  harnessAppendMessage('user', text);
+  harnessHandleMessage(text);
+}
+
+/* Handler do envio — versão mínima; a Task 8 substitui o corpo inteiro
+   pelo pipeline real de extração/resolução/execução/formatação. */
+function harnessHandleMessage(text) {
+  harnessAppendMessage('assistant', 'Ainda estou aprendendo a responder isso.');
+}
 </script>
 </body>
 </html>
