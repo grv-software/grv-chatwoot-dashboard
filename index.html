@@ -190,7 +190,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 .an-dist-row { display:grid; grid-template-columns:58px 1fr 52px; align-items:center; gap:10px; font-size:12px; }
 .an-dist-star { letter-spacing:1px; white-space:nowrap; font-size:13px; }
 .an-dist-bar { height:18px; border-radius:4px; background:var(--bg3); overflow:hidden; }
-.an-dist-fill { height:100%; border-radius:4px; transition:width .3s ease-out; }
+.an-dist-fill { display:block; height:100%; border-radius:4px; transition:width .3s ease-out; }
 .an-dist-num { text-align:right; font-variant-numeric:tabular-nums; color:var(--text2); }
 
 .an-coment { max-height:320px; overflow-y:auto; margin-top:12px; }
@@ -873,6 +873,30 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     </div>
     <div class="chart-wrap" style="height:220px"><canvas id="chart-tmr-team"></canvas></div>
     <div id="chart-tmr-team-na" class="chart-na" style="display:none">Dados de TMR por equipe não disponíveis</div>
+  </div>
+
+  <!-- ── 3 · O QUE O CLIENTE DISSE ── -->
+  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">3 · O que o cliente disse</span></div>
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="chart-card-hdr">
+        <div>
+          <div class="chart-card-title">Como avaliaram o atendimento</div>
+          <div class="chart-card-sub" id="an-csat-periodo">—</div>
+        </div>
+      </div>
+      <div class="an-dist" id="an-csat-dist"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-hdr">
+        <div>
+          <div class="chart-card-title">O que escreveram</div>
+          <div class="chart-card-sub" id="an-csat-com-sub">—</div>
+        </div>
+        <div class="am-csat-filter" id="an-csat-filtro"></div>
+      </div>
+      <div class="an-coment" id="an-csat-coment"></div>
+    </div>
   </div>
 
   <!-- ── EQUIPES ── -->
@@ -2528,6 +2552,7 @@ let _chartTrendBase = null;   /* mesmo trecho decorrido do mês anterior — bas
 let _chartCsat      = null;   /* {rows, truncado, since, until} — avaliações do mês mais recente */
 let _chartCsatCache = {};     /* {`${since}:${until}`: {data, ts}} — TTL 5min */
 const CSAT_MAX_PAGES = 40;    /* 40 × 25 = 1.000 avaliações; acima disso o card declara amostra */
+let _csatAnaliseFiltro = 'todos';  /* 'todos' | 'criticos' */
 let _charts         = {};
 let _ibVisible      = false;
 let _chartsDirty    = false;  /* true → renderCharts precisa rodar quando a aba ficar visível */
@@ -3488,6 +3513,91 @@ function renderAnaliseHero(n, trendPrev) {
   metricTrend('an-hero-tmr-trend',        d.avg_first_response_time, trendPrev('avg_first_response_time'), true);
 }
 
+/* Capítulo 3 — distribuição de notas e os comentários escritos */
+function renderAnaliseCsat() {
+  const distEl = document.getElementById('an-csat-dist');
+  const comEl  = document.getElementById('an-csat-coment');
+  const perEl  = document.getElementById('an-csat-periodo');
+  const subEl  = document.getElementById('an-csat-com-sub');
+  const filEl  = document.getElementById('an-csat-filtro');
+  if (!distEl || !comEl) return;
+
+  const heroSet = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+  const rows = _chartCsat?.rows || [];
+
+  if (!rows.length) {
+    const vazio = 'Ainda não há avaliações neste período.';
+    distEl.innerHTML = `<div class="chart-na">${vazio}</div>`;
+    comEl.innerHTML  = '';
+    if (perEl) perEl.textContent = '';
+    if (subEl) subEl.textContent = '';
+    if (filEl) filEl.innerHTML = '';
+    heroSet('an-hero-csat', '—');
+    heroSet('an-hero-csat-sub', 'sem avaliações');
+    return;
+  }
+
+  const mesLabel = new Date(_chartCsat.since * 1000)
+    .toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  const positivas = rows.filter(r => r.rating >= 4).length;
+  const pct = Math.round(positivas / rows.length * 1000) / 10;
+
+  heroSet('an-hero-csat', `${pct}%`.replace('.', ','));
+  heroSet('an-hero-csat-sub', `de ${rows.length.toLocaleString('pt-BR')} avaliações`);
+
+  if (perEl) {
+    perEl.textContent = `${String(pct).replace('.', ',')}% aprovaram · ${rows.length.toLocaleString('pt-BR')} avaliações · ${mesLabel.charAt(0).toUpperCase() + mesLabel.slice(1)}`
+      + (_chartCsat.truncado ? ` · amostra das ${CSAT_MAX_PAGES * 25} mais recentes` : '');
+  }
+
+  /* distribuição — contagem rotulada na própria linha, cor nunca sozinha */
+  const CORES = { 5: 'var(--green)', 4: 'var(--green)', 3: 'var(--yellow)', 2: 'var(--red)', 1: 'var(--red)' };
+  const maior = Math.max(...[5,4,3,2,1].map(n => rows.filter(r => r.rating === n).length), 1);
+  distEl.innerHTML = [5,4,3,2,1].map(n => {
+    const qtd = rows.filter(r => r.rating === n).length;
+    const larg = Math.round(qtd / maior * 100);
+    return `<div class="an-dist-row">
+      <span class="an-dist-star" style="color:${CORES[n]}">${'★'.repeat(n)}</span>
+      <span class="an-dist-bar"><span class="an-dist-fill" style="width:${larg}%;background:${CORES[n]}"></span></span>
+      <span class="an-dist-num">${qtd.toLocaleString('pt-BR')}</span>
+    </div>`;
+  }).join('');
+  distEl.setAttribute('aria-label',
+    `${pct}% das ${rows.length} avaliações de ${mesLabel} foram positivas (4 ou 5 estrelas).`);
+
+  /* comentários */
+  const comTexto = rows.filter(r => (r.feedback_message || '').trim());
+  const criticos = comTexto.filter(r => r.rating <= 3);
+  const lista = _csatAnaliseFiltro === 'criticos' ? criticos : comTexto;
+
+  if (subEl) subEl.textContent = `${comTexto.length} de ${rows.length} deixaram comentário`;
+  if (filEl) {
+    filEl.innerHTML = `
+      <button class="${_csatAnaliseFiltro === 'todos' ? 'active' : ''}" onclick="_csatAnaliseFiltro='todos';renderAnaliseCsat()">Todos (${comTexto.length})</button>
+      <button class="${_csatAnaliseFiltro === 'criticos' ? 'active' : ''}" onclick="_csatAnaliseFiltro='criticos';renderAnaliseCsat()">Críticos ≤3★ (${criticos.length})</button>`;
+  }
+
+  comEl.innerHTML = lista.length === 0
+    ? `<div class="chart-na">${_csatAnaliseFiltro === 'criticos' ? 'Nenhuma crítica escrita neste período.' : 'Nenhum comentário escrito neste período.'}</div>`
+    : lista.map(r => {
+        const n     = typeof r.rating === 'number' ? Math.max(1, Math.min(5, r.rating)) : 0;
+        const cor   = n >= 4 ? 'var(--green)' : n === 3 ? 'var(--yellow)' : 'var(--red)';
+        const nome  = r.contact?.name || '—';
+        const msg   = (r.feedback_message || '').trim();
+        const data  = new Date(r.created_at * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+        const cid   = r.conversation_id ?? r.message_id;
+        const url   = cid ? `https://nxticket.com.br/app/accounts/${cfg.account}/conversations/${cid}` : null;
+        return `<div class="am-csat-row${n > 0 && n <= 3 ? ' csat-row-bad' : ''}">
+          <span class="am-csat-stars" style="color:${cor}">${'★'.repeat(n)}${'☆'.repeat(5 - n)}</span>
+          <span class="am-csat-contact" title="${esc(nome)}">${esc(nome)}</span>
+          <span class="am-csat-msg" title="${esc(msg)}">${esc(msg)}</span>
+          <span class="am-csat-date">${data}</span>
+          ${url ? `<a class="am-csat-link" href="${url}" target="_blank" rel="noopener">Abrir chat →</a>`
+                : '<span class="am-csat-link" style="opacity:.35">—</span>'}
+        </div>`;
+      }).join('');
+}
+
 function renderCharts() {
   if (!window.Chart || !_chartData.length) return;
   if (document.getElementById('graficos-page')?.style.display === 'none') {
@@ -3511,6 +3621,7 @@ function renderCharts() {
      anterior completo só se a chamada do baseline tiver falhado. */
   const trendPrev = field => _chartTrendBase ? _chartTrendBase[field] : _chartData[n - 2]?.[field];
   renderAnaliseHero(n, trendPrev);
+  renderAnaliseCsat();
 
   function slaLine(value, label, color) {
     return { type: 'line', label, data: new Array(n).fill(value),
