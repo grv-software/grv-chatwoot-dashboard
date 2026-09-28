@@ -3394,9 +3394,7 @@ function renderCharts() {
   const labels     = _chartData.map(d => d.monthLabel);
   const fullLabels = _chartData.map(d => d.fullLabel || d.monthLabel);
   const n          = _chartData.length;
-  const chartConvs = (_chartTeamFilter && _chartTeamFilter.size > 0)
-    ? _rawConvs.filter(cv => convMatchesFilter(cv, _chartTeamFilter))
-    : _rawConvs;
+
   function setMetric(id, val) {
     const el = document.getElementById(id);
     if (el) el.textContent = val ?? '—';
