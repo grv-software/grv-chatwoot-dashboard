@@ -1154,6 +1154,14 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
       <div class="config-weight-sum ok" id="cfg-weight-sum">Soma: 100 / 100 pts ✓</div>
     </div>
 
+    <!-- Assistente -->
+    <div class="config-card">
+      <h3>Perguntas que o assistente não soube responder</h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Guardado só neste navegador. Use pra saber o que ensinar ao assistente depois.</p>
+      <div id="harness-unmatched-list"></div>
+      <button onclick="clearHarnessUnmatched()" style="margin-top:8px;padding:6px 14px;border:1px solid var(--border);border-radius:5px;background:var(--bg2);color:var(--text3);cursor:pointer;font-size:12px">Limpar</button>
+    </div>
+
     <!-- Ações -->
     <div class="config-actions">
       <button class="btn-primary" id="cfg-save-btn" onclick="saveConfig()">Salvar configurações</button>
@@ -3854,7 +3862,7 @@ function showPage(page) {
     if (!_agentPerfData || _agentTabDirty) { _agentTabDirty = false; fetchAgentTab(); }
     else renderAgentTab();
   }
-  if (page === 'configuracoes') { loadConfigPage(); renderGruposList(); }
+  if (page === 'configuracoes') { loadConfigPage(); renderGruposList(); renderHarnessUnmatchedList(); }
 }
 
 /* ── CONFIGURAÇÕES ── */
@@ -4744,6 +4752,48 @@ function harnessResponderResumir() {
     return `${entradas.length} agentes com atendimento no período selecionado da aba Agentes.`;
   }
   return 'Abra o Painel, Agentes ou Análise pra eu resumir o que está na tela.';
+}
+
+/* ── ASSISTENTE — caderno de perguntas não entendidas ─────── */
+const HARNESS_UNMATCHED_KEY = 'grv_harness_unmatched';
+const HARNESS_UNMATCHED_MAX = 200;
+
+function logUnmatchedQuestion(text) {
+  const norm = harnessNormalize(text);
+  if (!norm) return;
+  let lista = [];
+  try { lista = JSON.parse(localStorage.getItem(HARNESS_UNMATCHED_KEY) || '[]'); } catch { lista = []; }
+  const existente = lista.find(e => e.texto === norm);
+  if (existente) {
+    existente.contagem++;
+    existente.ultimaVez = Date.now();
+  } else {
+    lista.push({ texto: norm, original: text, contagem: 1, ultimaVez: Date.now() });
+  }
+  lista.sort((a, b) => b.ultimaVez - a.ultimaVez);
+  if (lista.length > HARNESS_UNMATCHED_MAX) lista = lista.slice(0, HARNESS_UNMATCHED_MAX);
+  localStorage.setItem(HARNESS_UNMATCHED_KEY, JSON.stringify(lista));
+  renderHarnessUnmatchedList();
+}
+
+function clearHarnessUnmatched() {
+  localStorage.removeItem(HARNESS_UNMATCHED_KEY);
+  renderHarnessUnmatchedList();
+}
+
+function renderHarnessUnmatchedList() {
+  const el = document.getElementById('harness-unmatched-list');
+  if (!el) return;
+  let lista = [];
+  try { lista = JSON.parse(localStorage.getItem(HARNESS_UNMATCHED_KEY) || '[]'); } catch { lista = []; }
+  if (!lista.length) {
+    el.innerHTML = '<p style="font-size:12px;color:var(--text3)">Nenhuma pergunta não reconhecida até agora.</p>';
+    return;
+  }
+  lista.sort((a, b) => b.contagem - a.contagem);
+  el.innerHTML = `<table class="agent-table"><thead><tr><th>Pergunta</th><th>Vezes</th></tr></thead><tbody>`
+    + lista.map(e => `<tr><td>${esc(e.original)}</td><td>${e.contagem}</td></tr>`).join('')
+    + `</tbody></table>`;
 }
 
 /* ── ASSISTENTE (harness) ──────────────────────────────── */
