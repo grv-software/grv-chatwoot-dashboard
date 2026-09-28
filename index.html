@@ -176,6 +176,33 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 .chart-auth-overlay { display:none; position:absolute; inset:0; background:rgba(15,17,23,0.72); border-radius:8px; align-items:center; justify-content:center; flex-direction:column; gap:6px; text-align:center; padding:16px; z-index:2; }
 .chart-card { position:relative; }
 .auth-limited .chart-auth-overlay { display:flex; }
+/* ── ANÁLISE — narrativa ──────────────────────────────── */
+.an-hero { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:10px; }
+@media (max-width:900px) { .an-hero { grid-template-columns:1fr 1fr; } }
+.an-hero-tile { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px 18px; }
+.an-hero-val { font-size:32px; font-weight:800; line-height:1.05; letter-spacing:-.5px; font-variant-numeric:tabular-nums; color:var(--text); }
+.an-hero-lbl { font-size:12px; color:var(--text2); margin-top:4px; }
+.an-hero-sub { font-size:11px; color:var(--text3); margin-top:2px; }
+.an-hero-trend { font-size:12px; font-weight:700; margin-top:8px; display:block; }
+.an-sub { font-size:12px; color:var(--text3); margin-top:2px; }
+
+.an-dist { display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+.an-dist-row { display:grid; grid-template-columns:58px 1fr 52px; align-items:center; gap:10px; font-size:12px; }
+.an-dist-star { letter-spacing:1px; white-space:nowrap; font-size:13px; }
+.an-dist-bar { height:18px; border-radius:4px; background:var(--bg3); overflow:hidden; }
+.an-dist-fill { height:100%; border-radius:4px; transition:width .3s ease-out; }
+.an-dist-num { text-align:right; font-variant-numeric:tabular-nums; color:var(--text2); }
+
+.an-coment { max-height:320px; overflow-y:auto; margin-top:12px; }
+
+.an-team-table { width:100%; border-collapse:collapse; font-size:12px; margin-top:12px; }
+.an-team-table th { background:var(--bg3); color:var(--text2); font-size:11px; font-weight:600; padding:8px 10px; border-bottom:2px solid var(--border); text-align:right; }
+.an-team-table th:first-child { text-align:left; }
+.an-team-table td { padding:8px 10px; border-bottom:1px solid var(--border); font-variant-numeric:tabular-nums; text-align:right; color:var(--text2); }
+.an-team-table td:first-child { text-align:left; font-weight:600; color:var(--text); }
+.an-team-table tr:last-child td { border:none; }
+
+@media (prefers-reduced-motion:reduce) { .an-dist-fill { transition:none; } }
 #kpi-filter-note.auth-warn { color:var(--yellow); background:rgba(234,179,8,.07); border-color:rgba(234,179,8,.25); }
 /* AGENTES TAB */
 .agent-period-pills { display:flex; gap:4px; }
