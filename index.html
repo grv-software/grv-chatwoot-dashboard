@@ -1156,7 +1156,33 @@ const INBOX_TEAM_MAP = {
   19: 11, 20: 11         /* comercial cps + nx  → comercial (team 11) */
 };
 const SAG_INBOX_ID = 17;
+/* O SAG é uma caixa de entrada, não um time do Chatwoot, então não vem em
+   _teamMap e ficava de fora dos filtros mesmo sendo o maior inbox da conta.
+   Entra nas seleções com este id sentinela e é resolvido por inbox_id. */
+const SAG_FILTER_ID = -17;
 const MIN_AMOSTRA_AGENTE = 10;  /* abaixo disso a pontuação do agente é ruído estatístico */
+
+/* Nome exibido de um item do filtro (equipe do Chatwoot ou a caixa SAG) */
+function filterLabel(id) {
+  if (Number(id) === SAG_FILTER_ID) return 'SAG';
+  return (_teamMap[id] || {}).name || `#${id}`;
+}
+
+/* Conversa pertence a alguma das equipes/caixas selecionadas? */
+function convMatchesFilter(c, filtro) {
+  if (!filtro || filtro.size === 0) return true;
+  if (filtro.has(SAG_FILTER_ID) && c.inbox_id === SAG_INBOX_ID) return true;
+  return filtro.has(c.meta?.team?.id);
+}
+
+/* Caixas de entrada cobertas por uma seleção de equipes/SAG */
+function inboxIdsForFilter(filtro) {
+  const ids = Object.entries(INBOX_TEAM_MAP)
+    .filter(([, tid]) => filtro.has(Number(tid)))
+    .map(([iid]) => Number(iid));
+  if (filtro.has(SAG_FILTER_ID)) ids.push(SAG_INBOX_ID);
+  return ids;
+}
 let timer = null, countdown = REFRESH_SEC;
 let _rawConvs = [];
 let _allInProg = [], _allWaiting = [], _inboxMap = {}, _shownCount = PAGE_SIZE, _totalOpen = 0, _totalPending = 0;
@@ -1423,9 +1449,7 @@ async function fetchKPIs() {
     ));
   /* busca summary por times → expande para inboxes (100% cobertura) */
   const summaryByTeamIds = (teamIds, since, until) => {
-    const inboxIds = Object.entries(INBOX_TEAM_MAP)
-      .filter(([, tid]) => teamIds.includes(Number(tid)))
-      .map(([iid]) => Number(iid));
+    const inboxIds = inboxIdsForFilter(new Set(teamIds));
     if (!inboxIds.length) return Promise.resolve([]);
     return summaryByIds(inboxIds, since, until);
   };
@@ -1483,7 +1507,7 @@ async function fetchKPIs() {
       ]);
       summary     = aggregateSummaries(currAll);
       summaryPrev = aggregateSummaries(prevAll);
-      const names = teamIds.map(id => (_teamMap[id] || {}).name || `#${id}`).join(', ');
+      const names = teamIds.map(id => filterLabel(id)).join(', ');
       note.textContent = `Filtrado por equipe: ${names}`;
       note.style.display = '';
     }
@@ -1836,7 +1860,7 @@ function renderInboxBar() {
 
 function applyInboxFilter(convs) {
   if (!_teamFilter || _teamFilter.size === 0) return convs;
-  return convs.filter(c => _teamFilter.has(c.meta?.team?.id));
+  return convs.filter(c => convMatchesFilter(c, _teamFilter));
 }
 
 function sortConvs(arr, col, dir) {
@@ -1932,7 +1956,7 @@ function openIbp(event) {
   event.stopPropagation();
 
   const teams  = Object.values(_teamMap).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
-  const allIds = teams.map(t => t.id);
+  const allIds = ibpAllIds();
   _ibpSel = _teamFilter ? new Set(_teamFilter) : new Set(allIds);
   const allChecked = !_teamFilter || _ibpSel.size === allIds.length;
 
@@ -1946,6 +1970,7 @@ function openIbp(event) {
       <span>${esc(t.name)}</span>
     </label>`;
   });
+  html += ibpSagOption();
 
   document.getElementById('ibp-body').innerHTML = html;
   const popup = document.getElementById('ibp');
@@ -1963,22 +1988,36 @@ function openIbp(event) {
   document.getElementById('inbox-trigger').classList.add('active');
 }
 
+/* Ids selecionáveis do filtro. O SAG entra em todos os modos menos o de
+   agentes, onde a seleção é por time (o SAG não tem membros próprios). */
+function ibpAllIds() {
+  const ids = Object.values(_teamMap).map(t => t.id);
+  return _ibpMode === 'agent-team' ? ids : [...ids, SAG_FILTER_ID];
+}
+
+function ibpSagOption() {
+  return `<label class="ibp-opt">
+    <input type="checkbox" ${_ibpSel.has(SAG_FILTER_ID) ? 'checked' : ''} data-id="${SAG_FILTER_ID}" onchange="ibpToggle(this)">
+    <span>SAG <span style="opacity:.55;font-size:10px">caixa de entrada</span></span>
+  </label>`;
+}
+
 function ibpToggle(el) {
   const id = parseInt(el.dataset.id, 10);
   if (el.checked) _ibpSel.add(id); else _ibpSel.delete(id);
-  const allIds = Object.values(_teamMap).map(t => t.id);
+  const allIds = ibpAllIds();
   const allChk = document.getElementById('ibp-all-chk');
   if (allChk) allChk.checked = _ibpSel.size === allIds.length;
 }
 
 function ibpToggleAll(el) {
-  const allIds = Object.values(_teamMap).map(t => t.id);
+  const allIds = ibpAllIds();
   _ibpSel = el.checked ? new Set(allIds) : new Set();
   document.querySelectorAll('#ibp-body input[data-id]').forEach(cb => { cb.checked = el.checked; });
 }
 
 function ibpAll() {
-  const allIds = Object.values(_teamMap).map(t => t.id);
+  const allIds = ibpAllIds();
   _ibpSel = new Set(allIds);
   const c = document.getElementById('ibp-all-chk');
   if (c) c.checked = true;
@@ -2002,7 +2041,7 @@ function ibpClose() {
 }
 
 function ibpApply() {
-  const allIds = Object.values(_teamMap).map(t => t.id);
+  const allIds = ibpAllIds();
   const filter = (_ibpSel.size === 0 || _ibpSel.size === allIds.length) ? null : new Set(_ibpSel);
   if (_ibpMode === 'chart') {
     _chartTeamFilter = filter;
@@ -2146,7 +2185,7 @@ function openChartIbp(event) {
   _ibpMode = 'chart';
   event.stopPropagation();
   const teams  = Object.values(_teamMap).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
-  const allIds = teams.map(t => t.id);
+  const allIds = ibpAllIds();
   _ibpSel = _chartTeamFilter ? new Set(_chartTeamFilter) : new Set(allIds);
 
   const allCount   = allIds.length;
@@ -2162,6 +2201,7 @@ function openChartIbp(event) {
       <span>${esc(t.name)}</span>
     </label>`;
   });
+  html += ibpSagOption();
 
   document.getElementById('ibp-body').innerHTML = html;
   const popup = document.getElementById('ibp');
@@ -2199,7 +2239,7 @@ function syncChartInboxBar() {
   if (clearEl) clearEl.style.display = '';
   if (noteEl)  noteEl.style.display  = '';
   chipsEl.innerHTML = [..._chartTeamFilter].map(id => {
-    const name = (_teamMap[id] || {}).name || `#${id}`;
+    const name = filterLabel(id);
     return `<span class="inbox-chip">${esc(name)}<button class="inbox-chip-rm" onclick="removeChartInboxChip(${id})" aria-label="Remover ${esc(name)}">×</button></span>`;
   }).join('');
 }
@@ -2234,7 +2274,7 @@ function syncInboxBar() {
   trigTxt.textContent = `${_teamFilter.size} equipe${_teamFilter.size > 1 ? 's' : ''}`;
   clearEl.style.display = '';
   chipsEl.innerHTML = [..._teamFilter].map(id => {
-    const name = (_teamMap[id] || {}).name || `#${id}`;
+    const name = filterLabel(id);
     return `<span class="inbox-chip">${esc(name)}<button class="inbox-chip-rm" onclick="removeInboxChip(${id})" aria-label="Remover ${esc(name)}">×</button></span>`;
   }).join('');
 }
@@ -2553,9 +2593,7 @@ async function fetchChartData() {
   const fetchMonth = async ({ since, until }) => {
     /* Se filtro de equipe ativo, expande para inboxes e agrega (cobertura 100%) */
     if (_chartTeamFilter && _chartTeamFilter.size > 0) {
-      const inboxIds = Object.entries(INBOX_TEAM_MAP)
-        .filter(([, tid]) => _chartTeamFilter.has(Number(tid)))
-        .map(([iid]) => Number(iid));
+      const inboxIds = inboxIdsForFilter(_chartTeamFilter);
       if (!inboxIds.length) return EMPTY_MONTH();
       const res = await Promise.all(inboxIds.map(id =>
         api(`/v2/accounts/${cfg.account}/reports/summary?since=${since}&until=${until}&type=inbox&id=${id}`)
@@ -2620,7 +2658,7 @@ async function fetchTeamComparison(periods) {
   const filteredIds = (_chartTeamFilter && _chartTeamFilter.size > 0)
     ? allInboxIds.filter(id => _chartTeamFilter.has(Number(INBOX_TEAM_MAP[id])))
     : allInboxIds;
-  const includeSAG = !_chartTeamFilter || _chartTeamFilter.size === 0;
+  const includeSAG = !_chartTeamFilter || _chartTeamFilter.size === 0 || _chartTeamFilter.has(SAG_FILTER_ID);
 
   const [inboxResults, sagResult] = await Promise.all([
     Promise.all(filteredIds.map(fetchInbox)),
@@ -3384,10 +3422,10 @@ function renderCharts() {
   const fullLabels = _chartData.map(d => d.fullLabel || d.monthLabel);
   const n          = _chartData.length;
   const chartConvs = (_chartTeamFilter && _chartTeamFilter.size > 0)
-    ? _rawConvs.filter(cv => _chartTeamFilter.has(cv.meta?.team?.id))
+    ? _rawConvs.filter(cv => convMatchesFilter(cv, _chartTeamFilter))
     : _rawConvs;
   const chartPending = (_chartTeamFilter && _chartTeamFilter.size > 0)
-    ? _pendingConvs.filter(cv => _chartTeamFilter.has(cv.meta?.team?.id))
+    ? _pendingConvs.filter(cv => convMatchesFilter(cv, _chartTeamFilter))
     : _pendingConvs;
 
   const sampleWarnEl = document.getElementById('chart-sample-warn');
