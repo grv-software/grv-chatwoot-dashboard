@@ -4738,6 +4738,7 @@ function harnessResponderResumir() {
 
 /* ── ASSISTENTE (harness) ──────────────────────────────── */
 let _harnessOpen = false;
+let _harnessMemory = { equipeId: null, agenteId: null, periodo: null };
 
 function harnessOpen() {
   _harnessOpen = true;
@@ -4792,10 +4793,40 @@ function harnessSubmit(text) {
   harnessHandleMessage(text);
 }
 
-/* Handler do envio — versão mínima; a Task 8 substitui o corpo inteiro
-   pelo pipeline real de extração/resolução/execução/formatação. */
-function harnessHandleMessage(text) {
-  harnessAppendMessage('assistant', 'Ainda estou aprendendo a responder isso.');
+async function harnessHandleMessage(text) {
+  const entities = harnessExtractEntities(text);
+  let intent = harnessResolveIntent(entities);
+
+  /* preenche com a memória da conversa quando a frase não citou a entidade */
+  if (intent.tipo === 'metrica') {
+    if (!intent.equipe && !intent.agente) {
+      if (_harnessMemory.agenteId != null) intent.agente = { key: _harnessMemory.agenteId, label: _harnessMemory.agenteLabel };
+      else if (_harnessMemory.equipeId != null) intent.equipe = { key: _harnessMemory.equipeId, label: _harnessMemory.equipeLabel };
+    }
+    _harnessMemory.equipeId = intent.equipe?.key ?? null;
+    _harnessMemory.equipeLabel = intent.equipe?.label ?? null;
+    _harnessMemory.agenteId = intent.agente?.key ?? null;
+    _harnessMemory.agenteLabel = intent.agente?.label ?? null;
+  }
+
+  let resposta;
+  try {
+    if (intent.tipo === 'navegar')  resposta = harnessExecutarNavegar(intent);
+    else if (intent.tipo === 'filtrar')  resposta = harnessExecutarFiltrar(intent);
+    else if (intent.tipo === 'fila')     resposta = await harnessExecutarFila(intent);
+    else if (intent.tipo === 'comparar') resposta = await harnessResponderComparar(intent);
+    else if (intent.tipo === 'ranking')  resposta = await harnessResponderRanking(intent);
+    else if (intent.tipo === 'resumir')  resposta = harnessResponderResumir();
+    else if (intent.tipo === 'metrica')  resposta = await harnessResponderMetrica(intent);
+    else {
+      logUnmatchedQuestion(text);
+      resposta = 'Não reconheci essa pergunta. Posso responder sobre volume, tempo de resposta, resolução, CSAT, ranking, comparar equipes/agentes, fila ao vivo, ou filtrar/navegar. Tenta reformular citando uma equipe, agente, período ou métrica.';
+    }
+  } catch (e) {
+    console.error('harness:', e);
+    resposta = 'Deu um erro buscando esse dado. Tenta de novo em alguns segundos.';
+  }
+  harnessAppendMessage('assistant', resposta);
 }
 </script>
 </body>
