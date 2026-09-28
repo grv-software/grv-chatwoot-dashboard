@@ -739,6 +739,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     <div class="inbox-chips" id="chart-inbox-chips"></div>
     <button class="inbox-clear" id="chart-inbox-clear" onclick="clearChartInboxFilter()" style="display:none">✕ Limpar</button>
     <span id="chart-filter-note" style="display:none;font-size:10px;color:var(--accent);background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:4px;padding:2px 7px">Filtro independente do painel</span>
+    <span id="chart-sample-warn" style="display:none;font-size:10px;color:var(--yellow);background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.25);border-radius:4px;padding:2px 7px"></span>
     <select id="chart-period-sel" class="chart-sel" onchange="fetchChartData()">
       <option value="3">Últimos 3 meses</option>
       <option value="6" selected>Últimos 6 meses</option>
@@ -811,7 +812,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
         <span class="metric-trend-up" id="mt-fcr"></span>
       </div>
       <div class="chart-card-hdr" style="margin-top:10px">
-        <div><div class="chart-card-title">Taxa de Resolução</div><div class="chart-card-sub">% de conversas encerradas no período · Quanto maior, melhor · Meta: <span id="sla-fcr-label">85%</span></div></div>
+        <div><div class="chart-card-title">Taxa de Resolução</div><div class="chart-card-sub">Resolvidas ÷ abertas no período · Quanto maior, melhor · Meta: <span id="sla-fcr-label">85%</span> · <span title="A API do Chatwoot conta como &quot;resolvidas no período&quot; qualquer conversa fechada nessas datas, mesmo se foi aberta antes. Por isso o valor pode passar de 100% quando se resolve mais atendimentos antigos do que se abre de novos.">pode passar de 100% ⓘ</span></div></div>
       </div>
       <div class="chart-wrap"><canvas id="chart-fcr"></canvas></div>
       <div class="chart-auth-overlay"><span style="font-size:18px">🔒</span><span style="font-size:12px;color:var(--text3)">Dados históricos requerem permissão de Administrador no Chatwoot<br>(Perfil → Função → Administrador).<br>Os dados ao vivo continuam disponíveis.</span></div>
@@ -878,13 +879,12 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     </div>
     <div class="chart-card">
       <div class="chart-card-hdr">
-        <div><div class="chart-card-title">Status das Conversas</div><div class="chart-card-sub">Distribuição atual das conversas</div></div>
+        <div><div class="chart-card-title">Fila Atual</div><div class="chart-card-sub">Conversas em aberto agora, por status de fila · Taxa de Resolução do período está na seção Velocidade</div></div>
         <span class="badge-live">Ao vivo</span>
       </div>
       <div class="chart-wrap" style="height:200px"><canvas id="chart-status"></canvas></div>
       <div class="chart-legend">
         <span class="chart-legend-item"><span class="chart-legend-dot" style="background:#ef4444"></span>Abertas</span>
-        <span class="chart-legend-item"><span class="chart-legend-dot" style="background:#22c55e"></span>Resolvidas</span>
         <span class="chart-legend-item"><span class="chart-legend-dot" style="background:#eab308"></span>Pendentes</span>
       </div>
     </div>
@@ -1156,9 +1156,10 @@ const INBOX_TEAM_MAP = {
   19: 11, 20: 11         /* comercial cps + nx  → comercial (team 11) */
 };
 const SAG_INBOX_ID = 17;
+const MIN_AMOSTRA_AGENTE = 10;  /* abaixo disso a pontuação do agente é ruído estatístico */
 let timer = null, countdown = REFRESH_SEC;
 let _rawConvs = [];
-let _allInProg = [], _allWaiting = [], _inboxMap = {}, _shownCount = PAGE_SIZE, _totalOpen = 0;
+let _allInProg = [], _allWaiting = [], _inboxMap = {}, _shownCount = PAGE_SIZE, _totalOpen = 0, _totalPending = 0;
 let _pendingConvs = [];
 let _kpiPeriod = 'month';
 let _filters = { waiting: {}, inprog: {} };
@@ -1329,33 +1330,35 @@ function showToast(msg) {
 /* ── PERIOD ── */
 function getPeriod(type) {
   const now = new Date();
-  let s0, ps0, ps1, badgeLabel;
+  let s0, ps0, badgeLabel, prevLabel;
   if (type === 'day') {
     s0  = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     ps0 = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-    ps1 = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 23, 59, 59);
     badgeLabel = `Hoje: ${now.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' })}`;
+    prevLabel  = 'ontem até o mesmo horário';
   } else if (type === 'week') {
     const dow = now.getDay();
     const diffToMon = (dow === 0 ? -6 : 1 - dow);
     s0  = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon);
     ps0 = new Date(s0.getFullYear(), s0.getMonth(), s0.getDate() - 7);
-    ps1 = new Date(s0.getFullYear(), s0.getMonth(), s0.getDate() - 1, 23, 59, 59);
     badgeLabel = 'Esta semana';
+    prevLabel  = 'semana passada até o mesmo ponto';
   } else {
     s0  = new Date(now.getFullYear(), now.getMonth(), 1);
     ps0 = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    ps1 = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
     const lbl = now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
     badgeLabel = `Este mês: ${lbl.charAt(0).toUpperCase() + lbl.slice(1)}`;
+    prevLabel  = 'mês passado até o mesmo dia';
   }
-  return {
-    since:     Math.floor(s0.getTime()  / 1000),
-    until:     Math.floor(now.getTime() / 1000),
-    prevSince: Math.floor(ps0.getTime() / 1000),
-    prevUntil: Math.floor(ps1.getTime() / 1000),
-    badgeLabel
-  };
+  const since     = Math.floor(s0.getTime()  / 1000);
+  const until     = Math.floor(now.getTime() / 1000);
+  const prevSince = Math.floor(ps0.getTime() / 1000);
+  /* O período anterior recebe a MESMA duração já decorrida do atual. Comparar
+     um mês pela metade contra um mês inteiro inflaria toda variação — no dia 2
+     a queda apareceria como ~-93%. O clamp evita invadir o período atual quando
+     o mês anterior é mais curto que o decorrido. */
+  const prevUntil = Math.min(prevSince + (until - since), since - 1);
+  return { since, until, prevSince, prevUntil, badgeLabel, prevLabel };
 }
 
 function setKpiPeriod(type) {
@@ -1571,6 +1574,7 @@ async function fetchAll() {
       );
       pRest.filter(Boolean).forEach(r => { _pendingConvs = _pendingConvs.concat(r.data?.payload || []); });
     }
+    _totalPending = pendingTotal;
 
     _inboxMap  = {};
     (inboxes.payload || []).forEach(i => { _inboxMap[i.id] = i; });
@@ -1634,7 +1638,7 @@ function renderKPIs(s, sp) {
   const rows = [
     {
       name: 'Chats atendidos',
-      desc: 'Quantidade de chats atendidos no período',
+      desc: 'Conversas abertas no período — inclui as que ainda não foram respondidas',
       val:  s.conversations_count,
       prev: sp.conversations_count,
       lb:   false
@@ -1647,17 +1651,21 @@ function renderKPIs(s, sp) {
       lb:   false
     },
     {
-      name: 'Não resolvidos no período',
-      desc: 'Atendimentos que não foram marcados como resolvidos',
-      val:  (s.conversations_count != null && s.resolutions_count != null)
-              ? Math.max(0, s.conversations_count - s.resolutions_count) : null,
-      prev: (sp.conversations_count != null && sp.resolutions_count != null)
-              ? Math.max(0, sp.conversations_count - sp.resolutions_count) : null,
-      lb:   true
+      /* Substitui o antigo "Não resolvidos no período", que era
+         conversas − resolvidas com piso em zero. Como a API conta resolvidas
+         por data de fechamento (incluindo conversas abertas antes), esse valor
+         ficava permanentemente em 0 e afirmava que não havia pendência.
+         Aqui vai a fila real, que é verificável a qualquer momento. */
+      name: 'Em aberto agora',
+      desc: 'Conversas abertas + pendentes neste momento · não depende do período selecionado',
+      val:  (_totalOpen || 0) + (_totalPending || 0),
+      prev: null,
+      lb:   true,
+      live: true
     },
     {
       name: 'Taxa de Resolução',
-      desc: 'Percentual de conversas encerradas como resolvidas no período',
+      desc: 'Resolvidas ÷ abertas no período · passa de 100% quando se fecha mais atendimentos antigos do que se abre de novos',
       val:  (s.conversations_count > 0 && s.resolutions_count != null)
               ? +(s.resolutions_count / s.conversations_count * 100).toFixed(1) : null,
       prev: (sp.conversations_count > 0 && sp.resolutions_count != null)
@@ -1684,20 +1692,28 @@ function renderKPIs(s, sp) {
     }
   ];
 
+  const prevLabel = getPeriod(_kpiPeriod).prevLabel;
+
   document.getElementById('kpi-tbody').innerHTML = rows.map(r => {
     const nd  = r.nd || r.val == null;
     const fmtVal = (v) => r.fmt === 'time' ? fmtSec(v) : r.fmt === 'pct' ? `${v}%` : v.toLocaleString('pt-BR');
     const vd  = nd ? '—' : fmtVal(r.val);
     const pvd = nd ? '—' : (r.prev != null ? `Ant: ${fmtVal(r.prev)}` : '—');
     const showCls = (nd && _showNd) ? ' show-nd' : '';
+    const prevCell = r.live
+      ? `<span class="kpi-prev" style="opacity:.6">ao vivo</span>`
+      : (nd ? '' : `<span title="Comparado com ${esc(prevLabel)}">${esc(pvd)}</span>`);
+    const chgCell = r.live
+      ? '<span class="kpi-chg nd">—</span>'
+      : (nd ? '<span class="kpi-chg nd">N/D</span>' : chg(r.val, r.prev, r.lb));
     return `<tr${nd ? ` class="dim${showCls}"` : ''}>
       <td style="min-width:220px">
         <div class="kpi-name">${esc(r.name)}</div>
         <div class="kpi-desc">${esc(r.desc)}</div>
       </td>
       <td class="kpi-val${nd ? ' dim' : ''}" style="width:130px">${esc(vd)}</td>
-      <td class="kpi-prev" style="width:110px">${nd ? '' : esc(pvd)}</td>
-      <td style="width:80px;text-align:right">${nd ? '<span class="kpi-chg nd">N/D</span>' : chg(r.val, r.prev, r.lb)}</td>
+      <td class="kpi-prev" style="width:110px">${prevCell}</td>
+      <td style="width:80px;text-align:right">${chgCell}</td>
     </tr>`;
   }).join('');
 }
@@ -2467,6 +2483,7 @@ function esc(s) {
 
 /* ── CHARTS ── */
 let _chartData      = [];
+let _chartTrendBase = null;   /* mesmo trecho decorrido do mês anterior — baseline das setas */
 let _charts         = {};
 let _ibVisible      = false;
 let _chartsDirty    = false;  /* true → renderCharts precisa rodar quando a aba ficar visível */
@@ -2489,6 +2506,9 @@ function destroyChart(id) {
 
 function makeChartOpts(isHoriz, yFmt) {
   const c = chartColors();
+  const xTicks = { color: c.labels, font: { size: 11 } };
+  const yTicks = { color: c.labels, font: { size: 11 } };
+  if (yFmt) { if (isHoriz) xTicks.callback = yFmt; else yTicks.callback = yFmt; }
   return {
     responsive: true, maintainAspectRatio: false,
     indexAxis: isHoriz ? 'y' : 'x',
@@ -2497,8 +2517,11 @@ function makeChartOpts(isHoriz, yFmt) {
       tooltip: { backgroundColor: c.tooltipBg, titleColor: c.labels, bodyColor: c.labels, borderColor: c.grid, borderWidth: 1 }
     },
     scales: {
-      x: { grid: { color: c.grid }, ticks: { color: c.labels, font: { size: 11 }, callback: (isHoriz && yFmt) ? yFmt : undefined } },
-      y: { grid: { color: c.grid }, ticks: { color: c.labels, font: { size: 11 }, callback: (!isHoriz && yFmt) ? yFmt : undefined } }
+      /* Só define `callback` quando há formatador. Passar `undefined` explícito
+         derruba o formatador padrão do Chart.js e o eixo de categoria passa a
+         imprimir o índice cru (0,1,2…) no lugar do rótulo do mês. */
+      x: { grid: { color: c.grid }, ticks: xTicks },
+      y: { grid: { color: c.grid }, ticks: yTicks }
     }
   };
 }
@@ -2516,8 +2539,16 @@ async function fetchChartData() {
     const last = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
     const lbl  = d.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }).replace('.', '');
     const full = d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-    periods.push({ since: Math.floor(d.getTime() / 1000), until: Math.floor(last.getTime() / 1000), monthLabel: lbl, fullLabel: full });
+    /* O mês corrente não pode pedir dados até o fim do mês (data futura) */
+    const end  = Math.floor(Math.min(last.getTime(), now.getTime()) / 1000);
+    periods.push({ since: Math.floor(d.getTime() / 1000), until: end, monthLabel: lbl, fullLabel: full });
   }
+  /* Baseline das setas de tendência: mesmo trecho decorrido do mês anterior.
+     Sem isso, o mês pela metade é comparado com um mês inteiro. */
+  const cur       = periods[periods.length - 1];
+  const prevStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const prevSince = Math.floor(prevStart.getTime() / 1000);
+  const trendBase = { since: prevSince, until: Math.min(prevSince + (cur.until - cur.since), cur.since - 1) };
   const EMPTY_MONTH = () => ({ conversations_count: 0, resolutions_count: 0, avg_resolution_time: null, avg_first_response_time: null, incoming_messages_count: 0, outgoing_messages_count: 0 });
   const fetchMonth = async ({ since, until }) => {
     /* Se filtro de equipe ativo, expande para inboxes e agrega (cobertura 100%) */
@@ -2543,8 +2574,12 @@ async function fetchChartData() {
     return aggregateSummaries(res);
   };
   try {
-    const results = await Promise.all(periods.map(fetchMonth));
+    const [results, baseline] = await Promise.all([
+      Promise.all(periods.map(fetchMonth)),
+      fetchMonth(trendBase).catch(() => null)
+    ]);
     _chartData = periods.map((p, i) => ({ ...p, ...results[i] }));
+    _chartTrendBase = baseline;
     _teamCompData = await fetchTeamComparison(periods).catch(() => null);
     renderCharts();
   } catch (err) { console.error('fetchChartData:', err); }
@@ -2882,16 +2917,20 @@ function renderAgentPerf() {
               : agentBadge(100 - fcr, Math.round(fcr) + '%', 100 - _SLA_FCR, '%', true,
                   fcr >= _SLA_FCR ? `${Math.round(fcr - _SLA_FCR)}pp acima da meta (${_SLA_FCR}%) ✓` : `${Math.round(_SLA_FCR - fcr)}pp abaixo da meta (${_SLA_FCR}%) ✗`);
             const missing = (tmaH == null ? 1 : 0) + (tmrM == null ? 1 : 0);
-            const scoreTip = sc == null ? '' : missing > 0
+            /* Uma nota apoiada em poucas conversas é ruído — sinaliza para não
+               ser lida como o desempenho de quem tem centenas de atendimentos. */
+            const lowSample = !nd && s.conversations_count < MIN_AMOSTRA_AGENTE;
+            const scoreTip = sc == null ? '' : (missing > 0
               ? `${sc}/100 · ${4 - missing}/4 métricas${tmaH == null ? ' · sem TMA' : ''}${tmrM == null ? ' · sem TMR' : ''}`
-              : `Pontuação: ${sc}/100`;
+              : `Pontuação: ${sc}/100`)
+              + (lowSample ? ` · amostra pequena (${s.conversations_count} conversa${s.conversations_count === 1 ? '' : 's'}) — pouco representativa` : '');
             return `<tr class="agent-row" onclick="openAgentModal(${e.agent.id})">
               <td style="font-weight:600">${esc(e.agent.name)}</td>
               <td>${nd ? '—' : s.conversations_count.toLocaleString('pt-BR')}</td>
               <td>${nd ? '<span class="agent-badge badge-na">—</span>' : agentBadge(tmaH, fmtSec(s.avg_resolution_time), _SLA_TMA, 'h', true)}</td>
               <td>${nd ? '<span class="agent-badge badge-na">—</span>' : agentBadge(tmrM, fmtSec(s.avg_first_response_time), _SLA_TMR, 'min', true)}</td>
               <td>${fcrBadge}</td>
-              <td>${sc == null ? '<span class="agent-badge badge-na">—</span>' : `<span class="score-badge ${scoreCls(sc)}" title="${scoreTip}">${sc}${missing > 0 ? `<sup style="font-size:9px;opacity:.7">${4-missing}/4</sup>` : ''}</span>`}</td>
+              <td>${sc == null ? '<span class="agent-badge badge-na">—</span>' : `<span class="score-badge ${scoreCls(sc)}"${lowSample ? ' style="opacity:.45"' : ''} title="${scoreTip}">${sc}${missing > 0 ? `<sup style="font-size:9px;opacity:.7">${4-missing}/4</sup>` : ''}${lowSample ? '<sup style="font-size:9px">⚠</sup>' : ''}</span>`}</td>
               <td><button class="ver-perfil-btn" onclick="event.stopPropagation();openAgentModal(${e.agent.id})">Ver perfil →</button></td>
             </tr>`;
           }).join('')}
@@ -3347,6 +3386,25 @@ function renderCharts() {
   const chartConvs = (_chartTeamFilter && _chartTeamFilter.size > 0)
     ? _rawConvs.filter(cv => _chartTeamFilter.has(cv.meta?.team?.id))
     : _rawConvs;
+  const chartPending = (_chartTeamFilter && _chartTeamFilter.size > 0)
+    ? _pendingConvs.filter(cv => _chartTeamFilter.has(cv.meta?.team?.id))
+    : _pendingConvs;
+
+  const sampleWarnEl = document.getElementById('chart-sample-warn');
+  if (sampleWarnEl) {
+    const openTruncated    = _totalOpen    > _rawConvs.length;
+    const pendingTruncated = _totalPending > _pendingConvs.length;
+    if (openTruncated || pendingTruncated) {
+      const parts = [];
+      if (openTruncated)    parts.push(`${_rawConvs.length} de ${_totalOpen} abertas`);
+      if (pendingTruncated) parts.push(`${_pendingConvs.length} de ${_totalPending} pendentes`);
+      sampleWarnEl.textContent = `⚠ Amostra parcial nos cards "Ao vivo" (canal, fila, pico, carga por agente): ${parts.join(' · ')}`;
+      sampleWarnEl.style.display = '';
+    } else {
+      sampleWarnEl.textContent = '';
+      sampleWarnEl.style.display = 'none';
+    }
+  }
 
   function setMetric(id, val) {
     const el = document.getElementById(id);
@@ -3363,8 +3421,13 @@ function renderCharts() {
     const up   = pct > 0;
     const good = invertGood ? !up : up;
     el.className   = good ? 'metric-trend-up' : 'metric-trend-dn';
-    el.textContent = `${up ? '▲' : '▼'} ${Math.abs(pct)}% vs ant.`;
+    el.textContent = `${up ? '▲' : '▼'} ${Math.abs(pct)}% vs mês passado`;
+    el.title       = 'Comparado com o mesmo trecho decorrido do mês passado (não com o mês inteiro)';
   }
+
+  /* Baseline das setas: mesmo trecho decorrido do mês anterior. Cai para o mês
+     anterior completo só se a chamada do baseline tiver falhado. */
+  const trendPrev = field => _chartTrendBase ? _chartTrendBase[field] : _chartData[n - 2]?.[field];
 
   function slaLine(value, label, color) {
     return { type: 'line', label, data: new Array(n).fill(value),
@@ -3384,7 +3447,7 @@ function renderCharts() {
   destroyChart('vol');
   {
     const last = _chartData[n - 1]?.conversations_count;
-    const prev = _chartData[n - 2]?.conversations_count;
+    const prev = trendPrev('conversations_count');
     setMetric('mv-vol', last != null ? last.toLocaleString('pt-BR') : '—');
     metricTrend('mt-vol', last, prev, false);
     const canvas = document.getElementById('chart-vol');
@@ -3407,7 +3470,7 @@ function renderCharts() {
   {
     const chanMap = {};
     chartConvs.forEach(cv => {
-      const ch = originOf(cv.channel) || cv.channel || 'Outro';
+      const ch = originOf((_inboxMap[cv.inbox_id] || {}).channel_type);
       chanMap[ch] = (chanMap[ch] || 0) + 1;
     });
     const entries = Object.entries(chanMap).sort((a, b) => b[1] - a[1]);
@@ -3436,7 +3499,7 @@ function renderCharts() {
   destroyChart('tma');
   {
     const last = _chartData[n - 1]?.avg_resolution_time;
-    const prev = _chartData[n - 2]?.avg_resolution_time;
+    const prev = trendPrev('avg_resolution_time');
     setMetric('mv-tma', fmtSec(last));
     metricTrend('mt-tma', last, prev, true);
     const slaEl = document.getElementById('sla-tma-label');
@@ -3464,7 +3527,7 @@ function renderCharts() {
   destroyChart('tmr');
   {
     const last   = _chartData[n - 1]?.avg_first_response_time;
-    const prev   = _chartData[n - 2]?.avg_first_response_time;
+    const prev   = trendPrev('avg_first_response_time');
     const hasTmr = _chartData.some(d => d.avg_first_response_time != null && d.avg_first_response_time > 0);
     const card   = document.getElementById('chart-tmr-card');
     if (card) card.style.display = hasTmr ? '' : 'none';
@@ -3500,7 +3563,9 @@ function renderCharts() {
       const conv = d.conversations_count || 0, res = d.resolutions_count || 0;
       return conv > 0 ? Math.round((res / conv) * 100) : null;
     });
-    const last = fcrVals[n - 1], prev = fcrVals[n - 2];
+    const last = fcrVals[n - 1];
+    const baseConv = trendPrev('conversations_count') || 0, baseRes = trendPrev('resolutions_count') || 0;
+    const prev = baseConv > 0 ? Math.round((baseRes / baseConv) * 100) : null;
     setMetric('mv-fcr', last != null ? `${last}%` : '—');
     metricTrend('mt-fcr', last, prev, false);
     const slaEl = document.getElementById('sla-fcr-label');
@@ -3530,7 +3595,10 @@ function renderCharts() {
       const msgs = (d.incoming_messages_count || 0) + (d.outgoing_messages_count || 0);
       return conv > 0 ? +(msgs / conv).toFixed(1) : null;
     });
-    const last = msgVals[n - 1], prev = msgVals[n - 2];
+    const last = msgVals[n - 1];
+    const baseConvM = trendPrev('conversations_count') || 0;
+    const baseMsgs  = (trendPrev('incoming_messages_count') || 0) + (trendPrev('outgoing_messages_count') || 0);
+    const prev = baseConvM > 0 ? +(baseMsgs / baseConvM).toFixed(1) : null;
     setMetric('mv-msg', last != null ? last.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '—');
     metricTrend('mt-msg', last, prev, true);
     const slaEl = document.getElementById('sla-msg-label');
@@ -3708,16 +3776,16 @@ function renderCharts() {
     });
   }
 
-  /* ── 10. STATUS DAS CONVERSAS ── */
+  /* ── 10. STATUS DAS CONVERSAS (fila ao vivo — abertas vs pendentes) ── */
   destroyChart('status');
   {
-    const sc = { open: 0, resolved: 0, pending: 0 };
-    chartConvs.forEach(cv => { if (cv.status in sc) sc[cv.status]++; });
+    const openCount    = chartConvs.length;
+    const pendingCount = chartPending.length;
     _charts.status = new Chart(document.getElementById('chart-status'), {
       type: 'doughnut',
       data: {
-        labels: ['Abertas', 'Resolvidas', 'Pendentes'],
-        datasets: [{ data: [sc.open, sc.resolved, sc.pending], backgroundColor: ['#ef4444','#22c55e','#eab308'], borderWidth: 2, borderColor: c.tooltipBg }]
+        labels: ['Abertas', 'Pendentes'],
+        datasets: [{ data: [openCount, pendingCount], backgroundColor: ['#ef4444','#eab308'], borderWidth: 2, borderColor: c.tooltipBg }]
       },
       options: {
         responsive: true, maintainAspectRatio: false, cutout: '65%',
