@@ -4254,9 +4254,9 @@ const HARNESS_PERIODOS_RELATIVOS = [
 const HARNESS_METRICAS = Object.entries({
   volume:    ['volume', 'atendimentos', 'conversas', 'chats'],
   resolucao: ['resolvid', 'resolucao', 'taxa de resolucao', 'taxa'],
-  tmr:       ['1a resposta', 'primeira resposta', 'tempo de resposta', 'tmr'],
+  tmr:       ['1a resposta', 'primeira resposta', 'tempo de resposta', 'tmr', 'meta de resposta'],
   tma:       ['tempo de atendimento', 'tempo de resolucao', 'tma', 'tempo pra resolver', 'tempo para resolver'],
-  csat:      ['csat', 'satisfacao', 'avaliac', 'nota do cliente'],
+  csat:      ['csat', 'satisfacao', 'avaliac', 'nota do cliente', 'estrela'],
   score:     ['pontuacao', 'score', 'nota geral'],
   mensagens: ['mensagens por conversa', 'mensagens']
 }).map(([key, aliases]) => ({ key, label: key, aliases }));
@@ -4264,7 +4264,7 @@ const HARNESS_METRICAS = Object.entries({
 const HARNESS_FILA = Object.entries({
   abertas:       ['abertas agora', 'em aberto agora', 'conversas abertas'],
   pendentes:     ['pendentes', 'pendente'],
-  semresposta:   ['sem resposta', 'nao atendidas', 'sem retorno'],
+  semresposta:   ['sem resposta', 'nao atendidas', 'sem retorno', 'esperando resposta', 'aguardando resposta'],
   naoatribuidas: ['nao atribuida', 'sem atendente', 'sem agente atribuido'],
   online:        ['online agora', 'agentes online', 'quem esta online']
 }).map(([key, aliases]) => ({ key, label: key, aliases }));
@@ -4307,7 +4307,7 @@ function harnessExtractEntities(rawMessage) {
 const HARNESS_ACOES = {
   navegar: ['vai pra', 'va para', 'abre a aba', 'muda pra aba', 'mostra a aba'],
   filtrar: ['mostra so', 'mostra apenas', 'filtra pelo', 'filtra pela', 'filtra por',
-            'tira o filtro', 'limpa filtro', 'limpa os filtros', 'volta pra todas', 'remove o filtro'],
+            'tira o filtro', 'limpa filtro', 'limpa os filtros', 'limpa todos os filtros', 'volta pra todas', 'remove o filtro'],
   resumir: ['resumo geral', 'resumo', 'como estamos', 'o que mudou']
 };
 
@@ -4393,7 +4393,7 @@ function harnessResolveIntent(entities) {
   }
 
   if (acao === 'filtrar') {
-    const limpar = /tira o filtro|limpa filtro|limpa os filtros|volta pra todas|remove o filtro/.test(norm);
+    const limpar = /tira o filtro|limpa filtro|limpa os filtros|limpa todos os filtros|volta pra todas|remove o filtro/.test(norm);
     return { tipo: 'filtrar', limpar, equipe: teams[0] || null, agente: agents[0] || null };
   }
 
