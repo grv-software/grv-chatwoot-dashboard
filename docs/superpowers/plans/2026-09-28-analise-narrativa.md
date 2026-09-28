@@ -230,11 +230,16 @@ Object.keys(_charts)
 ```
 Esperado: apenas `vol`, `tma`, `tmr`, `fcr`, `tmr-team`, `teams`. **Não pode** conter `channel`, `msg`, `peak`, `status`, `agents`.
 
-E confirmar console limpo:
+E confirmar a contagem de canvas **dentro da aba** — o seletor global pega 7, porque o modal da aba
+Agentes tem um canvas próprio (`am-chart`) fora de `#graficos-page`:
 ```js
-document.querySelectorAll('canvas').length
+document.querySelectorAll('#graficos-page canvas').length
 ```
 Esperado: 6.
+
+Aproveite para remover o `const chartConvs` do topo de `renderCharts()` — ele filtrava conversas
+abertas por equipe e só servia aos cards de canal, fila, pico e carga por agente. Sem eles, fica
+órfão.
 
 - [ ] **Step 9: Commit**
 
@@ -329,7 +334,55 @@ Logo após o fechamento do `<div id="chart-loading">…</div>`, inserir:
   </div>
 ```
 
-- [ ] **Step 4: Escrever `renderAnaliseHero()`**
+- [ ] **Step 4: Tirar `metricTrend()` de dentro de `renderCharts()`**
+
+`metricTrend` hoje é uma function declaration **interna** de `renderCharts()`. `renderAnaliseHero`,
+que fica no escopo de topo, não a enxergaria — daria `ReferenceError: metricTrend is not defined`
+e a exceção abortaria `renderCharts()` inteiro, deixando a aba sem nenhum gráfico.
+
+A função é pura (usa só os parâmetros e `document`), então subir de escopo é seguro. Recortar este
+bloco de dentro de `renderCharts()`:
+
+```js
+  function metricTrend(elId, current, previous, invertGood) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.className = '';
+    if (current == null || previous == null || previous === 0) { el.textContent = ''; return; }
+    const pct = Math.round(((current - previous) / previous) * 100);
+    if (pct === 0) { el.textContent = ''; return; }
+    const up   = pct > 0;
+    const good = invertGood ? !up : up;
+    el.className   = good ? 'metric-trend-up' : 'metric-trend-dn';
+    el.textContent = `${up ? '▲' : '▼'} ${Math.abs(pct)}% vs mês passado`;
+    el.title       = 'Comparado com o mesmo trecho decorrido do mês passado (não com o mês inteiro)';
+  }
+```
+
+e colá-lo no escopo de topo, **antes** de `function renderCharts() {`, sem indentação:
+
+```js
+/* Seta de tendência de um número contra o mesmo trecho do mês anterior.
+   Vive no topo porque a faixa de abertura também a usa. */
+function metricTrend(elId, current, previous, invertGood) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.className = '';
+  if (current == null || previous == null || previous === 0) { el.textContent = ''; return; }
+  const pct = Math.round(((current - previous) / previous) * 100);
+  if (pct === 0) { el.textContent = ''; return; }
+  const up   = pct > 0;
+  const good = invertGood ? !up : up;
+  el.className   = good ? 'metric-trend-up' : 'metric-trend-dn';
+  el.textContent = `${up ? '▲' : '▼'} ${Math.abs(pct)}% vs mês passado`;
+  el.title       = 'Comparado com o mesmo trecho decorrido do mês passado (não com o mês inteiro)';
+}
+```
+
+As quatro chamadas existentes dentro de `renderCharts()` (`mt-vol`, `mt-tma`, `mt-tmr`, `mt-fcr`)
+continuam funcionando sem alteração.
+
+- [ ] **Step 5: Escrever `renderAnaliseHero()`**
 
 Inserir **antes** de `function renderCharts() {`:
 
@@ -368,7 +421,7 @@ function renderAnaliseHero(n, trendPrev) {
 }
 ```
 
-- [ ] **Step 5: Chamar a função em `renderCharts()`**
+- [ ] **Step 6: Chamar a função em `renderCharts()`**
 
 Localizar, dentro de `renderCharts()`, a linha:
 ```js
@@ -379,7 +432,7 @@ e inserir **logo depois** dela:
   renderAnaliseHero(n, trendPrev);
 ```
 
-- [ ] **Step 6: Verificar sintaxe**
+- [ ] **Step 7: Verificar sintaxe**
 
 ```bash
 node -e "const fs=require('fs');const m=fs.readFileSync('index.html','utf8').match(/<script>([\s\S]*)<\/script>/);fs.writeFileSync(process.env.TMP+'/c.js',m[1]);"
@@ -387,7 +440,7 @@ node --check "$TMP/c.js" && echo OK
 ```
 Esperado: `OK`.
 
-- [ ] **Step 7: Dirigir e conferir contra a API**
+- [ ] **Step 8: Dirigir e conferir contra a API**
 
 Na página, depois dos charts carregarem:
 ```js
@@ -406,7 +459,7 @@ Esperado: `periodo` no formato `Setembro de 2026 · comparado com 01/ago a 28/ag
 `entraram` e `resolvidos` batendo exatamente com `apiEntraram`/`apiResolvidos` já formatados;
 `sub` no formato `NN% do que entrou`; `tmr` como `45min` ou `1hr 20min`; `baseTemJanela:true`.
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add index.html
