@@ -810,8 +810,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     </div>
   </div>
 
-  <!-- ── VOLUME ── -->
-  <div class="section-divider"><span class="section-divider-label">Volume</span></div>
+  <!-- ── 1 · QUANTO ABSORVEMOS ── -->
+  <div class="section-divider"><span class="section-divider-label">1 · Quanto absorvemos</span></div>
   <div class="chart-grid-2">
     <div class="chart-card">
       <div class="metric-card">
@@ -821,44 +821,44 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
       <div class="chart-card-hdr" style="margin-top:10px">
         <div><div class="chart-card-title">Volume de Atendimentos</div><div class="chart-card-sub">Total mensal no período selecionado</div></div>
       </div>
-      <div class="chart-wrap"><canvas id="chart-vol"></canvas></div>
+      <div class="chart-wrap"><canvas id="chart-vol" aria-label="Gráfico de barras: atendimentos abertos por mês no período selecionado"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="metric-card">
+        <div><div class="metric-value" id="mv-fcr">—</div><div class="metric-label">resolvidos este mês</div></div>
+        <span class="metric-trend-up" id="mt-fcr"></span>
+      </div>
+      <div class="chart-card-hdr" style="margin-top:10px">
+        <div><div class="chart-card-title">Resolvidos no período</div><div class="chart-card-sub">Atendimentos encerrados a cada mês · Meta de taxa: <span id="sla-fcr-label">85%</span> <span title="A API do Chatwoot conta como resolvida no período qualquer conversa fechada nessas datas, mesmo se foi aberta antes. Por isso a taxa pode passar de 100%.">ⓘ</span></div></div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-fcr" aria-label="Gráfico de barras: taxa de resolução por mês, comparada com a meta"></canvas></div>
+      <div class="chart-auth-overlay"><span style="font-size:18px">🔒</span><span style="font-size:12px;color:var(--text3)">Dados históricos requerem permissão de Administrador no Chatwoot<br>(Perfil → Função → Administrador).<br>Os dados ao vivo continuam disponíveis.</span></div>
     </div>
   </div>
 
-  <!-- ── VELOCIDADE ── -->
-  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">Velocidade</span></div>
+  <!-- ── 2 · COM QUE VELOCIDADE ── -->
+  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">2 · Com que velocidade</span></div>
   <div class="chart-grid-2">
-    <div class="chart-card">
-      <div class="metric-card">
-        <div><div class="metric-value" id="mv-tma">—</div><div class="metric-label">tempo médio de resolução este mês</div></div>
-        <span class="metric-trend-up" id="mt-tma"></span>
-      </div>
-      <div class="chart-card-hdr" style="margin-top:10px">
-        <div><div class="chart-card-title">Quanto tempo leva pra resolver? (TMA)</div><div class="chart-card-sub">Quanto menor, melhor · Meta SLA: <span id="sla-tma-label">8hr</span></div></div>
-      </div>
-      <div class="chart-wrap"><canvas id="chart-tma"></canvas></div>
-      <div class="chart-auth-overlay"><span style="font-size:18px">🔒</span><span style="font-size:12px;color:var(--text3)">Dados históricos requerem permissão de Administrador no Chatwoot<br>(Perfil → Função → Administrador).<br>Os dados ao vivo continuam disponíveis.</span></div>
-    </div>
     <div class="chart-card" id="chart-tmr-card">
       <div class="metric-card">
         <div><div class="metric-value" id="mv-tmr">—</div><div class="metric-label">tempo médio de 1ª resposta este mês</div></div>
         <span class="metric-trend-up" id="mt-tmr"></span>
       </div>
       <div class="chart-card-hdr" style="margin-top:10px">
-        <div><div class="chart-card-title">Velocidade de resposta (TMR)</div><div class="chart-card-sub">Quanto menor, melhor · Meta SLA: <span id="sla-tmr-label">30min</span></div></div>
+        <div><div class="chart-card-title">Até a primeira resposta</div><div class="chart-card-sub">Quanto menor, melhor · Meta SLA: <span id="sla-tmr-label">30min</span></div></div>
       </div>
-      <div class="chart-wrap"><canvas id="chart-tmr"></canvas></div>
+      <div class="chart-wrap"><canvas id="chart-tmr" aria-label="Gráfico de linha: tempo médio até a primeira resposta por mês, comparado com a meta"></canvas></div>
       <div class="chart-auth-overlay"><span style="font-size:18px">🔒</span><span style="font-size:12px;color:var(--text3)">Dados históricos requerem permissão de Administrador no Chatwoot<br>(Perfil → Função → Administrador).<br>Os dados ao vivo continuam disponíveis.</span></div>
     </div>
     <div class="chart-card">
       <div class="metric-card">
-        <div><div class="metric-value" id="mv-fcr">—</div><div class="metric-label">resolvidas este mês</div></div>
-        <span class="metric-trend-up" id="mt-fcr"></span>
+        <div><div class="metric-value" id="mv-tma">—</div><div class="metric-label">tempo médio de resolução este mês</div></div>
+        <span class="metric-trend-up" id="mt-tma"></span>
       </div>
       <div class="chart-card-hdr" style="margin-top:10px">
-        <div><div class="chart-card-title">Taxa de Resolução</div><div class="chart-card-sub">Resolvidas ÷ abertas no período · Quanto maior, melhor · Meta: <span id="sla-fcr-label">85%</span> · <span title="A API do Chatwoot conta como &quot;resolvidas no período&quot; qualquer conversa fechada nessas datas, mesmo se foi aberta antes. Por isso o valor pode passar de 100% quando se resolve mais atendimentos antigos do que se abre de novos.">pode passar de 100% ⓘ</span></div></div>
+        <div><div class="chart-card-title">Até resolver</div><div class="chart-card-sub">Quanto menor, melhor · Meta: <span id="sla-tma-label">8hr</span><br><span style="color:var(--yellow)">Média sensível a atendimentos antigos encerrados em lote — saltos grandes entre períodos costumam ser limpeza de fila, não queda de desempenho.</span></div></div>
       </div>
-      <div class="chart-wrap"><canvas id="chart-fcr"></canvas></div>
+      <div class="chart-wrap"><canvas id="chart-tma" aria-label="Gráfico de linha: tempo médio até resolver por mês, comparado com a meta"></canvas></div>
       <div class="chart-auth-overlay"><span style="font-size:18px">🔒</span><span style="font-size:12px;color:var(--text3)">Dados históricos requerem permissão de Administrador no Chatwoot<br>(Perfil → Função → Administrador).<br>Os dados ao vivo continuam disponíveis.</span></div>
     </div>
   </div>
@@ -3586,11 +3586,9 @@ function renderCharts() {
       const conv = d.conversations_count || 0, res = d.resolutions_count || 0;
       return conv > 0 ? Math.round((res / conv) * 100) : null;
     });
-    const last = fcrVals[n - 1];
-    const baseConv = trendPrev('conversations_count') || 0, baseRes = trendPrev('resolutions_count') || 0;
-    const prev = baseConv > 0 ? Math.round((baseRes / baseConv) * 100) : null;
-    setMetric('mv-fcr', last != null ? `${last}%` : '—');
-    metricTrend('mt-fcr', last, prev, false);
+    const resolvAbs = _chartData[n - 1]?.resolutions_count;
+    setMetric('mv-fcr', resolvAbs != null ? resolvAbs.toLocaleString('pt-BR') : '—');
+    metricTrend('mt-fcr', resolvAbs, trendPrev('resolutions_count'), false);
     const slaEl = document.getElementById('sla-fcr-label');
     if (slaEl) slaEl.textContent = `${_SLA_FCR}%`;
     const fcrColors = fcrVals.map(v => v == null ? '#374151' : v >= 90 ? '#22c55e' : v >= 70 ? '#eab308' : '#ef4444');
