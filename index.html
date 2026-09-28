@@ -766,7 +766,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     <div class="inbox-chips" id="chart-inbox-chips"></div>
     <button class="inbox-clear" id="chart-inbox-clear" onclick="clearChartInboxFilter()" style="display:none">✕ Limpar</button>
     <span id="chart-filter-note" style="display:none;font-size:10px;color:var(--accent);background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:4px;padding:2px 7px">Filtro independente do painel</span>
-    <span id="chart-sample-warn" style="display:none;font-size:10px;color:var(--yellow);background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.25);border-radius:4px;padding:2px 7px"></span>
     <select id="chart-period-sel" class="chart-sel" onchange="fetchChartData()">
       <option value="3">Últimos 3 meses</option>
       <option value="6" selected>Últimos 6 meses</option>
@@ -795,16 +794,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
         <div><div class="chart-card-title">Volume de Atendimentos</div><div class="chart-card-sub">Total mensal no período selecionado</div></div>
       </div>
       <div class="chart-wrap"><canvas id="chart-vol"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="metric-card">
-        <div><div class="metric-value" id="mv-channel" style="font-size:17px;word-break:break-word">—</div><div class="metric-label">canal com maior volume agora</div></div>
-        <span class="badge-live">Ao vivo</span>
-      </div>
-      <div class="chart-card-hdr" style="margin-top:10px">
-        <div><div class="chart-card-title">De onde vêm os atendimentos?</div><div class="chart-card-sub">Distribuição por canal · conversas abertas agora (não representa o período histórico)</div></div>
-      </div>
-      <div class="chart-wrap"><canvas id="chart-channel"></canvas></div>
     </div>
   </div>
 
@@ -844,17 +833,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
       <div class="chart-wrap"><canvas id="chart-fcr"></canvas></div>
       <div class="chart-auth-overlay"><span style="font-size:18px">🔒</span><span style="font-size:12px;color:var(--text3)">Dados históricos requerem permissão de Administrador no Chatwoot<br>(Perfil → Função → Administrador).<br>Os dados ao vivo continuam disponíveis.</span></div>
     </div>
-    <div class="chart-card">
-      <div class="metric-card">
-        <div><div class="metric-value" id="mv-msg">—</div><div class="metric-label">mensagens por conversa este mês</div></div>
-        <span class="metric-trend-up" id="mt-msg"></span>
-      </div>
-      <div class="chart-card-hdr" style="margin-top:10px">
-        <div><div class="chart-card-title">Eficiência do Atendimento</div><div class="chart-card-sub">Média de mensagens trocadas por atendimento · Quanto menor, melhor · Meta: <span id="sla-msg-label">10</span> mensagens</div></div>
-      </div>
-      <div class="chart-wrap"><canvas id="chart-msg"></canvas></div>
-      <div class="chart-auth-overlay"><span style="font-size:18px">🔒</span><span style="font-size:12px;color:var(--text3)">Dados históricos requerem permissão de Administrador no Chatwoot<br>(Perfil → Função → Administrador).<br>Os dados ao vivo continuam disponíveis.</span></div>
-    </div>
   </div>
   <!-- TMR por equipe (full) -->
   <div class="chart-card chart-full" style="margin-top:12px" id="tmr-team-card">
@@ -884,38 +862,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     <div id="chart-teams-partial" style="display:none;font-size:11px;color:var(--yellow);margin-top:6px;padding:4px 0">⚠ Dados parciais — algumas equipes podem não ter retornado resultados completos</div>
   </div>
 
-  <!-- ── AGENTES ── -->
-  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">Agentes</span></div>
-  <div class="chart-card chart-full">
-    <div class="chart-card-hdr">
-      <div><div class="chart-card-title">Carga por agente agora</div><div class="chart-card-sub">Conversas abertas por atendente</div></div>
-      <span class="badge-live">Ao vivo</span>
-    </div>
-    <div class="chart-wrap" style="height:280px"><canvas id="chart-agents"></canvas></div>
-  </div>
-
-  <!-- ── OPERACIONAL ── -->
-  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">Operacional</span></div>
-  <div class="chart-grid-2">
-    <div class="chart-card">
-      <div class="chart-card-hdr">
-        <div><div class="chart-card-title">Pico de Horário</div><div class="chart-card-sub">Horários com mais atendimentos agora</div></div>
-        <span class="badge-live">Ao vivo</span>
-      </div>
-      <div class="chart-wrap"><canvas id="chart-peak"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-card-hdr">
-        <div><div class="chart-card-title">Fila Atual</div><div class="chart-card-sub">Conversas em aberto agora, por status de fila · Taxa de Resolução do período está na seção Velocidade</div></div>
-        <span class="badge-live">Ao vivo</span>
-      </div>
-      <div class="chart-wrap" style="height:200px"><canvas id="chart-status"></canvas></div>
-      <div class="chart-legend">
-        <span class="chart-legend-item"><span class="chart-legend-dot" style="background:#ef4444"></span>Abertas</span>
-        <span class="chart-legend-item"><span class="chart-legend-dot" style="background:#eab308"></span>Pendentes</span>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- AGENTES PAGE -->
@@ -3451,26 +3397,6 @@ function renderCharts() {
   const chartConvs = (_chartTeamFilter && _chartTeamFilter.size > 0)
     ? _rawConvs.filter(cv => convMatchesFilter(cv, _chartTeamFilter))
     : _rawConvs;
-  const chartPending = (_chartTeamFilter && _chartTeamFilter.size > 0)
-    ? _pendingConvs.filter(cv => convMatchesFilter(cv, _chartTeamFilter))
-    : _pendingConvs;
-
-  const sampleWarnEl = document.getElementById('chart-sample-warn');
-  if (sampleWarnEl) {
-    const openTruncated    = _totalOpen    > _rawConvs.length;
-    const pendingTruncated = _totalPending > _pendingConvs.length;
-    if (openTruncated || pendingTruncated) {
-      const parts = [];
-      if (openTruncated)    parts.push(`${_rawConvs.length} de ${_totalOpen} abertas`);
-      if (pendingTruncated) parts.push(`${_pendingConvs.length} de ${_totalPending} pendentes`);
-      sampleWarnEl.textContent = `⚠ Amostra parcial nos cards "Ao vivo" (canal, fila, pico, carga por agente): ${parts.join(' · ')}`;
-      sampleWarnEl.style.display = '';
-    } else {
-      sampleWarnEl.textContent = '';
-      sampleWarnEl.style.display = 'none';
-    }
-  }
-
   function setMetric(id, val) {
     const el = document.getElementById(id);
     if (el) el.textContent = val ?? '—';
@@ -3527,36 +3453,6 @@ function renderCharts() {
       type: 'bar',
       data: { labels, datasets: [{ data: _chartData.map(d => d.conversations_count || 0), backgroundColor: grad, borderRadius: 4 }] },
       options: opts
-    });
-  }
-
-  /* ── 2. VOLUME POR CANAL ── */
-  destroyChart('channel');
-  {
-    const chanMap = {};
-    chartConvs.forEach(cv => {
-      const ch = originOf((_inboxMap[cv.inbox_id] || {}).channel_type);
-      chanMap[ch] = (chanMap[ch] || 0) + 1;
-    });
-    const entries = Object.entries(chanMap).sort((a, b) => b[1] - a[1]);
-    setMetric('mv-channel', entries[0]?.[0] || '—');
-    const COLORS = ['#3b82f6','#8b5cf6','#14b8a6','#f97316','#ef4444','#eab308','#22c55e','#ec4899'];
-    const total  = chartConvs.length || 1;
-    _charts.channel = new Chart(document.getElementById('chart-channel'), {
-      type: 'doughnut',
-      data: {
-        labels: entries.map(([k]) => k),
-        datasets: [{ data: entries.map(([, v]) => v), backgroundColor: COLORS.slice(0, entries.length), borderWidth: 2, borderColor: c.tooltipBg }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false, cutout: '60%',
-        plugins: {
-          legend: { display: true, position: 'right', labels: { color: c.labels, font: { size: 11 }, boxWidth: 12, padding: 8 } },
-          tooltip: { backgroundColor: c.tooltipBg, titleColor: c.labels, bodyColor: c.labels, borderColor: c.grid, borderWidth: 1,
-            callbacks: { label: item => `${item.label}: ${item.raw} (${Math.round(item.raw / total * 100)}%)` }
-          }
-        }
-      }
     });
   }
 
@@ -3650,46 +3546,6 @@ function renderCharts() {
       ]},
       options: opts
     });
-  }
-
-  /* ── 6. EFICIÊNCIA — MENSAGENS POR CONVERSA ── */
-  destroyChart('msg');
-  {
-    const msgVals = _chartData.map(d => {
-      const conv = d.conversations_count || 0;
-      const msgs = (d.incoming_messages_count || 0) + (d.outgoing_messages_count || 0);
-      return conv > 0 ? +(msgs / conv).toFixed(1) : null;
-    });
-    const last = msgVals[n - 1];
-    const baseConvM = trendPrev('conversations_count') || 0;
-    const baseMsgs  = (trendPrev('incoming_messages_count') || 0) + (trendPrev('outgoing_messages_count') || 0);
-    const prev = baseConvM > 0 ? +(baseMsgs / baseConvM).toFixed(1) : null;
-    setMetric('mv-msg', last != null ? last.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '—');
-    metricTrend('mt-msg', last, prev, true);
-    const slaEl = document.getElementById('sla-msg-label');
-    if (slaEl) slaEl.textContent = _SLA_MSG;
-    if (msgVals.some(v => v != null)) {
-      const opts = makeChartOpts(false, v => `${v}`);
-      opts.animation = false;
-      opts.plugins.tooltip.callbacks = {
-        title: items => fullLabels[items[0].dataIndex] || items[0].label,
-        label: item  => item.datasetIndex === 0 ? `${item.raw?.toLocaleString('pt-BR')} mensagens por conversa` : `Meta: ${_SLA_MSG} mensagens`
-      };
-      const grad = (ctx => {
-        const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, ctx.chart.height);
-        g.addColorStop(0, 'rgba(249,115,22,0.5)');
-        g.addColorStop(1, 'rgba(249,115,22,0.02)');
-        return g;
-      });
-      _charts.msg = new Chart(document.getElementById('chart-msg'), {
-        type: 'line',
-        data: { labels, datasets: [
-          { data: msgVals, borderColor: 'rgba(249,115,22,0.9)', backgroundColor: grad, fill: true, tension: 0.3, pointRadius: 3, pointBackgroundColor: 'rgba(249,115,22,0.9)', borderWidth: 2 },
-          slaLine(_SLA_MSG, `Meta (${_SLA_MSG} msg)`, 'rgba(239,68,68,0.6)')
-        ]},
-        options: opts
-      });
-    }
   }
 
   /* ── 7. TMR POR EQUIPE ── */
@@ -3803,64 +3659,6 @@ function renderCharts() {
     }
   }
 
-  /* ── 8. CARGA POR AGENTE ── */
-  destroyChart('agents');
-  {
-    const agCounts = {};
-    chartConvs.forEach(cv => { const nm = cv.meta?.assignee?.name; if (nm) agCounts[nm] = (agCounts[nm] || 0) + 1; });
-    const sorted = Object.entries(agCounts).sort((a, b) => b[1] - a[1]).slice(0, 15);
-    const opts   = makeChartOpts(true);
-    opts.animation = false;
-    opts.scales.y.ticks.font = { size: 11 };
-    _charts.agents = new Chart(document.getElementById('chart-agents'), {
-      type: 'bar',
-      data: { labels: sorted.map(([nm]) => nm.length > 22 ? nm.slice(0, 20) + '…' : nm), datasets: [{ data: sorted.map(([, v]) => v), backgroundColor: '#14b8a6', borderRadius: 3 }] },
-      options: opts
-    });
-  }
-
-  /* ── 9. PICO DE HORÁRIO ── */
-  destroyChart('peak');
-  {
-    const buckets = new Array(24).fill(0);
-    chartConvs.forEach(cv => { if (!cv.created_at) return; buckets[new Date(cv.created_at * 1000).getHours()]++; });
-    const peakIdx = buckets.indexOf(Math.max(...buckets));
-    const opts    = makeChartOpts(false);
-    opts.animation = false;
-    opts.plugins.tooltip.callbacks = {
-      title: items => items[0].label,
-      label: item  => `${item.raw} atendimento${item.raw !== 1 ? 's' : ''}`
-    };
-    _charts.peak = new Chart(document.getElementById('chart-peak'), {
-      type: 'bar',
-      data: {
-        labels: Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, '0')}h`),
-        datasets: [{ data: buckets, backgroundColor: buckets.map((_, i) => i === peakIdx ? '#f97316' : 'rgba(249,115,22,0.4)'), borderRadius: 3 }]
-      },
-      options: opts
-    });
-  }
-
-  /* ── 10. STATUS DAS CONVERSAS (fila ao vivo — abertas vs pendentes) ── */
-  destroyChart('status');
-  {
-    const openCount    = chartConvs.length;
-    const pendingCount = chartPending.length;
-    _charts.status = new Chart(document.getElementById('chart-status'), {
-      type: 'doughnut',
-      data: {
-        labels: ['Abertas', 'Pendentes'],
-        datasets: [{ data: [openCount, pendingCount], backgroundColor: ['#ef4444','#eab308'], borderWidth: 2, borderColor: c.tooltipBg }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false, cutout: '65%',
-        plugins: {
-          legend: { display: false },
-          tooltip: { backgroundColor: c.tooltipBg, titleColor: c.labels, bodyColor: c.labels, borderColor: c.grid, borderWidth: 1 }
-        }
-      }
-    });
-  }
 }
 
 /* ── PAGE NAVIGATION ── */
