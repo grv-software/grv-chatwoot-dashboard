@@ -1502,6 +1502,16 @@ Se `semReconhecimento` do Step 1 ficou dentro do esperado (só perguntas de cont
 
 Sem commit de código nesta task caso tudo passe — é só verificação.
 
+**Resultado real desta execução:** `semReconhecimento` veio com 9 perguntas na primeira rodada — 4
+esperadas (conta/inbox/label) e **5 lacuna real**, encontradas e separadas com precisão pelo
+subagente que rodou esta task. Corrigidas 4 delas com aliases pontuais (commit `e76b374`): "meta de
+resposta" → TMR; "estrela" → CSAT; "esperando/aguardando resposta" → fila sem resposta; "limpa
+todos os filtros" → ação de limpar filtro (precisou de dois lados — a lista de frases da ação
+`filtrar` e o sub-teste que decide se é limpeza, que é uma regex duplicada). A 5ª ("Quantas equipes
+têm dado disponível esse período?") foi aceita como fora de escopo — não há leitura clara de que
+métrica/ação isso mapeia. `semReconhecimento` final: 4 esperadas + 1 aceita = 5, dentro da
+tolerância do plano.
+
 ---
 
 ## Verificação final do recurso inteiro
