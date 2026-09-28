@@ -215,6 +215,13 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 .agp-foot { display:flex; justify-content:flex-end; gap:8px; padding:10px 12px; border-top:1px solid var(--border); }
 .agp-ok { padding:5px 16px; background:var(--accent); border:none; border-radius:5px; color:#fff; font-size:12px; font-weight:600; cursor:pointer; }
 .agp-ok:hover { opacity:.85; }
+#agdr { position:fixed; z-index:300; background:var(--bg2); border:1px solid var(--border); border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.4); width:230px; display:none; flex-direction:column; }
+#agdr.open { display:flex; }
+.agdr-body { padding:12px; display:flex; flex-direction:column; gap:10px; }
+.agdr-field { display:flex; flex-direction:column; gap:4px; }
+.agdr-field label { font-size:11px; color:var(--text2); }
+.agdr-field input[type=date] { padding:6px 8px; border:1px solid var(--border); border-radius:6px; background:var(--bg3); color:var(--text); font-size:12px; outline:none; color-scheme:dark light; }
+.agdr-field input[type=date]:focus { border-color:var(--accent); }
 .csat-placeholder { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:24px; text-align:center; color:var(--text2); font-size:13px; line-height:1.7; }
 .csat-placeholder strong { color:var(--text); display:block; margin-bottom:6px; }
 /* MODAL AGENTE */
@@ -889,10 +896,11 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
   <div class="chart-hdr">
     <h2>Agentes</h2>
     <div class="agent-period-pills" id="agent-period-pills">
-      <button class="agent-pill" onclick="setAgentTabPeriod('1')">Mês atual</button>
-      <button class="agent-pill active" onclick="setAgentTabPeriod('3')">3 meses</button>
-      <button class="agent-pill" onclick="setAgentTabPeriod('6')">6 meses</button>
-      <button class="agent-pill" onclick="setAgentTabPeriod('12')">12 meses</button>
+      <button class="agent-pill" data-period="1" onclick="setAgentTabPeriod('1')">Mês atual</button>
+      <button class="agent-pill active" data-period="3" onclick="setAgentTabPeriod('3')">3 meses</button>
+      <button class="agent-pill" data-period="6" onclick="setAgentTabPeriod('6')">6 meses</button>
+      <button class="agent-pill" data-period="12" onclick="setAgentTabPeriod('12')">12 meses</button>
+      <button class="agent-pill" data-period="custom" id="agent-pill-custom" onclick="openAgentDateRange(event)">📅 Personalizado</button>
     </div>
     <button class="inbox-trigger" id="agent-team-trigger" onclick="openAgentTeamFilter(event)" style="margin-right:4px">
       <span id="agent-team-trigger-txt">Todas as equipes</span> ▾
@@ -942,6 +950,27 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
   <div class="agp-foot">
     <button class="agp-xs" onclick="agpClose()">Fechar</button>
     <button class="agp-ok" onclick="agpApply()">Aplicar</button>
+  </div>
+</div>
+
+<!-- AGENT CUSTOM DATE RANGE POPUP -->
+<div id="agdr" role="dialog" aria-modal="true" aria-label="Período personalizado">
+  <div class="agp-head">
+    <span class="agp-head-title">Período personalizado</span>
+  </div>
+  <div class="agdr-body">
+    <div class="agdr-field">
+      <label for="agdr-since">De</label>
+      <input type="date" id="agdr-since">
+    </div>
+    <div class="agdr-field">
+      <label for="agdr-until">Até</label>
+      <input type="date" id="agdr-until">
+    </div>
+  </div>
+  <div class="agp-foot">
+    <button class="agp-xs" onclick="agdrClose()">Fechar</button>
+    <button class="agp-ok" onclick="applyAgentDateRange()">Aplicar</button>
   </div>
 </div>
 
@@ -1163,7 +1192,8 @@ let _chartTeamCache  = {};   /* {`${id}:${since}:${until}`: {data, ts}} — TTL 
 let _authLimited     = false; /* true quando API de relatórios retornou 401/403 */
 
 /* ── AGENTES TAB STATE ── */
-let _agentTabPeriod      = '3';  /* '1'|'3'|'6'|'12' */
+let _agentTabPeriod      = '3';  /* '1'|'3'|'6'|'12'|'custom' */
+let _agentCustomRange    = null; /* {since, until} em epoch seconds, quando período = 'custom' */
 let _agentTabFilter      = null; /* Set<number>|null — ids de agentes */
 let _agentTabTeamFilter  = null; /* Set<number>|null — ids de times (filtra agentes) */
 let _teamMembersCache    = {};   /* {teamId: Set<agentId>} */
@@ -2599,6 +2629,7 @@ async function fetchTeamComparison(periods) {
 
 /* Retorna {since, until} para o período selecionado */
 function getAgentTabRange() {
+  if (_agentTabPeriod === 'custom' && _agentCustomRange) return _agentCustomRange;
   const now   = new Date();
   const until = Math.floor(now.getTime() / 1000);
   let start;
@@ -2613,6 +2644,11 @@ function getAgentTabRange() {
 
 /* Retorna array de {since, until, label} — um por mês — para o gráfico de detalhe */
 function getAgentMonths() {
+  if (_agentTabPeriod === 'custom' && _agentCustomRange) {
+    const { since, until } = _agentCustomRange;
+    const f = ts => new Date(ts * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+    return [{ since, until, label: `${f(since)}–${f(until)}` }];
+  }
   const now    = new Date();
   const months = _agentTabPeriod === '1' ? 1 : parseInt(_agentTabPeriod);
   const result = [];
@@ -2629,6 +2665,14 @@ function getAgentMonths() {
     });
   }
   return result;
+}
+
+function agentTabPeriodLabel() {
+  if (_agentTabPeriod === 'custom' && _agentCustomRange) {
+    const f = ts => new Date(ts * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+    return `${f(_agentCustomRange.since)} – ${f(_agentCustomRange.until)}`;
+  }
+  return { '1': 'Mês atual', '3': '3 meses', '6': '6 meses', '12': '12 meses' }[_agentTabPeriod];
 }
 
 function getAgentCsatAvg(agentId) {
@@ -3009,7 +3053,7 @@ function renderAgentModalHeader(id) {
   const idx    = _agentModalOrder.indexOf(id);
   const prev   = _agentModalOrder[idx - 1] != null;
   const next   = _agentModalOrder[idx + 1] != null;
-  const period = { '1': 'Mês atual', '3': '3 meses', '6': '6 meses', '12': '12 meses' }[_agentTabPeriod];
+  const period = agentTabPeriodLabel();
 
   const missing = (tmaH == null ? 1 : 0) + (tmrM == null ? 1 : 0);
   const headerScoreTip = sc == null ? '' : missing > 0
@@ -3225,7 +3269,7 @@ function renderAgentCsatModal() {
       const rb = typeof b.rating === 'number' ? b.rating : 5;
       if (ra !== rb) return ra - rb;
     }
-    return new Date(b.created_at) - new Date(a.created_at);
+    return (b.created_at || 0) - (a.created_at || 0);
   });
 
   const shown   = sorted.slice(0, _csatModalPage * 25);
@@ -3255,7 +3299,7 @@ function renderAgentCsatModal() {
         const msg      = (r.feedback_message || '').trim();
         const msgDisp  = msg.length > 80 ? msg.slice(0, 80) + '…' : (msg || '—');
         const url      = convUrl(r);
-        const d        = r.created_at ? new Date(r.created_at) : null;
+        const d        = r.created_at ? new Date(r.created_at * 1000) : null;
         const dateStr  = d ? d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '—';
         const rowCls   = rating > 0 && rating <= 3 ? ' csat-row-bad' : '';
         return `<div class="am-csat-row${rowCls}">
@@ -3797,14 +3841,63 @@ function resetConfigDefaults() {
 }
 
 function setAgentTabPeriod(p) {
-  _agentTabPeriod  = p;
-  _agentPerfData   = null;
-  _agentMonthCache = {};
+  _agentTabPeriod   = p;
+  _agentCustomRange = null;
+  _agentPerfData    = null;
+  _agentMonthCache  = {};
   if (_agentModalId !== null) closeAgentModal(null);
-  const labels = { '1': 'Mês atual', '3': '3 meses', '6': '6 meses', '12': '12 meses' };
+  updateAgentPillActive();
+  fetchAgentTab();
+}
+
+function updateAgentPillActive() {
   document.querySelectorAll('.agent-pill').forEach(btn => {
-    btn.classList.toggle('active', btn.textContent.trim() === labels[p]);
+    btn.classList.toggle('active', btn.dataset.period === _agentTabPeriod);
   });
+  const customBtn = document.getElementById('agent-pill-custom');
+  if (customBtn) {
+    customBtn.textContent = _agentTabPeriod === 'custom' ? `📅 ${agentTabPeriodLabel()}` : '📅 Personalizado';
+  }
+}
+
+function openAgentDateRange(event) {
+  event.stopPropagation();
+  const popup = document.getElementById('agdr');
+  if (!popup) return;
+  const rect = event.currentTarget.getBoundingClientRect();
+  popup.style.top  = (rect.bottom + 6) + 'px';
+  popup.style.left = rect.left + 'px';
+  const range  = _agentCustomRange || getAgentTabRange();
+  const toIso  = ts => { const d = new Date(ts * 1000); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+  document.getElementById('agdr-since').value = toIso(range.since);
+  document.getElementById('agdr-until').value = toIso(range.until);
+  popup.classList.add('open');
+  setTimeout(() => document.addEventListener('click', agdrOutside, { once: true }), 0);
+}
+
+function agdrClose() {
+  document.getElementById('agdr')?.classList.remove('open');
+  document.removeEventListener('click', agdrOutside);
+}
+
+function agdrOutside(e) {
+  if (!document.getElementById('agdr')?.contains(e.target)) agdrClose();
+}
+
+function applyAgentDateRange() {
+  const sinceStr = document.getElementById('agdr-since').value;
+  const untilStr = document.getElementById('agdr-until').value;
+  if (!sinceStr || !untilStr) return;
+  const since = Math.floor(new Date(sinceStr + 'T00:00:00').getTime() / 1000);
+  const until = Math.floor(new Date(untilStr + 'T23:59:59').getTime() / 1000);
+  if (since > until) { showToast?.('A data "De" não pode ser depois da data "Até".'); return; }
+  _agentCustomRange = { since, until };
+  _agentTabPeriod   = 'custom';
+  _agentPerfData    = null;
+  _agentMonthCache  = {};
+  if (_agentModalId !== null) closeAgentModal(null);
+  agdrClose();
+  updateAgentPillActive();
   fetchAgentTab();
 }
 
