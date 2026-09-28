@@ -176,6 +176,33 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 .chart-auth-overlay { display:none; position:absolute; inset:0; background:rgba(15,17,23,0.72); border-radius:8px; align-items:center; justify-content:center; flex-direction:column; gap:6px; text-align:center; padding:16px; z-index:2; }
 .chart-card { position:relative; }
 .auth-limited .chart-auth-overlay { display:flex; }
+/* ── ANÁLISE — narrativa ──────────────────────────────── */
+.an-hero { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:10px; }
+@media (max-width:900px) { .an-hero { grid-template-columns:1fr 1fr; } }
+.an-hero-tile { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px 18px; }
+.an-hero-val { font-size:32px; font-weight:800; line-height:1.05; letter-spacing:-.5px; font-variant-numeric:tabular-nums; color:var(--text); }
+.an-hero-lbl { font-size:12px; color:var(--text2); margin-top:4px; }
+.an-hero-sub { font-size:11px; color:var(--text3); margin-top:2px; }
+.an-hero-trend { font-size:12px; font-weight:700; margin-top:8px; display:block; }
+.an-sub { font-size:12px; color:var(--text3); margin-top:2px; }
+
+.an-dist { display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+.an-dist-row { display:grid; grid-template-columns:58px 1fr 52px; align-items:center; gap:10px; font-size:12px; }
+.an-dist-star { letter-spacing:1px; white-space:nowrap; font-size:13px; }
+.an-dist-bar { height:18px; border-radius:4px; background:var(--bg3); overflow:hidden; }
+.an-dist-fill { display:block; height:100%; border-radius:4px; transition:width .3s ease-out; }
+.an-dist-num { text-align:right; font-variant-numeric:tabular-nums; color:var(--text2); }
+
+.an-coment { max-height:320px; overflow-y:auto; margin-top:12px; }
+
+.an-team-table { width:100%; border-collapse:collapse; font-size:12px; margin-top:12px; }
+.an-team-table th { background:var(--bg3); color:var(--text2); font-size:11px; font-weight:600; padding:8px 10px; border-bottom:2px solid var(--border); text-align:right; }
+.an-team-table th:first-child { text-align:left; }
+.an-team-table td { padding:8px 10px; border-bottom:1px solid var(--border); font-variant-numeric:tabular-nums; text-align:right; color:var(--text2); }
+.an-team-table td:first-child { text-align:left; font-weight:600; color:var(--text); }
+.an-team-table tr:last-child td { border:none; }
+
+@media (prefers-reduced-motion:reduce) { .an-dist-fill { transition:none; } }
 #kpi-filter-note.auth-warn { color:var(--yellow); background:rgba(234,179,8,.07); border-color:rgba(234,179,8,.25); }
 /* AGENTES TAB */
 .agent-period-pills { display:flex; gap:4px; }
@@ -732,14 +759,16 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 <div id="graficos-page" style="display:none;padding:12px 24px 32px;background:var(--bg);min-height:calc(100vh - 56px);margin-left:52px">
   <!-- Header -->
   <div class="chart-hdr">
-    <h2>Análise</h2>
+    <div>
+      <h2 style="margin:0">Análise</h2>
+      <div class="an-sub" id="an-periodo-label"></div>
+    </div>
     <button class="inbox-trigger" id="chart-inbox-trigger" onclick="openChartIbp(event)" aria-label="Filtrar por caixa de entrada">
       <span id="chart-inbox-trigger-txt">Todas</span> ▾
     </button>
     <div class="inbox-chips" id="chart-inbox-chips"></div>
     <button class="inbox-clear" id="chart-inbox-clear" onclick="clearChartInboxFilter()" style="display:none">✕ Limpar</button>
     <span id="chart-filter-note" style="display:none;font-size:10px;color:var(--accent);background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:4px;padding:2px 7px">Filtro independente do painel</span>
-    <span id="chart-sample-warn" style="display:none;font-size:10px;color:var(--yellow);background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.25);border-radius:4px;padding:2px 7px"></span>
     <select id="chart-period-sel" class="chart-sel" onchange="fetchChartData()">
       <option value="3">Últimos 3 meses</option>
       <option value="6" selected>Últimos 6 meses</option>
@@ -747,7 +776,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     </select>
     <button id="chart-update-btn" class="btn-hdr blue" onclick="fetchChartData()">↺ Atualizar</button>
     <span id="chart-updated-at" style="font-size:11px;color:var(--text3);margin-left:4px"></span>
-    <span style="font-size:10px;color:var(--text3);margin-left:auto">Período e filtros independentes do painel principal</span>
+    <span style="margin-left:auto"></span>
   </div>
 
   <!-- Loading skeleton — visible only while fetching -->
@@ -756,139 +785,104 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     <div class="chart-skel-card"><div class="chart-skel-title"></div><div class="chart-skel-body"><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div></div></div>
   </div>
 
-  <!-- ── VOLUME ── -->
-  <div class="section-divider"><span class="section-divider-label">Volume</span></div>
+  <!-- ABERTURA -->
+  <div class="an-hero">
+    <div class="an-hero-tile">
+      <div class="an-hero-val" id="an-hero-entraram">—</div>
+      <div class="an-hero-lbl">entraram</div>
+      <span class="an-hero-trend" id="an-hero-entraram-trend"></span>
+    </div>
+    <div class="an-hero-tile">
+      <div class="an-hero-val" id="an-hero-resolvidos">—</div>
+      <div class="an-hero-lbl">resolvidos</div>
+      <div class="an-hero-sub" id="an-hero-resolvidos-sub"></div>
+      <span class="an-hero-trend" id="an-hero-resolvidos-trend"></span>
+    </div>
+    <div class="an-hero-tile">
+      <div class="an-hero-val" id="an-hero-tmr">—</div>
+      <div class="an-hero-lbl">até a 1ª resposta</div>
+      <span class="an-hero-trend" id="an-hero-tmr-trend"></span>
+    </div>
+    <div class="an-hero-tile">
+      <div class="an-hero-val" id="an-hero-csat">—</div>
+      <div class="an-hero-lbl">aprovaram</div>
+      <div class="an-hero-sub" id="an-hero-csat-sub"></div>
+    </div>
+  </div>
+
+  <!-- ── 1 · QUANTO ABSORVEMOS ── -->
+  <div class="section-divider"><span class="section-divider-label">1 · Quanto absorvemos</span></div>
   <div class="chart-grid-2">
     <div class="chart-card">
-      <div class="metric-card">
-        <div><div class="metric-value" id="mv-vol">—</div><div class="metric-label">atendimentos este mês</div></div>
-        <span class="metric-trend-up" id="mt-vol"></span>
-      </div>
-      <div class="chart-card-hdr" style="margin-top:10px">
+      <div class="chart-card-hdr">
         <div><div class="chart-card-title">Volume de Atendimentos</div><div class="chart-card-sub">Total mensal no período selecionado</div></div>
       </div>
-      <div class="chart-wrap"><canvas id="chart-vol"></canvas></div>
+      <div class="chart-wrap"><canvas id="chart-vol" aria-label="Gráfico de barras: atendimentos abertos por mês no período selecionado"></canvas></div>
     </div>
     <div class="chart-card">
-      <div class="metric-card">
-        <div><div class="metric-value" id="mv-channel" style="font-size:17px;word-break:break-word">—</div><div class="metric-label">canal com maior volume agora</div></div>
-        <span class="badge-live">Ao vivo</span>
+      <div class="chart-card-hdr">
+        <div><div class="chart-card-title">Resolvidos no período</div><div class="chart-card-sub">Atendimentos encerrados a cada mês · a cor da barra indica a taxa contra a meta de <span id="sla-fcr-label">85%</span> <span title="A API do Chatwoot conta como resolvida no período qualquer conversa fechada nessas datas, mesmo se foi aberta antes. Por isso a taxa pode passar de 100%.">ⓘ</span></div></div>
       </div>
-      <div class="chart-card-hdr" style="margin-top:10px">
-        <div><div class="chart-card-title">De onde vêm os atendimentos?</div><div class="chart-card-sub">Distribuição por canal · conversas abertas agora (não representa o período histórico)</div></div>
-      </div>
-      <div class="chart-wrap"><canvas id="chart-channel"></canvas></div>
+      <div class="chart-wrap"><canvas id="chart-fcr" aria-label="Gráfico de barras: taxa de resolução por mês, comparada com a meta"></canvas></div>
+      <div class="chart-auth-overlay"><span style="font-size:18px">🔒</span><span style="font-size:12px;color:var(--text3)">Dados históricos requerem permissão de Administrador no Chatwoot<br>(Perfil → Função → Administrador).<br>Os dados ao vivo continuam disponíveis.</span></div>
     </div>
   </div>
 
-  <!-- ── VELOCIDADE ── -->
-  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">Velocidade</span></div>
+  <!-- ── 2 · COM QUE VELOCIDADE ── -->
+  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">2 · Com que velocidade</span></div>
   <div class="chart-grid-2">
-    <div class="chart-card">
-      <div class="metric-card">
-        <div><div class="metric-value" id="mv-tma">—</div><div class="metric-label">tempo médio de resolução este mês</div></div>
-        <span class="metric-trend-up" id="mt-tma"></span>
-      </div>
-      <div class="chart-card-hdr" style="margin-top:10px">
-        <div><div class="chart-card-title">Quanto tempo leva pra resolver? (TMA)</div><div class="chart-card-sub">Quanto menor, melhor · Meta SLA: <span id="sla-tma-label">8hr</span></div></div>
-      </div>
-      <div class="chart-wrap"><canvas id="chart-tma"></canvas></div>
-      <div class="chart-auth-overlay"><span style="font-size:18px">🔒</span><span style="font-size:12px;color:var(--text3)">Dados históricos requerem permissão de Administrador no Chatwoot<br>(Perfil → Função → Administrador).<br>Os dados ao vivo continuam disponíveis.</span></div>
-    </div>
     <div class="chart-card" id="chart-tmr-card">
-      <div class="metric-card">
-        <div><div class="metric-value" id="mv-tmr">—</div><div class="metric-label">tempo médio de 1ª resposta este mês</div></div>
-        <span class="metric-trend-up" id="mt-tmr"></span>
+      <div class="chart-card-hdr">
+        <div><div class="chart-card-title">Até a primeira resposta</div><div class="chart-card-sub">Quanto menor, melhor · Meta SLA: <span id="sla-tmr-label">30min</span></div></div>
       </div>
-      <div class="chart-card-hdr" style="margin-top:10px">
-        <div><div class="chart-card-title">Velocidade de resposta (TMR)</div><div class="chart-card-sub">Quanto menor, melhor · Meta SLA: <span id="sla-tmr-label">30min</span></div></div>
-      </div>
-      <div class="chart-wrap"><canvas id="chart-tmr"></canvas></div>
+      <div class="chart-wrap"><canvas id="chart-tmr" aria-label="Gráfico de linha: tempo médio até a primeira resposta por mês, comparado com a meta"></canvas></div>
       <div class="chart-auth-overlay"><span style="font-size:18px">🔒</span><span style="font-size:12px;color:var(--text3)">Dados históricos requerem permissão de Administrador no Chatwoot<br>(Perfil → Função → Administrador).<br>Os dados ao vivo continuam disponíveis.</span></div>
     </div>
     <div class="chart-card">
-      <div class="metric-card">
-        <div><div class="metric-value" id="mv-fcr">—</div><div class="metric-label">resolvidas este mês</div></div>
-        <span class="metric-trend-up" id="mt-fcr"></span>
+      <div class="chart-card-hdr">
+        <div><div class="chart-card-title">Até resolver</div><div class="chart-card-sub">Quanto menor, melhor · Meta: <span id="sla-tma-label">8hr</span><br><span style="color:var(--yellow)">Média sensível a atendimentos antigos encerrados em lote — saltos grandes entre períodos costumam ser limpeza de fila, não queda de desempenho.</span></div></div>
       </div>
-      <div class="chart-card-hdr" style="margin-top:10px">
-        <div><div class="chart-card-title">Taxa de Resolução</div><div class="chart-card-sub">Resolvidas ÷ abertas no período · Quanto maior, melhor · Meta: <span id="sla-fcr-label">85%</span> · <span title="A API do Chatwoot conta como &quot;resolvidas no período&quot; qualquer conversa fechada nessas datas, mesmo se foi aberta antes. Por isso o valor pode passar de 100% quando se resolve mais atendimentos antigos do que se abre de novos.">pode passar de 100% ⓘ</span></div></div>
-      </div>
-      <div class="chart-wrap"><canvas id="chart-fcr"></canvas></div>
-      <div class="chart-auth-overlay"><span style="font-size:18px">🔒</span><span style="font-size:12px;color:var(--text3)">Dados históricos requerem permissão de Administrador no Chatwoot<br>(Perfil → Função → Administrador).<br>Os dados ao vivo continuam disponíveis.</span></div>
-    </div>
-    <div class="chart-card">
-      <div class="metric-card">
-        <div><div class="metric-value" id="mv-msg">—</div><div class="metric-label">mensagens por conversa este mês</div></div>
-        <span class="metric-trend-up" id="mt-msg"></span>
-      </div>
-      <div class="chart-card-hdr" style="margin-top:10px">
-        <div><div class="chart-card-title">Eficiência do Atendimento</div><div class="chart-card-sub">Média de mensagens trocadas por atendimento · Quanto menor, melhor · Meta: <span id="sla-msg-label">10</span> mensagens</div></div>
-      </div>
-      <div class="chart-wrap"><canvas id="chart-msg"></canvas></div>
+      <div class="chart-wrap"><canvas id="chart-tma" aria-label="Gráfico de linha: tempo médio até resolver por mês, comparado com a meta"></canvas></div>
       <div class="chart-auth-overlay"><span style="font-size:18px">🔒</span><span style="font-size:12px;color:var(--text3)">Dados históricos requerem permissão de Administrador no Chatwoot<br>(Perfil → Função → Administrador).<br>Os dados ao vivo continuam disponíveis.</span></div>
     </div>
   </div>
-  <!-- TMR por equipe (full) -->
-  <div class="chart-card chart-full" style="margin-top:12px" id="tmr-team-card">
-    <div class="metric-card">
-      <div><div class="metric-value" id="mv-tmr-team" style="font-size:17px;word-break:break-word">—</div><div class="metric-label">equipe com menor tempo de 1ª resposta</div></div>
-      <span class="badge-live" id="tmr-team-badge">período selecionado</span>
-    </div>
-    <div class="chart-card-hdr" style="margin-top:10px">
-      <div><div class="chart-card-title">Velocidade de resposta por equipe</div><div class="chart-card-sub">Tempo médio até a 1ª resposta por caixa de entrada · Quanto menor, melhor</div></div>
-    </div>
-    <div class="chart-wrap" style="height:220px"><canvas id="chart-tmr-team"></canvas></div>
-    <div id="chart-tmr-team-na" class="chart-na" style="display:none">Dados de TMR por equipe não disponíveis</div>
-  </div>
-
-  <!-- ── EQUIPES ── -->
-  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">Equipes</span></div>
-  <div class="chart-card chart-full" id="teams-card">
-    <div class="metric-card">
-      <div><div class="metric-value" id="mv-teams" style="font-size:17px;word-break:break-word">—</div><div class="metric-label">equipe com menor TMA no último mês</div></div>
-      <span id="teams-coverage" style="font-size:10px;color:var(--text3)"></span>
-    </div>
-    <div class="chart-card-hdr" style="margin-top:10px">
-      <div><div class="chart-card-title">Qual equipe resolve mais rápido?</div><div class="chart-card-sub">TMA e TMR por equipe/inbox no último mês do período</div></div>
-    </div>
-    <div class="chart-wrap" style="height:240px"><canvas id="chart-teams"></canvas></div>
-    <div id="chart-teams-na" class="chart-na" style="display:none">Dados por equipe não disponíveis com este token</div>
-    <div id="chart-teams-partial" style="display:none;font-size:11px;color:var(--yellow);margin-top:6px;padding:4px 0">⚠ Dados parciais — algumas equipes podem não ter retornado resultados completos</div>
-  </div>
-
-  <!-- ── AGENTES ── -->
-  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">Agentes</span></div>
-  <div class="chart-card chart-full">
-    <div class="chart-card-hdr">
-      <div><div class="chart-card-title">Carga por agente agora</div><div class="chart-card-sub">Conversas abertas por atendente</div></div>
-      <span class="badge-live">Ao vivo</span>
-    </div>
-    <div class="chart-wrap" style="height:280px"><canvas id="chart-agents"></canvas></div>
-  </div>
-
-  <!-- ── OPERACIONAL ── -->
-  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">Operacional</span></div>
+  <!-- ── 3 · O QUE O CLIENTE DISSE ── -->
+  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">3 · O que o cliente disse</span></div>
   <div class="chart-grid-2">
-    <div class="chart-card">
+    <div class="chart-card" style="display:flex;flex-direction:column">
       <div class="chart-card-hdr">
-        <div><div class="chart-card-title">Pico de Horário</div><div class="chart-card-sub">Horários com mais atendimentos agora</div></div>
-        <span class="badge-live">Ao vivo</span>
+        <div>
+          <div class="chart-card-title">Como avaliaram o atendimento</div>
+          <div class="chart-card-sub" id="an-csat-periodo">—</div>
+        </div>
       </div>
-      <div class="chart-wrap"><canvas id="chart-peak"></canvas></div>
+      <div class="an-dist" id="an-csat-dist" style="flex:1;justify-content:center"></div>
     </div>
     <div class="chart-card">
       <div class="chart-card-hdr">
-        <div><div class="chart-card-title">Fila Atual</div><div class="chart-card-sub">Conversas em aberto agora, por status de fila · Taxa de Resolução do período está na seção Velocidade</div></div>
-        <span class="badge-live">Ao vivo</span>
+        <div>
+          <div class="chart-card-title">O que escreveram</div>
+          <div class="chart-card-sub" id="an-csat-com-sub">—</div>
+        </div>
+        <div class="am-csat-filter" id="an-csat-filtro"></div>
       </div>
-      <div class="chart-wrap" style="height:200px"><canvas id="chart-status"></canvas></div>
-      <div class="chart-legend">
-        <span class="chart-legend-item"><span class="chart-legend-dot" style="background:#ef4444"></span>Abertas</span>
-        <span class="chart-legend-item"><span class="chart-legend-dot" style="background:#eab308"></span>Pendentes</span>
-      </div>
+      <div class="an-coment" id="an-csat-coment"></div>
     </div>
   </div>
+
+  <!-- ── 4 · COMO CADA EQUIPE CONTRIBUIU ── -->
+  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">4 · Como cada equipe contribuiu</span></div>
+  <div class="chart-card chart-full" id="an-equipes-card">
+    <div class="chart-card-hdr">
+      <div>
+        <div class="chart-card-title">Contribuição por equipe</div>
+        <div class="chart-card-sub" id="an-equipes-sub">Ordenado por volume atendido no último mês do período</div>
+      </div>
+      <span id="an-equipes-cobertura" style="font-size:10px;color:var(--text3)"></span>
+    </div>
+    <div id="an-equipes-wrap"></div>
+  </div>
+
 </div>
 
 <!-- AGENTES PAGE -->
@@ -2524,6 +2518,10 @@ function esc(s) {
 /* ── CHARTS ── */
 let _chartData      = [];
 let _chartTrendBase = null;   /* mesmo trecho decorrido do mês anterior — baseline das setas */
+let _chartCsat      = null;   /* {rows, truncado, since, until} — avaliações do mês mais recente */
+let _chartCsatCache = {};     /* {`${since}:${until}`: {data, ts}} — TTL 5min */
+const CSAT_MAX_PAGES = 40;    /* 40 × 25 = 1.000 avaliações; acima disso o card declara amostra */
+let _csatAnaliseFiltro = 'todos';  /* 'todos' | 'criticos' */
 let _charts         = {};
 let _ibVisible      = false;
 let _chartsDirty    = false;  /* true → renderCharts precisa rodar quando a aba ficar visível */
@@ -2612,12 +2610,14 @@ async function fetchChartData() {
     return aggregateSummaries(res);
   };
   try {
-    const [results, baseline] = await Promise.all([
+    const [results, baseline, csat] = await Promise.all([
       Promise.all(periods.map(fetchMonth)),
-      fetchMonth(trendBase).catch(() => null)
+      fetchMonth(trendBase).catch(() => null),
+      fetchChartCsat(cur.since, cur.until).catch(() => null)
     ]);
+    _chartCsat = csat;
     _chartData = periods.map((p, i) => ({ ...p, ...results[i] }));
-    _chartTrendBase = baseline;
+    _chartTrendBase = baseline ? { ...baseline, since: trendBase.since, until: trendBase.until } : null;
     _teamCompData = await fetchTeamComparison(periods).catch(() => null);
     renderCharts();
   } catch (err) { console.error('fetchChartData:', err); }
@@ -2627,6 +2627,31 @@ async function fetchChartData() {
     const updEl = document.getElementById('chart-updated-at');
     if (updEl) updEl.textContent = `Atualizado às ${new Date().toLocaleTimeString('pt-BR')}`;
   }
+}
+
+/* Avaliações de CSAT de uma janela. Paginação limitada — quando o teto é
+   atingido o card declara que está mostrando amostra, nunca trunca calado. */
+async function fetchChartCsat(since, until) {
+  const key = `${since}:${until}`;
+  const now = Date.now(), TTL = 5 * 60 * 1000;
+  if (_chartCsatCache[key] && now - _chartCsatCache[key].ts < TTL) return _chartCsatCache[key].data;
+
+  const rows = [];
+  let page = 1, truncado = false;
+  while (page <= CSAT_MAX_PAGES) {
+    const raw = await api(`/v1/accounts/${cfg.account}/csat_survey_responses?page=${page}&since=${since}&until=${until}&sort=-created_at`)
+      .catch(() => null);
+    if (!raw) break;
+    const chunk = Array.isArray(raw) ? raw : Array.isArray(raw.data) ? raw.data : [];
+    rows.push(...chunk);
+    if (chunk.length < 25) break;
+    if (page === CSAT_MAX_PAGES) truncado = true;
+    page++;
+  }
+
+  const data = { rows, truncado, since, until };
+  _chartCsatCache[key] = { data, ts: now };
+  return data;
 }
 
 async function fetchTeamComparison(periods) {
@@ -3408,6 +3433,192 @@ function renderAgentCsatModal() {
   `;
 }
 
+/* Seta de tendência de um número contra o mesmo trecho do mês anterior.
+   Vive no topo porque a faixa de abertura também a usa. */
+function metricTrend(elId, current, previous, invertGood) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.className = '';
+  if (current == null || previous == null || previous === 0) { el.textContent = ''; return; }
+  const pct = Math.round(((current - previous) / previous) * 100);
+  if (pct === 0) { el.textContent = ''; return; }
+  const up   = pct > 0;
+  const good = invertGood ? !up : up;
+  el.className   = good ? 'metric-trend-up' : 'metric-trend-dn';
+  el.textContent = `${up ? '▲' : '▼'} ${Math.abs(pct)}% vs mês passado`;
+  el.title       = 'Comparado com o mesmo trecho decorrido do mês passado (não com o mês inteiro)';
+}
+
+/* Faixa de abertura da Análise — os quatro números do período */
+function renderAnaliseHero(n, trendPrev) {
+  const d = _chartData[n - 1] || {};
+  const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+
+  /* o cabeçalho declara o recorte e contra o que se compara */
+  const perEl = document.getElementById('an-periodo-label');
+  if (perEl) {
+    const f = ts => new Date(ts * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+    const mes = d.fullLabel ? d.fullLabel.charAt(0).toUpperCase() + d.fullLabel.slice(1) : '';
+    perEl.textContent = (mes && _chartTrendBase?.since)
+      ? `${mes} · comparado com ${f(_chartTrendBase.since)} a ${f(_chartTrendBase.until)}`
+      : mes;
+  }
+
+  const entraram   = d.conversations_count;
+  const resolvidos = d.resolutions_count;
+  set('an-hero-entraram',   entraram   != null ? entraram.toLocaleString('pt-BR')   : '—');
+  set('an-hero-resolvidos', resolvidos != null ? resolvidos.toLocaleString('pt-BR') : '—');
+  set('an-hero-tmr', fmtSec(d.avg_first_response_time));
+
+  const taxa  = entraram > 0 && resolvidos != null ? Math.round(resolvidos / entraram * 100) : null;
+  const subEl = document.getElementById('an-hero-resolvidos-sub');
+  if (subEl) {
+    subEl.textContent = taxa != null ? `${taxa}% do que entrou` : '';
+    subEl.title = 'A API do Chatwoot conta como resolvida no período qualquer conversa fechada nessas datas, mesmo se foi aberta antes. Por isso pode passar de 100%.';
+  }
+
+  metricTrend('an-hero-entraram-trend',   entraram,   trendPrev('conversations_count'), false);
+  metricTrend('an-hero-resolvidos-trend', resolvidos, trendPrev('resolutions_count'),   false);
+  metricTrend('an-hero-tmr-trend',        d.avg_first_response_time, trendPrev('avg_first_response_time'), true);
+}
+
+/* Capítulo 3 — distribuição de notas e os comentários escritos */
+function renderAnaliseCsat() {
+  const distEl = document.getElementById('an-csat-dist');
+  const comEl  = document.getElementById('an-csat-coment');
+  const perEl  = document.getElementById('an-csat-periodo');
+  const subEl  = document.getElementById('an-csat-com-sub');
+  const filEl  = document.getElementById('an-csat-filtro');
+  if (!distEl || !comEl) return;
+
+  const heroSet = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+  const rows = _chartCsat?.rows || [];
+
+  if (!rows.length) {
+    const vazio = 'Ainda não há avaliações neste período.';
+    distEl.innerHTML = `<div class="chart-na">${vazio}</div>`;
+    comEl.innerHTML  = '';
+    if (perEl) perEl.textContent = '';
+    if (subEl) subEl.textContent = '';
+    if (filEl) filEl.innerHTML = '';
+    heroSet('an-hero-csat', '—');
+    heroSet('an-hero-csat-sub', 'sem avaliações');
+    return;
+  }
+
+  const mesLabel = new Date(_chartCsat.since * 1000)
+    .toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  const positivas = rows.filter(r => r.rating >= 4).length;
+  const pct = Math.round(positivas / rows.length * 1000) / 10;
+
+  heroSet('an-hero-csat', `${pct}%`.replace('.', ','));
+  heroSet('an-hero-csat-sub', `de ${rows.length.toLocaleString('pt-BR')} avaliações`);
+
+  if (perEl) {
+    perEl.textContent = `${String(pct).replace('.', ',')}% aprovaram · ${rows.length.toLocaleString('pt-BR')} avaliações · ${mesLabel.charAt(0).toUpperCase() + mesLabel.slice(1)}`
+      + (_chartCsat.truncado ? ` · amostra das ${CSAT_MAX_PAGES * 25} mais recentes` : '');
+  }
+
+  /* distribuição — contagem rotulada na própria linha, cor nunca sozinha */
+  const CORES = { 5: 'var(--green)', 4: 'var(--green)', 3: 'var(--yellow)', 2: 'var(--red)', 1: 'var(--red)' };
+  const maior = Math.max(...[5,4,3,2,1].map(n => rows.filter(r => r.rating === n).length), 1);
+  distEl.innerHTML = [5,4,3,2,1].map(n => {
+    const qtd = rows.filter(r => r.rating === n).length;
+    const larg = Math.round(qtd / maior * 100);
+    return `<div class="an-dist-row">
+      <span class="an-dist-star" style="color:${CORES[n]}">${'★'.repeat(n)}</span>
+      <span class="an-dist-bar"><span class="an-dist-fill" style="width:${larg}%;background:${CORES[n]}"></span></span>
+      <span class="an-dist-num">${qtd.toLocaleString('pt-BR')}</span>
+    </div>`;
+  }).join('');
+  distEl.setAttribute('aria-label',
+    `${pct}% das ${rows.length} avaliações de ${mesLabel} foram positivas (4 ou 5 estrelas).`);
+
+  /* comentários */
+  const comTexto = rows.filter(r => (r.feedback_message || '').trim());
+  const criticos = comTexto.filter(r => r.rating <= 3);
+  const lista = _csatAnaliseFiltro === 'criticos' ? criticos : comTexto;
+
+  if (subEl) subEl.textContent = `${comTexto.length} de ${rows.length} deixaram comentário`;
+  if (filEl) {
+    filEl.innerHTML = `
+      <button class="${_csatAnaliseFiltro === 'todos' ? 'active' : ''}" onclick="_csatAnaliseFiltro='todos';renderAnaliseCsat()">Todos (${comTexto.length})</button>
+      <button class="${_csatAnaliseFiltro === 'criticos' ? 'active' : ''}" onclick="_csatAnaliseFiltro='criticos';renderAnaliseCsat()">Críticos ≤3★ (${criticos.length})</button>`;
+  }
+
+  comEl.innerHTML = lista.length === 0
+    ? `<div class="chart-na">${_csatAnaliseFiltro === 'criticos' ? 'Nenhuma crítica escrita neste período.' : 'Nenhum comentário escrito neste período.'}</div>`
+    : lista.map(r => {
+        const n     = typeof r.rating === 'number' ? Math.max(1, Math.min(5, r.rating)) : 0;
+        const cor   = n >= 4 ? 'var(--green)' : n === 3 ? 'var(--yellow)' : 'var(--red)';
+        const nome  = r.contact?.name || '—';
+        const msg   = (r.feedback_message || '').trim();
+        const data  = new Date(r.created_at * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+        const cid   = r.conversation_id ?? r.message_id;
+        const url   = cid ? `https://nxticket.com.br/app/accounts/${cfg.account}/conversations/${cid}` : null;
+        return `<div class="am-csat-row${n > 0 && n <= 3 ? ' csat-row-bad' : ''}">
+          <span class="am-csat-stars" style="color:${cor}">${'★'.repeat(n)}${'☆'.repeat(5 - n)}</span>
+          <span class="am-csat-contact" title="${esc(nome)}">${esc(nome)}</span>
+          <span class="am-csat-msg" title="${esc(msg)}">${esc(msg)}</span>
+          <span class="am-csat-date">${data}</span>
+          ${url ? `<a class="am-csat-link" href="${url}" target="_blank" rel="noopener">Abrir chat →</a>`
+                : '<span class="am-csat-link" style="opacity:.35">—</span>'}
+        </div>`;
+      }).join('');
+}
+
+/* Capítulo 4 — contribuição por equipe. Ordena por volume, não por
+   velocidade: ordenar por velocidade cria pódio, e esta tela é da equipe
+   inteira se vendo, não um ranking. */
+function renderAnaliseEquipes() {
+  const wrap  = document.getElementById('an-equipes-wrap');
+  const card  = document.getElementById('an-equipes-card');
+  const cobEl = document.getElementById('an-equipes-cobertura');
+  if (!wrap || !card) return;
+
+  const itens = (_teamCompData?.items || []).slice()
+    .sort((a, b) => (b.conversations_count || 0) - (a.conversations_count || 0));
+
+  /* Com uma equipe filtrada não há comparação a fazer */
+  if (_chartTeamFilter && _chartTeamFilter.size === 1) { card.style.display = 'none'; return; }
+  card.style.display = '';
+
+  if (!itens.length) {
+    wrap.innerHTML = '<div class="chart-na">Dados por equipe não disponíveis com este token</div>';
+    if (cobEl) cobEl.textContent = '';
+    return;
+  }
+
+  if (cobEl) cobEl.textContent = `${itens.length} equipe${itens.length > 1 ? 's' : ''} com dados`;
+
+  wrap.innerHTML = `
+    <table class="an-team-table">
+      <thead>
+        <tr>
+          <th>Equipe</th>
+          <th>Atendimentos</th>
+          <th>1ª resposta</th>
+          <th>Até resolver</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itens.map(t => `
+          <tr>
+            <td>${esc(t.name)}</td>
+            <td>${(t.conversations_count || 0).toLocaleString('pt-BR')}</td>
+            <td>${t.tmr_min == null
+                  ? '<span class="agent-badge badge-na">—</span>'
+                  : agentBadge(t.tmr_min, t.tmr_min < 60 ? `${Math.round(t.tmr_min)}min` : `${(t.tmr_min / 60).toFixed(1)}hr`, _SLA_TMR, 'min', true)}</td>
+            <td>${t.tma_h == null
+                  ? '<span class="agent-badge badge-na">—</span>'
+                  : agentBadge(t.tma_h, `${t.tma_h.toFixed(1)}hr`, _SLA_TMA, 'h', true)}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+  wrap.setAttribute('aria-label',
+    `Contribuição de ${itens.length} equipes, da que mais atendeu para a que menos atendeu. ${itens[0].name} lidera com ${itens[0].conversations_count} atendimentos.`);
+}
+
 function renderCharts() {
   if (!window.Chart || !_chartData.length) return;
   if (document.getElementById('graficos-page')?.style.display === 'none') {
@@ -3421,51 +3632,12 @@ function renderCharts() {
   const labels     = _chartData.map(d => d.monthLabel);
   const fullLabels = _chartData.map(d => d.fullLabel || d.monthLabel);
   const n          = _chartData.length;
-  const chartConvs = (_chartTeamFilter && _chartTeamFilter.size > 0)
-    ? _rawConvs.filter(cv => convMatchesFilter(cv, _chartTeamFilter))
-    : _rawConvs;
-  const chartPending = (_chartTeamFilter && _chartTeamFilter.size > 0)
-    ? _pendingConvs.filter(cv => convMatchesFilter(cv, _chartTeamFilter))
-    : _pendingConvs;
-
-  const sampleWarnEl = document.getElementById('chart-sample-warn');
-  if (sampleWarnEl) {
-    const openTruncated    = _totalOpen    > _rawConvs.length;
-    const pendingTruncated = _totalPending > _pendingConvs.length;
-    if (openTruncated || pendingTruncated) {
-      const parts = [];
-      if (openTruncated)    parts.push(`${_rawConvs.length} de ${_totalOpen} abertas`);
-      if (pendingTruncated) parts.push(`${_pendingConvs.length} de ${_totalPending} pendentes`);
-      sampleWarnEl.textContent = `⚠ Amostra parcial nos cards "Ao vivo" (canal, fila, pico, carga por agente): ${parts.join(' · ')}`;
-      sampleWarnEl.style.display = '';
-    } else {
-      sampleWarnEl.textContent = '';
-      sampleWarnEl.style.display = 'none';
-    }
-  }
-
-  function setMetric(id, val) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = val ?? '—';
-  }
-
-  function metricTrend(elId, current, previous, invertGood) {
-    const el = document.getElementById(elId);
-    if (!el) return;
-    el.className = '';
-    if (current == null || previous == null || previous === 0) { el.textContent = ''; return; }
-    const pct = Math.round(((current - previous) / previous) * 100);
-    if (pct === 0) { el.textContent = ''; return; }
-    const up   = pct > 0;
-    const good = invertGood ? !up : up;
-    el.className   = good ? 'metric-trend-up' : 'metric-trend-dn';
-    el.textContent = `${up ? '▲' : '▼'} ${Math.abs(pct)}% vs mês passado`;
-    el.title       = 'Comparado com o mesmo trecho decorrido do mês passado (não com o mês inteiro)';
-  }
 
   /* Baseline das setas: mesmo trecho decorrido do mês anterior. Cai para o mês
      anterior completo só se a chamada do baseline tiver falhado. */
   const trendPrev = field => _chartTrendBase ? _chartTrendBase[field] : _chartData[n - 2]?.[field];
+  renderAnaliseHero(n, trendPrev);
+  renderAnaliseCsat();
 
   function slaLine(value, label, color) {
     return { type: 'line', label, data: new Array(n).fill(value),
@@ -3484,10 +3656,6 @@ function renderCharts() {
   /* ── 1. VOLUME DE ATENDIMENTOS ── */
   destroyChart('vol');
   {
-    const last = _chartData[n - 1]?.conversations_count;
-    const prev = trendPrev('conversations_count');
-    setMetric('mv-vol', last != null ? last.toLocaleString('pt-BR') : '—');
-    metricTrend('mt-vol', last, prev, false);
     const canvas = document.getElementById('chart-vol');
     const grad   = barGrad(canvas, 'rgba(59,130,246,0.65)', 'rgba(59,130,246,0.12)');
     const opts   = makeChartOpts(false);
@@ -3503,43 +3671,9 @@ function renderCharts() {
     });
   }
 
-  /* ── 2. VOLUME POR CANAL ── */
-  destroyChart('channel');
-  {
-    const chanMap = {};
-    chartConvs.forEach(cv => {
-      const ch = originOf((_inboxMap[cv.inbox_id] || {}).channel_type);
-      chanMap[ch] = (chanMap[ch] || 0) + 1;
-    });
-    const entries = Object.entries(chanMap).sort((a, b) => b[1] - a[1]);
-    setMetric('mv-channel', entries[0]?.[0] || '—');
-    const COLORS = ['#3b82f6','#8b5cf6','#14b8a6','#f97316','#ef4444','#eab308','#22c55e','#ec4899'];
-    const total  = chartConvs.length || 1;
-    _charts.channel = new Chart(document.getElementById('chart-channel'), {
-      type: 'doughnut',
-      data: {
-        labels: entries.map(([k]) => k),
-        datasets: [{ data: entries.map(([, v]) => v), backgroundColor: COLORS.slice(0, entries.length), borderWidth: 2, borderColor: c.tooltipBg }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false, cutout: '60%',
-        plugins: {
-          legend: { display: true, position: 'right', labels: { color: c.labels, font: { size: 11 }, boxWidth: 12, padding: 8 } },
-          tooltip: { backgroundColor: c.tooltipBg, titleColor: c.labels, bodyColor: c.labels, borderColor: c.grid, borderWidth: 1,
-            callbacks: { label: item => `${item.label}: ${item.raw} (${Math.round(item.raw / total * 100)}%)` }
-          }
-        }
-      }
-    });
-  }
-
   /* ── 3. TMA ── */
   destroyChart('tma');
   {
-    const last = _chartData[n - 1]?.avg_resolution_time;
-    const prev = trendPrev('avg_resolution_time');
-    setMetric('mv-tma', fmtSec(last));
-    metricTrend('mt-tma', last, prev, true);
     const slaEl = document.getElementById('sla-tma-label');
     if (slaEl) slaEl.textContent = `${_SLA_TMA}hr`;
     const canvas = document.getElementById('chart-tma');
@@ -3564,14 +3698,10 @@ function renderCharts() {
   /* ── 4. TMR ── */
   destroyChart('tmr');
   {
-    const last   = _chartData[n - 1]?.avg_first_response_time;
-    const prev   = trendPrev('avg_first_response_time');
     const hasTmr = _chartData.some(d => d.avg_first_response_time != null && d.avg_first_response_time > 0);
     const card   = document.getElementById('chart-tmr-card');
     if (card) card.style.display = hasTmr ? '' : 'none';
     if (hasTmr) {
-      setMetric('mv-tmr', fmtSec(last));
-      metricTrend('mt-tmr', last, prev, true);
       const slaEl = document.getElementById('sla-tmr-label');
       if (slaEl) slaEl.textContent = `${_SLA_TMR}min`;
       const canvas = document.getElementById('chart-tmr');
@@ -3601,239 +3731,34 @@ function renderCharts() {
       const conv = d.conversations_count || 0, res = d.resolutions_count || 0;
       return conv > 0 ? Math.round((res / conv) * 100) : null;
     });
-    const last = fcrVals[n - 1];
-    const baseConv = trendPrev('conversations_count') || 0, baseRes = trendPrev('resolutions_count') || 0;
-    const prev = baseConv > 0 ? Math.round((baseRes / baseConv) * 100) : null;
-    setMetric('mv-fcr', last != null ? `${last}%` : '—');
-    metricTrend('mt-fcr', last, prev, false);
     const slaEl = document.getElementById('sla-fcr-label');
     if (slaEl) slaEl.textContent = `${_SLA_FCR}%`;
-    const fcrColors = fcrVals.map(v => v == null ? '#374151' : v >= 90 ? '#22c55e' : v >= 70 ? '#eab308' : '#ef4444');
-    const opts = makeChartOpts(false, v => `${v}%`);
+    /* Plota o volume resolvido, não a taxa: a taxa fica colada em ~100% todo
+       mês, então seis barras da mesma altura não informam nada. A taxa entra
+       na cor de cada barra e no tooltip, onde ainda tem utilidade. */
+    const resolvVals  = _chartData.map(d => d.resolutions_count ?? null);
+    const fcrColors = fcrVals.map(v => v == null ? '#374151' : v >= _SLA_FCR ? '#22c55e' : v >= _SLA_FCR - 15 ? '#eab308' : '#ef4444');
+    const opts = makeChartOpts(false, v => v.toLocaleString('pt-BR'));
     opts.animation = false;
     opts.plugins.tooltip.callbacks = {
       title: items => fullLabels[items[0].dataIndex] || items[0].label,
-      label: item  => item.datasetIndex === 0 ? `Taxa de Resolução: ${item.raw ?? '—'}%` : `Meta: ${_SLA_FCR}%`
+      label: item  => {
+        const taxa = fcrVals[item.dataIndex];
+        return `${(item.raw ?? 0).toLocaleString('pt-BR')} resolvidos` + (taxa != null ? ` · ${taxa}% do que entrou` : '');
+      }
     };
     _charts.fcr = new Chart(document.getElementById('chart-fcr'), {
       type: 'bar',
-      data: { labels, datasets: [
-        { data: fcrVals, backgroundColor: fcrColors, borderRadius: 4 },
-        slaLine(_SLA_FCR, `Meta (${_SLA_FCR}%)`, 'rgba(59,130,246,0.6)')
-      ]},
+      data: { labels, datasets: [{ data: resolvVals, backgroundColor: fcrColors, borderRadius: 4 }] },
       options: opts
     });
   }
 
-  /* ── 6. EFICIÊNCIA — MENSAGENS POR CONVERSA ── */
-  destroyChart('msg');
-  {
-    const msgVals = _chartData.map(d => {
-      const conv = d.conversations_count || 0;
-      const msgs = (d.incoming_messages_count || 0) + (d.outgoing_messages_count || 0);
-      return conv > 0 ? +(msgs / conv).toFixed(1) : null;
-    });
-    const last = msgVals[n - 1];
-    const baseConvM = trendPrev('conversations_count') || 0;
-    const baseMsgs  = (trendPrev('incoming_messages_count') || 0) + (trendPrev('outgoing_messages_count') || 0);
-    const prev = baseConvM > 0 ? +(baseMsgs / baseConvM).toFixed(1) : null;
-    setMetric('mv-msg', last != null ? last.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '—');
-    metricTrend('mt-msg', last, prev, true);
-    const slaEl = document.getElementById('sla-msg-label');
-    if (slaEl) slaEl.textContent = _SLA_MSG;
-    if (msgVals.some(v => v != null)) {
-      const opts = makeChartOpts(false, v => `${v}`);
-      opts.animation = false;
-      opts.plugins.tooltip.callbacks = {
-        title: items => fullLabels[items[0].dataIndex] || items[0].label,
-        label: item  => item.datasetIndex === 0 ? `${item.raw?.toLocaleString('pt-BR')} mensagens por conversa` : `Meta: ${_SLA_MSG} mensagens`
-      };
-      const grad = (ctx => {
-        const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, ctx.chart.height);
-        g.addColorStop(0, 'rgba(249,115,22,0.5)');
-        g.addColorStop(1, 'rgba(249,115,22,0.02)');
-        return g;
-      });
-      _charts.msg = new Chart(document.getElementById('chart-msg'), {
-        type: 'line',
-        data: { labels, datasets: [
-          { data: msgVals, borderColor: 'rgba(249,115,22,0.9)', backgroundColor: grad, fill: true, tension: 0.3, pointRadius: 3, pointBackgroundColor: 'rgba(249,115,22,0.9)', borderWidth: 2 },
-          slaLine(_SLA_MSG, `Meta (${_SLA_MSG} msg)`, 'rgba(239,68,68,0.6)')
-        ]},
-        options: opts
-      });
-    }
-  }
-
-  /* ── 7. TMR POR EQUIPE ── */
+  /* ── 4 · CONTRIBUIÇÃO POR EQUIPE ── */
   destroyChart('tmr-team');
-  {
-    const naEl  = document.getElementById('chart-tmr-team-na');
-    const items = (_teamCompData?.items || []).filter(t => t.tmr_min != null).sort((a, b) => a.tmr_min - b.tmr_min);
-    if (items.length > 0) {
-      if (naEl) naEl.style.display = 'none';
-      const best = items[0];
-      const bestLabel = `${best.name} — ${best.tmr_min < 60 ? best.tmr_min.toFixed(1) + 'min' : (best.tmr_min / 60).toFixed(1) + 'hr'}`;
-      setMetric('mv-tmr-team', bestLabel);
-      const barColors = items.map(t => t.tmr_min < 30 ? '#22c55e' : t.tmr_min < 60 ? '#eab308' : '#ef4444');
-      const teamNames = items.map(t => t.name.length > 22 ? t.name.slice(0, 20) + '…' : t.name);
-      const opts = {
-        responsive: true, maintainAspectRatio: false, animation: false, indexAxis: 'y',
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: c.tooltipBg, titleColor: c.labels, bodyColor: c.labels, borderColor: c.grid, borderWidth: 1,
-            callbacks: {
-              title: items => items[0].label,
-              label: item => {
-                const mins = item.raw;
-                const h = Math.floor(mins / 60), m = Math.round(mins % 60);
-                return h > 0 ? `${h}hr ${String(m).padStart(2,'0')}min de tempo médio de 1ª resposta` : `${mins.toFixed(1)}min de tempo médio de 1ª resposta`;
-              }
-            }
-          },
-          annotation: { annotations: { sla30: { type: 'line', xMin: _SLA_TMR, xMax: _SLA_TMR, borderColor: 'rgba(239,68,68,0.7)', borderWidth: 1.5, borderDash: [6,4], label: { content: `Meta ${_SLA_TMR}min`, display: true, position: 'end', font: { size: 10 }, color: '#ef4444', backgroundColor: 'transparent' } } } }
-        },
-        scales: {
-          x: { grid: { color: c.grid }, ticks: { color: c.labels, font: { size: 11 }, callback: v => `${v}min` } },
-          y: { grid: { display: false }, ticks: { color: c.labels, font: { size: 11 } } }
-        }
-      };
-      _charts['tmr-team'] = new Chart(document.getElementById('chart-tmr-team'), {
-        type: 'bar',
-        data: { labels: teamNames, datasets: [{ data: items.map(t => t.tmr_min), backgroundColor: barColors, borderRadius: 3 }] },
-        options: opts
-      });
-    } else {
-      if (naEl) naEl.style.display = '';
-      setMetric('mv-tmr-team', '—');
-    }
-  }
-
-  /* ── 8. COMPARATIVO EQUIPES ── */
   destroyChart('teams');
-  {
-    const naEl      = document.getElementById('chart-teams-na');
-    const partialEl = document.getElementById('chart-teams-partial');
-    const coverEl   = document.getElementById('teams-coverage');
-    const cardEl    = document.getElementById('teams-card');
-    const td        = _teamCompData;
-    const items     = td?.items || [];
+  renderAnaliseEquipes();
 
-    if (td && items.length > 0) {
-      if (naEl) naEl.style.display = 'none';
-
-      /* Indicador de completude */
-      const pct = td.total > 0 ? td.withData / td.total : 1;
-      if (coverEl) coverEl.textContent = `${td.withData} de ${td.total} equipes com dados`;
-      if (cardEl) cardEl.style.borderColor = pct < 0.8 ? 'var(--yellow)' : '';
-
-      /* Validação cruzada: TMA agregado vs account-level do mesmo mês */
-      if (partialEl) {
-        const acctTma = _chartData[n - 1]?.avg_resolution_time;
-        if (acctTma != null && acctTma > 0) {
-          const wSum = items.reduce((s, t) => s + (t.tma_h != null ? t.tma_h * (t.conversations_count || 1) : 0), 0);
-          const wCnt = items.reduce((s, t) => s + (t.tma_h != null ? (t.conversations_count || 1) : 0), 0);
-          const aggTma = wCnt > 0 ? wSum / wCnt : null;
-          const acctTmaH = acctTma / 3600;
-          const diverge = aggTma != null && acctTmaH > 0 ? Math.abs(aggTma - acctTmaH) / acctTmaH : 0;
-          partialEl.style.display = (diverge > 0.10 || pct < 0.8) ? '' : 'none';
-        } else {
-          partialEl.style.display = pct < 0.8 ? '' : 'none';
-        }
-      }
-
-      const best = [...items].filter(t => t.tma_h != null).sort((a, b) => a.tma_h - b.tma_h)[0];
-      setMetric('mv-teams', best?.name || '—');
-      const teamLabels = items.map(t => t.name.length > 20 ? t.name.slice(0, 18) + '…' : t.name);
-      const opts = {
-        responsive: true, maintainAspectRatio: false, animation: false, indexAxis: 'y',
-        plugins: {
-          legend: { display: true, position: 'top', labels: { color: c.labels, font: { size: 11 }, boxWidth: 12 } },
-          tooltip: { backgroundColor: c.tooltipBg, titleColor: c.labels, bodyColor: c.labels, borderColor: c.grid, borderWidth: 1,
-            callbacks: { label: item => item.datasetIndex === 0 ? `Tempo médio de resolução: ${item.raw?.toFixed(1)}hr` : `Tempo médio de 1ª resposta: ${item.raw?.toFixed(1)}min` }
-          }
-        },
-        scales: {
-          x: { grid: { color: c.grid }, ticks: { color: c.labels, font: { size: 11 } } },
-          y: { grid: { display: false }, ticks: { color: c.labels, font: { size: 11 } } }
-        }
-      };
-      _charts.teams = new Chart(document.getElementById('chart-teams'), {
-        type: 'bar',
-        data: { labels: teamLabels, datasets: [
-          { label: 'TMA (horas)',   data: items.map(t => t.tma_h),   backgroundColor: 'rgba(139,92,246,0.7)', borderRadius: 3 },
-          { label: 'TMR (minutos)', data: items.map(t => t.tmr_min), backgroundColor: 'rgba(20,184,166,0.7)', borderRadius: 3 }
-        ]},
-        options: opts
-      });
-    } else {
-      if (naEl) naEl.style.display = '';
-      if (partialEl) partialEl.style.display = 'none';
-      if (coverEl)  coverEl.textContent = '';
-      if (cardEl)   cardEl.style.borderColor = '';
-      setMetric('mv-teams', '—');
-    }
-  }
-
-  /* ── 8. CARGA POR AGENTE ── */
-  destroyChart('agents');
-  {
-    const agCounts = {};
-    chartConvs.forEach(cv => { const nm = cv.meta?.assignee?.name; if (nm) agCounts[nm] = (agCounts[nm] || 0) + 1; });
-    const sorted = Object.entries(agCounts).sort((a, b) => b[1] - a[1]).slice(0, 15);
-    const opts   = makeChartOpts(true);
-    opts.animation = false;
-    opts.scales.y.ticks.font = { size: 11 };
-    _charts.agents = new Chart(document.getElementById('chart-agents'), {
-      type: 'bar',
-      data: { labels: sorted.map(([nm]) => nm.length > 22 ? nm.slice(0, 20) + '…' : nm), datasets: [{ data: sorted.map(([, v]) => v), backgroundColor: '#14b8a6', borderRadius: 3 }] },
-      options: opts
-    });
-  }
-
-  /* ── 9. PICO DE HORÁRIO ── */
-  destroyChart('peak');
-  {
-    const buckets = new Array(24).fill(0);
-    chartConvs.forEach(cv => { if (!cv.created_at) return; buckets[new Date(cv.created_at * 1000).getHours()]++; });
-    const peakIdx = buckets.indexOf(Math.max(...buckets));
-    const opts    = makeChartOpts(false);
-    opts.animation = false;
-    opts.plugins.tooltip.callbacks = {
-      title: items => items[0].label,
-      label: item  => `${item.raw} atendimento${item.raw !== 1 ? 's' : ''}`
-    };
-    _charts.peak = new Chart(document.getElementById('chart-peak'), {
-      type: 'bar',
-      data: {
-        labels: Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, '0')}h`),
-        datasets: [{ data: buckets, backgroundColor: buckets.map((_, i) => i === peakIdx ? '#f97316' : 'rgba(249,115,22,0.4)'), borderRadius: 3 }]
-      },
-      options: opts
-    });
-  }
-
-  /* ── 10. STATUS DAS CONVERSAS (fila ao vivo — abertas vs pendentes) ── */
-  destroyChart('status');
-  {
-    const openCount    = chartConvs.length;
-    const pendingCount = chartPending.length;
-    _charts.status = new Chart(document.getElementById('chart-status'), {
-      type: 'doughnut',
-      data: {
-        labels: ['Abertas', 'Pendentes'],
-        datasets: [{ data: [openCount, pendingCount], backgroundColor: ['#ef4444','#eab308'], borderWidth: 2, borderColor: c.tooltipBg }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false, cutout: '65%',
-        plugins: {
-          legend: { display: false },
-          tooltip: { backgroundColor: c.tooltipBg, titleColor: c.labels, bodyColor: c.labels, borderColor: c.grid, borderWidth: 1 }
-        }
-      }
-    });
-  }
 }
 
 /* ── PAGE NAVIGATION ── */
