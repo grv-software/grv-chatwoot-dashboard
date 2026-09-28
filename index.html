@@ -4416,6 +4416,67 @@ function harnessResolveIntent(entities) {
   return { tipo: 'desconhecido' };
 }
 
+/* ── ASSISTENTE — execução: navegar e filtrar ─────────────── */
+const HARNESS_PAGINA_LABEL = { painel: 'Painel', agentes: 'Agentes', graficos: 'Análise', configuracoes: 'Configurações' };
+
+function harnessPaginaAtiva() {
+  if (document.getElementById('agentes-page')?.style.display !== 'none') return 'agentes';
+  if (document.getElementById('graficos-page')?.style.display !== 'none') return 'graficos';
+  if (document.getElementById('config-page')?.style.display !== 'none') return 'configuracoes';
+  return 'painel';
+}
+
+function harnessExecutarNavegar(intent) {
+  showPage(intent.pagina);
+  return `Prontinho — abri ${HARNESS_PAGINA_LABEL[intent.pagina]}.`;
+}
+
+function harnessExecutarFiltrar(intent) {
+  const pagina = harnessPaginaAtiva();
+
+  if (intent.limpar) {
+    if (pagina === 'painel')   { clearInboxFilter(); removeAgentFilter(); }
+    if (pagina === 'graficos') { clearChartInboxFilter(); }
+    if (pagina === 'agentes')  { clearAgentFilter(); }
+    return 'Filtros limpos.';
+  }
+
+  if (intent.agente) {
+    if (pagina === 'painel') {
+      _agentFilter = { id: intent.agente.key, name: intent.agente.label };
+      syncAgentTableHighlight(); syncAgentChip(); applyInboxAndRender();
+      return `Filtrando o Painel por ${intent.agente.label}.`;
+    }
+    if (pagina === 'agentes') {
+      _agentTabFilter = new Set([intent.agente.key]);
+      updateAgentFilterUI(); _agentPerfData = null; _agentMonthCache = {}; fetchAgentTab();
+      return `Filtrando a aba Agentes por ${intent.agente.label}.`;
+    }
+    return `Esse filtro por agente não existe na aba ${HARNESS_PAGINA_LABEL[pagina]}. Vai pra Painel ou Agentes primeiro.`;
+  }
+
+  if (intent.equipe) {
+    if (pagina === 'painel') {
+      _teamFilter = new Set([intent.equipe.key]);
+      syncInboxBar(); applyInboxAndRender();
+      return `Filtrando o Painel por ${intent.equipe.label}.`;
+    }
+    if (pagina === 'graficos') {
+      _chartTeamFilter = new Set([intent.equipe.key]);
+      syncChartInboxBar(); fetchChartData();
+      return `Filtrando a Análise por ${intent.equipe.label}.`;
+    }
+    if (pagina === 'agentes') {
+      _agentTabTeamFilter = new Set([intent.equipe.key]);
+      syncAgentTeamUI(); applyAgentTeamFilter();
+      return `Filtrando os agentes da equipe ${intent.equipe.label}.`;
+    }
+    return `Vai pra Painel, Agentes ou Análise pra eu filtrar por equipe.`;
+  }
+
+  return 'Me diga qual equipe ou agente você quer filtrar.';
+}
+
 /* ── ASSISTENTE (harness) ──────────────────────────────── */
 let _harnessOpen = false;
 
