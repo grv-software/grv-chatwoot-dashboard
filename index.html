@@ -829,7 +829,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
         <span class="metric-trend-up" id="mt-fcr"></span>
       </div>
       <div class="chart-card-hdr" style="margin-top:10px">
-        <div><div class="chart-card-title">Resolvidos no período</div><div class="chart-card-sub">Atendimentos encerrados a cada mês · Meta de taxa: <span id="sla-fcr-label">85%</span> <span title="A API do Chatwoot conta como resolvida no período qualquer conversa fechada nessas datas, mesmo se foi aberta antes. Por isso a taxa pode passar de 100%.">ⓘ</span></div></div>
+        <div><div class="chart-card-title">Resolvidos no período</div><div class="chart-card-sub">Atendimentos encerrados a cada mês · a cor da barra indica a taxa contra a meta de <span id="sla-fcr-label">85%</span> <span title="A API do Chatwoot conta como resolvida no período qualquer conversa fechada nessas datas, mesmo se foi aberta antes. Por isso a taxa pode passar de 100%.">ⓘ</span></div></div>
       </div>
       <div class="chart-wrap"><canvas id="chart-fcr" aria-label="Gráfico de barras: taxa de resolução por mês, comparada com a meta"></canvas></div>
       <div class="chart-auth-overlay"><span style="font-size:18px">🔒</span><span style="font-size:12px;color:var(--text3)">Dados históricos requerem permissão de Administrador no Chatwoot<br>(Perfil → Função → Administrador).<br>Os dados ao vivo continuam disponíveis.</span></div>
@@ -3591,19 +3591,23 @@ function renderCharts() {
     metricTrend('mt-fcr', resolvAbs, trendPrev('resolutions_count'), false);
     const slaEl = document.getElementById('sla-fcr-label');
     if (slaEl) slaEl.textContent = `${_SLA_FCR}%`;
-    const fcrColors = fcrVals.map(v => v == null ? '#374151' : v >= 90 ? '#22c55e' : v >= 70 ? '#eab308' : '#ef4444');
-    const opts = makeChartOpts(false, v => `${v}%`);
+    /* Plota o volume resolvido, não a taxa: a taxa fica colada em ~100% todo
+       mês, então seis barras da mesma altura não informam nada. A taxa entra
+       na cor de cada barra e no tooltip, onde ainda tem utilidade. */
+    const resolvVals  = _chartData.map(d => d.resolutions_count ?? null);
+    const fcrColors = fcrVals.map(v => v == null ? '#374151' : v >= _SLA_FCR ? '#22c55e' : v >= _SLA_FCR - 15 ? '#eab308' : '#ef4444');
+    const opts = makeChartOpts(false, v => v.toLocaleString('pt-BR'));
     opts.animation = false;
     opts.plugins.tooltip.callbacks = {
       title: items => fullLabels[items[0].dataIndex] || items[0].label,
-      label: item  => item.datasetIndex === 0 ? `Taxa de Resolução: ${item.raw ?? '—'}%` : `Meta: ${_SLA_FCR}%`
+      label: item  => {
+        const taxa = fcrVals[item.dataIndex];
+        return `${(item.raw ?? 0).toLocaleString('pt-BR')} resolvidos` + (taxa != null ? ` · ${taxa}% do que entrou` : '');
+      }
     };
     _charts.fcr = new Chart(document.getElementById('chart-fcr'), {
       type: 'bar',
-      data: { labels, datasets: [
-        { data: fcrVals, backgroundColor: fcrColors, borderRadius: 4 },
-        slaLine(_SLA_FCR, `Meta (${_SLA_FCR}%)`, 'rgba(59,130,246,0.6)')
-      ]},
+      data: { labels, datasets: [{ data: resolvVals, backgroundColor: fcrColors, borderRadius: 4 }] },
       options: opts
     });
   }
