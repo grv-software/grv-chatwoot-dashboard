@@ -4289,6 +4289,133 @@ function harnessExtractEntities(rawMessage) {
   return { norm, teams, agents, mes, periodoRel, metrica, fila, pagina };
 }
 
+/* ── ASSISTENTE — ação e período ──────────────────────────── */
+const HARNESS_ACOES = {
+  navegar: ['vai pra', 'va para', 'abre a aba', 'muda pra aba', 'mostra a aba'],
+  filtrar: ['mostra so', 'mostra apenas', 'filtra pelo', 'filtra pela', 'filtra por',
+            'tira o filtro', 'limpa filtro', 'limpa os filtros', 'volta pra todas', 'remove o filtro'],
+  resumir: ['resumo geral', 'resumo', 'como estamos', 'o que mudou']
+};
+
+function harnessDetectAcao(norm) {
+  for (const [acao, frases] of Object.entries(HARNESS_ACOES)) {
+    for (const f of frases) if (norm.includes(harnessNormalize(f))) return acao;
+  }
+  return 'perguntar';
+}
+
+function harnessRangeFromRelativo(key) {
+  const now = new Date();
+  const until = Math.floor(now.getTime() / 1000);
+  if (key === 'hoje') {
+    return { since: Math.floor(new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000), until };
+  }
+  if (key === 'semana') {
+    const dow = now.getDay(), diffToMon = (dow === 0 ? -6 : 1 - dow);
+    const s = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon);
+    return { since: Math.floor(s.getTime() / 1000), until };
+  }
+  if (key === 'mes') {
+    return { since: Math.floor(new Date(now.getFullYear(), now.getMonth(), 1).getTime() / 1000), until };
+  }
+  if (key === 'mespassado') {
+    const s = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const e = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+    return { since: Math.floor(s.getTime() / 1000), until: Math.floor(e.getTime() / 1000) };
+  }
+  const n = key === '3m' ? 3 : key === '6m' ? 6 : 12;
+  const s = new Date(now.getFullYear(), now.getMonth() - n + 1, 1);
+  return { since: Math.floor(s.getTime() / 1000), until };
+}
+
+function harnessRangeFromMes(monthIdx) {
+  const now = new Date();
+  let year = now.getFullYear();
+  if (monthIdx > now.getMonth()) year -= 1;
+  const s = new Date(year, monthIdx, 1);
+  const e = new Date(year, monthIdx + 1, 0, 23, 59, 59);
+  const until = Math.min(e.getTime(), now.getTime());
+  return { since: Math.floor(s.getTime() / 1000), until: Math.floor(until / 1000) };
+}
+
+/* Mesmo trecho decorrido do período anterior — mesma fórmula já corrigida
+   no Painel e na Análise nesta sessão. Nunca comparar mês parcial com mês
+   anterior completo. */
+function harnessPrevWindow(since, until) {
+  const dur = until - since;
+  const prevUntil = since - 1;
+  return { since: prevUntil - dur, until: prevUntil };
+}
+
+function harnessResolvePeriodo(mes, periodoRel) {
+  if (mes) return harnessRangeFromMes(mes.key);
+  if (periodoRel) return harnessRangeFromRelativo(periodoRel.key);
+  return harnessRangeFromRelativo('mes');
+}
+
+function harnessIsRanking(norm) {
+  return /\bquem\b/.test(norm) || /\b(mais|menos|melhor|pior|maior|menor)\b/.test(norm);
+}
+
+/* "mais"/"maior" e "menos"/"menor" pedem o valor bruto — não dependem de
+   saber se subir é bom ou ruim pra métrica ("menor tempo de resposta" quer
+   o valor literalmente menor). "melhor"/"pior" são avaliativos e só fazem
+   sentido combinados com a polaridade da métrica, resolvida na execução
+   (Task 7). Sem isso, "menor tmr" acabava invertido: tratado como "pior",
+   quando na verdade é o melhor resultado possível pra essa métrica. */
+function harnessDirecaoRanking(norm) {
+  if (/\b(maior|mais)\b/.test(norm)) return { modo: 'magnitude', desc: true };
+  if (/\b(menor|menos)\b/.test(norm)) return { modo: 'magnitude', desc: false };
+  if (/\bpior\b/.test(norm)) return { modo: 'avaliativo', quer: 'pior' };
+  return { modo: 'avaliativo', quer: 'melhor' };
+}
+
+function harnessResolveIntent(entities) {
+  const { teams, agents, mes, periodoRel, metrica, fila, pagina, norm } = entities;
+  const acao = harnessDetectAcao(norm);
+
+  if (acao === 'navegar' && pagina) {
+    return { tipo: 'navegar', pagina: pagina.key };
+  }
+
+  if (acao === 'filtrar') {
+    const limpar = /tira o filtro|limpa filtro|limpa os filtros|volta pra todas|remove o filtro/.test(norm);
+    return { tipo: 'filtrar', limpar, equipe: teams[0] || null, agente: agents[0] || null };
+  }
+
+  if (fila) return { tipo: 'fila', fila: fila.key };
+
+  if (acao === 'resumir' && !teams.length && !agents.length) {
+    return { tipo: 'resumir' };
+  }
+
+  const periodo = harnessResolvePeriodo(mes, periodoRel);
+  const comparar = /comparad|melhorou|piorou|subiu|caiu|melhor que|pior que/.test(norm);
+
+  if (teams.length === 2) {
+    return { tipo: 'comparar', escopo: 'equipe', a: teams[0], b: teams[1], metrica: metrica?.key || 'volume', periodo };
+  }
+  if (agents.length === 2) {
+    return { tipo: 'comparar', escopo: 'agente', a: agents[0], b: agents[1], metrica: metrica?.key || 'volume', periodo };
+  }
+
+  /* Sem exigir metrica reconhecida: "quem atendeu mais" não cita nenhuma
+     palavra da tabela de métricas (só "atendimentos"/"atendeu" bate, e
+     "atendeu" — verbo conjugado — não está na lista de aliases), mas ainda
+     assim é claramente uma pergunta de ranking. Sem métrica explícita,
+     assume volume — é a leitura mais natural de "quem fez mais". */
+  if (!teams.length && !agents.length && harnessIsRanking(norm)) {
+    const escopoRanking = /\bequipe\b|\btime\b/.test(norm) ? 'equipe' : 'agente';
+    return { tipo: 'ranking', escopo: escopoRanking, metrica: metrica?.key || 'volume', direcao: harnessDirecaoRanking(norm), periodo };
+  }
+
+  if (metrica || teams.length || agents.length) {
+    return { tipo: 'metrica', metrica: metrica?.key || 'volume', equipe: teams[0] || null, agente: agents[0] || null, periodo, comparar };
+  }
+
+  return { tipo: 'desconhecido' };
+}
+
 /* ── ASSISTENTE (harness) ──────────────────────────────── */
 let _harnessOpen = false;
 
