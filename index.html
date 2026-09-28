@@ -2525,6 +2525,9 @@ function esc(s) {
 /* ── CHARTS ── */
 let _chartData      = [];
 let _chartTrendBase = null;   /* mesmo trecho decorrido do mês anterior — baseline das setas */
+let _chartCsat      = null;   /* {rows, truncado, since, until} — avaliações do mês mais recente */
+let _chartCsatCache = {};     /* {`${since}:${until}`: {data, ts}} — TTL 5min */
+const CSAT_MAX_PAGES = 40;    /* 40 × 25 = 1.000 avaliações; acima disso o card declara amostra */
 let _charts         = {};
 let _ibVisible      = false;
 let _chartsDirty    = false;  /* true → renderCharts precisa rodar quando a aba ficar visível */
@@ -2613,10 +2616,12 @@ async function fetchChartData() {
     return aggregateSummaries(res);
   };
   try {
-    const [results, baseline] = await Promise.all([
+    const [results, baseline, csat] = await Promise.all([
       Promise.all(periods.map(fetchMonth)),
-      fetchMonth(trendBase).catch(() => null)
+      fetchMonth(trendBase).catch(() => null),
+      fetchChartCsat(cur.since, cur.until).catch(() => null)
     ]);
+    _chartCsat = csat;
     _chartData = periods.map((p, i) => ({ ...p, ...results[i] }));
     _chartTrendBase = baseline ? { ...baseline, since: trendBase.since, until: trendBase.until } : null;
     _teamCompData = await fetchTeamComparison(periods).catch(() => null);
@@ -2628,6 +2633,31 @@ async function fetchChartData() {
     const updEl = document.getElementById('chart-updated-at');
     if (updEl) updEl.textContent = `Atualizado às ${new Date().toLocaleTimeString('pt-BR')}`;
   }
+}
+
+/* Avaliações de CSAT de uma janela. Paginação limitada — quando o teto é
+   atingido o card declara que está mostrando amostra, nunca trunca calado. */
+async function fetchChartCsat(since, until) {
+  const key = `${since}:${until}`;
+  const now = Date.now(), TTL = 5 * 60 * 1000;
+  if (_chartCsatCache[key] && now - _chartCsatCache[key].ts < TTL) return _chartCsatCache[key].data;
+
+  const rows = [];
+  let page = 1, truncado = false;
+  while (page <= CSAT_MAX_PAGES) {
+    const raw = await api(`/v1/accounts/${cfg.account}/csat_survey_responses?page=${page}&since=${since}&until=${until}&sort=-created_at`)
+      .catch(() => null);
+    if (!raw) break;
+    const chunk = Array.isArray(raw) ? raw : Array.isArray(raw.data) ? raw.data : [];
+    rows.push(...chunk);
+    if (chunk.length < 25) break;
+    if (page === CSAT_MAX_PAGES) truncado = true;
+    page++;
+  }
+
+  const data = { rows, truncado, since, until };
+  _chartCsatCache[key] = { data, ts: now };
+  return data;
 }
 
 async function fetchTeamComparison(periods) {
