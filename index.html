@@ -4223,6 +4223,72 @@ function harnessAllMatches(normMsg, candidates) {
   return found.slice(0, 2);
 }
 
+/* ── ASSISTENTE — tabelas de entidade ─────────────────────── */
+const HARNESS_MESES = ['janeiro','fevereiro','marco','abril','maio','junho',
+  'julho','agosto','setembro','outubro','novembro','dezembro'];
+
+const HARNESS_PERIODOS_RELATIVOS = [
+  { key: 'hoje',       aliases: ['hoje'] },
+  { key: 'semana',     aliases: ['essa semana', 'esta semana'] },
+  { key: 'mes',        aliases: ['esse mes', 'este mes', 'mes atual', 'mes corrente'] },
+  { key: 'mespassado', aliases: ['mes passado', 'mes anterior'] },
+  { key: '3m',         aliases: ['3 meses', 'ultimos 3 meses', 'esse trimestre', 'este trimestre', 'trimestre'] },
+  { key: '6m',         aliases: ['6 meses', 'ultimos 6 meses', 'semestre'] },
+  { key: '12m',        aliases: ['12 meses', 'ultimos 12 meses', 'um ano', 'ultimo ano'] }
+].map(p => ({ key: p.key, label: p.key, aliases: p.aliases }));
+
+const HARNESS_METRICAS = Object.entries({
+  volume:    ['volume', 'atendimentos', 'conversas', 'chats'],
+  resolucao: ['resolvid', 'resolucao', 'taxa de resolucao', 'taxa'],
+  tmr:       ['1a resposta', 'primeira resposta', 'tempo de resposta', 'tmr'],
+  tma:       ['tempo de atendimento', 'tempo de resolucao', 'tma', 'tempo pra resolver', 'tempo para resolver'],
+  csat:      ['csat', 'satisfacao', 'avaliac', 'nota do cliente'],
+  score:     ['pontuacao', 'score', 'nota geral'],
+  mensagens: ['mensagens por conversa', 'mensagens']
+}).map(([key, aliases]) => ({ key, label: key, aliases }));
+
+const HARNESS_FILA = Object.entries({
+  abertas:       ['abertas agora', 'em aberto agora', 'conversas abertas'],
+  pendentes:     ['pendentes', 'pendente'],
+  semresposta:   ['sem resposta', 'nao atendidas', 'sem retorno'],
+  naoatribuidas: ['nao atribuida', 'sem atendente', 'sem agente atribuido'],
+  online:        ['online agora', 'agentes online', 'quem esta online']
+}).map(([key, aliases]) => ({ key, label: key, aliases }));
+
+const HARNESS_PAGINAS = [
+  { key: 'painel',        label: 'painel',        aliases: ['painel', 'inicio'] },
+  { key: 'agentes',       label: 'agentes',       aliases: ['agentes'] },
+  { key: 'graficos',      label: 'graficos',      aliases: ['analise', 'graficos'] },
+  { key: 'configuracoes', label: 'configuracoes', aliases: ['configuracoes', 'config'] }
+];
+
+function harnessTeamCandidates() {
+  const list = Object.values(_teamMap).map(t => ({ key: t.id, label: t.name, aliases: [t.name, t.name.replace(/_/g, ' ')] }));
+  list.push({ key: SAG_FILTER_ID, label: 'SAG', aliases: ['sag'] });
+  return list;
+}
+
+function harnessAgentCandidates() {
+  return _agentList.map(a => ({ key: a.id, label: a.name, aliases: [a.name, a.name.split(' ')[0]] }));
+}
+
+/* Extrai todas as entidades reconhecíveis de uma mensagem, independente
+   de ordem ou frase exata (spec §2.2). */
+function harnessExtractEntities(rawMessage) {
+  let norm = harnessNormalize(rawMessage);
+  norm = harnessNumeroPorExtenso(norm);
+
+  const teams  = harnessAllMatches(norm, harnessTeamCandidates());
+  const agents = harnessAllMatches(norm, harnessAgentCandidates());
+  const mes    = harnessLongestMatch(norm, HARNESS_MESES.map((nome, idx) => ({ key: idx, label: nome, aliases: [nome] })));
+  const periodoRel = harnessLongestMatch(norm, HARNESS_PERIODOS_RELATIVOS);
+  const metrica = harnessLongestMatch(norm, HARNESS_METRICAS);
+  const fila    = harnessLongestMatch(norm, HARNESS_FILA);
+  const pagina  = harnessLongestMatch(norm, HARNESS_PAGINAS);
+
+  return { norm, teams, agents, mes, periodoRel, metrica, fila, pagina };
+}
+
 /* ── ASSISTENTE (harness) ──────────────────────────────── */
 let _harnessOpen = false;
 
