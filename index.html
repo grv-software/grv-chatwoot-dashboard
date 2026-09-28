@@ -4409,7 +4409,11 @@ function harnessResolveIntent(entities) {
     return { tipo: 'ranking', escopo: escopoRanking, metrica: metrica?.key || 'volume', direcao: harnessDirecaoRanking(norm), periodo };
   }
 
-  if (metrica || teams.length || agents.length) {
+  /* mes/periodoRel entram aqui também: uma pergunta de seguimento só com
+     período ("e em setembro?") não cita métrica nem equipe/agente — sem
+     isso, cairia em 'desconhecido' antes mesmo da memória de conversa
+     (Task 8) ter chance de completar com o que já foi perguntado antes. */
+  if (metrica || teams.length || agents.length || mes || periodoRel) {
     return { tipo: 'metrica', metrica: metrica?.key || 'volume', equipe: teams[0] || null, agente: agents[0] || null, periodo, comparar };
   }
 
