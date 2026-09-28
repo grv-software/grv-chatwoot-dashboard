@@ -531,6 +531,19 @@ function harnessIsRanking(norm) {
   return /\bquem\b/.test(norm) || /\b(mais|menos|melhor|pior|maior|menor)\b/.test(norm);
 }
 
+/* "mais"/"maior" e "menos"/"menor" pedem o valor bruto — não dependem de
+   saber se subir é bom ou ruim pra métrica ("menor tempo de resposta" quer
+   o valor literalmente menor). "melhor"/"pior" são avaliativos e só fazem
+   sentido combinados com a polaridade da métrica, resolvida na execução
+   (Task 7). Sem isso, "menor tmr" acabava invertido: tratado como "pior",
+   quando na verdade é o melhor resultado possível pra essa métrica. */
+function harnessDirecaoRanking(norm) {
+  if (/\b(maior|mais)\b/.test(norm)) return { modo: 'magnitude', desc: true };
+  if (/\b(menor|menos)\b/.test(norm)) return { modo: 'magnitude', desc: false };
+  if (/\bpior\b/.test(norm)) return { modo: 'avaliativo', quer: 'pior' };
+  return { modo: 'avaliativo', quer: 'melhor' };
+}
+
 function harnessResolveIntent(entities) {
   const { teams, agents, mes, periodoRel, metrica, fila, pagina, norm } = entities;
   const acao = harnessDetectAcao(norm);
@@ -560,10 +573,14 @@ function harnessResolveIntent(entities) {
     return { tipo: 'comparar', escopo: 'agente', a: agents[0], b: agents[1], metrica: metrica?.key || 'volume', periodo };
   }
 
-  if (!teams.length && !agents.length && harnessIsRanking(norm) && (metrica || /pontuacao|csat/.test(norm))) {
+  /* Sem exigir metrica reconhecida: "quem atendeu mais" não cita nenhuma
+     palavra da tabela de métricas (só "atendimentos"/"atendeu" bate, e
+     "atendeu" — verbo conjugado — não está na lista de aliases), mas ainda
+     assim é claramente uma pergunta de ranking. Sem métrica explícita,
+     assume volume — é a leitura mais natural de "quem fez mais". */
+  if (!teams.length && !agents.length && harnessIsRanking(norm)) {
     const escopoRanking = /\bequipe\b|\btime\b/.test(norm) ? 'equipe' : 'agente';
-    const direcao = /pior|menos|menor/.test(norm) ? 'pior' : 'melhor';
-    return { tipo: 'ranking', escopo: escopoRanking, metrica: metrica?.key || 'score', direcao, periodo };
+    return { tipo: 'ranking', escopo: escopoRanking, metrica: metrica?.key || 'volume', direcao: harnessDirecaoRanking(norm), periodo };
   }
 
   if (metrica || teams.length || agents.length) {
@@ -602,7 +619,18 @@ Esperado: `tipo:"comparar"`, `escopo:"equipe"`, `metrica:"volume"` (nenhuma mét
 ```js
 JSON.stringify(harnessResolveIntent(harnessExtractEntities('quem atendeu mais esse mes')))
 ```
-Esperado: `{"tipo":"ranking","escopo":"agente","metrica":"score","direcao":"melhor", ...}` — nota: sem métrica explícita cai em `score`; isso é esperado, será tratado pela execução na Task 7 tratando ranking-sem-métrica como volume quando fizer mais sentido (documentado no código da Task 7).
+Esperado: `{"tipo":"ranking","escopo":"agente","metrica":"volume","direcao":{"modo":"magnitude","desc":true}, ...}` — sem métrica explícita ("atendeu" não está na tabela de aliases, só "atendimentos"), cai no padrão `volume`; "mais" resolve pra `{modo:'magnitude', desc:true}`.
+
+Testar também a distinção entre magnitude e avaliativo:
+```js
+JSON.stringify(harnessResolveIntent(harnessExtractEntities('quem tem o menor tempo de resposta')).direcao)
+```
+Esperado: `{"modo":"magnitude","desc":false}` — "menor" pede o valor literalmente menor, não é avaliado como "pior".
+
+```js
+JSON.stringify(harnessResolveIntent(harnessExtractEntities('qual agente tem a pior pontuacao')).direcao)
+```
+Esperado: `{"modo":"avaliativo","quer":"pior"}`.
 
 ```js
 JSON.stringify(harnessResolveIntent(harnessExtractEntities('bom dia')))
@@ -958,7 +986,7 @@ function harnessValorPorMetrica(metrica, s) {
 }
 
 function harnessUnidadeMetrica(metrica) {
-  return metrica === 'resolucao' ? '%' : metrica === 'tmr' ? 'min' : metrica === 'tma' ? 'hr' : '';
+  return metrica === 'resolucao' ? '%' : metrica === 'csat' ? '%' : metrica === 'tmr' ? 'min' : metrica === 'tma' ? 'hr' : '';
 }
 
 async function harnessResponderComparar(intent) {
@@ -978,33 +1006,52 @@ async function harnessResponderComparar(intent) {
 - [ ] **Step 2: Ranking**
 
 ```js
+/* Valor de um agente pra ranking. 'score' e 'csat' não vêm do
+   reports/summary — precisam de uma busca de CSAT à parte, igual à
+   Task 6. Ranking por CSAT usa o % de aprovação (não a contagem bruta
+   de avaliações — "quem recebeu mais avaliações" vs "quem tem a melhor
+   nota" colapsam na mesma métrica nesta v1; distinguir contagem de
+   qualidade fica pra uma iteração futura). */
+async function harnessValorRankingAgente(intent, agenteId) {
+  const { since, until } = intent.periodo;
+  if (intent.metrica === 'score') {
+    const s = await harnessFetchSummary({ agenteId, since, until });
+    if (!s || !s.conversations_count) return null;
+    const csat = await harnessFetchCsat({ agenteId, since, until });
+    return calcAgentScore(s, csat.media);
+  }
+  if (intent.metrica === 'csat') {
+    const csat = await harnessFetchCsat({ agenteId, since, until });
+    return csat.total ? csat.pct : null;
+  }
+  const s = await harnessFetchSummary({ agenteId, since, until });
+  if (!s || !s.conversations_count) return null;
+  return harnessValorPorMetrica(intent.metrica, s);
+}
+
 async function harnessResponderRanking(intent) {
   const { since, until } = intent.periodo;
   const periodoTxt = harnessFmtPeriodo(since, until);
+  let resultados;
 
   if (intent.escopo === 'agente') {
     if (!_agentList.length) {
       const agents = await api(`/v1/accounts/${cfg.account}/agents`).catch(() => []);
       if (Array.isArray(agents)) _agentList = agents;
     }
-    const candidatos = _agentList;
-    var resultados = await Promise.all(candidatos.map(async a => {
-      const s = await harnessFetchSummary({ agenteId: a.id, since, until });
-      if (!s || !s.conversations_count) return null;
-      let csatMedia = null;
-      if (intent.metrica === 'score') {
-        const csat = await harnessFetchCsat({ agenteId: a.id, since, until });
-        csatMedia = csat.media;
-      }
-      const valor = intent.metrica === 'score' ? calcAgentScore(s, csatMedia) : harnessValorPorMetrica(intent.metrica, s);
+    resultados = await Promise.all(_agentList.map(async a => {
+      const valor = await harnessValorRankingAgente(intent, a.id);
       return valor == null ? null : { nome: a.name, valor };
     }));
   } else {
-    const candidatos = harnessTeamCandidates();
-    var resultados = await Promise.all(candidatos.map(async t => {
+    /* Equipe não tem CSAT nem pontuação individual calculável aqui —
+       cai pra volume, que é o que faz sentido comparar entre equipes
+       quando a métrica pedida foi score/csat. */
+    const metricaEquipe = (intent.metrica === 'score' || intent.metrica === 'csat') ? 'volume' : intent.metrica;
+    resultados = await Promise.all(harnessTeamCandidates().map(async t => {
       const s = await harnessFetchSummary({ equipeId: t.key, since, until });
       if (!s || !s.conversations_count) return null;
-      const valor = harnessValorPorMetrica(intent.metrica === 'score' ? 'volume' : intent.metrica, s);
+      const valor = harnessValorPorMetrica(metricaEquipe, s);
       return valor == null ? null : { nome: t.label, valor };
     }));
   }
@@ -1012,15 +1059,24 @@ async function harnessResponderRanking(intent) {
   const validos = resultados.filter(Boolean);
   if (!validos.length) return `Não encontrei dados suficientes em ${periodoTxt}.`;
 
+  /* "mais"/"maior"/"menos"/"menor" pedem o valor bruto, direto — não
+     olham pra polaridade da métrica. "melhor"/"pior" são avaliativos:
+     pra métrica onde menor é melhor (tmr/tma/mensagens), "melhor" tem
+     que ordenar ascendente, não descendente. */
   const lowerIsBetter = intent.metrica === 'tmr' || intent.metrica === 'tma' || intent.metrica === 'mensagens';
-  const querMelhor = intent.direcao === 'melhor';
-  const ordenarAsc = lowerIsBetter ? querMelhor : !querMelhor;
+  let ordenarAsc;
+  if (intent.direcao.modo === 'magnitude') {
+    ordenarAsc = !intent.direcao.desc;
+  } else {
+    const querMelhor = intent.direcao.quer === 'melhor';
+    ordenarAsc = lowerIsBetter ? querMelhor : !querMelhor;
+  }
   validos.sort((a, b) => ordenarAsc ? a.valor - b.valor : b.valor - a.valor);
 
   const top = validos[0];
   const unidade = harnessUnidadeMetrica(intent.metrica);
   const valorFmt = Number.isInteger(top.valor) ? top.valor : top.valor.toFixed(1);
-  return `${top.nome} está ${querMelhor ? 'na frente' : 'atrás'} em ${periodoTxt}: ${valorFmt}${unidade}.`;
+  return `${top.nome} lidera em ${periodoTxt}: ${valorFmt}${unidade}.`;
 }
 ```
 
