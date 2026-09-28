@@ -583,7 +583,11 @@ function harnessResolveIntent(entities) {
     return { tipo: 'ranking', escopo: escopoRanking, metrica: metrica?.key || 'volume', direcao: harnessDirecaoRanking(norm), periodo };
   }
 
-  if (metrica || teams.length || agents.length) {
+  /* mes/periodoRel entram aqui também: uma pergunta de seguimento só com
+     período ("e em setembro?") não cita métrica nem equipe/agente — sem
+     isso, cairia em 'desconhecido' antes mesmo da memória de conversa
+     (Task 8) ter chance de completar com o que já foi perguntado antes. */
+  if (metrica || teams.length || agents.length || mes || periodoRel) {
     return { tipo: 'metrica', metrica: metrica?.key || 'volume', equipe: teams[0] || null, agente: agents[0] || null, periodo, comparar };
   }
 
@@ -1166,7 +1170,7 @@ Substitui a resposta fixa da Task 1 pelo pipeline completo, e acrescenta a memó
 
 Localizar `let _harnessOpen = false;` (Task 1) e inserir logo depois:
 ```js
-let _harnessMemory = { equipeId: null, agenteId: null, periodo: null };
+let _harnessMemory = { equipeId: null, agenteId: null, metrica: null, periodo: null };
 ```
 
 Substituir o corpo inteiro de `harnessHandleMessage` (Task 1):
@@ -1187,10 +1191,19 @@ async function harnessHandleMessage(text) {
       if (_harnessMemory.agenteId != null) intent.agente = { key: _harnessMemory.agenteId, label: _harnessMemory.agenteLabel };
       else if (_harnessMemory.equipeId != null) intent.equipe = { key: _harnessMemory.equipeId, label: _harnessMemory.equipeLabel };
     }
+    /* entities.metrica (não intent.metrica) diz se ESTA mensagem citou uma
+       métrica de verdade — resolveIntent sempre preenche intent.metrica com
+       um padrão ('volume'), então essa é a única forma de saber se foi
+       explícito ou herdado. Sem isso, "e em setembro?" depois de uma
+       pergunta de TMR/CSAT voltava sempre como volume, trocando de métrica
+       sem avisar. */
+    if (!entities.metrica && _harnessMemory.metrica) intent.metrica = _harnessMemory.metrica;
+
     _harnessMemory.equipeId = intent.equipe?.key ?? null;
     _harnessMemory.equipeLabel = intent.equipe?.label ?? null;
     _harnessMemory.agenteId = intent.agente?.key ?? null;
     _harnessMemory.agenteLabel = intent.agente?.label ?? null;
+    _harnessMemory.metrica = intent.metrica;
   }
 
   let resposta;
@@ -1243,6 +1256,24 @@ Abrir o painel, mandar duas mensagens em sequência pela UI de verdade (`harness
 })()
 ```
 Esperado: `segunda` cita "equipe 2" mesmo sem o nome ter sido repetido na segunda mensagem, com números de setembro (mês diferente de agosto).
+
+Testar também que a métrica se preserva no seguimento, não só a equipe — este é o caso que motivou o fix em `d635d79` (o guard de `harnessResolveIntent` foi alargado pra aceitar período sozinho, e a memória passou a guardar a métrica, não só equipe/agente):
+```js
+(async () => {
+  harnessSubmit('qual o tempo medio de resposta da equipe 2 em agosto');
+  await new Promise(r => setTimeout(r, 4000));
+  const r1 = document.querySelectorAll('.harness-msg.assistant');
+  const primeira = r1[r1.length - 1].textContent;
+
+  harnessSubmit('e em setembro?');
+  await new Promise(r => setTimeout(r, 4000));
+  const r2 = document.querySelectorAll('.harness-msg.assistant');
+  const segunda = r2[r2.length - 1].textContent;
+
+  return JSON.stringify({ primeira, segunda });
+})()
+```
+Esperado: `segunda` continua falando de "tempo de resposta"/minutos — **não** deve trocar silenciosamente pra "atendimentos"/volume só porque a segunda mensagem não repetiu a métrica.
 
 - [ ] **Step 4: Commit**
 
