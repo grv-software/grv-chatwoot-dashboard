@@ -214,7 +214,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 .agent-table th:hover { color:var(--text); }
 .agent-table th.sort-asc::after  { content:' ▲'; color:var(--accent); }
 .agent-table th.sort-desc::after { content:' ▼'; color:var(--accent); }
-.agent-table td { padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:middle; }
+.agent-table td { padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:middle; font-variant-numeric:tabular-nums; }
 .agent-table tr:last-child td { border:none; }
 .agent-table tr.agent-row:hover { background:var(--bg3); cursor:pointer; }
 .agent-no-data { color:var(--text3); font-size:12px; font-style:italic; padding:24px; text-align:center; }
@@ -906,6 +906,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     <button class="inbox-clear" id="agent-filter-clear" onclick="clearAgentFilter()" style="display:none">✕ Limpar</button>
     <span id="agent-tab-updated" style="font-size:11px;color:var(--text3);margin-left:auto"></span>
   </div>
+  <div id="agent-csat-truncated-warn" style="display:none;font-size:11px;color:var(--yellow);background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.25);border-radius:4px;padding:5px 10px;margin-bottom:10px">
+    ⚠ CSAT baseado numa amostra parcial — o período tem mais avaliações do que a busca conseguiu trazer. A média de cada agente pode estar incompleta.
+  </div>
+  <div class="chart-card-sub" style="margin:-4px 0 10px 2px">Resolução pode passar de 100%: a API conta como resolvida no período qualquer conversa fechada nessas datas, mesmo se foi aberta antes.</div>
 
   <div id="agent-perf-section"><div class="agent-no-data">Carregando…</div></div>
   <div id="agent-csat-section" style="margin-top:16px"></div>
@@ -1155,6 +1159,7 @@ const SAG_INBOX_ID = 17;
    Entra nas seleções com este id sentinela e é resolvido por inbox_id. */
 const SAG_FILTER_ID = -17;
 const MIN_AMOSTRA_AGENTE = 10;  /* abaixo disso a pontuação do agente é ruído estatístico */
+let _agentCsatTruncated = false; /* true quando a busca de CSAT bateu no teto de páginas */
 
 /* Nome exibido de um item do filtro (equipe do Chatwoot ou a caixa SAG) */
 function filterLabel(id) {
@@ -2851,27 +2856,45 @@ async function fetchAgentTab() {
 
   const { since, until } = getAgentTabRange();
 
+  /* A API não devolve total de páginas, então não dá pra saber o fim de
+     antemão — busca em lotes paralelos e para no primeiro lote com página
+     curta. Testado ao vivo: 1 mês tem ~470 avaliações, mas 3/6/12 meses já
+     passam de 2.000 — o teto antigo de 20 páginas (500) cortava a maioria
+     dos períodos em silêncio, sempre nas avaliações mais antigas (a busca
+     é da mais nova pra mais velha). Isso distorcia a média de CSAT de todo
+     mundo, e mais ainda de quem foi bem avaliado no começo do período. */
+  const AGENT_CSAT_MAX_PAGES = 120;   /* 120 × 25 = 3.000 — cobre os ~2.088 de 12 meses com folga */
+  const AGENT_CSAT_BATCH     = 8;
   const fetchCsatAll = async () => {
     const all = [];
-    let page = 1;
-    while (page <= 20) {
-      const raw = await api(`/v1/accounts/${cfg.account}/csat_survey_responses?page=${page}&since=${since}&until=${until}&sort=-created_at`)
-        .catch(e => { console.warn('CSAT fetch error:', e?.status, e?.message); return null; });
-      const chunk = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : [];
-      all.push(...chunk);
-      if (chunk.length < 25) break;
-      page++;
+    let truncated = true;
+    for (let start = 1; start <= AGENT_CSAT_MAX_PAGES; start += AGENT_CSAT_BATCH) {
+      const pages = Array.from({ length: AGENT_CSAT_BATCH }, (_, i) => start + i)
+        .filter(p => p <= AGENT_CSAT_MAX_PAGES);
+      const results = await Promise.all(pages.map(p =>
+        api(`/v1/accounts/${cfg.account}/csat_survey_responses?page=${p}&since=${since}&until=${until}&sort=-created_at`)
+          .catch(e => { console.warn('CSAT fetch error:', e?.status, e?.message); return null; })
+      ));
+      let stoppedShort = false;
+      results.forEach(raw => {
+        const chunk = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : [];
+        all.push(...chunk);
+        if (chunk.length < 25) stoppedShort = true;
+      });
+      if (stoppedShort) { truncated = false; break; }
     }
-    return all;
+    return { rows: all, truncated };
   };
 
-  const [summaryResults, csatList] = await Promise.all([
+  const [summaryResults, csatResult] = await Promise.all([
     Promise.all(visibleAgents.map(a =>
       api(`/v2/accounts/${cfg.account}/reports/summary?type=agent&id=${a.id}&since=${since}&until=${until}`)
         .catch(e => ({ _err: e }))
     )),
     fetchCsatAll()
   ]);
+  const csatList = csatResult.rows;
+  _agentCsatTruncated = csatResult.truncated;
 
   const firstErr = summaryResults.find(r => r?._err);
   if (visibleAgents.length > 0 && firstErr && isAuthError(firstErr._err)) {
@@ -2932,7 +2955,7 @@ function renderAgentPerf() {
     if (col === 'avg_resolution_time')     return s.avg_resolution_time ?? Infinity;
     if (col === 'avg_first_response_time') return s.avg_first_response_time ?? Infinity;
     if (col === 'fcr')                     return s.conversations_count > 0 ? (s.resolutions_count || 0) / s.conversations_count : null;
-    if (col === 'score')                   return calcAgentScore(s);
+    if (col === 'score')                   return calcAgentScore(s, getAgentCsatAvg(e.agent.id));
     return null;
   };
 
@@ -2993,7 +3016,7 @@ function renderAgentPerf() {
               <td>${nd ? '<span class="agent-badge badge-na">—</span>' : agentBadge(tmaH, fmtSec(s.avg_resolution_time), _SLA_TMA, 'h', true)}</td>
               <td>${nd ? '<span class="agent-badge badge-na">—</span>' : agentBadge(tmrM, fmtSec(s.avg_first_response_time), _SLA_TMR, 'min', true)}</td>
               <td>${fcrBadge}</td>
-              <td>${sc == null ? '<span class="agent-badge badge-na">—</span>' : `<span class="score-badge ${scoreCls(sc)}"${lowSample ? ' style="opacity:.45"' : ''} title="${scoreTip}">${sc}${missing > 0 ? `<sup style="font-size:9px;opacity:.7">${4-missing}/4</sup>` : ''}${lowSample ? '<sup style="font-size:9px">⚠</sup>' : ''}</span>`}</td>
+              <td>${sc == null ? '<span class="agent-badge badge-na">—</span>' : `<span class="score-badge ${scoreCls(sc)}"${lowSample ? ' style="opacity:.45"' : ''} title="${scoreTip}" aria-label="${esc(scoreTip)}">${sc}${missing > 0 ? `<sup style="font-size:9px;opacity:.7">${4-missing}/4</sup>` : ''}${lowSample ? '<sup style="font-size:9px">⚠</sup>' : ''}</span>`}</td>
               <td><button class="ver-perfil-btn" onclick="event.stopPropagation();openAgentModal(${e.agent.id})">Ver perfil →</button></td>
             </tr>`;
           }).join('')}
@@ -3338,6 +3361,8 @@ function renderAgentModalMonthTable(id) {
 }
 
 function renderAgentTab() {
+  const warnEl = document.getElementById('agent-csat-truncated-warn');
+  if (warnEl) warnEl.style.display = _agentCsatTruncated ? '' : 'none';
   renderAgentPerf();
   renderAgentCsat();
 }
@@ -3416,6 +3441,7 @@ function renderAgentCsatModal() {
       }).join('');
 
   el.innerHTML = `
+    ${_agentCsatTruncated ? `<div style="font-size:11px;color:var(--yellow);background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.25);border-radius:4px;padding:5px 10px;margin-bottom:10px">⚠ Amostra parcial de CSAT no período — pode haver mais avaliações antigas fora do alcance da busca.</div>` : ''}
     <div class="am-csat-header">
       <span>${rows.length} avaliação${rows.length !== 1 ? 'ões' : ''} · ${posPct}% positivas</span>
       <div class="am-csat-controls">
