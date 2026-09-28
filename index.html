@@ -4477,6 +4477,133 @@ function harnessExecutarFiltrar(intent) {
   return 'Me diga qual equipe ou agente você quer filtrar.';
 }
 
+/* ── ASSISTENTE — execução: perguntas de métrica ──────────── */
+function harnessFmtPeriodo(since, until) {
+  const f = ts => new Date(ts * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+  return `${f(since)} a ${f(until)}`;
+}
+
+function harnessFmtEscopoNome(intent) {
+  if (intent.agente) return intent.agente.label;
+  if (intent.equipe) return intent.equipe.label;
+  return 'A conta inteira';
+}
+
+async function harnessTeamMemberIds(equipeId) {
+  if (equipeId === SAG_FILTER_ID) return null;
+  const members = await api(`/v1/accounts/${cfg.account}/teams/${equipeId}/team_members`).catch(() => []);
+  return Array.isArray(members) ? members.map(m => m.id) : [];
+}
+
+async function harnessFetchSummary({ equipeId, agenteId, since, until }) {
+  if (agenteId != null) {
+    return api(`/v2/accounts/${cfg.account}/reports/summary?type=agent&id=${agenteId}&since=${since}&until=${until}`).catch(() => null);
+  }
+  if (equipeId != null) {
+    if (equipeId === SAG_FILTER_ID) {
+      return api(`/v2/accounts/${cfg.account}/reports/summary?type=inbox&id=${SAG_INBOX_ID}&since=${since}&until=${until}`).catch(() => null);
+    }
+    const inboxIds = Object.entries(INBOX_TEAM_MAP).filter(([, tid]) => Number(tid) === Number(equipeId)).map(([iid]) => Number(iid));
+    if (!inboxIds.length) return null;
+    const results = await Promise.all(inboxIds.map(id =>
+      api(`/v2/accounts/${cfg.account}/reports/summary?type=inbox&id=${id}&since=${since}&until=${until}`).catch(() => null)
+    ));
+    return aggregateSummaries(results.filter(Boolean));
+  }
+  return api(`/v2/accounts/${cfg.account}/reports/summary?type=account&since=${since}&until=${until}`).catch(() => null);
+}
+
+async function harnessFetchCsat({ equipeId, agenteId, since, until }) {
+  const { rows } = await fetchChartCsat(since, until).catch(() => ({ rows: [] }));
+  let filtered = rows;
+  if (agenteId != null) {
+    filtered = rows.filter(r => r.assigned_agent?.id === agenteId);
+  } else if (equipeId != null) {
+    const ids = await harnessTeamMemberIds(equipeId);
+    filtered = ids ? rows.filter(r => ids.includes(r.assigned_agent?.id)) : rows;
+  }
+  const nums = filtered.map(r => typeof r.rating === 'number' ? r.rating : null).filter(v => v !== null);
+  const total = filtered.length;
+  const positivos = nums.filter(n => n >= 4).length;
+  const media = nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
+  return { total, positivos, pct: total ? Math.round(positivos / total * 100) : null, media };
+}
+
+function harnessFmtComparacao(metrica, atual, anterior) {
+  const campo = metrica === 'volume' ? 'conversations_count'
+    : metrica === 'resolucao' ? 'resolutions_count'
+    : metrica === 'tmr' ? 'avg_first_response_time'
+    : metrica === 'tma' ? 'avg_resolution_time' : null;
+  if (!campo) return '';
+  const a = atual[campo], b = anterior[campo];
+  if (a == null || b == null || b === 0) return '';
+  const pct = Math.round((a - b) / b * 100);
+  if (pct === 0) return 'Igual ao período anterior.';
+  return `${pct > 0 ? 'Subiu' : 'Caiu'} ${Math.abs(pct)}% em relação ao mesmo trecho do período anterior.`;
+}
+
+async function harnessResponderMetrica(intent) {
+  const { since, until } = intent.periodo;
+  const escopo = { equipeId: intent.equipe?.key, agenteId: intent.agente?.key, since, until };
+  const nome = harnessFmtEscopoNome(intent);
+  const periodoTxt = harnessFmtPeriodo(since, until);
+
+  if (intent.metrica === 'csat') {
+    const csat = await harnessFetchCsat(escopo);
+    if (!csat.total) return `${nome} não teve avaliações de CSAT em ${periodoTxt}.`;
+    let texto = `${nome} teve ${csat.pct}% de aprovação em ${periodoTxt}, com ${csat.total} avaliaç${csat.total === 1 ? 'ão' : 'ões'}.`;
+    if (intent.comparar) {
+      const prev = harnessPrevWindow(since, until);
+      const csatPrev = await harnessFetchCsat({ ...escopo, since: prev.since, until: prev.until });
+      if (csatPrev.total) texto += ` No período anterior era ${csatPrev.pct}%.`;
+    }
+    return texto;
+  }
+
+  if (intent.metrica === 'score') {
+    if (!intent.agente) return 'Pontuação é uma métrica por agente — me diga o nome de quem você quer ver.';
+    const summary = await harnessFetchSummary(escopo);
+    const csat = await harnessFetchCsat(escopo);
+    const nota = calcAgentScore(summary, csat.media);
+    if (nota == null) return `${nome} não teve atendimentos em ${periodoTxt}.`;
+    return `${nome} está com pontuação ${nota}/100 em ${periodoTxt}.`;
+  }
+
+  const summary = await harnessFetchSummary(escopo);
+  if (!summary || !summary.conversations_count) return `${nome} não teve atendimentos em ${periodoTxt}.`;
+
+  let texto;
+  if (intent.metrica === 'volume') {
+    texto = `${nome} teve ${summary.conversations_count.toLocaleString('pt-BR')} atendimentos em ${periodoTxt}.`;
+  } else if (intent.metrica === 'resolucao') {
+    const taxa = Math.round((summary.resolutions_count || 0) / summary.conversations_count * 100);
+    texto = `${nome} resolveu ${(summary.resolutions_count || 0).toLocaleString('pt-BR')} atendimentos em ${periodoTxt} — taxa de ${taxa}% (meta: ${_SLA_FCR}%)`
+      + (taxa > 100 ? '. Pode passar de 100% porque a API conta como resolvida no período qualquer conversa fechada nessas datas, mesmo se foi aberta antes.' : '.');
+  } else if (intent.metrica === 'tmr') {
+    const tmrM = summary.avg_first_response_time != null ? summary.avg_first_response_time / 60 : null;
+    texto = tmrM == null ? `${nome} não tem tempo de 1ª resposta calculável em ${periodoTxt}.`
+      : `${nome} levou em média ${fmtSec(summary.avg_first_response_time)} pra responder em ${periodoTxt} — meta é ${_SLA_TMR}min ${tmrM <= _SLA_TMR ? '✓' : '✗'}.`;
+  } else if (intent.metrica === 'tma') {
+    const tmaH = summary.avg_resolution_time != null ? summary.avg_resolution_time / 3600 : null;
+    texto = tmaH == null ? `${nome} não tem tempo de resolução calculável em ${periodoTxt}.`
+      : `${nome} levou em média ${fmtSec(summary.avg_resolution_time)} pra resolver em ${periodoTxt} — meta é ${_SLA_TMA}hr ${tmaH <= _SLA_TMA ? '✓' : '✗'}.`;
+  } else {
+    const totalMsgs = (summary.incoming_messages_count || 0) + (summary.outgoing_messages_count || 0);
+    const media = +(totalMsgs / summary.conversations_count).toFixed(1);
+    texto = `${nome} teve em média ${media.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} mensagens por conversa em ${periodoTxt} — meta é até ${_SLA_MSG}.`;
+  }
+
+  if (intent.comparar) {
+    const prev = harnessPrevWindow(since, until);
+    const summaryPrev = await harnessFetchSummary({ ...escopo, since: prev.since, until: prev.until });
+    if (summaryPrev && summaryPrev.conversations_count) {
+      const cmp = harnessFmtComparacao(intent.metrica, summary, summaryPrev);
+      if (cmp) texto += ` ${cmp}`;
+    }
+  }
+  return texto;
+}
+
 /* ── ASSISTENTE (harness) ──────────────────────────────── */
 let _harnessOpen = false;
 
