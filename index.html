@@ -4172,6 +4172,57 @@ new MutationObserver(() => {
   if (document.getElementById('agentes-page').style.display !== 'none' && _agentPerfData) renderAgentTab();
 }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
+/* ── ASSISTENTE — normalização e casamento de padrão ─────── */
+function harnessNormalize(s) {
+  return (s || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function harnessNumeroPorExtenso(s) {
+  return s.replace(/\bum\b/g, '1').replace(/\bdois\b/g, '2').replace(/\btres\b/g, '3');
+}
+
+/* Maior alias que aparece na mensagem, com desempate alfabético quando
+   dois candidatos empatam no mesmo tamanho de alias (nunca pergunta de
+   volta — sempre assume o mais específico e sinaliza ambiguidade). */
+function harnessLongestMatch(normMsg, candidates) {
+  let bestLen = 0;
+  let tied = [];
+  candidates.forEach(c => {
+    (c.aliases || [c.label]).forEach(alias => {
+      const a = harnessNormalize(alias);
+      if (a && a.length >= 3 && normMsg.includes(a)) {
+        if (a.length > bestLen) { bestLen = a.length; tied = [c]; }
+        else if (a.length === bestLen && !tied.includes(c)) { tied.push(c); }
+      }
+    });
+  });
+  if (!tied.length) return null;
+  tied.sort((x, y) => x.label.localeCompare(y.label, 'pt-BR'));
+  return { key: tied[0].key, label: tied[0].label, matchLen: bestLen, ambiguous: tied.length > 1 };
+}
+
+/* Até 2 candidatos distintos que aparecem na mensagem — usado para
+   detectar intenção de comparação (duas equipes ou dois agentes citados). */
+function harnessAllMatches(normMsg, candidates) {
+  const found = [];
+  candidates.forEach(c => {
+    (c.aliases || [c.label]).forEach(alias => {
+      const a = harnessNormalize(alias);
+      if (a && a.length >= 3 && normMsg.includes(a)) {
+        const existing = found.find(f => f.key === c.key);
+        if (!existing) found.push({ key: c.key, label: c.label, matchLen: a.length });
+        else if (a.length > existing.matchLen) existing.matchLen = a.length;
+      }
+    });
+  });
+  found.sort((a, b) => b.matchLen - a.matchLen);
+  return found.slice(0, 2);
+}
+
 /* ── ASSISTENTE (harness) ──────────────────────────────── */
 let _harnessOpen = false;
 
