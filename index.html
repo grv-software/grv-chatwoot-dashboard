@@ -4742,7 +4742,7 @@ function harnessResponderResumir() {
 
 /* ── ASSISTENTE (harness) ──────────────────────────────── */
 let _harnessOpen = false;
-let _harnessMemory = { equipeId: null, agenteId: null, periodo: null };
+let _harnessMemory = { equipeId: null, agenteId: null, metrica: null, periodo: null };
 
 function harnessOpen() {
   _harnessOpen = true;
@@ -4807,10 +4807,19 @@ async function harnessHandleMessage(text) {
       if (_harnessMemory.agenteId != null) intent.agente = { key: _harnessMemory.agenteId, label: _harnessMemory.agenteLabel };
       else if (_harnessMemory.equipeId != null) intent.equipe = { key: _harnessMemory.equipeId, label: _harnessMemory.equipeLabel };
     }
+    /* entities.metrica (não intent.metrica) diz se ESTA mensagem citou uma
+       métrica de verdade — resolveIntent sempre preenche intent.metrica com
+       um padrão ('volume'), então essa é a única forma de saber se foi
+       explícito ou herdado. Sem isso, "e em setembro?" depois de uma
+       pergunta de TMR/CSAT voltava sempre como volume, trocando de métrica
+       sem avisar. */
+    if (!entities.metrica && _harnessMemory.metrica) intent.metrica = _harnessMemory.metrica;
+
     _harnessMemory.equipeId = intent.equipe?.key ?? null;
     _harnessMemory.equipeLabel = intent.equipe?.label ?? null;
     _harnessMemory.agenteId = intent.agente?.key ?? null;
     _harnessMemory.agenteLabel = intent.agente?.label ?? null;
+    _harnessMemory.metrica = intent.metrica;
   }
 
   let resposta;
