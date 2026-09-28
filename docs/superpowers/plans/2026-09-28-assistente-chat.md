@@ -285,11 +285,17 @@ Esperado: `OK`.
 
 - [ ] **Step 3: Testar as funções puras isoladas, sem subir o app**
 
+**Não** dá pra `eval` o script inteiro desde o início: a primeira linha do `<script>` já chama
+`localStorage.getItem(...)`, que não existe no Node. Isolar só o bloco que a Task 2 acabou de
+inserir, entre os dois comentários-âncora — nenhuma dependência de DOM/`localStorage` nesse trecho:
+
 ```bash
 node -e "
 const fs=require('fs');
-const src=fs.readFileSync('index.html','utf8').match(/<script>([\s\S]*)<\/script>/)[1];
-eval(src.slice(0, src.indexOf('function harnessOpen')));  // so ate antes de harnessOpen, que precisa de DOM
+const src=fs.readFileSync('index.html','utf8');
+const start = src.indexOf('/* ── ASSISTENTE — normalização e casamento de padrão');
+const end   = src.indexOf('/* ── ASSISTENTE (harness) ──────────────────────────────── */');
+eval(src.slice(start, end));
 
 console.log('normalize:', harnessNormalize('Não Tá Dando Certo, ÊÊÊ'));
 console.log('numero:', harnessNumeroPorExtenso(harnessNormalize('equipe dois')));
