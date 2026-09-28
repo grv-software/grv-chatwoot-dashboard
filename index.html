@@ -4177,6 +4177,12 @@ function harnessNormalize(s) {
   return (s || '')
     .toLowerCase()
     .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    /* "tempo médio de resposta" não bate com o alias "tempo de resposta"
+       porque "medio" quebra a substring em dois pedaços — a pergunta mais
+       comum do catálogo ("Qual o tempo médio de resposta esse mês?") caía
+       sem métrica reconhecida por causa disso. Remove como palavra de
+       preenchimento antes do casamento. */
+    .replace(/\bmedi[ao]\b/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 }
