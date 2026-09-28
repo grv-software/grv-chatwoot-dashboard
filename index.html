@@ -4604,6 +4604,138 @@ async function harnessResponderMetrica(intent) {
   return texto;
 }
 
+/* ── ASSISTENTE — execução: comparar, ranking, fila, resumo ── */
+function harnessValorPorMetrica(metrica, s) {
+  if (!s) return null;
+  if (metrica === 'volume')    return s.conversations_count || 0;
+  if (metrica === 'resolucao') return s.conversations_count > 0 ? Math.round((s.resolutions_count || 0) / s.conversations_count * 100) : null;
+  if (metrica === 'tmr')       return s.avg_first_response_time != null ? Math.round(s.avg_first_response_time / 60) : null;
+  if (metrica === 'tma')       return s.avg_resolution_time != null ? +(s.avg_resolution_time / 3600).toFixed(1) : null;
+  if (metrica === 'mensagens') return s.conversations_count > 0 ? +(((s.incoming_messages_count || 0) + (s.outgoing_messages_count || 0)) / s.conversations_count).toFixed(1) : null;
+  return s.conversations_count || 0;
+}
+
+function harnessUnidadeMetrica(metrica) {
+  return metrica === 'resolucao' ? '%' : metrica === 'csat' ? '%' : metrica === 'tmr' ? 'min' : metrica === 'tma' ? 'hr' : '';
+}
+
+async function harnessResponderComparar(intent) {
+  const { since, until } = intent.periodo;
+  const campo = intent.escopo === 'equipe' ? 'equipeId' : 'agenteId';
+  const [sa, sb] = await Promise.all([
+    harnessFetchSummary({ [campo]: intent.a.key, since, until }),
+    harnessFetchSummary({ [campo]: intent.b.key, since, until })
+  ]);
+  const va = harnessValorPorMetrica(intent.metrica, sa);
+  const vb = harnessValorPorMetrica(intent.metrica, sb);
+  const unidade = harnessUnidadeMetrica(intent.metrica);
+  return `Em ${harnessFmtPeriodo(since, until)}: ${intent.a.label} = ${va ?? '—'}${unidade}, ${intent.b.label} = ${vb ?? '—'}${unidade}.`;
+}
+
+/* Valor de um agente pra ranking. 'score' e 'csat' não vêm do
+   reports/summary — precisam de uma busca de CSAT à parte, igual à
+   Task 6. Ranking por CSAT usa o % de aprovação (não a contagem bruta
+   de avaliações — "quem recebeu mais avaliações" vs "quem tem a melhor
+   nota" colapsam na mesma métrica nesta v1; distinguir contagem de
+   qualidade fica pra uma iteração futura). */
+async function harnessValorRankingAgente(intent, agenteId) {
+  const { since, until } = intent.periodo;
+  if (intent.metrica === 'score') {
+    const s = await harnessFetchSummary({ agenteId, since, until });
+    if (!s || !s.conversations_count) return null;
+    const csat = await harnessFetchCsat({ agenteId, since, until });
+    return calcAgentScore(s, csat.media);
+  }
+  if (intent.metrica === 'csat') {
+    const csat = await harnessFetchCsat({ agenteId, since, until });
+    return csat.total ? csat.pct : null;
+  }
+  const s = await harnessFetchSummary({ agenteId, since, until });
+  if (!s || !s.conversations_count) return null;
+  return harnessValorPorMetrica(intent.metrica, s);
+}
+
+async function harnessResponderRanking(intent) {
+  const { since, until } = intent.periodo;
+  const periodoTxt = harnessFmtPeriodo(since, until);
+  let resultados;
+
+  if (intent.escopo === 'agente') {
+    if (!_agentList.length) {
+      const agents = await api(`/v1/accounts/${cfg.account}/agents`).catch(() => []);
+      if (Array.isArray(agents)) _agentList = agents;
+    }
+    resultados = await Promise.all(_agentList.map(async a => {
+      const valor = await harnessValorRankingAgente(intent, a.id);
+      return valor == null ? null : { nome: a.name, valor };
+    }));
+  } else {
+    /* Equipe não tem CSAT nem pontuação individual calculável aqui —
+       cai pra volume, que é o que faz sentido comparar entre equipes
+       quando a métrica pedida foi score/csat. */
+    const metricaEquipe = (intent.metrica === 'score' || intent.metrica === 'csat') ? 'volume' : intent.metrica;
+    resultados = await Promise.all(harnessTeamCandidates().map(async t => {
+      const s = await harnessFetchSummary({ equipeId: t.key, since, until });
+      if (!s || !s.conversations_count) return null;
+      const valor = harnessValorPorMetrica(metricaEquipe, s);
+      return valor == null ? null : { nome: t.label, valor };
+    }));
+  }
+
+  const validos = resultados.filter(Boolean);
+  if (!validos.length) return `Não encontrei dados suficientes em ${periodoTxt}.`;
+
+  /* "mais"/"maior"/"menos"/"menor" pedem o valor bruto, direto — não
+     olham pra polaridade da métrica. "melhor"/"pior" são avaliativos:
+     pra métrica onde menor é melhor (tmr/tma/mensagens), "melhor" tem
+     que ordenar ascendente, não descendente. */
+  const lowerIsBetter = intent.metrica === 'tmr' || intent.metrica === 'tma' || intent.metrica === 'mensagens';
+  let ordenarAsc;
+  if (intent.direcao.modo === 'magnitude') {
+    ordenarAsc = !intent.direcao.desc;
+  } else {
+    const querMelhor = intent.direcao.quer === 'melhor';
+    ordenarAsc = lowerIsBetter ? querMelhor : !querMelhor;
+  }
+  validos.sort((a, b) => ordenarAsc ? a.valor - b.valor : b.valor - a.valor);
+
+  const top = validos[0];
+  const unidade = harnessUnidadeMetrica(intent.metrica);
+  const valorFmt = Number.isInteger(top.valor) ? top.valor : top.valor.toFixed(1);
+  return `${top.nome} lidera em ${periodoTxt}: ${valorFmt}${unidade}.`;
+}
+
+async function harnessExecutarFila(intent) {
+  if (intent.fila === 'online') {
+    if (!_agentList.length) {
+      const agents = await api(`/v1/accounts/${cfg.account}/agents`).catch(() => []);
+      if (Array.isArray(agents)) _agentList = agents;
+    }
+    const online = _agentList.filter(a => a.availability_status === 'online').length;
+    return `${online} de ${_agentList.length} agentes estão online agora.`;
+  }
+  const r = await api(`/v2/accounts/${cfg.account}/reports/conversations?type=account`).catch(() => null);
+  if (!r) return 'Não consegui buscar o estado da fila agora.';
+  const label = { abertas: 'abertas', pendentes: 'pendentes', semresposta: 'sem nenhuma resposta', naoatribuidas: 'sem atendente atribuído' }[intent.fila];
+  const valor = { abertas: r.open, pendentes: r.pending, semresposta: r.unattended, naoatribuidas: r.unassigned }[intent.fila];
+  if (valor == null) return 'Não encontrei esse dado ao vivo agora.';
+  return `Tem ${valor} conversa${valor === 1 ? '' : 's'} ${label} agora.`;
+}
+
+function harnessResponderResumir() {
+  const pagina = harnessPaginaAtiva();
+  if (pagina === 'graficos' && _chartData.length) {
+    const d = _chartData[_chartData.length - 1];
+    return `No período atual da Análise: ${(d.conversations_count || 0).toLocaleString('pt-BR')} atendimentos, `
+      + `${(d.resolutions_count || 0).toLocaleString('pt-BR')} resolvidos, 1ª resposta em ${fmtSec(d.avg_first_response_time)}.`;
+  }
+  if (pagina === 'agentes' && _agentPerfData && !_agentPerfData._authError) {
+    const entradas = Object.values(_agentPerfData).filter(e => e.agent && e.summary?.conversations_count);
+    return `${entradas.length} agentes com atendimento no período selecionado da aba Agentes.`;
+  }
+  return 'Abra o Painel, Agentes ou Análise pra eu resumir o que está na tela.';
+}
+
 /* ── ASSISTENTE (harness) ──────────────────────────────── */
 let _harnessOpen = false;
 
