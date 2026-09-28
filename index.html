@@ -759,7 +759,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 <div id="graficos-page" style="display:none;padding:12px 24px 32px;background:var(--bg);min-height:calc(100vh - 56px);margin-left:52px">
   <!-- Header -->
   <div class="chart-hdr">
-    <h2>Análise</h2>
+    <div>
+      <h2 style="margin:0">Análise</h2>
+      <div class="an-sub" id="an-periodo-label"></div>
+    </div>
     <button class="inbox-trigger" id="chart-inbox-trigger" onclick="openChartIbp(event)" aria-label="Filtrar por caixa de entrada">
       <span id="chart-inbox-trigger-txt">Todas</span> ▾
     </button>
@@ -773,13 +776,38 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     </select>
     <button id="chart-update-btn" class="btn-hdr blue" onclick="fetchChartData()">↺ Atualizar</button>
     <span id="chart-updated-at" style="font-size:11px;color:var(--text3);margin-left:4px"></span>
-    <span style="font-size:10px;color:var(--text3);margin-left:auto">Período e filtros independentes do painel principal</span>
+    <span style="margin-left:auto"></span>
   </div>
 
   <!-- Loading skeleton — visible only while fetching -->
   <div id="chart-loading">
     <div class="chart-skel-card"><div class="chart-skel-title"></div><div class="chart-skel-body"><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div></div></div>
     <div class="chart-skel-card"><div class="chart-skel-title"></div><div class="chart-skel-body"><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div><div class="chart-skel-bar"></div></div></div>
+  </div>
+
+  <!-- ABERTURA -->
+  <div class="an-hero">
+    <div class="an-hero-tile">
+      <div class="an-hero-val" id="an-hero-entraram">—</div>
+      <div class="an-hero-lbl">entraram</div>
+      <span class="an-hero-trend" id="an-hero-entraram-trend"></span>
+    </div>
+    <div class="an-hero-tile">
+      <div class="an-hero-val" id="an-hero-resolvidos">—</div>
+      <div class="an-hero-lbl">resolvidos</div>
+      <div class="an-hero-sub" id="an-hero-resolvidos-sub"></div>
+      <span class="an-hero-trend" id="an-hero-resolvidos-trend"></span>
+    </div>
+    <div class="an-hero-tile">
+      <div class="an-hero-val" id="an-hero-tmr">—</div>
+      <div class="an-hero-lbl">até a 1ª resposta</div>
+      <span class="an-hero-trend" id="an-hero-tmr-trend"></span>
+    </div>
+    <div class="an-hero-tile">
+      <div class="an-hero-val" id="an-hero-csat">—</div>
+      <div class="an-hero-lbl">aprovaram</div>
+      <div class="an-hero-sub" id="an-hero-csat-sub"></div>
+    </div>
   </div>
 
   <!-- ── VOLUME ── -->
@@ -2590,7 +2618,7 @@ async function fetchChartData() {
       fetchMonth(trendBase).catch(() => null)
     ]);
     _chartData = periods.map((p, i) => ({ ...p, ...results[i] }));
-    _chartTrendBase = baseline;
+    _chartTrendBase = baseline ? { ...baseline, since: trendBase.since, until: trendBase.until } : null;
     _teamCompData = await fetchTeamComparison(periods).catch(() => null);
     renderCharts();
   } catch (err) { console.error('fetchChartData:', err); }
@@ -3381,6 +3409,55 @@ function renderAgentCsatModal() {
   `;
 }
 
+/* Seta de tendência de um número contra o mesmo trecho do mês anterior.
+   Vive no topo porque a faixa de abertura também a usa. */
+function metricTrend(elId, current, previous, invertGood) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.className = '';
+  if (current == null || previous == null || previous === 0) { el.textContent = ''; return; }
+  const pct = Math.round(((current - previous) / previous) * 100);
+  if (pct === 0) { el.textContent = ''; return; }
+  const up   = pct > 0;
+  const good = invertGood ? !up : up;
+  el.className   = good ? 'metric-trend-up' : 'metric-trend-dn';
+  el.textContent = `${up ? '▲' : '▼'} ${Math.abs(pct)}% vs mês passado`;
+  el.title       = 'Comparado com o mesmo trecho decorrido do mês passado (não com o mês inteiro)';
+}
+
+/* Faixa de abertura da Análise — os quatro números do período */
+function renderAnaliseHero(n, trendPrev) {
+  const d = _chartData[n - 1] || {};
+  const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+
+  /* o cabeçalho declara o recorte e contra o que se compara */
+  const perEl = document.getElementById('an-periodo-label');
+  if (perEl) {
+    const f = ts => new Date(ts * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+    const mes = d.fullLabel ? d.fullLabel.charAt(0).toUpperCase() + d.fullLabel.slice(1) : '';
+    perEl.textContent = (mes && _chartTrendBase?.since)
+      ? `${mes} · comparado com ${f(_chartTrendBase.since)} a ${f(_chartTrendBase.until)}`
+      : mes;
+  }
+
+  const entraram   = d.conversations_count;
+  const resolvidos = d.resolutions_count;
+  set('an-hero-entraram',   entraram   != null ? entraram.toLocaleString('pt-BR')   : '—');
+  set('an-hero-resolvidos', resolvidos != null ? resolvidos.toLocaleString('pt-BR') : '—');
+  set('an-hero-tmr', fmtSec(d.avg_first_response_time));
+
+  const taxa  = entraram > 0 && resolvidos != null ? Math.round(resolvidos / entraram * 100) : null;
+  const subEl = document.getElementById('an-hero-resolvidos-sub');
+  if (subEl) {
+    subEl.textContent = taxa != null ? `${taxa}% do que entrou` : '';
+    subEl.title = 'A API do Chatwoot conta como resolvida no período qualquer conversa fechada nessas datas, mesmo se foi aberta antes. Por isso pode passar de 100%.';
+  }
+
+  metricTrend('an-hero-entraram-trend',   entraram,   trendPrev('conversations_count'), false);
+  metricTrend('an-hero-resolvidos-trend', resolvidos, trendPrev('resolutions_count'),   false);
+  metricTrend('an-hero-tmr-trend',        d.avg_first_response_time, trendPrev('avg_first_response_time'), true);
+}
+
 function renderCharts() {
   if (!window.Chart || !_chartData.length) return;
   if (document.getElementById('graficos-page')?.style.display === 'none') {
@@ -3400,23 +3477,10 @@ function renderCharts() {
     if (el) el.textContent = val ?? '—';
   }
 
-  function metricTrend(elId, current, previous, invertGood) {
-    const el = document.getElementById(elId);
-    if (!el) return;
-    el.className = '';
-    if (current == null || previous == null || previous === 0) { el.textContent = ''; return; }
-    const pct = Math.round(((current - previous) / previous) * 100);
-    if (pct === 0) { el.textContent = ''; return; }
-    const up   = pct > 0;
-    const good = invertGood ? !up : up;
-    el.className   = good ? 'metric-trend-up' : 'metric-trend-dn';
-    el.textContent = `${up ? '▲' : '▼'} ${Math.abs(pct)}% vs mês passado`;
-    el.title       = 'Comparado com o mesmo trecho decorrido do mês passado (não com o mês inteiro)';
-  }
-
   /* Baseline das setas: mesmo trecho decorrido do mês anterior. Cai para o mês
      anterior completo só se a chamada do baseline tiver falhado. */
   const trendPrev = field => _chartTrendBase ? _chartTrendBase[field] : _chartData[n - 2]?.[field];
+  renderAnaliseHero(n, trendPrev);
 
   function slaLine(value, label, color) {
     return { type: 'line', label, data: new Array(n).fill(value),
