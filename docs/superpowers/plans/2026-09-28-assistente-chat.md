@@ -294,7 +294,11 @@ node -e "
 const fs=require('fs');
 const src=fs.readFileSync('index.html','utf8');
 const start = src.indexOf('/* ── ASSISTENTE — normalização e casamento de padrão');
-const end   = src.indexOf('/* ── ASSISTENTE (harness) ──────────────────────────────── */');
+/* O comentário '/* ── ASSISTENTE (harness) ── *\/' aparece 3 vezes no arquivo
+   (CSS da Task 1, HTML da Task 1, e este JS) — sem o segundo argumento,
+   indexOf pega a primeira ocorrência (a do CSS, que vem ANTES de start) e
+   o slice sai vazio. Buscar a partir de start. */
+const end   = src.indexOf('/* ── ASSISTENTE (harness) ──────────────────────────────── */', start);
 eval(src.slice(start, end));
 
 console.log('normalize:', harnessNormalize('Não Tá Dando Certo, ÊÊÊ'));
