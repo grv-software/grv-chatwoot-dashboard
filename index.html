@@ -4317,10 +4317,13 @@ function harnessExtractEntities(rawMessage) {
 
 /* ── ASSISTENTE — ação e período ──────────────────────────── */
 const HARNESS_ACOES = {
-  navegar: ['vai pra', 'va para', 'abre a aba', 'muda pra aba', 'mostra a aba'],
+  navegar: ['vai pra', 'va para', 'abre a aba', 'muda pra aba', 'mostra a aba',
+            'abre', 'bora pra', 'me leva pra', 'quero ver a aba'],
   filtrar: ['mostra so', 'mostra apenas', 'filtra pelo', 'filtra pela', 'filtra por',
-            'tira o filtro', 'limpa filtro', 'limpa os filtros', 'limpa todos os filtros', 'volta pra todas', 'remove o filtro'],
-  resumir: ['resumo geral', 'resumo', 'como estamos', 'o que mudou']
+            'tira o filtro', 'limpa filtro', 'limpa os filtros', 'limpa todos os filtros', 'volta pra todas', 'remove o filtro',
+            'filtr', 'quero ver so', 'fica so com'],
+  resumir: ['resumo geral', 'resumo', 'como estamos', 'o que mudou',
+            'como anda', 'como ta', 'panorama', 'visao geral', 'me atualiza']
 };
 
 function harnessDetectAcao(norm) {
