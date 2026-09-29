@@ -474,6 +474,16 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 #toast { position:fixed; bottom:20px; right:20px; z-index:8000; background:var(--bg2); border:1px solid rgba(239,68,68,.4); border-radius:6px; padding:10px 16px; font-size:12px; color:var(--red); max-width:340px; box-shadow:0 4px 20px rgba(0,0,0,.5); opacity:0; transform:translateY(8px); transition:opacity .2s,transform .2s; pointer-events:none; }
 #toast.show { opacity:1; transform:translateY(0); pointer-events:auto; }
 
+/* AVISO DE ATUALIZAÇÃO — persiste até "Marcar como visto", diferente do toast (que some sozinho) */
+#update-banner { position:fixed; top:66px; left:60px; right:16px; z-index:90; max-width:520px; margin-left:auto;
+  background:var(--bg2); border:1px solid var(--accent); border-radius:8px; padding:10px 14px;
+  display:none; align-items:center; gap:12px; box-shadow:0 4px 20px rgba(0,0,0,.25); font-size:12px; color:var(--text2); }
+#update-banner.show { display:flex; }
+#update-banner-dismiss { margin-left:auto; padding:5px 12px; background:var(--accent); border:none; border-radius:5px; color:#fff; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; }
+#update-banner-dismiss:hover { opacity:.85; }
+#update-banner-close { background:none; border:none; color:var(--text3); cursor:pointer; font-size:16px; line-height:1; padding:2px; flex-shrink:0; }
+#update-banner-close:hover { color:var(--text); }
+
 /* Scrollbar */
 ::-webkit-scrollbar { width:5px; height:5px; }
 ::-webkit-scrollbar-track { background:transparent; }
@@ -599,6 +609,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     <div class="sidebar-item" onclick="openSettings()" title="Configurações">
       <span class="sidebar-icon">⚙</span>
       <span class="sidebar-label">Config.</span>
+    </div>
+    <div class="sidebar-item" id="nav-version" onclick="showAppVersionNotice()" title="Ver o que mudou">
+      <span class="sidebar-icon">🆕</span>
+      <span class="sidebar-label" id="version-label"></span>
     </div>
   </div>
 </nav>
@@ -1007,6 +1021,13 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 <!-- TOAST -->
 <div id="toast" role="alert" aria-live="assertive"></div>
 
+<!-- AVISO DE ATUALIZAÇÃO -->
+<div id="update-banner" role="status">
+  <span id="update-banner-text"></span>
+  <button id="update-banner-dismiss" onclick="dismissAppVersionNotice()">Marcar como visto</button>
+  <button id="update-banner-close" onclick="dismissAppVersionNotice()" aria-label="Fechar aviso">✕</button>
+</div>
+
 <!-- ASSISTENTE (harness) -->
 <button id="harness-toggle" onclick="harnessOpen()" aria-label="Abrir assistente" title="Assistente">✨</button>
 <div id="harness-panel" role="dialog" aria-label="Assistente do dashboard">
@@ -1189,6 +1210,36 @@ function toggleTheme() {
   applyTheme(cur === 'dark' ? 'light' : 'dark', true);
 }
 applyTheme(localStorage.getItem('grv_theme') || 'dark', false);
+
+/* ── VERSÃO / AVISO DE ATUALIZAÇÃO ──
+   Não há build/CI neste projeto (é um index.html só) — a data abaixo é
+   atualizada à mão a cada mudança relevante pro usuário. */
+const APP_VERSION = '2026-09-29';
+const APP_VERSION_NOTES = 'Assistente agora entende mais jeitos de perguntar (verbos conjugados, gírias) e responde sobre carga ao vivo, quem está sobrecarregado e ranking dentro de uma equipe.';
+
+function appVersionLabel() {
+  const [y, m, d] = APP_VERSION.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function showAppVersionNotice() {
+  document.getElementById('update-banner-text').textContent = `Atualização de ${appVersionLabel()}: ${APP_VERSION_NOTES}`;
+  document.getElementById('update-banner').classList.add('show');
+}
+
+function dismissAppVersionNotice() {
+  localStorage.setItem('grv_seen_version', APP_VERSION);
+  document.getElementById('update-banner').classList.remove('show');
+}
+
+function checkAppVersionNotice() {
+  const label = document.getElementById('version-label');
+  if (label) label.textContent = `v${APP_VERSION}`;
+  const seen = localStorage.getItem('grv_seen_version');
+  if (seen === null) { localStorage.setItem('grv_seen_version', APP_VERSION); return; }
+  if (seen !== APP_VERSION) showAppVersionNotice();
+}
+checkAppVersionNotice();
 
 let cfg = {
   account:   localStorage.getItem('grv_account')   || '1',
