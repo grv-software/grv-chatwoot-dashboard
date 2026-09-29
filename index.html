@@ -4244,6 +4244,7 @@ const HARNESS_MESES = ['janeiro','fevereiro','marco','abril','maio','junho',
 const HARNESS_PERIODOS_RELATIVOS = [
   { key: 'hoje',       aliases: ['hoje'] },
   { key: 'semana',     aliases: ['essa semana', 'esta semana'] },
+  { key: 'semanapassada', aliases: ['semana passada', 'semana anterior', 'ultima semana'] },
   { key: 'mes',        aliases: ['esse mes', 'este mes', 'mes atual', 'mes corrente'] },
   { key: 'mespassado', aliases: ['mes passado', 'mes anterior'] },
   { key: '3m',         aliases: ['3 meses', 'ultimos 3 meses', 'esse trimestre', 'este trimestre', 'trimestre'] },
@@ -4252,21 +4253,21 @@ const HARNESS_PERIODOS_RELATIVOS = [
 ].map(p => ({ key: p.key, label: p.key, aliases: p.aliases }));
 
 const HARNESS_METRICAS = Object.entries({
-  volume:    ['volume', 'atendimentos', 'conversas', 'chats'],
-  resolucao: ['resolvid', 'resolucao', 'taxa de resolucao', 'taxa'],
-  tmr:       ['1a resposta', 'primeira resposta', 'tempo de resposta', 'tmr', 'meta de resposta'],
+  volume:    ['volume', 'atendimentos', 'conversas', 'chats', 'atend'],
+  resolucao: ['resolv', 'resolucao', 'taxa de resolucao', 'taxa'],
+  tmr:       ['1a resposta', 'primeira resposta', 'tempo de resposta', 'tmr', 'meta de resposta', 'respond'],
   tma:       ['tempo de atendimento', 'tempo de resolucao', 'tma', 'tempo pra resolver', 'tempo para resolver'],
-  csat:      ['csat', 'satisfacao', 'avaliac', 'nota do cliente', 'estrela'],
+  csat:      ['csat', 'satisfacao', 'avali', 'nota do cliente', 'estrela'],
   score:     ['pontuacao', 'score', 'nota geral'],
   mensagens: ['mensagens por conversa', 'mensagens']
 }).map(([key, aliases]) => ({ key, label: key, aliases }));
 
 const HARNESS_FILA = Object.entries({
-  abertas:       ['abertas agora', 'em aberto agora', 'conversas abertas'],
-  pendentes:     ['pendentes', 'pendente'],
+  abertas:       ['abertas agora', 'em aberto agora', 'conversas abertas', 'em andamento'],
+  pendentes:     ['pendentes', 'pendente', 'aguardando'],
   semresposta:   ['sem resposta', 'nao atendidas', 'sem retorno', 'esperando resposta', 'aguardando resposta'],
   naoatribuidas: ['nao atribuida', 'sem atendente', 'sem agente atribuido'],
-  online:        ['online agora', 'agentes online', 'quem esta online']
+  online:        ['online agora', 'agentes online', 'quem esta online', 'logado', 'conectado']
 }).map(([key, aliases]) => ({ key, label: key, aliases }));
 
 /* "agora"/"neste momento" pede carga AO VIVO de um agente/equipe específico —
@@ -4316,10 +4317,13 @@ function harnessExtractEntities(rawMessage) {
 
 /* ── ASSISTENTE — ação e período ──────────────────────────── */
 const HARNESS_ACOES = {
-  navegar: ['vai pra', 'va para', 'abre a aba', 'muda pra aba', 'mostra a aba'],
+  navegar: ['vai pra', 'va para', 'abre a aba', 'muda pra aba', 'mostra a aba',
+            'abre', 'bora pra', 'me leva pra', 'quero ver a aba', 'bora ver'],
   filtrar: ['mostra so', 'mostra apenas', 'filtra pelo', 'filtra pela', 'filtra por',
-            'tira o filtro', 'limpa filtro', 'limpa os filtros', 'limpa todos os filtros', 'volta pra todas', 'remove o filtro'],
-  resumir: ['resumo geral', 'resumo', 'como estamos', 'o que mudou']
+            'tira o filtro', 'limpa filtro', 'limpa os filtros', 'limpa todos os filtros', 'volta pra todas', 'remove o filtro',
+            'filtr', 'quero ver so', 'fica so com'],
+  resumir: ['resumo geral', 'resumo', 'como estamos', 'o que mudou',
+            'como anda', 'como ta', 'panorama', 'visao geral', 'me atualiza']
 };
 
 function harnessDetectAcao(norm) {
@@ -4339,6 +4343,12 @@ function harnessRangeFromRelativo(key) {
     const dow = now.getDay(), diffToMon = (dow === 0 ? -6 : 1 - dow);
     const s = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon);
     return { since: Math.floor(s.getTime() / 1000), until };
+  }
+  if (key === 'semanapassada') {
+    const dow = now.getDay(), diffToMon = (dow === 0 ? -6 : 1 - dow);
+    const s = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon - 7);
+    const e = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon - 1, 23, 59, 59);
+    return { since: Math.floor(s.getTime() / 1000), until: Math.floor(e.getTime() / 1000) };
   }
   if (key === 'mes') {
     return { since: Math.floor(new Date(now.getFullYear(), now.getMonth(), 1).getTime() / 1000), until };
