@@ -4253,11 +4253,11 @@ const HARNESS_PERIODOS_RELATIVOS = [
 ].map(p => ({ key: p.key, label: p.key, aliases: p.aliases }));
 
 const HARNESS_METRICAS = Object.entries({
-  volume:    ['volume', 'atendimentos', 'conversas', 'chats'],
-  resolucao: ['resolvid', 'resolucao', 'taxa de resolucao', 'taxa'],
-  tmr:       ['1a resposta', 'primeira resposta', 'tempo de resposta', 'tmr', 'meta de resposta'],
+  volume:    ['volume', 'atendimentos', 'conversas', 'chats', 'atend'],
+  resolucao: ['resolv', 'resolucao', 'taxa de resolucao', 'taxa'],
+  tmr:       ['1a resposta', 'primeira resposta', 'tempo de resposta', 'tmr', 'meta de resposta', 'respond'],
   tma:       ['tempo de atendimento', 'tempo de resolucao', 'tma', 'tempo pra resolver', 'tempo para resolver'],
-  csat:      ['csat', 'satisfacao', 'avaliac', 'nota do cliente', 'estrela'],
+  csat:      ['csat', 'satisfacao', 'avali', 'nota do cliente', 'estrela'],
   score:     ['pontuacao', 'score', 'nota geral'],
   mensagens: ['mensagens por conversa', 'mensagens']
 }).map(([key, aliases]) => ({ key, label: key, aliases }));
