@@ -4711,6 +4711,66 @@ async function harnessValorRankingAgente(intent, agenteId) {
   return harnessValorPorMetrica(intent.metrica, s);
 }
 
+const HARNESS_SAG_RANKING_MAX_PAGES = 150;
+const HARNESS_SAG_RANKING_BATCH = 8;
+
+/* Paginação real medida em 2026-09-29 contra a API de produção: o mês
+   corrente inteiro do inbox SAG são 73 páginas / 1.810 conversas. O teto
+   de 150 páginas dá o dobro de folga pra "este mês"/"hoje"; períodos mais
+   longos ("trimestre", "6 meses") podem estourar — nesse caso a resposta
+   avisa que o número pode estar incompleto, mesmo padrão do aviso de
+   truncamento já usado no fix de paginação do CSAT. */
+async function harnessBuscarConversasSAGPorAgente(since, until) {
+  const porAgente = {};
+  let page = 1;
+  let parar = false;
+  while (!parar && page <= HARNESS_SAG_RANKING_MAX_PAGES) {
+    const paginas = Array.from({ length: HARNESS_SAG_RANKING_BATCH }, (_, i) => page + i);
+    const respostas = await Promise.all(paginas.map(p =>
+      api(`/v1/accounts/${cfg.account}/conversations?inbox_id=${SAG_INBOX_ID}&status=all&assignee_type=all&sort_by=created_at&page=${p}`).catch(() => null)
+    ));
+    let algumaComDado = false;
+    for (const r of respostas) {
+      const lista = r?.data?.payload || [];
+      if (!lista.length) continue;
+      algumaComDado = true;
+      for (const c of lista) {
+        if (c.created_at < since) { parar = true; continue; }
+        if (c.created_at > until) continue;
+        const a = c.meta?.assignee;
+        if (!a) continue;
+        if (!porAgente[a.id]) porAgente[a.id] = { nome: a.name, valor: 0 };
+        porAgente[a.id].valor++;
+      }
+    }
+    if (!algumaComDado) parar = true;
+    page += HARNESS_SAG_RANKING_BATCH;
+  }
+  const truncado = page > HARNESS_SAG_RANKING_MAX_PAGES;
+  return { porAgente, truncado };
+}
+
+async function harnessResponderRankingSAG(intent) {
+  const { since, until } = intent.periodo;
+  const periodoTxt = harnessFmtPeriodo(since, until);
+
+  if (intent.metrica !== 'volume') {
+    return 'Dentro do SAG eu só consigo comparar por quantidade de atendimentos — TMR, TMA e CSAT recortados por esse inbox exigiriam abrir cada conversa uma por uma. Pergunta por quantidade, ou tira o recorte do SAG.';
+  }
+
+  const { porAgente, truncado } = await harnessBuscarConversasSAGPorAgente(since, until);
+  const validos = Object.values(porAgente);
+  if (!validos.length) return `Não encontrei atendimentos no SAG em ${periodoTxt}.`;
+
+  const ordenarAsc = intent.direcao.modo === 'magnitude' ? !intent.direcao.desc : intent.direcao.quer !== 'melhor';
+  validos.sort((a, b) => ordenarAsc ? a.valor - b.valor : b.valor - a.valor);
+
+  const top = validos[0];
+  let texto = `No SAG, ${top.nome} lidera em ${periodoTxt}: ${top.valor} atendimento${top.valor === 1 ? '' : 's'}.`;
+  if (truncado) texto += ' (período longo — contei até o teto de páginas, o número real pode ser um pouco maior.)';
+  return texto;
+}
+
 async function harnessResponderRanking(intent) {
   const { since, until } = intent.periodo;
   const periodoTxt = harnessFmtPeriodo(since, until);
@@ -4723,6 +4783,9 @@ async function harnessResponderRanking(intent) {
     }
 
     let candidatos = _agentList;
+    if (intent.equipe && intent.equipe.key === SAG_FILTER_ID) {
+      return harnessResponderRankingSAG(intent);
+    }
     if (intent.equipe) {
       const memberIds = await harnessTeamMemberIds(intent.equipe.key);
       candidatos = _agentList.filter(a => (memberIds || []).includes(a.id));
