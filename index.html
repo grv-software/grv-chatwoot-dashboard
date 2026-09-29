@@ -4244,6 +4244,7 @@ const HARNESS_MESES = ['janeiro','fevereiro','marco','abril','maio','junho',
 const HARNESS_PERIODOS_RELATIVOS = [
   { key: 'hoje',       aliases: ['hoje'] },
   { key: 'semana',     aliases: ['essa semana', 'esta semana'] },
+  { key: 'semanapassada', aliases: ['semana passada', 'semana anterior', 'ultima semana'] },
   { key: 'mes',        aliases: ['esse mes', 'este mes', 'mes atual', 'mes corrente'] },
   { key: 'mespassado', aliases: ['mes passado', 'mes anterior'] },
   { key: '3m',         aliases: ['3 meses', 'ultimos 3 meses', 'esse trimestre', 'este trimestre', 'trimestre'] },
@@ -4339,6 +4340,12 @@ function harnessRangeFromRelativo(key) {
     const dow = now.getDay(), diffToMon = (dow === 0 ? -6 : 1 - dow);
     const s = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon);
     return { since: Math.floor(s.getTime() / 1000), until };
+  }
+  if (key === 'semanapassada') {
+    const dow = now.getDay(), diffToMon = (dow === 0 ? -6 : 1 - dow);
+    const s = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon - 7);
+    const e = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon - 1, 23, 59, 59);
+    return { since: Math.floor(s.getTime() / 1000), until: Math.floor(e.getTime() / 1000) };
   }
   if (key === 'mes') {
     return { since: Math.floor(new Date(now.getFullYear(), now.getMonth(), 1).getTime() / 1000), until };
