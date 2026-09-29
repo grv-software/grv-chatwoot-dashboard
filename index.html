@@ -4269,6 +4269,17 @@ const HARNESS_FILA = Object.entries({
   online:        ['online agora', 'agentes online', 'quem esta online']
 }).map(([key, aliases]) => ({ key, label: key, aliases }));
 
+/* "agora"/"neste momento" pede carga AO VIVO de um agente/equipe específico —
+   diferente de HARNESS_FILA, que é sobre a conta inteira. Sobrecarga não
+   precisa da palavra "agora": perguntar se alguém "está sobrecarregado" já é
+   inerentemente sobre o presente. */
+const HARNESS_CARGA_LIVE_RE = /\bagora\b|\bneste momento\b|\bno momento\b|\bnesse momento\b/;
+const HARNESS_SOBRECARGA_RE = /sobrecarregad|tranquil[oa]|afogad|precisa de (ajuda|reforco)/;
+
+function harnessDirecaoSobrecarga(norm) {
+  return /tranquil[oa]|folgad|mais calm/.test(norm) ? 'tranquilo' : 'sobrecarregado';
+}
+
 const HARNESS_PAGINAS = [
   { key: 'painel',        label: 'painel',        aliases: ['painel', 'inicio'] },
   { key: 'agentes',       label: 'agentes',       aliases: ['agentes'] },
@@ -4397,6 +4408,24 @@ function harnessResolveIntent(entities) {
     return { tipo: 'filtrar', limpar, equipe: teams[0] || null, agente: agents[0] || null };
   }
 
+  const cargaLive = HARNESS_CARGA_LIVE_RE.test(norm);
+  const sobrecarga = HARNESS_SOBRECARGA_RE.test(norm);
+  if (sobrecarga || (cargaLive && (teams.length || agents.length))) {
+    let escopo;
+    if (agents.length) escopo = 'agente';
+    else if (teams.length) escopo = 'equipe';
+    else if (sobrecarga && /\bequipe\b|\btime\b/.test(norm)) escopo = 'equipe';
+    else escopo = 'todos';
+    return {
+      tipo: 'carga',
+      modo: sobrecarga ? 'sobrecarga' : 'valor',
+      escopo,
+      agente: agents[0] || null,
+      equipe: teams[0] || null,
+      direcao: sobrecarga ? harnessDirecaoSobrecarga(norm) : null
+    };
+  }
+
   if (fila) return { tipo: 'fila', fila: fila.key };
 
   if (acao === 'resumir' && !teams.length && !agents.length) {
@@ -4411,6 +4440,15 @@ function harnessResolveIntent(entities) {
   }
   if (agents.length === 2) {
     return { tipo: 'comparar', escopo: 'agente', a: agents[0], b: agents[1], metrica: metrica?.key || 'volume', periodo };
+  }
+
+  /* Uma equipe citada junto com "quem"/"mais"/"menos" etc. é ranking
+     DENTRO daquele time, não equipe-vs-equipe — precisa vir antes do
+     ramo de ranking sem equipe (que assume toda a conta) e antes do
+     fallback pra 'metrica' (que trataria a equipe como escopo de uma
+     pergunta de valor único, não de comparação entre agentes). */
+  if (teams.length === 1 && !agents.length && harnessIsRanking(norm)) {
+    return { tipo: 'ranking', escopo: 'agente', equipe: teams[0], metrica: metrica?.key || 'volume', direcao: harnessDirecaoRanking(norm), periodo };
   }
 
   /* Sem exigir metrica reconhecida: "quem atendeu mais" não cita nenhuma
@@ -4673,6 +4711,66 @@ async function harnessValorRankingAgente(intent, agenteId) {
   return harnessValorPorMetrica(intent.metrica, s);
 }
 
+const HARNESS_SAG_RANKING_MAX_PAGES = 150;
+const HARNESS_SAG_RANKING_BATCH = 8;
+
+/* Paginação real medida em 2026-09-29 contra a API de produção: o mês
+   corrente inteiro do inbox SAG são 73 páginas / 1.810 conversas. O teto
+   de 150 páginas dá o dobro de folga pra "este mês"/"hoje"; períodos mais
+   longos ("trimestre", "6 meses") podem estourar — nesse caso a resposta
+   avisa que o número pode estar incompleto, mesmo padrão do aviso de
+   truncamento já usado no fix de paginação do CSAT. */
+async function harnessBuscarConversasSAGPorAgente(since, until) {
+  const porAgente = {};
+  let page = 1;
+  let parar = false;
+  while (!parar && page <= HARNESS_SAG_RANKING_MAX_PAGES) {
+    const paginas = Array.from({ length: HARNESS_SAG_RANKING_BATCH }, (_, i) => page + i);
+    const respostas = await Promise.all(paginas.map(p =>
+      api(`/v1/accounts/${cfg.account}/conversations?inbox_id=${SAG_INBOX_ID}&status=all&assignee_type=all&sort_by=created_at&page=${p}`).catch(() => null)
+    ));
+    let algumaComDado = false;
+    for (const r of respostas) {
+      const lista = r?.data?.payload || [];
+      if (!lista.length) continue;
+      algumaComDado = true;
+      for (const c of lista) {
+        if (c.created_at < since) { parar = true; continue; }
+        if (c.created_at > until) continue;
+        const a = c.meta?.assignee;
+        if (!a) continue;
+        if (!porAgente[a.id]) porAgente[a.id] = { nome: a.name, valor: 0 };
+        porAgente[a.id].valor++;
+      }
+    }
+    if (!algumaComDado) parar = true;
+    page += HARNESS_SAG_RANKING_BATCH;
+  }
+  const truncado = page > HARNESS_SAG_RANKING_MAX_PAGES;
+  return { porAgente, truncado };
+}
+
+async function harnessResponderRankingSAG(intent) {
+  const { since, until } = intent.periodo;
+  const periodoTxt = harnessFmtPeriodo(since, until);
+
+  if (intent.metrica !== 'volume') {
+    return 'Dentro do SAG eu só consigo comparar por quantidade de atendimentos — TMR, TMA e CSAT recortados por esse inbox exigiriam abrir cada conversa uma por uma. Pergunta por quantidade, ou tira o recorte do SAG.';
+  }
+
+  const { porAgente, truncado } = await harnessBuscarConversasSAGPorAgente(since, until);
+  const validos = Object.values(porAgente);
+  if (!validos.length) return `Não encontrei atendimentos no SAG em ${periodoTxt}.`;
+
+  const ordenarAsc = intent.direcao.modo === 'magnitude' ? !intent.direcao.desc : intent.direcao.quer !== 'melhor';
+  validos.sort((a, b) => ordenarAsc ? a.valor - b.valor : b.valor - a.valor);
+
+  const top = validos[0];
+  let texto = `No SAG, ${top.nome} lidera em ${periodoTxt}: ${top.valor} atendimento${top.valor === 1 ? '' : 's'}.`;
+  if (truncado) texto += ' (período longo — contei até o teto de páginas, o número real pode ser um pouco maior.)';
+  return texto;
+}
+
 async function harnessResponderRanking(intent) {
   const { since, until } = intent.periodo;
   const periodoTxt = harnessFmtPeriodo(since, until);
@@ -4683,7 +4781,18 @@ async function harnessResponderRanking(intent) {
       const agents = await api(`/v1/accounts/${cfg.account}/agents`).catch(() => []);
       if (Array.isArray(agents)) _agentList = agents;
     }
-    resultados = await Promise.all(_agentList.map(async a => {
+
+    let candidatos = _agentList;
+    if (intent.equipe && intent.equipe.key === SAG_FILTER_ID) {
+      return harnessResponderRankingSAG(intent);
+    }
+    if (intent.equipe) {
+      const memberIds = await harnessTeamMemberIds(intent.equipe.key);
+      candidatos = _agentList.filter(a => (memberIds || []).includes(a.id));
+      if (!candidatos.length) return `Não encontrei agentes na equipe ${intent.equipe.label}.`;
+    }
+
+    resultados = await Promise.all(candidatos.map(async a => {
       const valor = await harnessValorRankingAgente(intent, a.id);
       return valor == null ? null : { nome: a.name, valor };
     }));
@@ -4738,6 +4847,106 @@ async function harnessExecutarFila(intent) {
   const valor = { abertas: r.open, pendentes: r.pending, semresposta: r.unattended, naoatribuidas: r.unassigned }[intent.fila];
   if (valor == null) return 'Não encontrei esse dado ao vivo agora.';
   return `Tem ${valor} conversa${valor === 1 ? '' : 's'} ${label} agora.`;
+}
+
+/* ── ASSISTENTE — execução: carga ao vivo e sobrecarga ────── */
+function harnessCargaAoVivo() {
+  const porAgente = {};
+  for (const c of [..._rawConvs, ..._pendingConvs]) {
+    const a = c.meta?.assignee;
+    if (!a) continue;
+    if (!porAgente[a.id]) porAgente[a.id] = { nome: a.name, valor: 0 };
+    porAgente[a.id].valor++;
+  }
+  return porAgente;
+}
+
+async function harnessAgentTeamMap() {
+  const mapa = {};
+  const times = harnessTeamCandidates().filter(t => t.key !== SAG_FILTER_ID);
+  const listas = await Promise.all(times.map(t => harnessTeamMemberIds(t.key)));
+  times.forEach((t, i) => { (listas[i] || []).forEach(agentId => { mapa[agentId] = t.key; }); });
+  return mapa;
+}
+
+async function harnessExecutarCarga(intent) {
+  const carga = harnessCargaAoVivo();
+
+  if (intent.modo === 'valor') {
+    if (intent.agente) {
+      const valor = carga[intent.agente.key]?.valor || 0;
+      return `${intent.agente.label} tem ${valor} atendimento${valor === 1 ? '' : 's'} em aberto agora.`;
+    }
+    if (intent.equipe) {
+      if (intent.equipe.key === SAG_FILTER_ID) {
+        const doSag = [..._rawConvs, ..._pendingConvs].filter(c => c.inbox_id === SAG_INBOX_ID).length;
+        return `O SAG tem ${doSag} atendimento${doSag === 1 ? '' : 's'} em aberto agora.`;
+      }
+      const membros = await harnessTeamMemberIds(intent.equipe.key);
+      const valor = (membros || []).reduce((soma, id) => soma + (carga[id]?.valor || 0), 0);
+      return `A equipe ${intent.equipe.label} tem ${valor} atendimento${valor === 1 ? '' : 's'} em aberto agora.`;
+    }
+    return 'Me diga qual agente ou equipe você quer ver a carga ao vivo.';
+  }
+
+  /* modo 'sobrecarga' */
+  const mapa = await harnessAgentTeamMap();
+  const somaTime = {}; const contaTime = {}; const mediaTime = {};
+  Object.entries(mapa).forEach(([agentId, teamId]) => {
+    contaTime[teamId] = (contaTime[teamId] || 0) + 1;
+    somaTime[teamId] = (somaTime[teamId] || 0) + (carga[agentId]?.valor || 0);
+  });
+  Object.keys(contaTime).forEach(teamId => { mediaTime[teamId] = somaTime[teamId] / contaTime[teamId]; });
+
+  if (intent.escopo === 'equipe') {
+    if (intent.equipe?.key === SAG_FILTER_ID) {
+      return 'O SAG não tem um time fixo de agentes, então não dá pra calcular uma média por pessoa pra comparar sobrecarga. Pergunte sobre uma equipe real, ou "quantos atendimentos o SAG tem agora" pra ver o volume ao vivo.';
+    }
+    if (intent.equipe) {
+      const teamId = intent.equipe.key;
+      const media = mediaTime[teamId] || 0;
+      const outras = Object.entries(mediaTime).filter(([tid]) => Number(tid) !== Number(teamId)).map(([, m]) => m);
+      const mediaOutras = outras.length ? outras.reduce((a, b) => a + b, 0) / outras.length : 0;
+      if (media === 0) return `A equipe ${intent.equipe.label} não tem nenhum atendimento em aberto agora.`;
+      const status = media >= mediaOutras * 1.5 ? 'está mais carregada que as outras equipes'
+        : media <= mediaOutras / 1.5 ? 'está mais tranquila que as outras equipes'
+        : 'está com carga parecida com as outras equipes';
+      return `A equipe ${intent.equipe.label} ${status}: média de ${media.toFixed(1)} atendimentos por agente agora (outras equipes: ${mediaOutras.toFixed(1)}).`;
+    }
+    const entradas = Object.entries(mediaTime);
+    if (!entradas.length) return 'Não encontrei dados de carga por equipe agora.';
+    entradas.sort((a, b) => intent.direcao === 'tranquilo' ? a[1] - b[1] : b[1] - a[1]);
+    const [teamId, media] = entradas[0];
+    const nome = (_teamMap[teamId] || {}).name || `Time ${teamId}`;
+    return intent.direcao === 'tranquilo'
+      ? `A equipe ${nome} está mais tranquila agora: média de ${media.toFixed(1)} atendimentos por agente.`
+      : `A equipe ${nome} está mais sobrecarregada agora: média de ${media.toFixed(1)} atendimentos por agente.`;
+  }
+
+  if (intent.agente) {
+    const teamId = mapa[intent.agente.key];
+    const valor = carga[intent.agente.key]?.valor || 0;
+    if (teamId == null) return `${intent.agente.label} tem ${valor} atendimento${valor === 1 ? '' : 's'} agora, mas não encontrei o time dele(a) pra comparar com a média.`;
+    const media = mediaTime[teamId] || 0;
+    if (media === 0) return `${intent.agente.label} tem ${valor} atendimento${valor === 1 ? '' : 's'} agora — o time dele(a) está zerado agora, sem média pra comparar.`;
+    const razao = valor / media;
+    return razao >= 1.5
+      ? `Sim — ${intent.agente.label} está sobrecarregado(a): ${valor} atendimentos agora, ${razao.toFixed(1)}x a média do time (${media.toFixed(1)}).`
+      : `Não — ${intent.agente.label} está com ${valor} atendimentos agora, dentro da média do time (${media.toFixed(1)}).`;
+  }
+
+  const candidatos = Object.entries(carga)
+    .map(([agentId, e]) => {
+      const teamId = mapa[agentId];
+      if (teamId == null || !mediaTime[teamId]) return null;
+      return { nome: e.nome, valor: e.valor, razao: e.valor / mediaTime[teamId] };
+    })
+    .filter(c => c && c.razao >= 1.5)
+    .sort((a, b) => b.razao - a.razao);
+  if (!candidatos.length) return 'Ninguém está claramente sobrecarregado agora — a carga está equilibrada entre os times.';
+  const top = candidatos[0];
+  const resto = candidatos.length > 1 ? ` (e mais ${candidatos.length - 1} agente${candidatos.length - 1 === 1 ? '' : 's'})` : '';
+  return `${top.nome} está sobrecarregado(a): ${top.valor} atendimentos agora, ${top.razao.toFixed(1)}x a média do time${resto}.`;
 }
 
 function harnessResponderResumir() {
@@ -4882,6 +5091,7 @@ async function harnessHandleMessage(text) {
   try {
     if (intent.tipo === 'navegar')  resposta = harnessExecutarNavegar(intent);
     else if (intent.tipo === 'filtrar')  resposta = harnessExecutarFiltrar(intent);
+    else if (intent.tipo === 'carga')    resposta = await harnessExecutarCarga(intent);
     else if (intent.tipo === 'fila')     resposta = await harnessExecutarFila(intent);
     else if (intent.tipo === 'comparar') resposta = await harnessResponderComparar(intent);
     else if (intent.tipo === 'ranking')  resposta = await harnessResponderRanking(intent);
