@@ -4253,21 +4253,21 @@ const HARNESS_PERIODOS_RELATIVOS = [
 ].map(p => ({ key: p.key, label: p.key, aliases: p.aliases }));
 
 const HARNESS_METRICAS = Object.entries({
-  volume:    ['volume', 'atendimentos', 'conversas', 'chats'],
-  resolucao: ['resolvid', 'resolucao', 'taxa de resolucao', 'taxa'],
-  tmr:       ['1a resposta', 'primeira resposta', 'tempo de resposta', 'tmr', 'meta de resposta'],
+  volume:    ['volume', 'atendimentos', 'conversas', 'chats', 'atend'],
+  resolucao: ['resolv', 'resolucao', 'taxa de resolucao', 'taxa'],
+  tmr:       ['1a resposta', 'primeira resposta', 'tempo de resposta', 'tmr', 'meta de resposta', 'respond'],
   tma:       ['tempo de atendimento', 'tempo de resolucao', 'tma', 'tempo pra resolver', 'tempo para resolver'],
-  csat:      ['csat', 'satisfacao', 'avaliac', 'nota do cliente', 'estrela'],
+  csat:      ['csat', 'satisfacao', 'avali', 'nota do cliente', 'estrela'],
   score:     ['pontuacao', 'score', 'nota geral'],
   mensagens: ['mensagens por conversa', 'mensagens']
 }).map(([key, aliases]) => ({ key, label: key, aliases }));
 
 const HARNESS_FILA = Object.entries({
-  abertas:       ['abertas agora', 'em aberto agora', 'conversas abertas'],
-  pendentes:     ['pendentes', 'pendente'],
+  abertas:       ['abertas agora', 'em aberto agora', 'conversas abertas', 'em andamento'],
+  pendentes:     ['pendentes', 'pendente', 'aguardando'],
   semresposta:   ['sem resposta', 'nao atendidas', 'sem retorno', 'esperando resposta', 'aguardando resposta'],
   naoatribuidas: ['nao atribuida', 'sem atendente', 'sem agente atribuido'],
-  online:        ['online agora', 'agentes online', 'quem esta online']
+  online:        ['online agora', 'agentes online', 'quem esta online', 'logado', 'conectado']
 }).map(([key, aliases]) => ({ key, label: key, aliases }));
 
 /* "agora"/"neste momento" pede carga AO VIVO de um agente/equipe específico —
@@ -4317,10 +4317,13 @@ function harnessExtractEntities(rawMessage) {
 
 /* ── ASSISTENTE — ação e período ──────────────────────────── */
 const HARNESS_ACOES = {
-  navegar: ['vai pra', 'va para', 'abre a aba', 'muda pra aba', 'mostra a aba'],
+  navegar: ['vai pra', 'va para', 'abre a aba', 'muda pra aba', 'mostra a aba',
+            'abre', 'bora pra', 'me leva pra', 'quero ver a aba', 'bora ver'],
   filtrar: ['mostra so', 'mostra apenas', 'filtra pelo', 'filtra pela', 'filtra por',
-            'tira o filtro', 'limpa filtro', 'limpa os filtros', 'limpa todos os filtros', 'volta pra todas', 'remove o filtro'],
-  resumir: ['resumo geral', 'resumo', 'como estamos', 'o que mudou']
+            'tira o filtro', 'limpa filtro', 'limpa os filtros', 'limpa todos os filtros', 'volta pra todas', 'remove o filtro',
+            'filtr', 'quero ver so', 'fica so com'],
+  resumir: ['resumo geral', 'resumo', 'como estamos', 'o que mudou',
+            'como anda', 'como ta', 'panorama', 'visao geral', 'me atualiza']
 };
 
 function harnessDetectAcao(norm) {
