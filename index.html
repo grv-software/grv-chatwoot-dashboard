@@ -4442,6 +4442,15 @@ function harnessResolveIntent(entities) {
     return { tipo: 'comparar', escopo: 'agente', a: agents[0], b: agents[1], metrica: metrica?.key || 'volume', periodo };
   }
 
+  /* Uma equipe citada junto com "quem"/"mais"/"menos" etc. é ranking
+     DENTRO daquele time, não equipe-vs-equipe — precisa vir antes do
+     ramo de ranking sem equipe (que assume toda a conta) e antes do
+     fallback pra 'metrica' (que trataria a equipe como escopo de uma
+     pergunta de valor único, não de comparação entre agentes). */
+  if (teams.length === 1 && !agents.length && harnessIsRanking(norm)) {
+    return { tipo: 'ranking', escopo: 'agente', equipe: teams[0], metrica: metrica?.key || 'volume', direcao: harnessDirecaoRanking(norm), periodo };
+  }
+
   /* Sem exigir metrica reconhecida: "quem atendeu mais" não cita nenhuma
      palavra da tabela de métricas (só "atendimentos"/"atendeu" bate, e
      "atendeu" — verbo conjugado — não está na lista de aliases), mas ainda
@@ -4712,7 +4721,15 @@ async function harnessResponderRanking(intent) {
       const agents = await api(`/v1/accounts/${cfg.account}/agents`).catch(() => []);
       if (Array.isArray(agents)) _agentList = agents;
     }
-    resultados = await Promise.all(_agentList.map(async a => {
+
+    let candidatos = _agentList;
+    if (intent.equipe) {
+      const memberIds = await harnessTeamMemberIds(intent.equipe.key);
+      candidatos = _agentList.filter(a => (memberIds || []).includes(a.id));
+      if (!candidatos.length) return `Não encontrei agentes na equipe ${intent.equipe.label}.`;
+    }
+
+    resultados = await Promise.all(candidatos.map(async a => {
       const valor = await harnessValorRankingAgente(intent, a.id);
       return valor == null ? null : { nome: a.name, valor };
     }));
