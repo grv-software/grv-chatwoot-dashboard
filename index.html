@@ -4263,11 +4263,11 @@ const HARNESS_METRICAS = Object.entries({
 }).map(([key, aliases]) => ({ key, label: key, aliases }));
 
 const HARNESS_FILA = Object.entries({
-  abertas:       ['abertas agora', 'em aberto agora', 'conversas abertas'],
-  pendentes:     ['pendentes', 'pendente'],
+  abertas:       ['abertas agora', 'em aberto agora', 'conversas abertas', 'em andamento'],
+  pendentes:     ['pendentes', 'pendente', 'aguardando'],
   semresposta:   ['sem resposta', 'nao atendidas', 'sem retorno', 'esperando resposta', 'aguardando resposta'],
   naoatribuidas: ['nao atribuida', 'sem atendente', 'sem agente atribuido'],
-  online:        ['online agora', 'agentes online', 'quem esta online']
+  online:        ['online agora', 'agentes online', 'quem esta online', 'logado', 'conectado']
 }).map(([key, aliases]) => ({ key, label: key, aliases }));
 
 /* "agora"/"neste momento" pede carga AO VIVO de um agente/equipe específico —
