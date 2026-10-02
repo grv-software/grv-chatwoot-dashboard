@@ -6,206 +6,325 @@
 <title>Painel de Implantações — GRV</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@420;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root {
-    /* tokens extraidos ao vivo de crm.nxlite.com.br (Frappe UI) */
-    --bg: #f8f8f8;
-    --panel: #ffffff;
-    --panel-2: #f3f3f3;
-    --border: #ededed;
-    --text: #383838;
-    --text-dim: #525252;
-    --muted: #7c7c7c;
-    --heading: #171717;
-    --good: #30a66d;
-    --critical: #cc2929;
+    /* Superficies */
+    --bg: #f2efe9;
+    --surface: #ffffff;
+    --surface-sunken: #ece8de;
+    --border: #e2ddd0;
+    --border-strong: #d2cbb9;
+
+    /* Tinta */
+    --ink: #17140f;
+    --ink-dim: #5c5648;
+    --ink-faint: #938c7a;
+
+    /* Marca GRV (amostrada do icone oficial) */
+    --brand: #f8511c;
+    --brand-ink: #ffffff;
+    --brand-soft: #fde6da;
+
+    /* Status -- paleta validada nesta sessao (dataviz/validate_palette.js) */
+    --good: #0ca30c;
+    --good-soft: #e1f3e0;
+    --warning: #b9790a;
+    --warning-soft: #faeed2;
+    --critical: #d03b3b;
+    --critical-soft: #fae2e1;
+    --neutral-status: #8a8575;
+    --neutral-soft: #eeece5;
+
     --radius-sm: 8px;
-    --radius-md: 10px;
-    --radius-lg: 12px;
-    --shadow-card: 0px 0px 1px rgba(0,0,0,.12), 0px .5px 2px rgba(0,0,0,.1), 0px 2px 3px rgba(0,0,0,.06);
-    --shadow-modal: 0px 0px 1px rgba(0,0,0,.19), 0px 1px 2px rgba(0,0,0,.07), 0px 6px 15px -5px rgba(0,0,0,.11);
-    /* compatibilidade com o codigo existente -- nao usar como decoracao nova */
-    --orange: var(--text);
+    --radius-md: 14px;
+    --radius-lg: 22px;
+    --shadow-card: 0 1px 2px rgba(23,20,15,.04), 0 12px 28px -18px rgba(23,20,15,.3);
+    --shadow-pop: 0 4px 10px rgba(23,20,15,.08), 0 28px 56px -24px rgba(23,20,15,.35);
+
+    /* compatibilidade com o codigo existente */
+    --panel: var(--surface);
+    --panel-2: var(--surface-sunken);
+    --text: var(--ink);
+    --text-dim: var(--ink-dim);
+    --muted: var(--ink-faint);
+    --heading: var(--ink);
+    --orange: var(--brand);
     --green: var(--good);
-    --yellow: var(--muted);
-    --purple: var(--text-dim);
-    --grey: var(--muted);
+    --yellow: var(--warning);
+    --purple: var(--brand);
+    --grey: var(--neutral-status);
     --red: var(--critical);
+    --shadow-modal: var(--shadow-pop);
   }
   * { box-sizing: border-box; }
   body {
     background: var(--bg);
-    color: var(--text);
+    color: var(--ink);
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
     margin: 0;
-    padding: 24px;
+    padding: 0 0 64px;
   }
-  h1 { font-size: 22px; margin: 0 0 4px; color: var(--heading); font-weight: 600; }
-  .subtitle { color: var(--text-dim); font-size: 13px; margin-bottom: 24px; }
-  .kpis {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
-    margin-bottom: 28px;
-  }
-  .kpi {
-    background: var(--panel);
-    box-shadow: var(--shadow-card);
-    border-left: 3px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 16px;
-  }
-  .kpi .value { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--heading); }
-  .kpi .label { color: var(--text-dim); font-size: 12px; margin-top: 4px; }
-  .kpi.orange .value { color: var(--orange); }
-  .kpi.red { border-left-color: var(--critical); }
-  .kpi.red .value { color: var(--red); }
-  .kpi.grey .value { color: var(--grey); }
-  .kpi.green { border-left-color: var(--good); }
-  .kpi.green .value { color: var(--green); }
+  .page { max-width: 1240px; margin: 0 auto; padding: 28px 28px 0; }
 
-  .panel {
-    background: var(--panel);
-    box-shadow: var(--shadow-card);
-    border-radius: var(--radius-md);
-    padding: 20px;
+  .app-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
     margin-bottom: 24px;
   }
-  .panel h2 { font-size: 15px; margin: 0 0 16px; display: flex; align-items: center; gap: 8px; }
-  .panel h2 .count { color: var(--text-dim); font-weight: 400; font-size: 13px; }
-
-  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; }
-  .bar-name { width: 160px; flex-shrink: 0; color: var(--text-dim); text-align: right; }
-  .bar-track { flex: 1; background: var(--panel-2); border-radius: 4px; overflow: hidden; height: 20px; }
-  .bar-fill { background: var(--text-dim); height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 600; color: #ffffff; font-variant-numeric: tabular-nums; }
-  .bar-fill.critical { background: var(--critical); }
-  .progresso-mini { display: flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; font-size: 11px; white-space: nowrap; }
-  .progresso-mini .trilha { width: 48px; height: 6px; border-radius: 3px; background: var(--panel-2); overflow: hidden; }
-  .progresso-mini .preenchido { height: 100%; background: var(--good, #30a66d); }
-  .modulo-linha { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
-  .modulo-linha:last-child { border-bottom: none; }
-
-  .controls { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
-  input[type=text], select {
-    background: var(--panel-2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 6px;
-    padding: 7px 10px;
-    font-size: 13px;
+  .app-bar .mark {
+    width: 38px; height: 38px; flex-shrink: 0;
+    background: var(--brand);
+    border-radius: 10px;
+    transform: rotate(45deg);
+    position: relative;
   }
+  .app-bar .mark::after {
+    content: "";
+    position: absolute; inset: 7px;
+    border-radius: 4px;
+    background: rgba(255,255,255,.35);
+  }
+  .app-bar .titles { flex: 1; min-width: 0; }
+  h1 { font-size: 21px; margin: 0; color: var(--ink); font-weight: 800; letter-spacing: -0.01em; }
+  .subtitle { color: var(--ink-dim); font-size: 13px; margin-top: 2px; }
+  .updated-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 7px 14px 7px 10px;
+    font-size: 12px;
+    color: var(--ink-dim);
+    font-weight: 600;
+    box-shadow: var(--shadow-card);
+    flex-shrink: 0;
+  }
+  .updated-pill::before {
+    content: ""; width: 7px; height: 7px; border-radius: 999px; background: var(--good);
+  }
+
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .kpi {
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+  }
+  .kpi .value { font-size: 32px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--ink); letter-spacing: -0.02em; line-height: 1; }
+  .kpi .label {
+    display: flex; align-items: center; gap: 7px;
+    color: var(--ink-dim); font-size: 12.5px; font-weight: 500; margin-top: 9px; line-height: 1.4;
+  }
+  .kpi .label::before {
+    content: ""; width: 7px; height: 7px; border-radius: 999px; background: var(--ink-faint); flex-shrink: 0;
+  }
+  .kpi.orange .value { color: var(--brand); }
+  .kpi.orange .label::before { background: var(--brand); }
+  .kpi.red .value { color: var(--critical); }
+  .kpi.red .label::before { background: var(--critical); }
+  .kpi.grey .value { color: var(--neutral-status); }
+  .kpi.grey .label::before { background: var(--neutral-status); }
+  .kpi.green .value { color: var(--good); }
+  .kpi.green .label::before { background: var(--good); }
+
+  .panel {
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
+    border-radius: var(--radius-lg);
+    padding: 22px 24px;
+    margin-bottom: 20px;
+  }
+  .panel h2 {
+    font-size: 14.5px; font-weight: 700; margin: 0 0 18px; color: var(--ink);
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .panel h2 .count {
+    color: var(--ink-faint); font-weight: 600; font-size: 11.5px;
+    background: var(--surface-sunken); border-radius: 999px; padding: 3px 10px;
+  }
+
+  .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; font-size: 13px; }
+  .bar-row:last-child { margin-bottom: 0; }
+  .bar-name { width: 220px; flex-shrink: 0; color: var(--ink-dim); text-align: right; font-weight: 500; }
+  .bar-track { flex: 1; background: var(--surface-sunken); border-radius: 999px; overflow: hidden; height: 12px; }
+  .bar-fill { background: var(--ink-faint); height: 100%; border-radius: 999px; }
+  .bar-fill.critical { background: var(--critical); }
+  .bar-value { width: 48px; flex-shrink: 0; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); }
+
+  .progresso-mini { display: flex; align-items: center; gap: 7px; font-variant-numeric: tabular-nums; font-size: 11.5px; font-weight: 600; white-space: nowrap; color: var(--ink-dim); }
+  .progresso-mini .trilha { width: 52px; height: 6px; border-radius: 3px; background: var(--surface-sunken); overflow: hidden; }
+  .progresso-mini .preenchido { height: 100%; background: var(--good); border-radius: 3px; }
+  .modulo-linha { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+  .modulo-linha:last-child { border-bottom: none; }
+  .modulo-linha .nome { font-weight: 600; }
+  .modulo-linha .status-txt { color: var(--ink-faint); flex-shrink: 0; }
+
+  .controls { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  input[type=text], select {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    color: var(--ink);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  input[type=text]:focus, select:focus {
+    outline: 2px solid var(--brand);
+    outline-offset: 1px;
+  }
+  input[type=text] { min-width: 220px; }
+
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th {
     text-align: left;
-    color: var(--text-dim);
-    font-weight: 600;
-    font-size: 11px;
+    color: var(--ink-faint);
+    font-weight: 700;
+    font-size: 10.5px;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--border);
+    letter-spacing: 0.04em;
+    padding: 0 12px 10px;
+    border-bottom: 1px solid var(--border-strong);
     cursor: pointer;
     user-select: none;
     white-space: nowrap;
   }
-  th:hover { color: var(--text); }
-  td { padding: 10px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
-  tr:hover td { background: var(--panel-2); }
+  th:hover { color: var(--ink); }
+  td { padding: 13px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface-sunken); }
+
   .badge {
     display: inline-block;
-    padding: 2px 8px;
+    padding: 3px 10px;
     border-radius: 999px;
     font-size: 11px;
-    font-weight: 600;
-    color: #ffffff;
+    font-weight: 700;
     white-space: nowrap;
   }
-  .proj-id { color: var(--text-dim); font-size: 11px; }
-  .cliente { font-weight: 600; }
-  .motivo { color: var(--text-dim); max-width: 420px; display: block; }
-  .dias { font-weight: 700; }
-  .dias.critico { color: var(--critical); }
-  .dias.alto { color: var(--text); }
-  .dias.medio { color: var(--text-dim); }
-  .dias.baixo { color: var(--muted); }
+  .badge-motivo { background: var(--good-soft); color: #0a7d0a; }
+  .badge-sem-motivo { background: var(--critical-soft); color: #a62c2c; }
+  .badge-confuso { background: var(--neutral-soft); color: var(--ink-dim); }
+  .badge-sim { background: var(--warning-soft); color: #8f6107; }
+  .badge-nao { background: var(--neutral-soft); color: var(--ink-faint); }
+  .badge-lote { background: var(--neutral-soft); color: var(--ink-dim); }
+
+  .proj-id { color: var(--ink-faint); font-size: 11px; font-weight: 600; }
+  .cliente { font-weight: 700; color: var(--ink); }
+  .motivo { color: var(--ink-dim); max-width: 420px; display: block; margin-top: 4px; line-height: 1.45; }
+
+  .dias-pill {
+    display: inline-flex; align-items: baseline; gap: 2px;
+    font-weight: 800; font-variant-numeric: tabular-nums;
+    padding: 3px 10px; border-radius: 999px; font-size: 13px;
+  }
+  .dias-pill.critico { background: var(--critical-soft); color: #a62c2c; }
+  .dias-pill.alto { background: var(--warning-soft); color: #8f6107; }
+  .dias-pill.medio { background: var(--neutral-soft); color: var(--ink-dim); }
+  .dias-pill.baixo { background: var(--surface-sunken); color: var(--ink-faint); }
+  .dias-pill .unidade { font-weight: 600; font-size: 10px; opacity: .8; }
+
   .toggle-btn {
-    background: var(--panel-2);
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    border-radius: 6px;
-    padding: 6px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    color: var(--ink-dim);
+    border-radius: 999px;
+    padding: 7px 14px;
     font-size: 12px;
+    font-weight: 600;
     cursor: pointer;
   }
-  .toggle-btn:hover { color: var(--text); }
-  .warn-box {
-    background: #fdfaed;
-    border: 1px solid #f7e28d;
+  .toggle-btn:hover { color: var(--ink); border-color: var(--ink-faint); }
+
+  .note-card {
+    display: flex; gap: 12px;
+    background: var(--surface);
+    border-left: 4px solid var(--warning);
     border-radius: var(--radius-sm);
-    padding: 12px 16px;
+    box-shadow: var(--shadow-card);
+    padding: 14px 18px;
     font-size: 13px;
-    color: var(--text-dim);
-    margin-bottom: 16px;
+    color: var(--ink-dim);
+    line-height: 1.5;
+    margin-bottom: 18px;
   }
-  .action-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-  .action-list li { display: flex; gap: 10px; font-size: 13px; line-height: 1.5; align-items: baseline; }
-  .action-list .dot { flex-shrink: 0; width: 8px; height: 8px; border-radius: 2px; background: var(--muted); margin-top: 4px; }
-  .action-list .dot.critical { background: var(--critical); }
+  .note-card.purple { border-left-color: var(--brand); }
+  .note-card .note-icon {
+    flex-shrink: 0; width: 22px; height: 22px; margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 999px; background: var(--warning-soft); color: #8f6107;
+    font-size: 12px; font-weight: 800;
+  }
+  .note-card.purple .note-icon { background: var(--brand-soft); color: var(--brand); }
+  .note-card b { color: var(--ink); }
+
+  .action-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .action-list li {
+    display: flex; gap: 12px; align-items: flex-start;
+    font-size: 13.5px; line-height: 1.55;
+    background: var(--surface-sunken);
+    border-left: 3px solid var(--ink-faint);
+    border-radius: 10px;
+    padding: 12px 16px;
+  }
+  .action-list li.critical { border-left-color: var(--critical); background: var(--critical-soft); }
   .action-list b { font-weight: 700; }
   .action-list .link-btn {
     background: none; border: none; padding: 0; margin-left: 4px;
-    color: var(--text); font-weight: 600; font-size: 13px; cursor: pointer;
-    text-decoration: underline; text-underline-offset: 2px; font-family: inherit;
+    color: var(--brand); font-weight: 700; font-size: 13px; cursor: pointer;
+    text-decoration: none; font-family: inherit; white-space: nowrap;
   }
+  .action-list .link-btn:hover { text-decoration: underline; }
   .hidden { display: none; }
 
-  .tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .tabs {
+    display: inline-flex; gap: 2px; margin-bottom: 24px;
+    background: var(--surface-sunken);
+    border-radius: 999px;
+    padding: 4px;
+  }
   .tab-btn {
     background: transparent;
     border: none;
-    color: var(--text-dim);
-    font-size: 14px;
-    font-weight: 600;
-    padding: 10px 16px;
+    color: var(--ink-dim);
+    font-size: 13.5px;
+    font-weight: 700;
+    padding: 9px 18px;
+    border-radius: 999px;
     cursor: pointer;
-    border-bottom: 2px solid transparent;
   }
-  .tab-btn:hover { color: var(--text); }
-  .tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+  .tab-btn:hover { color: var(--ink); }
+  .tab-btn.active { color: var(--brand-ink); background: var(--brand); box-shadow: var(--shadow-card); }
   .tab-content.hidden { display: none; }
-  .cluster-note {
-    background: #f0ebff;
-    border: 1px solid #dad2f7;
-    border-radius: var(--radius-sm);
-    padding: 12px 16px;
-    font-size: 13px;
-    color: var(--text-dim);
-    margin-bottom: 16px;
-  }
+
   .cluster-badge {
     display: inline-block;
-    background: var(--panel-2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 3px 8px;
-    font-size: 11px;
-    margin: 2px 4px 2px 0;
-    color: var(--text);
+    background: var(--surface-sunken);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    margin: 2px 6px 2px 0;
+    color: var(--ink-dim);
   }
-  .cluster-badge b { color: #6846e3; }
+  .cluster-badge b { color: var(--brand); }
 
   .motivo-link {
     cursor: pointer;
-    text-decoration: underline dotted;
-    text-underline-offset: 3px;
   }
-  .motivo-link:hover { opacity: 0.8; }
+  .motivo-link:hover { opacity: 0.75; }
 
   .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(31, 35, 40, 0.5);
+    background: rgba(23, 20, 15, 0.45);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -213,58 +332,58 @@
   }
   .modal-overlay.hidden { display: none; }
   .modal-box {
-    background: var(--panel);
+    background: var(--surface);
     border-radius: var(--radius-lg);
     width: min(720px, 92vw);
     max-height: 82vh;
     display: flex;
     flex-direction: column;
-    box-shadow: var(--shadow-modal), 0 16px 48px rgba(0,0,0,0.18);
+    box-shadow: var(--shadow-pop);
   }
   .modal-header {
-    padding: 16px 20px;
+    padding: 20px 24px;
     border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
   }
-  .modal-header h3 { margin: 0 0 2px; font-size: 16px; }
-  .modal-header .sub { color: var(--text-dim); font-size: 12px; }
+  .modal-header h3 { margin: 0 0 2px; font-size: 17px; font-weight: 800; }
+  .modal-header .sub { color: var(--ink-dim); font-size: 12.5px; }
   .modal-close {
-    background: none;
+    background: var(--surface-sunken);
     border: none;
-    color: var(--text-dim);
-    font-size: 20px;
+    color: var(--ink-dim);
+    width: 28px; height: 28px; border-radius: 999px;
+    font-size: 17px;
     cursor: pointer;
     line-height: 1;
-    padding: 2px 6px;
   }
-  .modal-close:hover { color: var(--text); }
-  .modal-tabs { display: flex; gap: 4px; padding: 0 20px; border-bottom: 1px solid var(--border); }
+  .modal-close:hover { color: var(--ink); }
+  .modal-tabs { display: flex; gap: 4px; padding: 0 24px; border-bottom: 1px solid var(--border); }
   .modal-tab-btn {
     background: none;
     border: none;
-    color: var(--text-dim);
+    color: var(--ink-faint);
     font-size: 13px;
-    font-weight: 600;
-    padding: 10px 4px;
-    margin-right: 16px;
+    font-weight: 700;
+    padding: 12px 4px;
+    margin-right: 20px;
     cursor: pointer;
     border-bottom: 2px solid transparent;
   }
-  .modal-tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
-  .modal-body { padding: 16px 20px; overflow-y: auto; }
+  .modal-tab-btn.active { color: var(--brand); border-bottom-color: var(--brand); }
+  .modal-body { padding: 20px 24px; overflow-y: auto; }
   .modal-tab-content.hidden { display: none; }
-  .timeline-item { display: flex; gap: 12px; margin-bottom: 14px; }
+  .timeline-item { display: flex; gap: 14px; margin-bottom: 16px; }
   .timeline-date {
     flex-shrink: 0;
     width: 90px;
     font-size: 11px;
-    color: var(--text-dim);
-    font-weight: 600;
+    color: var(--ink-faint);
+    font-weight: 700;
     padding-top: 2px;
   }
-  .timeline-text { font-size: 13px; line-height: 1.5; }
+  .timeline-text { font-size: 13px; line-height: 1.55; }
   .timeline-text.preview {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -272,19 +391,26 @@
     overflow: hidden;
   }
   .note-block {
-    border-left: 3px solid var(--border);
-    padding: 4px 0 4px 14px;
-    margin-bottom: 18px;
+    border-left: 3px solid var(--border-strong);
+    padding: 4px 0 4px 16px;
+    margin-bottom: 20px;
   }
-  .note-block .note-date { font-size: 11px; color: var(--text-dim); font-weight: 600; margin-bottom: 4px; }
+  .note-block .note-date { font-size: 11px; color: var(--ink-faint); font-weight: 700; margin-bottom: 4px; }
   .note-block .note-text { font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
-  .empty-state { color: var(--text-dim); font-size: 13px; text-align: center; padding: 24px; }
+  .empty-state { color: var(--ink-faint); font-size: 13px; text-align: center; padding: 28px; }
 </style>
 </head>
 <body>
+<div class="page">
 
-<h1>Painel de Implantações e Reimplantações — GRV</h1>
-<div class="subtitle">Fonte: crm.nxlite.com.br (SAG Projeto) · <span id="gerado-em-badge">-</span></div>
+<div class="app-bar">
+  <div class="mark"></div>
+  <div class="titles">
+    <h1>Painel de Implantações e Reimplantações</h1>
+    <div class="subtitle">GRV Software · Fonte: crm.nxlite.com.br (SAG Projeto)</div>
+  </div>
+  <div class="updated-pill" id="gerado-em-badge">-</div>
+</div>
 
 <div class="tabs">
   <button class="tab-btn active" data-tab="tab-visao-geral">Visão geral</button>
@@ -334,8 +460,9 @@
   </div>
 </div>
 
-<div class="warn-box">
-  ⚠️ "Atrasados agora" e "dentro do prazo" foram calculados comparando a data de término prevista com hoje — não usei o campo "ritmo de andamento" do sistema, porque ele está errado em boa parte dos casos (nesse mesmo grupo, 21 projetos estão marcados "Atrasado" com prazo que ainda nem venceu).
+<div class="note-card">
+  <span class="note-icon">!</span>
+  <div>"Atrasados agora" e "dentro do prazo" foram calculados comparando a data de término prevista com hoje — não uso o campo "ritmo de andamento" do sistema, porque ele erra em boa parte dos casos.</div>
 </div>
 
 <div class="panel">
@@ -382,8 +509,9 @@
   </div>
 </div>
 
-<div class="warn-box">
-  ⚠️ O sistema marca projetos como <b>"Atrasado"</b> (campo ritmo de andamento) de forma inconsistente: dos <span id="warn-total">-</span> projetos com essa flag, <b><span id="warn-inconsistente">-</span></b> ainda nem chegaram na data de término prevista. O painel abaixo separa os dois grupos — trate a segunda tabela como um problema de cadastro, não de prazo real.
+<div class="note-card">
+  <span class="note-icon">!</span>
+  <div>O sistema marca projetos como <b>"Atrasado"</b> (campo ritmo de andamento) de forma inconsistente: dos <span id="warn-total">-</span> projetos com essa flag, <b><span id="warn-inconsistente">-</span></b> ainda nem chegaram na data de término prevista. O painel abaixo separa os dois grupos — trate a segunda tabela como um problema de cadastro, não de prazo real.</div>
 </div>
 
 <div class="panel">
@@ -488,13 +616,17 @@
   </div>
 </div>
 
-<div class="warn-box">
-  ⚠️ O <b>prazo previsto</b> (`termino_previsto`) quase nunca reflete quando o trabalho realmente terminou — é uma estimativa inicial raramente atualizada.
+<div class="note-card">
+  <span class="note-icon">!</span>
+  <div>O <b>prazo previsto</b> (<code>termino_previsto</code>) quase nunca reflete quando o trabalho realmente terminou — é uma estimativa inicial raramente atualizada.</div>
 </div>
 
-<div class="cluster-note">
-  🔍 <b>A data de mudança de status também não é confiável</b>: em vez de estar espalhada conforme cada projeto foi concluído, ela se concentra em poucos dias específicos — sinal de que alguém fez uma <b>revisão/faxina em lote</b>, movendo vários projetos parados de uma vez, em vez de atualizar status no momento real da conclusão.
-  <div style="margin-top:8px" id="cluster-badges"></div>
+<div class="note-card purple">
+  <span class="note-icon">i</span>
+  <div>
+    <b>A data de mudança de status também não é confiável</b>: em vez de estar espalhada conforme cada projeto foi concluído, ela se concentra em poucos dias específicos — sinal de uma <b>revisão/faxina em lote</b>, movendo vários projetos parados de uma vez, em vez de atualizar status no momento real da conclusão.
+    <div style="margin-top:10px" id="cluster-badges"></div>
+  </div>
 </div>
 
 <div class="panel">
@@ -524,6 +656,7 @@
 
 </div>
 
+</div>
 
 <div class="modal-overlay hidden" id="modal-anotacoes">
   <div class="modal-box">
@@ -551,7 +684,6 @@
 <script>
 const DATA = DASHBOARD_DATA.atrasados;
 const CAT_LABELS = DASHBOARD_DATA.cat_labels;
-const CAT_CORES = DASHBOARD_DATA.cat_cores;
 const ANOTACOES_MAP = DASHBOARD_DATA.anotacoes_map;
 const PAUSAS_INFO = DASHBOARD_DATA.pausas_info;
 let VISAO_GERAL = DASHBOARD_DATA.visao_geral_por_ano;
@@ -595,7 +727,7 @@ function renderVisaoGeral() {
     const row = document.createElement('div');
     row.className = 'bar-row';
     const pct = (count / max * 100).toFixed(0);
-    row.innerHTML = `<div class="bar-name" style="width:240px">${nome}</div><div class="bar-track"><div class="bar-fill${critico ? ' critical' : ''}" style="width:${pct}%">${count}</div></div>`;
+    row.innerHTML = `<div class="bar-name" style="width:220px">${nome}</div><div class="bar-track"><div class="bar-fill${critico ? ' critical' : ''}" style="width:${pct}%"></div></div><div class="bar-value">${count}</div>`;
     el.appendChild(row);
   });
 }
@@ -660,7 +792,7 @@ document.getElementById('count-nao-vencidos').textContent = '(' + DATA.nao_venci
 
   itens.push({ critico: true, html: `${semMotivo.length} projetos não têm nenhuma explicação aceitável registrada.`, comBotao: true });
 
-  listEl.innerHTML = itens.map(it => `<li><span class="dot${it.critico ? ' critical' : ''}"></span><span>${it.html}</span></li>`).join('');
+  listEl.innerHTML = itens.map(it => `<li class="${it.critico ? 'critical' : ''}"><span>${it.html}</span></li>`).join('');
 
   const lastLi = listEl.lastElementChild;
   const btn = document.createElement('button');
@@ -681,7 +813,7 @@ DATA.lideres.forEach(([nome, count]) => {
   const row = document.createElement('div');
   row.className = 'bar-row';
   const pct = (count / maxCount * 100).toFixed(0);
-  row.innerHTML = `<div class="bar-name">${nome}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%">${count}</div></div>`;
+  row.innerHTML = `<div class="bar-name">${nome}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div><div class="bar-value">${count}</div>`;
   chartEl.appendChild(row);
 });
 
@@ -705,8 +837,8 @@ function renderChartMotivos() {
     const pct = (count / maxMotivo * 100).toFixed(0);
     const ativo = tema === filtroTemaAtivo;
     const critico = tema.startsWith('Sem motivo claro') || tema.startsWith('Não identificado');
-    const trackStyle = ativo ? 'box-shadow: 0 0 0 2px var(--text) inset;' : '';
-    row.innerHTML = `<div class="bar-name" style="width:280px${ativo ? ';font-weight:700' : ''}">${tema}</div><div class="bar-track" style="${trackStyle}"><div class="bar-fill${critico ? ' critical' : ''}" style="width:${pct}%">${count}</div></div>`;
+    const trackStyle = ativo ? 'box-shadow: 0 0 0 2px var(--brand) inset;' : '';
+    row.innerHTML = `<div class="bar-name" style="width:280px${ativo ? ';font-weight:700;color:var(--ink)' : ''}">${tema}</div><div class="bar-track" style="${trackStyle}"><div class="bar-fill${critico ? ' critical' : ''}" style="width:${pct}%"></div></div><div class="bar-value">${count}</div>`;
     chartMotivosEl.appendChild(row);
   });
 }
@@ -759,8 +891,9 @@ function modulosListaHtml(modulos) {
   }
   return modulos.map(m => `
     <div class="modulo-linha">
-      <span>${escapeHtml(m.nome || '(sem nome)')}</span>
-      <span>${escapeHtml(m.status || '-')} · ${(m.percentual_conclusao || 0).toFixed(0)}%</span>
+      <span class="nome">${escapeHtml(m.nome || '(sem nome)')}</span>
+      <span class="status-txt">${escapeHtml(m.status || '-')}</span>
+      ${progressoMiniHtml(m.percentual_conclusao)}
     </div>
   `).join('');
 }
@@ -788,27 +921,28 @@ function renderVencidos() {
   rows.sort((a, b) => b._dias_atraso - a._dias_atraso);
   const tbody = document.getElementById('tbody-vencidos');
   tbody.innerHTML = '';
+  const classeCategoria = { motivo: 'badge-motivo', sem_motivo: 'badge-sem-motivo', confuso: 'badge-confuso' };
   rows.forEach(p => {
     const tr = document.createElement('tr');
-    const cor = CAT_CORES[p._categoria_motivo] || '#6e7681';
+    const claCat = classeCategoria[p._categoria_motivo] || 'badge-confuso';
     const pausaBadge = p._teve_pausa
-      ? `<span class="badge motivo-link" style="background:${CAT_CORES.inconsistente}" data-abrir-pausa="${p.name}">Sim</span>`
-      : `<span class="badge" style="background:#e1e0d9;color:#52514e">Não</span>`;
+      ? `<span class="badge badge-sim motivo-link" data-abrir-pausa="${p.name}">Sim</span>`
+      : `<span class="badge badge-nao">Não</span>`;
     const plausivelBadge = p._motivo_plausivel
-      ? `<span class="badge" style="background:${CAT_CORES.motivo}">Sim</span>`
-      : `<span class="badge" style="background:${CAT_CORES.sem_motivo}">Não</span>`;
+      ? `<span class="badge badge-motivo">Sim</span>`
+      : `<span class="badge badge-sem-motivo">Não</span>`;
     tr.innerHTML = `
       <td><span class="proj-id">${p.name}</span></td>
       <td class="cliente">${p.nome_cliente || ''}</td>
       <td>${p.nome_lider_projeto_grv || ''}</td>
       <td>${p.tipo_de_projeto}</td>
-      <td class="dias ${diasClasse(p._dias_atraso)}">${p._dias_atraso}d</td>
+      <td><span class="dias-pill ${diasClasse(p._dias_atraso)}">${p._dias_atraso}<span class="unidade">d</span></span></td>
       <td>${p._semanas_atraso}</td>
       <td>${p.termino_previsto}</td>
       <td>${progressoMiniHtml(p.percentual_conclusao)}</td>
       <td>${pausaBadge}</td>
-      <td>${plausivelBadge}<div class="motivo" style="margin-top:4px;max-width:260px">${p._justificativa_plausibilidade || ''}</div></td>
-      <td><span class="badge motivo-link" style="background:${cor}" data-abrir-anotacoes="${p.name}">${CAT_LABELS[p._categoria_motivo]}</span><span class="motivo">${p._motivo}</span></td>
+      <td>${plausivelBadge}<div class="motivo" style="max-width:260px">${p._justificativa_plausibilidade || ''}</div></td>
+      <td><span class="badge ${claCat} motivo-link" data-abrir-anotacoes="${p.name}">${CAT_LABELS[p._categoria_motivo]}</span><span class="motivo">${p._motivo}</span></td>
     `;
     tbody.appendChild(tr);
   });
@@ -1025,9 +1159,9 @@ function renderFinalizados() {
   rows.forEach(p => {
     const tr = document.createElement('tr');
     const lote = p._dia_mudanca ? loteBase[p._dia_mudanca] : 0;
-    const loteTxt = lote ? (lote >= 4 ? `<span class="badge" style="background:${CAT_CORES.confuso}">${lote} no mesmo dia</span>` : lote) : '-';
+    const loteTxt = lote ? (lote >= 4 ? `<span class="badge badge-lote">${lote} no mesmo dia</span>` : lote) : '-';
     const diasTxt = p._dias_entre_prazo_e_status === null ? 'sem log' :
-      (p._dias_entre_prazo_e_status > 0 ? `<span class="dias ${diasClasse(p._dias_entre_prazo_e_status)}">+${p._dias_entre_prazo_e_status}d</span>` : `${p._dias_entre_prazo_e_status}d (antecipado)`);
+      (p._dias_entre_prazo_e_status > 0 ? `<span class="dias-pill ${diasClasse(p._dias_entre_prazo_e_status)}">+${p._dias_entre_prazo_e_status}<span class="unidade">d</span></span>` : `${p._dias_entre_prazo_e_status}d (antecipado)`);
     tr.innerHTML = `
       <td><span class="proj-id">${p.name}</span></td>
       <td class="cliente">${p.nome_cliente || ''}</td>
