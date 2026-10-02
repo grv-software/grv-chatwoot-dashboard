@@ -93,5 +93,67 @@ class TestCalcularPrioridade(unittest.TestCase):
         self.assertEqual(ad.calcular_prioridade(None), "normal")
 
 
+class TestFazerLogin(unittest.TestCase):
+    @patch("atualizar_dados.call")
+    def test_login_sucesso_nao_lanca_erro(self, mock_call):
+        mock_call.return_value = (200, '{"message": "Logged In"}')
+        ad.fazer_login(opener=object(), usuario="u", senha="p")
+
+    @patch("atualizar_dados.call")
+    def test_login_falho_lanca_login_error(self, mock_call):
+        mock_call.return_value = (401, '{"message": "invalid"}')
+        with self.assertRaises(ad.LoginError):
+            ad.fazer_login(opener=object(), usuario="u", senha="p")
+
+
+class TestBuscarProjetos(unittest.TestCase):
+    @patch("atualizar_dados.call")
+    def test_retorna_lista_de_projetos(self, mock_call):
+        mock_call.return_value = (200, json.dumps({"data": [{"name": "SAGP-00001"}]}))
+        resultado = ad.buscar_projetos(opener=object())
+        self.assertEqual(resultado, [{"name": "SAGP-00001"}])
+
+    @patch("atualizar_dados.call")
+    def test_erro_de_api_lanca_excecao(self, mock_call):
+        mock_call.return_value = (500, "erro interno")
+        with self.assertRaises(RuntimeError):
+            ad.buscar_projetos(opener=object())
+
+
+class TestBuscarAnotacoes(unittest.TestCase):
+    @patch("atualizar_dados.call")
+    def test_retorna_child_table_anotacoes(self, mock_call):
+        mock_call.return_value = (200, json.dumps({"data": {"anotacoes": [{"data": "2026-01-01", "anotacao": "x"}]}}))
+        resultado = ad.buscar_anotacoes(opener=object(), nome_projeto="SAGP-00001")
+        self.assertEqual(resultado, [{"data": "2026-01-01", "anotacao": "x"}])
+
+    @patch("atualizar_dados.call")
+    def test_sem_anotacoes_retorna_lista_vazia(self, mock_call):
+        mock_call.return_value = (200, json.dumps({"data": {}}))
+        self.assertEqual(ad.buscar_anotacoes(opener=object(), nome_projeto="SAGP-00002"), [])
+
+
+class TestBuscarTodosModulos(unittest.TestCase):
+    @patch("atualizar_dados.call")
+    def test_agrupa_por_projeto_e_ordena_por_sequencia(self, mock_call):
+        mock_call.return_value = (200, json.dumps({"data": [
+            {"nome_modulo": "Financeiro", "status": "Fechado", "percentual_conclusao": 100.0, "sequencia": 2, "projeto": "SAGP-00001"},
+            {"nome_modulo": "Cadastros", "status": "Fechado", "percentual_conclusao": 100.0, "sequencia": 1, "projeto": "SAGP-00001"},
+            {"nome_modulo": "Estoque", "status": "Consulta", "percentual_conclusao": 40.0, "sequencia": 1, "projeto": "SAGP-00002"},
+        ]}))
+        resultado = ad.buscar_todos_modulos(opener=object())
+        self.assertEqual([m["nome_modulo"] for m in resultado["SAGP-00001"]], ["Cadastros", "Financeiro"])
+        self.assertEqual(len(resultado["SAGP-00002"]), 1)
+        self.assertNotIn("SAGP-00003", resultado)
+
+
+class TestBuscarVersionsStatus(unittest.TestCase):
+    @patch("atualizar_dados.call")
+    def test_retorna_lista_de_versions(self, mock_call):
+        mock_call.return_value = (200, json.dumps({"data": [{"name": "v1", "creation": "2026-05-01 10:00:00", "data": "{}"}]}))
+        resultado = ad.buscar_versions_status(opener=object(), nome_projeto="SAGP-00001")
+        self.assertEqual(len(resultado), 1)
+
+
 if __name__ == "__main__":
     unittest.main()
