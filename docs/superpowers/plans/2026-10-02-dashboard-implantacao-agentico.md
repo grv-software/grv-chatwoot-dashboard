@@ -31,7 +31,7 @@ Spec de referência: `docs/superpowers/specs/2026-10-01-dashboard-implantacao-ag
 **Interfaces:**
 - Produces: `calcular_atrasado(termino_previsto: str|None, hoje: date) -> str` (`"atrasado"|"no_prazo"|"prazo_nao_informado"`), `dias_desde_ultima_anotacao(anotacoes: list[dict], hoje: date) -> int|None`, `detectar_pausas(anotacoes: list[dict]) -> list[dict]`, `classificar_tema(anotacoes: list[dict]) -> str`, `categoria_motivo(tema: str) -> str` (`"motivo"|"sem_motivo"|"confuso"`), `calcular_prioridade(dias_atraso: int|None) -> str` (`"alta"|"normal"`), constantes `SEM_MOTIVO`, `REVISAR_MANUALMENTE`. Cada `anotacao` é um dict com chaves `"data"` (`"YYYY-MM-DD"`) e `"anotacao"` (texto) — esse é o formato bruto que a API do Frappe devolve para o child table `anotacoes` de `SAG Projeto` (confirmado via `GET /api/resource/SAG Projeto/<nome>`).
 
-- [ ] **Step 1: Escrever os testes (vão falhar por enquanto, `atualizar_dados.py` não existe)**
+- [x] **Step 1: Escrever os testes (vão falhar por enquanto, `atualizar_dados.py` não existe)**
 
 Criar `tests/test_atualizar_dados.py`:
 
@@ -135,12 +135,12 @@ if __name__ == "__main__":
     unittest.main()
 ```
 
-- [ ] **Step 2: Rodar e confirmar que falha (módulo não existe)**
+- [x] **Step 2: Rodar e confirmar que falha (módulo não existe)**
 
 Run: `python -m unittest discover -s tests -t . -v`
 Expected: `ModuleNotFoundError: No module named 'atualizar_dados'` (ou erro de import equivalente).
 
-- [ ] **Step 3: Criar `atualizar_dados.py` com a lógica pura**
+- [x] **Step 3: Criar `atualizar_dados.py` com a lógica pura**
 
 ```python
 # -*- coding: utf-8 -*-
@@ -239,12 +239,12 @@ def calcular_prioridade(dias_atraso):
     return "alta" if dias_atraso is not None and dias_atraso >= 30 else "normal"
 ```
 
-- [ ] **Step 4: Rodar os testes e confirmar que passam**
+- [x] **Step 4: Rodar os testes e confirmar que passam**
 
 Run: `python -m unittest discover -s tests -t . -v`
 Expected: `OK` com 13 testes passando (0 falhas).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add atualizar_dados.py tests/test_atualizar_dados.py
@@ -268,7 +268,7 @@ Campos confirmados ao vivo nesta sessão (consulta `GET /api/resource/DocType/SA
 - `SAG Projeto.anotacoes` (child table, doctype `projeto_anotacoes`): cada item tem `data` (Date) e `anotacao` (texto).
 - `Version`: filtra por `ref_doctype`/`docname`; campo `data` é uma **string JSON** com chave `changed` = lista de `[nome_campo, valor_antigo, valor_novo]`.
 
-- [ ] **Step 1: Escrever os testes mockados (vão falhar, funções não existem)**
+- [x] **Step 1: Escrever os testes mockados (vão falhar, funções não existem)**
 
 Adicionar a `tests/test_atualizar_dados.py` (não remover as classes do Task 1):
 
@@ -335,12 +335,12 @@ class TestBuscarVersionsStatus(unittest.TestCase):
         self.assertEqual(len(resultado), 1)
 ```
 
-- [ ] **Step 2: Rodar e confirmar que falha**
+- [x] **Step 2: Rodar e confirmar que falha**
 
 Run: `python -m unittest discover -s tests -t . -v`
 Expected: `AttributeError: module 'atualizar_dados' has no attribute 'fazer_login'` (ou similar para as demais funções).
 
-- [ ] **Step 3: Implementar as funções de acesso à API**
+- [x] **Step 3: Implementar as funções de acesso à API**
 
 Adicionar ao final de `atualizar_dados.py`:
 
@@ -436,12 +436,12 @@ def buscar_versions_status(opener, nome_projeto):
     return json.loads(raw)["data"]
 ```
 
-- [ ] **Step 4: Rodar os testes e confirmar que passam**
+- [x] **Step 4: Rodar os testes e confirmar que passam**
 
 Run: `python -m unittest discover -s tests -t . -v`
 Expected: `OK` com 21 testes passando (13 do Task 1 + 8 novos).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add atualizar_dados.py tests/test_atualizar_dados.py
@@ -462,7 +462,7 @@ git commit -m "feat: funcoes de acesso a API do CRM (login, projetos, modulos, v
 - Consumes: todas as funções dos Tasks 1 e 2.
 - Produces: `montar_projeto_atrasado(projeto: dict, anotacoes: list[dict], modulos: list[dict], hoje: date) -> dict`, `extrair_dia_mudanca_status(versions: list[dict], status_alvo: tuple[str,...]) -> str|None`, `montar_projeto_finalizado(projeto: dict, versions: list[dict], modulos: list[dict]) -> dict`, `calcular_visao_geral_por_ano(projetos: list[dict], info_conclusao: dict[str, int|None], hoje: date) -> dict`, `gerar_dashboard_data(opener, hoje: date) -> dict`, `escrever_arquivo_js(dados: dict, caminho: str) -> None`, `main() -> None`.
 
-- [ ] **Step 1: Escrever os testes de agregação (sem rede, vão falhar)**
+- [x] **Step 1: Escrever os testes de agregação (sem rede, vão falhar)**
 
 Adicionar a `tests/test_atualizar_dados.py`:
 
@@ -567,12 +567,12 @@ class TestCalcularVisaoGeralPorAno(unittest.TestCase):
         self.assertEqual(resultado["2026"]["concluidos_atrasados"], 0)
 ```
 
-- [ ] **Step 2: Rodar e confirmar que falha**
+- [x] **Step 2: Rodar e confirmar que falha**
 
 Run: `python -m unittest discover -s tests -t . -v`
 Expected: `AttributeError: module 'atualizar_dados' has no attribute 'montar_projeto_atrasado'` (ou similar).
 
-- [ ] **Step 3: Implementar montagem, agregação, escrita e `main()`**
+- [x] **Step 3: Implementar montagem, agregação, escrita e `main()`**
 
 Adicionar ao final de `atualizar_dados.py`:
 
@@ -818,12 +818,12 @@ Adicionar os imports que faltam no topo do arquivo (`tempfile`):
 import tempfile
 ```
 
-- [ ] **Step 4: Rodar os testes e confirmar que passam**
+- [x] **Step 4: Rodar os testes e confirmar que passam**
 
 Run: `python -m unittest discover -s tests -t . -v`
 Expected: `OK` com 29 testes passando (21 anteriores + 8 novos).
 
-- [ ] **Step 5: Criar o `.bat` de conveniência**
+- [x] **Step 5: Criar o `.bat` de conveniência**
 
 Criar `atualizar_dados.bat`:
 
@@ -838,11 +838,11 @@ set NXLITE_PASS=
 pause
 ```
 
-- [ ] **Step 6: Ignorar o `dashboard_data.js` gerado**
+- [x] **Step 6: Ignorar o `dashboard_data.js` gerado**
 
 Ler `.gitignore` atual e adicionar a linha `dashboard_data.js` ao final (arquivo tem hoje: `nul`, `check-api.html`, `.env`).
 
-- [ ] **Step 7: Rodar o script contra o CRM real e validar contra os números já auditados**
+- [x] **Step 7: Rodar o script contra o CRM real e validar contra os números já auditados**
 
 Run (credenciais via variável de ambiente, apagadas logo em seguida):
 ```bash
@@ -864,7 +864,7 @@ print('anos visao geral:', list(dados['visao_geral_por_ano'].keys()))
 ```
 Expected: valores plausíveis (não zero, não ordens de grandeza diferentes do que já vimos nesta sessão) e a lista de anos incluindo "todos".
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add atualizar_dados.py atualizar_dados.bat tests/test_atualizar_dados.py .gitignore
@@ -883,7 +883,7 @@ git commit -m "feat: monta e grava dashboard_data.js a partir da API do CRM"
 - Consumes: `DASHBOARD_DATA` (global definida por `dashboard_data.js`, gerado no Task 3).
 - Produces: globais `DATA`, `CAT_LABELS`, `CAT_CORES`, `ANOTACOES_MAP`, `PAUSAS_INFO`, `VISAO_GERAL`, `FINALIZADOS` (derivadas de `DASHBOARD_DATA`, consumidas pelos Tasks 5–8).
 
-- [ ] **Step 1: Criar o harness de verificação**
+- [x] **Step 1: Criar o harness de verificação**
 
 Criar `tests/verify_dashboard_html.js`:
 
@@ -984,12 +984,12 @@ if (faltando.length) {
 console.log('OK: todos os ' + idsReferenciados.size + ' ids referenciados existem no HTML');
 ```
 
-- [ ] **Step 2: Rodar o harness contra o HTML atual (ainda sem `dashboard_data.js`) para confirmar a baseline**
+- [x] **Step 2: Rodar o harness contra o HTML atual (ainda sem `dashboard_data.js`) para confirmar a baseline**
 
 Run: `node tests/verify_dashboard_html.js dashboard-implantacoes.html`
 Expected: falha em "execucao simulada" (`DATA is not defined` ou similar), porque ainda não existe `dashboard_data.js` — isso confirma que o harness detecta o problema antes da correção.
 
-- [ ] **Step 3: Trocar a fonte de dados embutida pelo arquivo externo**
+- [x] **Step 3: Trocar a fonte de dados embutida pelo arquivo externo**
 
 Usar Edit em `dashboard-implantacoes.html`. Antes do `<script>` que contém `const DATA = ...` (a linha é exatamente `<script>`, seguida de uma linha enorme `const DATA = {...}`), inserir o `<script src>`:
 
@@ -1060,7 +1060,7 @@ print("OK, MOTIVO_TEMA removido")
 EOF
 ```
 
-- [ ] **Step 4: Adicionar o badge de última atualização**
+- [x] **Step 4: Adicionar o badge de última atualização**
 
 Usar Edit em `dashboard-implantacoes.html`:
 
@@ -1087,12 +1087,12 @@ function formatarDataHoraBR(isoString) {
 document.getElementById('gerado-em-badge').textContent = 'Atualizado em ' + formatarDataHoraBR(DASHBOARD_DATA.gerado_em);
 ```
 
-- [ ] **Step 5: Rodar o harness contra o `dashboard_data.js` real gerado no Task 3**
+- [x] **Step 5: Rodar o harness contra o `dashboard_data.js` real gerado no Task 3**
 
 Run: `node tests/verify_dashboard_html.js dashboard-implantacoes.html`
 Expected: as três linhas `OK:` (sintaxe, execução simulada, ids) sem erro.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add dashboard-implantacoes.html tests/verify_dashboard_html.js
@@ -1109,7 +1109,7 @@ git commit -m "feat: dashboard carrega dashboard_data.js externo em vez de dados
 **Interfaces:**
 - Consumes: `VISAO_GERAL` (global do Task 4, formato `{"<ano>": {total, atrasados, abertos_no_prazo, pausados, concluidos, concluidos_no_prazo, concluidos_atrasados, concluidos_sem_info, cancelados}, ..., "todos": {...}}`).
 
-- [ ] **Step 1: Trocar o rótulo da aba e adicionar o seletor no HTML**
+- [x] **Step 1: Trocar o rótulo da aba e adicionar o seletor no HTML**
 
 old_string:
 ```html
@@ -1151,12 +1151,12 @@ new_string:
 </div>
 ```
 
-- [ ] **Step 2: Rodar o harness e confirmar que falha (os `document.getElementById` novos ainda não têm JS)**
+- [x] **Step 2: Rodar o harness e confirmar que falha (os `document.getElementById` novos ainda não têm JS)**
 
 Run: `node tests/verify_dashboard_html.js dashboard-implantacoes.html`
 Expected: ainda passa (os ids novos existem no HTML, só não são usados ainda) — serve de baseline antes de ligar o seletor.
 
-- [ ] **Step 3: Substituir o bloco de KPIs/gráfico fixo por uma função orientada ao seletor**
+- [x] **Step 3: Substituir o bloco de KPIs/gráfico fixo por uma função orientada ao seletor**
 
 Usar o script de substituição por regex (o bloco original é identificável pelas linhas exatas já lidas nesta sessão):
 
@@ -1250,12 +1250,12 @@ selAnoVisaoGeral.addEventListener('change', () => {
 renderVisaoGeral();
 ```
 
-- [ ] **Step 4: Rodar o harness**
+- [x] **Step 4: Rodar o harness**
 
 Run: `node tests/verify_dashboard_html.js dashboard-implantacoes.html`
 Expected: as três linhas `OK:` sem erro.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add dashboard-implantacoes.html
@@ -1272,7 +1272,7 @@ git commit -m "feat: seletor de ano/cohort na aba Visao geral"
 **Interfaces:**
 - Consumes: `FINALIZADOS.projetos` (global do Task 4; cada item tem `_ano_inicio`, `_dia_mudanca`, `_dias_entre_prazo_e_status`, `percentual_conclusao`, `modulos`).
 
-- [ ] **Step 1: Trocar o rótulo da aba, o título do painel e adicionar o seletor**
+- [x] **Step 1: Trocar o rótulo da aba, o título do painel e adicionar o seletor**
 
 old_string:
 ```html
@@ -1318,7 +1318,7 @@ new_string:
   </div>
 ```
 
-- [ ] **Step 2: Substituir o bloco "ABA 2" para filtrar por ano e recalcular KPIs/clusters em JS**
+- [x] **Step 2: Substituir o bloco "ABA 2" para filtrar por ano e recalcular KPIs/clusters em JS**
 
 old_string:
 ```js
@@ -1512,12 +1512,12 @@ document.querySelectorAll('th[data-sort2]').forEach(th => {
 renderFinalizados();
 ```
 
-- [ ] **Step 3: Rodar o harness**
+- [x] **Step 3: Rodar o harness**
 
 Run: `node tests/verify_dashboard_html.js dashboard-implantacoes.html`
 Expected: as três linhas `OK:` sem erro.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add dashboard-implantacoes.html
@@ -1534,7 +1534,7 @@ git commit -m "feat: seletor de ano/cohort na aba Finalizados, KPIs e clusters r
 **Interfaces:**
 - Consumes: campo `modulos: [{nome, status, percentual_conclusao}]` e `percentual_conclusao` em cada projeto de `DATA.vencidos`, `DATA.nao_vencidos` e `FINALIZADOS.projetos` (produzidos no Task 3).
 
-- [ ] **Step 1: CSS da barra de progresso compacta**
+- [x] **Step 1: CSS da barra de progresso compacta**
 
 old_string:
 ```css
@@ -1550,7 +1550,7 @@ new_string:
   .modulo-linha:last-child { border-bottom: none; }
 ```
 
-- [ ] **Step 2: Função reutilizável de progresso + coluna nova em `tabela-nao-vencidos` e `tabela-finalizados`**
+- [x] **Step 2: Função reutilizável de progresso + coluna nova em `tabela-nao-vencidos` e `tabela-finalizados`**
 
 old_string:
 ```html
@@ -1588,7 +1588,7 @@ new_string:
       </tr>
 ```
 
-- [ ] **Step 3: Função `progressoMiniHtml` + uso nas três tabelas**
+- [x] **Step 3: Função `progressoMiniHtml` + uso nas três tabelas**
 
 Inserir logo após a definição de `function diasClasse(dias) { ... }`:
 
@@ -1671,7 +1671,7 @@ new_string:
     `;
 ```
 
-- [ ] **Step 4: Sub-aba "Progresso" no modal**
+- [x] **Step 4: Sub-aba "Progresso" no modal**
 
 old_string:
 ```html
@@ -1721,12 +1721,12 @@ function fecharModalAnotacoes() {
 
 O botão "Progresso" já funciona automaticamente: o listener genérico de `.modal-tab-btn` (final do script) troca `active`/`hidden` por `data-modal-tab`, sem precisar de código novo.
 
-- [ ] **Step 5: Rodar o harness**
+- [x] **Step 5: Rodar o harness**
 
 Run: `node tests/verify_dashboard_html.js dashboard-implantacoes.html`
 Expected: as três linhas `OK:` sem erro.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add dashboard-implantacoes.html
@@ -1743,7 +1743,7 @@ git commit -m "feat: progresso (percentual + modulos) nas tabelas e no modal de 
 **Interfaces:**
 - Consumes: `p._tema` (string), `p._prioridade` (`"alta"|"normal"`), `p._dias_sem_atualizacao` (`int|null`) — todos já presentes em cada item de `DATA.vencidos` desde o Task 3.
 
-- [ ] **Step 1: Trocar `MOTIVO_TEMA[p.name]` por `p._tema` no gráfico de motivos**
+- [x] **Step 1: Trocar `MOTIVO_TEMA[p.name]` por `p._tema` no gráfico de motivos**
 
 old_string:
 ```js
@@ -1779,7 +1779,7 @@ new_string:
     if (filtroTemaAtivo && p._tema !== filtroTemaAtivo) return false;
 ```
 
-- [ ] **Step 2: Estender "Onde agir primeiro" com o ranking de prioridade**
+- [x] **Step 2: Estender "Onde agir primeiro" com o ranking de prioridade**
 
 old_string:
 ```js
@@ -1806,17 +1806,17 @@ new_string:
   listEl.innerHTML = itens.map(it => `<li><span class="dot${it.critico ? ' critical' : ''}"></span><span>${it.html}</span></li>`).join('');
 ```
 
-- [ ] **Step 3: Rodar o harness**
+- [x] **Step 3: Rodar o harness**
 
 Run: `node tests/verify_dashboard_html.js dashboard-implantacoes.html`
 Expected: as três linhas `OK:` sem erro.
 
-- [ ] **Step 4: Abrir o arquivo num navegador e conferir visualmente**
+- [x] **Step 4: Abrir o arquivo num navegador e conferir visualmente**
 
 Run: abrir `dashboard-implantacoes.html` diretamente no navegador (duplo clique ou `start dashboard-implantacoes.html` no Windows).
 Conferir manualmente: aba "Visão geral" com seletor de ano funcionando, aba "Atrasados" com coluna de progresso e "Onde agir primeiro" mostrando o novo item de atraso crítico (quando houver projeto com 30+ dias), aba "Finalizados" com seletor de ano e coluna de progresso, modal com a aba "Progresso" listando os módulos.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add dashboard-implantacoes.html
