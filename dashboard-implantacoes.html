@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Implantações — GRV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@420;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* tokens extraidos ao vivo de crm.nxlite.com.br (Frappe UI) */
+    --bg: #f8f8f8;
+    --panel: #ffffff;
+    --panel-2: #f3f3f3;
+    --border: #ededed;
+    --text: #383838;
+    --text-dim: #525252;
+    --muted: #7c7c7c;
+    --heading: #171717;
+    --good: #30a66d;
+    --critical: #cc2929;
+    --radius-sm: 8px;
+    --radius-md: 10px;
+    --radius-lg: 12px;
+    --shadow-card: 0px 0px 1px rgba(0,0,0,.12), 0px .5px 2px rgba(0,0,0,.1), 0px 2px 3px rgba(0,0,0,.06);
+    --shadow-modal: 0px 0px 1px rgba(0,0,0,.19), 0px 1px 2px rgba(0,0,0,.07), 0px 6px 15px -5px rgba(0,0,0,.11);
+    /* compatibilidade com o codigo existente -- nao usar como decoracao nova */
+    --orange: var(--text);
+    --green: var(--good);
+    --yellow: var(--muted);
+    --purple: var(--text-dim);
+    --grey: var(--muted);
+    --red: var(--critical);
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    margin: 0;
+    padding: 24px;
+  }
+  h1 { font-size: 22px; margin: 0 0 4px; color: var(--heading); font-weight: 600; }
+  .subtitle { color: var(--text-dim); font-size: 13px; margin-bottom: 24px; }
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .kpi {
+    background: var(--panel);
+    box-shadow: var(--shadow-card);
+    border-left: 3px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+  }
+  .kpi .value { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--heading); }
+  .kpi .label { color: var(--text-dim); font-size: 12px; margin-top: 4px; }
+  .kpi.orange .value { color: var(--orange); }
+  .kpi.red { border-left-color: var(--critical); }
+  .kpi.red .value { color: var(--red); }
+  .kpi.grey .value { color: var(--grey); }
+  .kpi.green { border-left-color: var(--good); }
+  .kpi.green .value { color: var(--green); }
+
+  .panel {
+    background: var(--panel);
+    box-shadow: var(--shadow-card);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .panel h2 { font-size: 15px; margin: 0 0 16px; display: flex; align-items: center; gap: 8px; }
+  .panel h2 .count { color: var(--text-dim); font-weight: 400; font-size: 13px; }
+
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; }
+  .bar-name { width: 160px; flex-shrink: 0; color: var(--text-dim); text-align: right; }
+  .bar-track { flex: 1; background: var(--panel-2); border-radius: 4px; overflow: hidden; height: 20px; }
+  .bar-fill { background: var(--text-dim); height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 600; color: #ffffff; font-variant-numeric: tabular-nums; }
+  .bar-fill.critical { background: var(--critical); }
+
+  .controls { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  input[type=text], select {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    text-align: left;
+    color: var(--text-dim);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  th:hover { color: var(--text); }
+  td { padding: 10px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--panel-2); }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+  }
+  .proj-id { color: var(--text-dim); font-size: 11px; }
+  .cliente { font-weight: 600; }
+  .motivo { color: var(--text-dim); max-width: 420px; display: block; }
+  .dias { font-weight: 700; }
+  .dias.critico { color: var(--critical); }
+  .dias.alto { color: var(--text); }
+  .dias.medio { color: var(--text-dim); }
+  .dias.baixo { color: var(--muted); }
+  .toggle-btn {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .toggle-btn:hover { color: var(--text); }
+  .warn-box {
+    background: #fdfaed;
+    border: 1px solid #f7e28d;
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+  .action-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .action-list li { display: flex; gap: 10px; font-size: 13px; line-height: 1.5; align-items: baseline; }
+  .action-list .dot { flex-shrink: 0; width: 8px; height: 8px; border-radius: 2px; background: var(--muted); margin-top: 4px; }
+  .action-list .dot.critical { background: var(--critical); }
+  .action-list b { font-weight: 700; }
+  .action-list .link-btn {
+    background: none; border: none; padding: 0; margin-left: 4px;
+    color: var(--text); font-weight: 600; font-size: 13px; cursor: pointer;
+    text-decoration: underline; text-underline-offset: 2px; font-family: inherit;
+  }
+  .hidden { display: none; }
+
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 16px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+  .tab-content.hidden { display: none; }
+  .cluster-note {
+    background: #f0ebff;
+    border: 1px solid #dad2f7;
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+  .cluster-badge {
+    display: inline-block;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px;
+    margin: 2px 4px 2px 0;
+    color: var(--text);
+  }
+  .cluster-badge b { color: #6846e3; }
+
+  .motivo-link {
+    cursor: pointer;
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+  }
+  .motivo-link:hover { opacity: 0.8; }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(31, 35, 40, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal-box {
+    background: var(--panel);
+    border-radius: var(--radius-lg);
+    width: min(720px, 92vw);
+    max-height: 82vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-modal), 0 16px 48px rgba(0,0,0,0.18);
+  }
+  .modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .modal-header h3 { margin: 0 0 2px; font-size: 16px; }
+  .modal-header .sub { color: var(--text-dim); font-size: 12px; }
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 6px;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-tabs { display: flex; gap: 4px; padding: 0 20px; border-bottom: 1px solid var(--border); }
+  .modal-tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 4px;
+    margin-right: 16px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  .modal-tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+  .modal-body { padding: 16px 20px; overflow-y: auto; }
+  .modal-tab-content.hidden { display: none; }
+  .timeline-item { display: flex; gap: 12px; margin-bottom: 14px; }
+  .timeline-date {
+    flex-shrink: 0;
+    width: 90px;
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 600;
+    padding-top: 2px;
+  }
+  .timeline-text { font-size: 13px; line-height: 1.5; }
+  .timeline-text.preview {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .note-block {
+    border-left: 3px solid var(--border);
+    padding: 4px 0 4px 14px;
+    margin-bottom: 18px;
+  }
+  .note-block .note-date { font-size: 11px; color: var(--text-dim); font-weight: 600; margin-bottom: 4px; }
+  .note-block .note-text { font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
+  .empty-state { color: var(--text-dim); font-size: 13px; text-align: center; padding: 24px; }
+</style>
+</head>
+<body>
+
+<h1>Painel de Implantações e Reimplantações — GRV</h1>
+<div class="subtitle">Fonte: crm.nxlite.com.br (SAG Projeto) · <span id="gerado-em-badge">-</span></div>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="tab-visao-geral">Visão geral 2026</button>
+  <button class="tab-btn" data-tab="tab-atrasados">Atrasados atuais</button>
+  <button class="tab-btn" data-tab="tab-finalizados">Projetos finalizados em 2026</button>
+</div>
+
+<div id="tab-visao-geral" class="tab-content">
+
+<div class="subtitle" style="margin-top:16px">Todos os projetos de Implantação/Reimplantação com início previsto em 2026, por situação atual.</div>
+
+<div class="kpis">
+  <div class="kpi">
+    <div class="value" id="vg-total">-</div>
+    <div class="label">Projetos iniciados em 2026</div>
+  </div>
+  <div class="kpi red">
+    <div class="value" id="vg-atrasados">-</div>
+    <div class="label">Atrasados agora (aberto, prazo vencido)</div>
+  </div>
+  <div class="kpi green">
+    <div class="value" id="vg-no-prazo">-</div>
+    <div class="label">Abertos, ainda dentro do prazo</div>
+  </div>
+  <div class="kpi">
+    <div class="value" id="vg-pausados">-</div>
+    <div class="label">Pausados (status atual)</div>
+  </div>
+  <div class="kpi">
+    <div class="value" id="vg-concluidos">-</div>
+    <div class="label">Concluídos (Consulta/Fechado)</div>
+  </div>
+  <div class="kpi green">
+    <div class="value" id="vg-concluidos-no-prazo">-</div>
+    <div class="label">Concluídos dentro do prazo</div>
+  </div>
+  <div class="kpi red">
+    <div class="value" id="vg-concluidos-atrasados">-</div>
+    <div class="label">Concluídos depois do prazo</div>
+  </div>
+  <div class="kpi grey">
+    <div class="value" id="vg-cancelados">-</div>
+    <div class="label">Cancelados / interrompidos / modelo</div>
+  </div>
+</div>
+
+<div class="warn-box">
+  ⚠️ "Atrasados agora" e "dentro do prazo" foram calculados comparando a data de término prevista com hoje — não usei o campo "ritmo de andamento" do sistema, porque ele está errado em boa parte dos casos (nesse mesmo grupo, 21 projetos estão marcados "Atrasado" com prazo que ainda nem venceu).
+</div>
+
+<div class="panel">
+  <h2>Como os 118 projetos de 2026 se distribuem</h2>
+  <div id="chart-visao-geral"></div>
+</div>
+
+</div>
+
+<div id="tab-atrasados" class="tab-content hidden">
+
+<div class="kpis">
+  <div class="kpi">
+    <div class="value" id="kpi-total">-</div>
+    <div class="label">Implantação + Reimplantação (total)</div>
+  </div>
+  <div class="kpi">
+    <div class="value" id="kpi-tipo">-</div>
+    <div class="label">Implantação / Reimplantação</div>
+  </div>
+  <div class="kpi orange">
+    <div class="value" id="kpi-abertos">-</div>
+    <div class="label">Projetos abertos</div>
+  </div>
+  <div class="kpi red">
+    <div class="value" id="kpi-atrasados-vencidos">-</div>
+    <div class="label">Realmente atrasados (prazo vencido)</div>
+  </div>
+  <div class="kpi grey">
+    <div class="value" id="kpi-atrasados-inconsistentes">-</div>
+    <div class="label">Marcados "Atrasado" com prazo ainda não vencido</div>
+  </div>
+  <div class="kpi green">
+    <div class="value" id="kpi-motivo-plausivel">-</div>
+    <div class="label">Com motivo plausível de atraso</div>
+  </div>
+  <div class="kpi red">
+    <div class="value" id="kpi-motivo-nao-plausivel">-</div>
+    <div class="label">Sem motivo plausível (só descreve o atraso)</div>
+  </div>
+  <div class="kpi">
+    <div class="value" id="kpi-teve-pausa">-</div>
+    <div class="label">Já tiveram pausa registrada</div>
+  </div>
+</div>
+
+<div class="warn-box">
+  ⚠️ O sistema marca projetos como <b>"Atrasado"</b> (campo ritmo de andamento) de forma inconsistente: dos <span id="warn-total">-</span> projetos com essa flag, <b><span id="warn-inconsistente">-</span></b> ainda nem chegaram na data de término prevista. O painel abaixo separa os dois grupos — trate a segunda tabela como um problema de cadastro, não de prazo real.
+</div>
+
+<div class="panel">
+  <h2>Onde agir primeiro</h2>
+  <ul class="action-list" id="action-list"></ul>
+</div>
+
+<div class="panel">
+  <h2>Atrasados (prazo vencido) por consultor <span class="count" id="count-lideres"></span></h2>
+  <div id="chart-lideres"></div>
+</div>
+
+<div class="panel">
+  <h2>
+    Atrasados por motivo <span class="count" id="count-motivos-chart"></span>
+    <span id="filtro-tema-ativo" class="count" style="color:var(--orange);margin-left:8px"></span>
+    <button class="toggle-btn" id="btn-limpar-tema" style="margin-left:auto;display:none">Limpar filtro</button>
+  </h2>
+  <div id="chart-motivos"></div>
+  <div style="font-size:11px;color:var(--text-dim);margin-top:8px">Clique em uma barra para filtrar a tabela de projetos abaixo por esse motivo.</div>
+</div>
+
+<div class="panel">
+  <h2>Projetos com prazo realmente vencido <span class="count" id="count-vencidos"></span></h2>
+  <div class="controls">
+    <input type="text" id="busca-vencidos" placeholder="Buscar cliente ou projeto...">
+    <select id="filtro-lider-vencidos"><option value="">Todos os consultores</option></select>
+    <select id="filtro-categoria-vencidos">
+      <option value="">Todas as categorias de motivo</option>
+      <option value="motivo">Motivo identificado</option>
+      <option value="sem_motivo">Sem motivo claro</option>
+    </select>
+    <select id="filtro-plausivel-vencidos">
+      <option value="">Plausível: todos</option>
+      <option value="sim">Motivo plausível</option>
+      <option value="nao">Sem motivo plausível</option>
+    </select>
+    <select id="filtro-pausa-vencidos">
+      <option value="">Pausa: todos</option>
+      <option value="sim">Já teve pausa</option>
+      <option value="nao">Nunca pausado</option>
+    </select>
+  </div>
+  <table id="tabela-vencidos">
+    <thead>
+      <tr>
+        <th data-sort="name">Projeto</th>
+        <th data-sort="nome_cliente">Cliente</th>
+        <th data-sort="nome_lider_projeto_grv">Consultor</th>
+        <th data-sort="tipo_de_projeto">Tipo</th>
+        <th data-sort="_dias_atraso">Dias atraso</th>
+        <th data-sort="_semanas_atraso">Semanas</th>
+        <th data-sort="termino_previsto">Deveria ter terminado em</th>
+        <th data-sort="percentual_conclusao">% concl.</th>
+        <th data-sort="_teve_pausa">Pausou?</th>
+        <th data-sort="_motivo_plausivel">Motivo plausível?</th>
+        <th>Motivo (última anotação)</th>
+      </tr>
+    </thead>
+    <tbody id="tbody-vencidos"></tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <h2>
+    Marcados "Atrasado" mas com prazo ainda não vencido (inconsistência de cadastro)
+    <span class="count" id="count-nao-vencidos"></span>
+    <button class="toggle-btn" id="btn-toggle-nao-vencidos" style="margin-left:auto">Mostrar</button>
+  </h2>
+  <table id="tabela-nao-vencidos" class="hidden">
+    <thead>
+      <tr>
+        <th data-sort="name">Projeto</th>
+        <th data-sort="nome_cliente">Cliente</th>
+        <th data-sort="nome_lider_projeto_grv">Consultor</th>
+        <th data-sort="termino_previsto">Prazo</th>
+        <th data-sort="_dias_atraso">Dias até o prazo</th>
+        <th>Última anotação</th>
+      </tr>
+    </thead>
+    <tbody id="tbody-nao-vencidos"></tbody>
+  </table>
+</div>
+
+</div>
+
+<div id="tab-finalizados" class="tab-content hidden">
+
+<div class="kpis">
+  <div class="kpi">
+    <div class="value" id="kpi2-total">-</div>
+    <div class="label">Projetos iniciados em 2026 e já em Consulta/Fechado</div>
+  </div>
+  <div class="kpi green">
+    <div class="value" id="kpi2-com-log">-</div>
+    <div class="label">Com data de mudança de status encontrada no log</div>
+  </div>
+  <div class="kpi red">
+    <div class="value" id="kpi2-passou-prazo">-</div>
+    <div class="label">Já tinham passado do prazo quando o status mudou</div>
+  </div>
+</div>
+
+<div class="warn-box">
+  ⚠️ O <b>prazo previsto</b> (`termino_previsto`) quase nunca reflete quando o trabalho realmente terminou — é uma estimativa inicial raramente atualizada.
+</div>
+
+<div class="cluster-note">
+  🔍 <b>A data de mudança de status também não é confiável</b>: em vez de estar espalhada conforme cada projeto foi concluído, ela se concentra em poucos dias específicos — sinal de que alguém fez uma <b>revisão/faxina em lote</b>, movendo vários projetos parados de uma vez, em vez de atualizar status no momento real da conclusão.
+  <div style="margin-top:8px" id="cluster-badges"></div>
+</div>
+
+<div class="panel">
+  <h2>Projetos finalizados em 2026 (Implantação/Reimplantação) <span class="count" id="count-finalizados"></span></h2>
+  <div class="controls">
+    <input type="text" id="busca-finalizados" placeholder="Buscar cliente ou projeto...">
+    <select id="filtro-lider-finalizados"><option value="">Todos os consultores</option></select>
+  </div>
+  <table id="tabela-finalizados">
+    <thead>
+      <tr>
+        <th data-sort2="name">Projeto</th>
+        <th data-sort2="nome_cliente">Cliente</th>
+        <th data-sort2="nome_lider_projeto_grv">Consultor</th>
+        <th data-sort2="status">Status</th>
+        <th data-sort2="termino_previsto">Prazo previsto</th>
+        <th data-sort2="_dia_mudanca">Mudou p/ este status em</th>
+        <th data-sort2="_dias_entre_prazo_e_status">Dias entre prazo e mudança</th>
+        <th data-sort2="_qtd_no_mesmo_dia">Lote (qtd no mesmo dia)</th>
+      </tr>
+    </thead>
+    <tbody id="tbody-finalizados"></tbody>
+  </table>
+</div>
+
+</div>
+
+
+<div class="modal-overlay hidden" id="modal-anotacoes">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <h3 id="modal-titulo">-</h3>
+        <div class="sub" id="modal-subtitulo">-</div>
+      </div>
+      <button class="modal-close" id="modal-close">&times;</button>
+    </div>
+    <div class="modal-tabs" id="modal-tabs-nav">
+      <button class="modal-tab-btn active" data-modal-tab="timeline">Linha do tempo (resumo)</button>
+      <button class="modal-tab-btn" data-modal-tab="completo">Todas as anotações</button>
+    </div>
+    <div class="modal-body">
+      <div id="modal-tab-timeline" class="modal-tab-content"></div>
+      <div id="modal-tab-completo" class="modal-tab-content hidden"></div>
+    </div>
+  </div>
+</div>
+
+<script src="dashboard_data.js"></script>
+<script>
+const DATA = DASHBOARD_DATA.atrasados;
+const CAT_LABELS = DASHBOARD_DATA.cat_labels;
+const CAT_CORES = DASHBOARD_DATA.cat_cores;
+const ANOTACOES_MAP = DASHBOARD_DATA.anotacoes_map;
+const PAUSAS_INFO = DASHBOARD_DATA.pausas_info;
+let VISAO_GERAL = DASHBOARD_DATA.visao_geral_por_ano;
+let FINALIZADOS = DASHBOARD_DATA.finalizados;
+// Stub temporario: a classificacao por tema agora vem pronta em p._tema (ver Tarefa 8).
+// Mantido vazio so para nao quebrar os usos de MOTIVO_TEMA ainda nao migrados.
+const MOTIVO_TEMA = {};
+// Stub temporario: repoe o formato antigo de TAB2 a partir de FINALIZADOS.projetos,
+// so para nao quebrar renderFinalizados ainda nao migrado para seletor de ano (Tarefa 6).
+const TAB2 = (function () {
+  const projetos = FINALIZADOS.projetos;
+  const loteBase = {};
+  projetos.forEach(p => { if (p._dia_mudanca) loteBase[p._dia_mudanca] = (loteBase[p._dia_mudanca] || 0) + 1; });
+  projetos.forEach(p => { p._qtd_no_mesmo_dia = p._dia_mudanca ? loteBase[p._dia_mudanca] : 0; });
+  return {
+    projetos,
+    clusters: Object.entries(loteBase).sort((a, b) => b[1] - a[1]),
+    total: projetos.length,
+    com_log: projetos.filter(p => p._dia_mudanca).length,
+    passou_do_prazo_quando_mudou: projetos.filter(p => p._dias_entre_prazo_e_status !== null && p._dias_entre_prazo_e_status > 0).length,
+  };
+})();
+function formatarDataHoraBR(isoString) {
+  const d = new Date(isoString);
+  const pad = n => String(n).padStart(2, '0');
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} às ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+document.getElementById('gerado-em-badge').textContent = 'Atualizado em ' + formatarDataHoraBR(DASHBOARD_DATA.gerado_em);
+const VISAO_2026 = {"total_2026": 118, "atrasados": 36, "abertos_no_prazo": 26, "pausados": 0, "concluidos": 48, "concluidos_no_prazo": 3, "concluidos_atrasados": 43, "concluidos_sem_info": 2, "cancelados": 8};
+
+document.getElementById('vg-total').textContent = VISAO_2026.total_2026;
+document.getElementById('vg-atrasados').textContent = VISAO_2026.atrasados;
+document.getElementById('vg-no-prazo').textContent = VISAO_2026.abertos_no_prazo;
+document.getElementById('vg-pausados').textContent = VISAO_2026.pausados;
+document.getElementById('vg-concluidos').textContent = VISAO_2026.concluidos;
+document.getElementById('vg-concluidos-no-prazo').textContent = VISAO_2026.concluidos_no_prazo;
+document.getElementById('vg-concluidos-atrasados').textContent = VISAO_2026.concluidos_atrasados;
+document.getElementById('vg-cancelados').textContent = VISAO_2026.cancelados;
+
+(function renderChartVisaoGeral() {
+  const itens = [
+    ['Atrasados (prazo vencido)', VISAO_2026.atrasados, true],
+    ['Concluídos depois do prazo', VISAO_2026.concluidos_atrasados, true],
+    ['Abertos, dentro do prazo', VISAO_2026.abertos_no_prazo, false],
+    ['Concluídos dentro do prazo', VISAO_2026.concluidos_no_prazo, false],
+    ['Concluídos sem informação de data', VISAO_2026.concluidos_sem_info, false],
+    ['Pausados', VISAO_2026.pausados, false],
+    ['Cancelados / interrompidos / modelo', VISAO_2026.cancelados, false],
+  ];
+  const max = Math.max(...itens.map(i => i[1]));
+  const el = document.getElementById('chart-visao-geral');
+  itens.forEach(([nome, count, critico]) => {
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    const pct = max ? (count / max * 100).toFixed(0) : 0;
+    row.innerHTML = `<div class="bar-name" style="width:240px">${nome}</div><div class="bar-track"><div class="bar-fill${critico ? ' critical' : ''}" style="width:${pct}%">${count}</div></div>`;
+    el.appendChild(row);
+  });
+})();
+
+document.getElementById('kpi-total').textContent = DATA.resumo.total_implantacao_reimplantacao;
+document.getElementById('kpi-tipo').textContent = (DATA.resumo.por_tipo['Implantação']||0) + ' / ' + (DATA.resumo.por_tipo['Reimplantação']||0);
+document.getElementById('kpi-abertos').textContent = DATA.resumo.abertos;
+document.getElementById('kpi-atrasados-vencidos').textContent = DATA.resumo.atrasados_prazo_vencido;
+document.getElementById('kpi-atrasados-inconsistentes').textContent = DATA.resumo.atrasados_prazo_nao_vencido;
+document.getElementById('kpi-motivo-plausivel').textContent = DATA.vencidos.filter(p => p._motivo_plausivel).length;
+document.getElementById('kpi-motivo-nao-plausivel').textContent = DATA.vencidos.filter(p => !p._motivo_plausivel).length;
+document.getElementById('kpi-teve-pausa').textContent = DATA.vencidos.filter(p => p._teve_pausa).length;
+document.getElementById('warn-total').textContent = DATA.resumo.atrasados_flag_sistema;
+document.getElementById('warn-inconsistente').textContent = DATA.resumo.atrasados_prazo_nao_vencido;
+document.getElementById('count-lideres').textContent = '(' + DATA.lideres.length + ' consultores)';
+document.getElementById('count-vencidos').textContent = '(' + DATA.vencidos.length + ')';
+document.getElementById('count-nao-vencidos').textContent = '(' + DATA.nao_vencidos.length + ')';
+
+// ==== Onde agir primeiro ====
+(function renderActionList() {
+  const semMotivo = DATA.vencidos.filter(p => !p._motivo_plausivel);
+  const porLiderSemMotivo = {};
+  semMotivo.forEach(p => { porLiderSemMotivo[p.nome_lider_projeto_grv] = (porLiderSemMotivo[p.nome_lider_projeto_grv] || 0) + 1; });
+  const piorLider = Object.entries(porLiderSemMotivo).sort((a, b) => b[1] - a[1])[0];
+  const maisAntigo = [...DATA.vencidos].sort((a, b) => b._dias_atraso - a._dias_atraso)[0];
+
+  const listEl = document.getElementById('action-list');
+  const itens = [];
+  if (piorLider) {
+    itens.push({ critico: true, html: `<b>${piorLider[0]}</b> lidera ${piorLider[1]} projeto${piorLider[1] > 1 ? 's' : ''} atrasado${piorLider[1] > 1 ? 's' : ''} sem motivo aceitável.` });
+  }
+  if (maisAntigo) {
+    itens.push({ critico: false, html: `Caso mais antigo: <b>${maisAntigo.nome_cliente}</b>, ${maisAntigo._dias_atraso} dias atrasado (${maisAntigo._semanas_atraso} semanas).` });
+  }
+  itens.push({ critico: true, html: `${semMotivo.length} projetos não têm nenhuma explicação aceitável registrada.`, comBotao: true });
+
+  listEl.innerHTML = itens.map(it => `<li><span class="dot${it.critico ? ' critical' : ''}"></span><span>${it.html}</span></li>`).join('');
+
+  const lastLi = listEl.lastElementChild;
+  const btn = document.createElement('button');
+  btn.className = 'link-btn';
+  btn.textContent = 'Ver lista →';
+  btn.addEventListener('click', () => {
+    document.getElementById('filtro-plausivel-vencidos').value = 'nao';
+    renderVencidos();
+    document.getElementById('tabela-vencidos').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  lastLi.appendChild(btn);
+})();
+
+// grafico de barras lideres
+const maxCount = Math.max(...DATA.lideres.map(l => l[1]));
+const chartEl = document.getElementById('chart-lideres');
+DATA.lideres.forEach(([nome, count]) => {
+  const row = document.createElement('div');
+  row.className = 'bar-row';
+  const pct = (count / maxCount * 100).toFixed(0);
+  row.innerHTML = `<div class="bar-name">${nome}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%">${count}</div></div>`;
+  chartEl.appendChild(row);
+});
+
+const motivoCount = {};
+DATA.vencidos.forEach(p => {
+  const tema = MOTIVO_TEMA[p.name] || "Outros";
+  motivoCount[tema] = (motivoCount[tema] || 0) + 1;
+});
+const motivoOrdenado = Object.entries(motivoCount).sort((a, b) => b[1] - a[1]);
+document.getElementById('count-motivos-chart').textContent = '(' + DATA.vencidos.length + ' projetos)';
+const maxMotivo = Math.max(...motivoOrdenado.map(m => m[1]));
+const chartMotivosEl = document.getElementById('chart-motivos');
+let filtroTemaAtivo = null;
+
+function renderChartMotivos() {
+  chartMotivosEl.innerHTML = '';
+  motivoOrdenado.forEach(([tema, count]) => {
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.style.cursor = 'pointer';
+    row.dataset.tema = tema;
+    const pct = (count / maxMotivo * 100).toFixed(0);
+    const ativo = tema === filtroTemaAtivo;
+    const critico = tema.startsWith('Sem motivo claro');
+    const trackStyle = ativo ? 'box-shadow: 0 0 0 2px var(--text) inset;' : '';
+    row.innerHTML = `<div class="bar-name" style="width:280px${ativo ? ';font-weight:700' : ''}">${tema}</div><div class="bar-track" style="${trackStyle}"><div class="bar-fill${critico ? ' critical' : ''}" style="width:${pct}%">${count}</div></div>`;
+    chartMotivosEl.appendChild(row);
+  });
+}
+renderChartMotivos();
+
+chartMotivosEl.addEventListener('click', (e) => {
+  const row = e.target.closest('[data-tema]');
+  if (!row) return;
+  const tema = row.dataset.tema;
+  filtroTemaAtivo = (filtroTemaAtivo === tema) ? null : tema;
+  document.getElementById('filtro-tema-ativo').textContent = filtroTemaAtivo ? ('· filtrando: ' + filtroTemaAtivo) : '';
+  document.getElementById('btn-limpar-tema').style.display = filtroTemaAtivo ? 'inline-block' : 'none';
+  renderChartMotivos();
+  renderVencidos();
+  document.getElementById('tabela-vencidos').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
+
+document.getElementById('btn-limpar-tema').addEventListener('click', () => {
+  filtroTemaAtivo = null;
+  document.getElementById('filtro-tema-ativo').textContent = '';
+  document.getElementById('btn-limpar-tema').style.display = 'none';
+  renderChartMotivos();
+  renderVencidos();
+});
+
+// popular filtro de lideres
+const lideresSet = [...new Set(DATA.vencidos.map(p => p.nome_lider_projeto_grv))].sort();
+const selLider = document.getElementById('filtro-lider-vencidos');
+lideresSet.forEach(l => {
+  const opt = document.createElement('option');
+  opt.value = l; opt.textContent = l;
+  selLider.appendChild(opt);
+});
+
+function diasClasse(dias) {
+  if (dias >= 180) return 'critico';
+  if (dias >= 60) return 'alto';
+  if (dias >= 14) return 'medio';
+  return 'baixo';
+}
+
+function renderVencidos() {
+  const busca = document.getElementById('busca-vencidos').value.toLowerCase();
+  const lider = document.getElementById('filtro-lider-vencidos').value;
+  const categoria = document.getElementById('filtro-categoria-vencidos').value;
+  const plausivel = document.getElementById('filtro-plausivel-vencidos').value;
+  const pausa = document.getElementById('filtro-pausa-vencidos').value;
+  let rows = DATA.vencidos.filter(p => {
+    if (lider && p.nome_lider_projeto_grv !== lider) return false;
+    if (categoria && p._categoria_motivo !== categoria) return false;
+    if (plausivel === 'sim' && !p._motivo_plausivel) return false;
+    if (plausivel === 'nao' && p._motivo_plausivel) return false;
+    if (pausa === 'sim' && !p._teve_pausa) return false;
+    if (pausa === 'nao' && p._teve_pausa) return false;
+    if (filtroTemaAtivo && (MOTIVO_TEMA[p.name] || 'Outros') !== filtroTemaAtivo) return false;
+    if (busca) {
+      const alvo = (p.nome_cliente + ' ' + p.name + ' ' + p.nome_do_projeto).toLowerCase();
+      if (!alvo.includes(busca)) return false;
+    }
+    return true;
+  });
+  rows.sort((a, b) => b._dias_atraso - a._dias_atraso);
+  const tbody = document.getElementById('tbody-vencidos');
+  tbody.innerHTML = '';
+  rows.forEach(p => {
+    const tr = document.createElement('tr');
+    const cor = CAT_CORES[p._categoria_motivo] || '#6e7681';
+    const pausaBadge = p._teve_pausa
+      ? `<span class="badge motivo-link" style="background:${CAT_CORES.inconsistente}" data-abrir-pausa="${p.name}">Sim</span>`
+      : `<span class="badge" style="background:#e1e0d9;color:#52514e">Não</span>`;
+    const plausivelBadge = p._motivo_plausivel
+      ? `<span class="badge" style="background:${CAT_CORES.motivo}">Sim</span>`
+      : `<span class="badge" style="background:${CAT_CORES.sem_motivo}">Não</span>`;
+    tr.innerHTML = `
+      <td><span class="proj-id">${p.name}</span></td>
+      <td class="cliente">${p.nome_cliente || ''}</td>
+      <td>${p.nome_lider_projeto_grv || ''}</td>
+      <td>${p.tipo_de_projeto}</td>
+      <td class="dias ${diasClasse(p._dias_atraso)}">${p._dias_atraso}d</td>
+      <td>${p._semanas_atraso}</td>
+      <td>${p.termino_previsto}</td>
+      <td>${(p.percentual_conclusao||0).toFixed(0)}%</td>
+      <td>${pausaBadge}</td>
+      <td>${plausivelBadge}<div class="motivo" style="margin-top:4px;max-width:260px">${p._justificativa_plausibilidade || ''}</div></td>
+      <td><span class="badge motivo-link" style="background:${cor}" data-abrir-anotacoes="${p.name}">${CAT_LABELS[p._categoria_motivo]}</span><span class="motivo">${p._motivo}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderNaoVencidos() {
+  const tbody = document.getElementById('tbody-nao-vencidos');
+  tbody.innerHTML = '';
+  const rows = [...DATA.nao_vencidos].sort((a,b) => a._dias_atraso - b._dias_atraso);
+  rows.forEach(p => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="proj-id">${p.name}</span></td>
+      <td class="cliente">${p.nome_cliente || ''}</td>
+      <td>${p.nome_lider_projeto_grv || ''}</td>
+      <td>${p.termino_previsto}</td>
+      <td>${-p._dias_atraso}d</td>
+      <td class="motivo">${p._motivo}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById('busca-vencidos').addEventListener('input', renderVencidos);
+document.getElementById('filtro-lider-vencidos').addEventListener('change', renderVencidos);
+document.getElementById('filtro-categoria-vencidos').addEventListener('change', renderVencidos);
+document.getElementById('filtro-plausivel-vencidos').addEventListener('change', renderVencidos);
+document.getElementById('filtro-pausa-vencidos').addEventListener('change', renderVencidos);
+document.getElementById('btn-toggle-nao-vencidos').addEventListener('click', (e) => {
+  const tbl = document.getElementById('tabela-nao-vencidos');
+  tbl.classList.toggle('hidden');
+  e.target.textContent = tbl.classList.contains('hidden') ? 'Mostrar' : 'Esconder';
+});
+
+let sortDir = {};
+document.querySelectorAll('th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.sort;
+    const table = th.closest('table').id;
+    sortDir[key] = !sortDir[key];
+    const arr = table === 'tabela-vencidos' ? DATA.vencidos : DATA.nao_vencidos;
+    arr.sort((a, b) => {
+      let va = a[key], vb = b[key];
+      if (typeof va === 'string') { va = va || ''; vb = vb || ''; return sortDir[key] ? va.localeCompare(vb) : vb.localeCompare(va); }
+      return sortDir[key] ? (va - vb) : (vb - va);
+    });
+    if (table === 'tabela-vencidos') renderVencidos(); else renderNaoVencidos();
+  });
+});
+
+renderVencidos();
+renderNaoVencidos();
+
+// ==== Modal de anotações ====
+function formatarDataBR(iso) {
+  if (!iso) return '-';
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+function abrirModalAnotacoes(projetoId) {
+  const proj = DATA.vencidos.find(p => p.name === projetoId);
+  const notas = ANOTACOES_MAP[projetoId] || [];
+  document.getElementById('modal-tabs-nav').classList.remove('hidden');
+  document.getElementById('modal-titulo').textContent = (proj ? proj.nome_cliente : projetoId) + ' — ' + projetoId;
+  document.getElementById('modal-subtitulo').textContent = notas.length + ' anotação(ões) registrada(s)' + (proj ? (' · consultor: ' + proj.nome_lider_projeto_grv) : '');
+
+  const timelineEl = document.getElementById('modal-tab-timeline');
+  const completoEl = document.getElementById('modal-tab-completo');
+  timelineEl.classList.remove('hidden');
+  completoEl.classList.add('hidden');
+  document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.modal-tab-btn[data-modal-tab="timeline"]').classList.add('active');
+
+  if (notas.length === 0) {
+    timelineEl.innerHTML = '<div class="empty-state">Nenhuma anotação registrada para este projeto.</div>';
+    completoEl.innerHTML = '<div class="empty-state">Nenhuma anotação registrada para este projeto.</div>';
+  } else {
+    timelineEl.innerHTML = notas.map(n => `
+      <div class="timeline-item">
+        <div class="timeline-date">${formatarDataBR(n.data)}</div>
+        <div class="timeline-text preview">${escapeHtml(n.texto)}</div>
+      </div>
+    `).join('');
+
+    completoEl.innerHTML = notas.map(n => `
+      <div class="note-block">
+        <div class="note-date">${formatarDataBR(n.data)}</div>
+        <div class="note-text">${escapeHtml(n.texto)}</div>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('modal-anotacoes').classList.remove('hidden');
+}
+
+function fecharModalAnotacoes() {
+  document.getElementById('modal-anotacoes').classList.add('hidden');
+}
+
+function abrirModalPausa(projetoId) {
+  const proj = DATA.vencidos.find(p => p.name === projetoId);
+  const eventos = PAUSAS_INFO[projetoId] || [{ data: null, motivo: null, prazo: null }];
+
+  document.getElementById('modal-titulo').textContent = (proj ? proj.nome_cliente : projetoId) + ' — ' + projetoId;
+  document.getElementById('modal-subtitulo').textContent = eventos.length + ' pausa(s) identificada(s) nas anotações' + (proj ? (' · consultor: ' + proj.nome_lider_projeto_grv) : '');
+
+  document.getElementById('modal-tabs-nav').classList.add('hidden');
+  const timelineEl = document.getElementById('modal-tab-timeline');
+  const completoEl = document.getElementById('modal-tab-completo');
+  completoEl.classList.add('hidden');
+  timelineEl.classList.remove('hidden');
+
+  timelineEl.innerHTML = `<div style="font-size:13px;margin-bottom:14px;color:var(--text-dim)">Esse projeto pausou <b style="color:var(--text)">${eventos.length}</b> vez(es), segundo as anotações:</div>` +
+    eventos.map((ev, i) => {
+      const temInfo = ev.data || ev.motivo || ev.prazo;
+      if (!temInfo) {
+        return `
+          <div class="note-block">
+            <div class="note-date">Pausa ${i + 1}</div>
+            <div class="note-text">Apenas uma pausa e o prazo não está informado.</div>
+          </div>`;
+      }
+      return `
+        <div class="note-block">
+          <div class="note-date">Pausa ${i + 1}${ev.data ? ' — ' + formatarDataBR(ev.data) : ''}</div>
+          <div class="note-text">
+            <b>Motivo:</b> ${escapeHtml(ev.motivo) || 'não informado'}<br>
+            <b>Período:</b> ${escapeHtml(ev.prazo) || 'não informado'}
+          </div>
+        </div>`;
+    }).join('');
+
+  document.getElementById('modal-anotacoes').classList.remove('hidden');
+}
+
+document.getElementById('tbody-vencidos').addEventListener('click', (e) => {
+  const alvoAnotacao = e.target.closest('[data-abrir-anotacoes]');
+  if (alvoAnotacao) { abrirModalAnotacoes(alvoAnotacao.dataset.abrirAnotacoes); return; }
+  const alvoPausa = e.target.closest('[data-abrir-pausa]');
+  if (alvoPausa) abrirModalPausa(alvoPausa.dataset.abrirPausa);
+});
+
+document.getElementById('modal-close').addEventListener('click', fecharModalAnotacoes);
+document.getElementById('modal-anotacoes').addEventListener('click', (e) => {
+  if (e.target.id === 'modal-anotacoes') fecharModalAnotacoes();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') fecharModalAnotacoes();
+});
+
+document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.modal-tab-content').forEach(c => c.classList.add('hidden'));
+    btn.classList.add('active');
+    document.getElementById('modal-tab-' + btn.dataset.modalTab).classList.remove('hidden');
+  });
+});
+
+// ==== ABA 2: Projetos finalizados em 2026 ====
+document.getElementById('kpi2-total').textContent = TAB2.total;
+document.getElementById('kpi2-com-log').textContent = TAB2.com_log;
+document.getElementById('kpi2-passou-prazo').textContent = TAB2.passou_do_prazo_quando_mudou;
+
+const clusterEl = document.getElementById('cluster-badges');
+TAB2.clusters.filter(c => c[1] >= 2).forEach(([data, qtd]) => {
+  const span = document.createElement('span');
+  span.className = 'cluster-badge';
+  span.innerHTML = `${data}: <b>${qtd} projetos</b>`;
+  clusterEl.appendChild(span);
+});
+
+const lideresSet2 = [...new Set(TAB2.projetos.map(p => p.nome_lider_projeto_grv))].sort();
+const selLider2 = document.getElementById('filtro-lider-finalizados');
+lideresSet2.forEach(l => {
+  const opt = document.createElement('option');
+  opt.value = l; opt.textContent = l;
+  selLider2.appendChild(opt);
+});
+
+function renderFinalizados() {
+  const busca = document.getElementById('busca-finalizados').value.toLowerCase();
+  const lider = document.getElementById('filtro-lider-finalizados').value;
+  let rows = TAB2.projetos.filter(p => {
+    if (lider && p.nome_lider_projeto_grv !== lider) return false;
+    if (busca) {
+      const alvo = (p.nome_cliente + ' ' + p.name).toLowerCase();
+      if (!alvo.includes(busca)) return false;
+    }
+    return true;
+  });
+  document.getElementById('count-finalizados').textContent = '(' + rows.length + ' de ' + TAB2.total + ')';
+  const tbody = document.getElementById('tbody-finalizados');
+  tbody.innerHTML = '';
+  rows.forEach(p => {
+    const tr = document.createElement('tr');
+    const lote = p._qtd_no_mesmo_dia;
+    const loteTxt = lote ? (lote >= 4 ? `<span class="badge" style="background:${CAT_CORES.confuso}">${lote} no mesmo dia</span>` : lote) : '-';
+    const diasTxt = p._dias_entre_prazo_e_status === null ? 'sem log' :
+      (p._dias_entre_prazo_e_status > 0 ? `<span class="dias ${diasClasse(p._dias_entre_prazo_e_status)}">+${p._dias_entre_prazo_e_status}d</span>` : `${p._dias_entre_prazo_e_status}d (antecipado)`);
+    tr.innerHTML = `
+      <td><span class="proj-id">${p.name}</span></td>
+      <td class="cliente">${p.nome_cliente || ''}</td>
+      <td>${p.nome_lider_projeto_grv || ''}</td>
+      <td>${p.status}</td>
+      <td>${p.termino_previsto}</td>
+      <td>${p._dia_mudanca ? p._dia_mudanca : '(sem registro no log)'}</td>
+      <td>${diasTxt}</td>
+      <td>${loteTxt}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById('busca-finalizados').addEventListener('input', renderFinalizados);
+document.getElementById('filtro-lider-finalizados').addEventListener('change', renderFinalizados);
+
+let sortDir2 = {};
+document.querySelectorAll('th[data-sort2]').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.sort2;
+    sortDir2[key] = !sortDir2[key];
+    TAB2.projetos.sort((a, b) => {
+      let va = a[key], vb = b[key];
+      if (va === null) va = sortDir2[key] ? Infinity : -Infinity;
+      if (vb === null) vb = sortDir2[key] ? Infinity : -Infinity;
+      if (typeof va === 'string') { return sortDir2[key] ? va.localeCompare(vb) : vb.localeCompare(va); }
+      return sortDir2[key] ? (va - vb) : (vb - va);
+    });
+    renderFinalizados();
+  });
+});
+
+renderFinalizados();
+
+// ==== Troca de abas ====
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.remove('hidden');
+  });
+});
+</script>
+</body>
+</html>
