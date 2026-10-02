@@ -282,14 +282,17 @@
 <div class="subtitle">Fonte: crm.nxlite.com.br (SAG Projeto) · <span id="gerado-em-badge">-</span></div>
 
 <div class="tabs">
-  <button class="tab-btn active" data-tab="tab-visao-geral">Visão geral 2026</button>
+  <button class="tab-btn active" data-tab="tab-visao-geral">Visão geral</button>
   <button class="tab-btn" data-tab="tab-atrasados">Atrasados atuais</button>
   <button class="tab-btn" data-tab="tab-finalizados">Projetos finalizados em 2026</button>
 </div>
 
 <div id="tab-visao-geral" class="tab-content">
 
-<div class="subtitle" style="margin-top:16px">Todos os projetos de Implantação/Reimplantação com início previsto em 2026, por situação atual.</div>
+<div class="controls" style="margin-top:16px">
+  <select id="seletor-ano-visao-geral"></select>
+</div>
+<div class="subtitle" id="visao-geral-subtitulo">-</div>
 
 <div class="kpis">
   <div class="kpi">
@@ -331,7 +334,7 @@
 </div>
 
 <div class="panel">
-  <h2>Como os 118 projetos de 2026 se distribuem</h2>
+  <h2 id="visao-geral-titulo">-</h2>
   <div id="chart-visao-geral"></div>
 </div>
 
@@ -567,37 +570,59 @@ function formatarDataHoraBR(isoString) {
   return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} às ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 document.getElementById('gerado-em-badge').textContent = 'Atualizado em ' + formatarDataHoraBR(DASHBOARD_DATA.gerado_em);
-const VISAO_2026 = {"total_2026": 118, "atrasados": 36, "abertos_no_prazo": 26, "pausados": 0, "concluidos": 48, "concluidos_no_prazo": 3, "concluidos_atrasados": 43, "concluidos_sem_info": 2, "cancelados": 8};
+let anoVisaoGeralAtual = 'todos';
 
-document.getElementById('vg-total').textContent = VISAO_2026.total_2026;
-document.getElementById('vg-atrasados').textContent = VISAO_2026.atrasados;
-document.getElementById('vg-no-prazo').textContent = VISAO_2026.abertos_no_prazo;
-document.getElementById('vg-pausados').textContent = VISAO_2026.pausados;
-document.getElementById('vg-concluidos').textContent = VISAO_2026.concluidos;
-document.getElementById('vg-concluidos-no-prazo').textContent = VISAO_2026.concluidos_no_prazo;
-document.getElementById('vg-concluidos-atrasados').textContent = VISAO_2026.concluidos_atrasados;
-document.getElementById('vg-cancelados').textContent = VISAO_2026.cancelados;
+function renderVisaoGeral() {
+  const v = VISAO_GERAL[anoVisaoGeralAtual] || VISAO_GERAL['todos'];
+  document.getElementById('vg-total').textContent = v.total;
+  document.getElementById('vg-atrasados').textContent = v.atrasados;
+  document.getElementById('vg-no-prazo').textContent = v.abertos_no_prazo;
+  document.getElementById('vg-pausados').textContent = v.pausados;
+  document.getElementById('vg-concluidos').textContent = v.concluidos;
+  document.getElementById('vg-concluidos-no-prazo').textContent = v.concluidos_no_prazo;
+  document.getElementById('vg-concluidos-atrasados').textContent = v.concluidos_atrasados;
+  document.getElementById('vg-cancelados').textContent = v.cancelados;
 
-(function renderChartVisaoGeral() {
+  const rotuloAno = anoVisaoGeralAtual === 'todos' ? 'todos os anos' : ('iniciados em ' + anoVisaoGeralAtual);
+  document.getElementById('visao-geral-titulo').textContent = `Como os ${v.total} projetos ${rotuloAno} se distribuem`;
+  document.getElementById('visao-geral-subtitulo').textContent = `Projetos de Implantação/Reimplantação ${rotuloAno}, por situação atual.`;
+
   const itens = [
-    ['Atrasados (prazo vencido)', VISAO_2026.atrasados, true],
-    ['Concluídos depois do prazo', VISAO_2026.concluidos_atrasados, true],
-    ['Abertos, dentro do prazo', VISAO_2026.abertos_no_prazo, false],
-    ['Concluídos dentro do prazo', VISAO_2026.concluidos_no_prazo, false],
-    ['Concluídos sem informação de data', VISAO_2026.concluidos_sem_info, false],
-    ['Pausados', VISAO_2026.pausados, false],
-    ['Cancelados / interrompidos / modelo', VISAO_2026.cancelados, false],
+    ['Atrasados (prazo vencido)', v.atrasados, true],
+    ['Concluídos depois do prazo', v.concluidos_atrasados, true],
+    ['Abertos, dentro do prazo', v.abertos_no_prazo, false],
+    ['Concluídos dentro do prazo', v.concluidos_no_prazo, false],
+    ['Concluídos sem informação de data', v.concluidos_sem_info, false],
+    ['Pausados', v.pausados, false],
+    ['Cancelados / interrompidos / modelo', v.cancelados, false],
   ];
-  const max = Math.max(...itens.map(i => i[1]));
+  const max = Math.max(...itens.map(i => i[1]), 1);
   const el = document.getElementById('chart-visao-geral');
+  el.innerHTML = '';
   itens.forEach(([nome, count, critico]) => {
     const row = document.createElement('div');
     row.className = 'bar-row';
-    const pct = max ? (count / max * 100).toFixed(0) : 0;
+    const pct = (count / max * 100).toFixed(0);
     row.innerHTML = `<div class="bar-name" style="width:240px">${nome}</div><div class="bar-track"><div class="bar-fill${critico ? ' critical' : ''}" style="width:${pct}%">${count}</div></div>`;
     el.appendChild(row);
   });
-})();
+}
+
+const selAnoVisaoGeral = document.getElementById('seletor-ano-visao-geral');
+Object.keys(VISAO_GERAL)
+  .sort((a, b) => (a === 'todos' ? -1 : b === 'todos' ? 1 : b.localeCompare(a)))
+  .forEach(ano => {
+    const opt = document.createElement('option');
+    opt.value = ano;
+    opt.textContent = ano === 'todos' ? 'Todos os anos' : ano;
+    selAnoVisaoGeral.appendChild(opt);
+  });
+selAnoVisaoGeral.value = 'todos';
+selAnoVisaoGeral.addEventListener('change', () => {
+  anoVisaoGeralAtual = selAnoVisaoGeral.value;
+  renderVisaoGeral();
+});
+renderVisaoGeral();
 
 document.getElementById('kpi-total').textContent = DATA.resumo.total_implantacao_reimplantacao;
 document.getElementById('kpi-tipo').textContent = (DATA.resumo.por_tipo['Implantação']||0) + ' / ' + (DATA.resumo.por_tipo['Reimplantação']||0);
