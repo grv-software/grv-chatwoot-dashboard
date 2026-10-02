@@ -145,6 +145,7 @@
     font-size: 14.5px; font-weight: 700; margin: 0 0 18px; color: var(--ink);
     display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
   }
+  .panel h2 .count:empty { display: none; }
   .panel h2 .count {
     color: var(--ink-faint); font-weight: 600; font-size: 11.5px;
     background: var(--surface-sunken); border-radius: 999px; padding: 3px 10px;
@@ -218,7 +219,12 @@
 
   .proj-id { color: var(--ink-faint); font-size: 11px; font-weight: 600; }
   .cliente { font-weight: 700; color: var(--ink); }
-  .motivo { color: var(--ink-dim); max-width: 420px; display: block; margin-top: 4px; line-height: 1.45; }
+  .motivo {
+    color: var(--ink-dim); max-width: 340px; display: -webkit-box; margin-top: 5px; line-height: 1.45;
+    -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;
+  }
+  .motivo.motivo-link { cursor: pointer; }
+  .motivo.motivo-link:hover { color: var(--ink); }
 
   .dias-pill {
     display: inline-flex; align-items: baseline; gap: 2px;
@@ -428,7 +434,7 @@
 <div class="kpis">
   <div class="kpi">
     <div class="value" id="vg-total">-</div>
-    <div class="label">Projetos iniciados em 2026</div>
+    <div class="label" id="vg-total-label">-</div>
   </div>
   <div class="kpi red">
     <div class="value" id="vg-atrasados">-</div>
@@ -699,6 +705,7 @@ let anoVisaoGeralAtual = 'todos';
 function renderVisaoGeral() {
   const v = VISAO_GERAL[anoVisaoGeralAtual] || VISAO_GERAL['todos'];
   document.getElementById('vg-total').textContent = v.total;
+  document.getElementById('vg-total-label').textContent = anoVisaoGeralAtual === 'todos' ? 'Projetos (todos os anos)' : 'Projetos iniciados em ' + anoVisaoGeralAtual;
   document.getElementById('vg-atrasados').textContent = v.atrasados;
   document.getElementById('vg-no-prazo').textContent = v.abertos_no_prazo;
   document.getElementById('vg-pausados').textContent = v.pausados;
@@ -942,7 +949,7 @@ function renderVencidos() {
       <td>${progressoMiniHtml(p.percentual_conclusao)}</td>
       <td>${pausaBadge}</td>
       <td>${plausivelBadge}<div class="motivo" style="max-width:260px">${p._justificativa_plausibilidade || ''}</div></td>
-      <td><span class="badge ${claCat} motivo-link" data-abrir-anotacoes="${p.name}">${CAT_LABELS[p._categoria_motivo]}</span><span class="motivo">${p._motivo}</span></td>
+      <td><span class="badge ${claCat} motivo-link" data-abrir-anotacoes="${p.name}">${CAT_LABELS[p._categoria_motivo]}</span><span class="motivo motivo-link" title="Clique para ver todas as anotações" data-abrir-anotacoes="${p.name}">${p._motivo}</span></td>
     `;
     tbody.appendChild(tr);
   });
@@ -961,7 +968,7 @@ function renderNaoVencidos() {
       <td>${p.termino_previsto}</td>
       <td>${-p._dias_atraso}d</td>
       <td>${progressoMiniHtml(p.percentual_conclusao)}</td>
-      <td class="motivo">${p._motivo}</td>
+      <td><span class="motivo">${p._motivo}</span></td>
     `;
     tbody.appendChild(tr);
   });
