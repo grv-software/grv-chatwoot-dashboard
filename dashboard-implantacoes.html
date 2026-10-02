@@ -80,6 +80,11 @@
   .bar-track { flex: 1; background: var(--panel-2); border-radius: 4px; overflow: hidden; height: 20px; }
   .bar-fill { background: var(--text-dim); height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 600; color: #ffffff; font-variant-numeric: tabular-nums; }
   .bar-fill.critical { background: var(--critical); }
+  .progresso-mini { display: flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; font-size: 11px; white-space: nowrap; }
+  .progresso-mini .trilha { width: 48px; height: 6px; border-radius: 3px; background: var(--panel-2); overflow: hidden; }
+  .progresso-mini .preenchido { height: 100%; background: var(--good, #30a66d); }
+  .modulo-linha { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .modulo-linha:last-child { border-bottom: none; }
 
   .controls { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
   input[type=text], select {
@@ -456,6 +461,7 @@
         <th data-sort="nome_lider_projeto_grv">Consultor</th>
         <th data-sort="termino_previsto">Prazo</th>
         <th data-sort="_dias_atraso">Dias até o prazo</th>
+        <th data-sort="percentual_conclusao">Progresso</th>
         <th>Última anotação</th>
       </tr>
     </thead>
@@ -509,6 +515,7 @@
         <th data-sort2="_dia_mudanca">Mudou p/ este status em</th>
         <th data-sort2="_dias_entre_prazo_e_status">Dias entre prazo e mudança</th>
         <th data-sort2="_qtd_no_mesmo_dia">Lote (qtd no mesmo dia)</th>
+        <th data-sort2="percentual_conclusao">Progresso</th>
       </tr>
     </thead>
     <tbody id="tbody-finalizados"></tbody>
@@ -530,10 +537,12 @@
     <div class="modal-tabs" id="modal-tabs-nav">
       <button class="modal-tab-btn active" data-modal-tab="timeline">Linha do tempo (resumo)</button>
       <button class="modal-tab-btn" data-modal-tab="completo">Todas as anotações</button>
+      <button class="modal-tab-btn" data-modal-tab="progresso">Progresso</button>
     </div>
     <div class="modal-body">
       <div id="modal-tab-timeline" class="modal-tab-content"></div>
       <div id="modal-tab-completo" class="modal-tab-content hidden"></div>
+      <div id="modal-tab-progresso" class="modal-tab-content hidden"></div>
     </div>
   </div>
 </div>
@@ -731,6 +740,23 @@ function diasClasse(dias) {
   return 'baixo';
 }
 
+function progressoMiniHtml(percentual) {
+  const pct = Math.max(0, Math.min(100, percentual || 0));
+  return `<div class="progresso-mini"><div class="trilha"><div class="preenchido" style="width:${pct}%"></div></div>${pct.toFixed(0)}%</div>`;
+}
+
+function modulosListaHtml(modulos) {
+  if (!modulos || modulos.length === 0) {
+    return '<div class="empty-state">Nenhum módulo cadastrado para este projeto.</div>';
+  }
+  return modulos.map(m => `
+    <div class="modulo-linha">
+      <span>${escapeHtml(m.nome || '(sem nome)')}</span>
+      <span>${escapeHtml(m.status || '-')} · ${(m.percentual_conclusao || 0).toFixed(0)}%</span>
+    </div>
+  `).join('');
+}
+
 function renderVencidos() {
   const busca = document.getElementById('busca-vencidos').value.toLowerCase();
   const lider = document.getElementById('filtro-lider-vencidos').value;
@@ -771,7 +797,7 @@ function renderVencidos() {
       <td class="dias ${diasClasse(p._dias_atraso)}">${p._dias_atraso}d</td>
       <td>${p._semanas_atraso}</td>
       <td>${p.termino_previsto}</td>
-      <td>${(p.percentual_conclusao||0).toFixed(0)}%</td>
+      <td>${progressoMiniHtml(p.percentual_conclusao)}</td>
       <td>${pausaBadge}</td>
       <td>${plausivelBadge}<div class="motivo" style="margin-top:4px;max-width:260px">${p._justificativa_plausibilidade || ''}</div></td>
       <td><span class="badge motivo-link" style="background:${cor}" data-abrir-anotacoes="${p.name}">${CAT_LABELS[p._categoria_motivo]}</span><span class="motivo">${p._motivo}</span></td>
@@ -792,6 +818,7 @@ function renderNaoVencidos() {
       <td>${p.nome_lider_projeto_grv || ''}</td>
       <td>${p.termino_previsto}</td>
       <td>${-p._dias_atraso}d</td>
+      <td>${progressoMiniHtml(p.percentual_conclusao)}</td>
       <td class="motivo">${p._motivo}</td>
     `;
     tbody.appendChild(tr);
@@ -873,6 +900,10 @@ function abrirModalAnotacoes(projetoId) {
       </div>
     `).join('');
   }
+
+  document.getElementById('modal-tab-progresso').innerHTML = proj
+    ? `<div style="margin-bottom:10px">${progressoMiniHtml(proj.percentual_conclusao)}</div>` + modulosListaHtml(proj.modulos)
+    : '<div class="empty-state">Progresso não disponível.</div>';
 
   document.getElementById('modal-anotacoes').classList.remove('hidden');
 }
@@ -998,6 +1029,7 @@ function renderFinalizados() {
       <td>${p._dia_mudanca ? p._dia_mudanca : '(sem registro no log)'}</td>
       <td>${diasTxt}</td>
       <td>${loteTxt}</td>
+      <td>${progressoMiniHtml(p.percentual_conclusao)}</td>
     `;
     tbody.appendChild(tr);
   });
