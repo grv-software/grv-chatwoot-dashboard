@@ -284,7 +284,7 @@
 <div class="tabs">
   <button class="tab-btn active" data-tab="tab-visao-geral">Visão geral</button>
   <button class="tab-btn" data-tab="tab-atrasados">Atrasados atuais</button>
-  <button class="tab-btn" data-tab="tab-finalizados">Projetos finalizados em 2026</button>
+  <button class="tab-btn" data-tab="tab-finalizados">Projetos finalizados</button>
 </div>
 
 <div id="tab-visao-geral" class="tab-content">
@@ -470,7 +470,7 @@
 <div class="kpis">
   <div class="kpi">
     <div class="value" id="kpi2-total">-</div>
-    <div class="label">Projetos iniciados em 2026 e já em Consulta/Fechado</div>
+    <div class="label" id="kpi2-total-label">Projetos já em Consulta/Fechado</div>
   </div>
   <div class="kpi green">
     <div class="value" id="kpi2-com-log">-</div>
@@ -492,8 +492,9 @@
 </div>
 
 <div class="panel">
-  <h2>Projetos finalizados em 2026 (Implantação/Reimplantação) <span class="count" id="count-finalizados"></span></h2>
+  <h2>Projetos finalizados (Implantação/Reimplantação) <span class="count" id="count-finalizados"></span></h2>
   <div class="controls">
+    <select id="seletor-ano-finalizados"></select>
     <input type="text" id="busca-finalizados" placeholder="Buscar cliente ou projeto...">
     <select id="filtro-lider-finalizados"><option value="">Todos os consultores</option></select>
   </div>
@@ -549,21 +550,6 @@ let FINALIZADOS = DASHBOARD_DATA.finalizados;
 // Stub temporario: a classificacao por tema agora vem pronta em p._tema (ver Tarefa 8).
 // Mantido vazio so para nao quebrar os usos de MOTIVO_TEMA ainda nao migrados.
 const MOTIVO_TEMA = {};
-// Stub temporario: repoe o formato antigo de TAB2 a partir de FINALIZADOS.projetos,
-// so para nao quebrar renderFinalizados ainda nao migrado para seletor de ano (Tarefa 6).
-const TAB2 = (function () {
-  const projetos = FINALIZADOS.projetos;
-  const loteBase = {};
-  projetos.forEach(p => { if (p._dia_mudanca) loteBase[p._dia_mudanca] = (loteBase[p._dia_mudanca] || 0) + 1; });
-  projetos.forEach(p => { p._qtd_no_mesmo_dia = p._dia_mudanca ? loteBase[p._dia_mudanca] : 0; });
-  return {
-    projetos,
-    clusters: Object.entries(loteBase).sort((a, b) => b[1] - a[1]),
-    total: projetos.length,
-    com_log: projetos.filter(p => p._dia_mudanca).length,
-    passou_do_prazo_quando_mudou: projetos.filter(p => p._dias_entre_prazo_e_status !== null && p._dias_entre_prazo_e_status > 0).length,
-  };
-})();
 function formatarDataHoraBR(isoString) {
   const d = new Date(isoString);
   const pad = n => String(n).padStart(2, '0');
@@ -955,31 +941,38 @@ document.querySelectorAll('.modal-tab-btn').forEach(btn => {
   });
 });
 
-// ==== ABA 2: Projetos finalizados em 2026 ====
-document.getElementById('kpi2-total').textContent = TAB2.total;
-document.getElementById('kpi2-com-log').textContent = TAB2.com_log;
-document.getElementById('kpi2-passou-prazo').textContent = TAB2.passou_do_prazo_quando_mudou;
+// ==== ABA: Projetos finalizados ====
+let anoFinalizadosAtual = 'todos';
 
-const clusterEl = document.getElementById('cluster-badges');
-TAB2.clusters.filter(c => c[1] >= 2).forEach(([data, qtd]) => {
-  const span = document.createElement('span');
-  span.className = 'cluster-badge';
-  span.innerHTML = `${data}: <b>${qtd} projetos</b>`;
-  clusterEl.appendChild(span);
-});
-
-const lideresSet2 = [...new Set(TAB2.projetos.map(p => p.nome_lider_projeto_grv))].sort();
-const selLider2 = document.getElementById('filtro-lider-finalizados');
-lideresSet2.forEach(l => {
-  const opt = document.createElement('option');
-  opt.value = l; opt.textContent = l;
-  selLider2.appendChild(opt);
-});
+function projetosFinalizadosFiltradosPorAno() {
+  if (anoFinalizadosAtual === 'todos') return FINALIZADOS.projetos;
+  return FINALIZADOS.projetos.filter(p => String(p._ano_inicio) === anoFinalizadosAtual);
+}
 
 function renderFinalizados() {
   const busca = document.getElementById('busca-finalizados').value.toLowerCase();
   const lider = document.getElementById('filtro-lider-finalizados').value;
-  let rows = TAB2.projetos.filter(p => {
+  const base = projetosFinalizadosFiltradosPorAno();
+
+  const comLog = base.filter(p => p._dia_mudanca).length;
+  const passouPrazo = base.filter(p => p._dias_entre_prazo_e_status !== null && p._dias_entre_prazo_e_status > 0).length;
+  document.getElementById('kpi2-total').textContent = base.length;
+  document.getElementById('kpi2-com-log').textContent = comLog;
+  document.getElementById('kpi2-passou-prazo').textContent = passouPrazo;
+
+  const loteBase = {};
+  base.forEach(p => { if (p._dia_mudanca) loteBase[p._dia_mudanca] = (loteBase[p._dia_mudanca] || 0) + 1; });
+
+  const clusterEl = document.getElementById('cluster-badges');
+  clusterEl.innerHTML = '';
+  Object.entries(loteBase).filter(c => c[1] >= 2).sort((a, b) => b[1] - a[1]).forEach(([data, qtd]) => {
+    const span = document.createElement('span');
+    span.className = 'cluster-badge';
+    span.innerHTML = `${data}: <b>${qtd} projetos</b>`;
+    clusterEl.appendChild(span);
+  });
+
+  let rows = base.filter(p => {
     if (lider && p.nome_lider_projeto_grv !== lider) return false;
     if (busca) {
       const alvo = (p.nome_cliente + ' ' + p.name).toLowerCase();
@@ -987,12 +980,12 @@ function renderFinalizados() {
     }
     return true;
   });
-  document.getElementById('count-finalizados').textContent = '(' + rows.length + ' de ' + TAB2.total + ')';
+  document.getElementById('count-finalizados').textContent = '(' + rows.length + ' de ' + base.length + ')';
   const tbody = document.getElementById('tbody-finalizados');
   tbody.innerHTML = '';
   rows.forEach(p => {
     const tr = document.createElement('tr');
-    const lote = p._qtd_no_mesmo_dia;
+    const lote = p._dia_mudanca ? loteBase[p._dia_mudanca] : 0;
     const loteTxt = lote ? (lote >= 4 ? `<span class="badge" style="background:${CAT_CORES.confuso}">${lote} no mesmo dia</span>` : lote) : '-';
     const diasTxt = p._dias_entre_prazo_e_status === null ? 'sem log' :
       (p._dias_entre_prazo_e_status > 0 ? `<span class="dias ${diasClasse(p._dias_entre_prazo_e_status)}">+${p._dias_entre_prazo_e_status}d</span>` : `${p._dias_entre_prazo_e_status}d (antecipado)`);
@@ -1001,7 +994,7 @@ function renderFinalizados() {
       <td class="cliente">${p.nome_cliente || ''}</td>
       <td>${p.nome_lider_projeto_grv || ''}</td>
       <td>${p.status}</td>
-      <td>${p.termino_previsto}</td>
+      <td>${p.termino_previsto || '-'}</td>
       <td>${p._dia_mudanca ? p._dia_mudanca : '(sem registro no log)'}</td>
       <td>${diasTxt}</td>
       <td>${loteTxt}</td>
@@ -1009,6 +1002,33 @@ function renderFinalizados() {
     tbody.appendChild(tr);
   });
 }
+
+const lideresSet2 = [...new Set(FINALIZADOS.projetos.map(p => p.nome_lider_projeto_grv))].sort();
+const selLider2 = document.getElementById('filtro-lider-finalizados');
+lideresSet2.forEach(l => {
+  const opt = document.createElement('option');
+  opt.value = l; opt.textContent = l;
+  selLider2.appendChild(opt);
+});
+
+const selAnoFinalizados = document.getElementById('seletor-ano-finalizados');
+const optTodosFinalizados = document.createElement('option');
+optTodosFinalizados.value = 'todos';
+optTodosFinalizados.textContent = 'Todos os anos';
+selAnoFinalizados.appendChild(optTodosFinalizados);
+[...new Set(FINALIZADOS.projetos.map(p => p._ano_inicio).filter(a => a !== null))]
+  .sort((a, b) => b - a)
+  .forEach(ano => {
+    const opt = document.createElement('option');
+    opt.value = String(ano);
+    opt.textContent = String(ano);
+    selAnoFinalizados.appendChild(opt);
+  });
+selAnoFinalizados.value = 'todos';
+selAnoFinalizados.addEventListener('change', () => {
+  anoFinalizadosAtual = selAnoFinalizados.value;
+  renderFinalizados();
+});
 
 document.getElementById('busca-finalizados').addEventListener('input', renderFinalizados);
 document.getElementById('filtro-lider-finalizados').addEventListener('change', renderFinalizados);
@@ -1018,10 +1038,10 @@ document.querySelectorAll('th[data-sort2]').forEach(th => {
   th.addEventListener('click', () => {
     const key = th.dataset.sort2;
     sortDir2[key] = !sortDir2[key];
-    TAB2.projetos.sort((a, b) => {
+    FINALIZADOS.projetos.sort((a, b) => {
       let va = a[key], vb = b[key];
-      if (va === null) va = sortDir2[key] ? Infinity : -Infinity;
-      if (vb === null) vb = sortDir2[key] ? Infinity : -Infinity;
+      if (va === null || va === undefined) va = sortDir2[key] ? Infinity : -Infinity;
+      if (vb === null || vb === undefined) vb = sortDir2[key] ? Infinity : -Infinity;
       if (typeof va === 'string') { return sortDir2[key] ? va.localeCompare(vb) : vb.localeCompare(va); }
       return sortDir2[key] ? (va - vb) : (vb - va);
     });
