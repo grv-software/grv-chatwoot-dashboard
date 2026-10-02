@@ -556,9 +556,6 @@ const ANOTACOES_MAP = DASHBOARD_DATA.anotacoes_map;
 const PAUSAS_INFO = DASHBOARD_DATA.pausas_info;
 let VISAO_GERAL = DASHBOARD_DATA.visao_geral_por_ano;
 let FINALIZADOS = DASHBOARD_DATA.finalizados;
-// Stub temporario: a classificacao por tema agora vem pronta em p._tema (ver Tarefa 8).
-// Mantido vazio so para nao quebrar os usos de MOTIVO_TEMA ainda nao migrados.
-const MOTIVO_TEMA = {};
 function formatarDataHoraBR(isoString) {
   const d = new Date(isoString);
   const pad = n => String(n).padStart(2, '0');
@@ -649,6 +646,18 @@ document.getElementById('count-nao-vencidos').textContent = '(' + DATA.nao_venci
   if (maisAntigo) {
     itens.push({ critico: false, html: `Caso mais antigo: <b>${maisAntigo.nome_cliente}</b>, ${maisAntigo._dias_atraso} dias atrasado (${maisAntigo._semanas_atraso} semanas).` });
   }
+  const criticos = DATA.vencidos
+    .filter(p => p._prioridade === 'alta')
+    .sort((a, b) => (b._dias_sem_atualizacao || 0) - (a._dias_sem_atualizacao || 0))
+    .slice(0, 5);
+  if (criticos.length) {
+    const descricoes = criticos.map(p => {
+      const semAtualizacao = p._dias_sem_atualizacao != null ? `, ${p._dias_sem_atualizacao}d sem atualização` : '';
+      return `<b>${p.nome_cliente}</b> (${p._dias_atraso}d atrasado${semAtualizacao})`;
+    }).join(', ');
+    itens.push({ critico: true, html: `${criticos.length} projeto${criticos.length > 1 ? 's' : ''} em atraso crítico (30+ dias vencido): ${descricoes}.` });
+  }
+
   itens.push({ critico: true, html: `${semMotivo.length} projetos não têm nenhuma explicação aceitável registrada.`, comBotao: true });
 
   listEl.innerHTML = itens.map(it => `<li><span class="dot${it.critico ? ' critical' : ''}"></span><span>${it.html}</span></li>`).join('');
@@ -678,8 +687,7 @@ DATA.lideres.forEach(([nome, count]) => {
 
 const motivoCount = {};
 DATA.vencidos.forEach(p => {
-  const tema = MOTIVO_TEMA[p.name] || "Outros";
-  motivoCount[tema] = (motivoCount[tema] || 0) + 1;
+  motivoCount[p._tema] = (motivoCount[p._tema] || 0) + 1;
 });
 const motivoOrdenado = Object.entries(motivoCount).sort((a, b) => b[1] - a[1]);
 document.getElementById('count-motivos-chart').textContent = '(' + DATA.vencidos.length + ' projetos)';
@@ -696,7 +704,7 @@ function renderChartMotivos() {
     row.dataset.tema = tema;
     const pct = (count / maxMotivo * 100).toFixed(0);
     const ativo = tema === filtroTemaAtivo;
-    const critico = tema.startsWith('Sem motivo claro');
+    const critico = tema.startsWith('Sem motivo claro') || tema.startsWith('Não identificado');
     const trackStyle = ativo ? 'box-shadow: 0 0 0 2px var(--text) inset;' : '';
     row.innerHTML = `<div class="bar-name" style="width:280px${ativo ? ';font-weight:700' : ''}">${tema}</div><div class="bar-track" style="${trackStyle}"><div class="bar-fill${critico ? ' critical' : ''}" style="width:${pct}%">${count}</div></div>`;
     chartMotivosEl.appendChild(row);
@@ -770,7 +778,7 @@ function renderVencidos() {
     if (plausivel === 'nao' && p._motivo_plausivel) return false;
     if (pausa === 'sim' && !p._teve_pausa) return false;
     if (pausa === 'nao' && p._teve_pausa) return false;
-    if (filtroTemaAtivo && (MOTIVO_TEMA[p.name] || 'Outros') !== filtroTemaAtivo) return false;
+    if (filtroTemaAtivo && p._tema !== filtroTemaAtivo) return false;
     if (busca) {
       const alvo = (p.nome_cliente + ' ' + p.name + ' ' + p.nome_do_projeto).toLowerCase();
       if (!alvo.includes(busca)) return false;
