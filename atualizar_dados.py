@@ -4,10 +4,13 @@
 So leitura (GET). Nunca criar/alterar/apagar registros no CRM.
 """
 import json
+import os
+import sys
+import tempfile
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import datetime
+from datetime import date, datetime
 from http.cookiejar import CookieJar
 
 BASE_URL = "https://crm.nxlite.com.br"
@@ -181,3 +184,238 @@ def buscar_versions_status(opener, nome_projeto):
     if status != 200:
         raise RuntimeError(f"busca de Version de {nome_projeto} falhou (status={status}): {raw[:300]}")
     return json.loads(raw)["data"]
+
+
+def montar_projeto_atrasado(projeto, anotacoes, modulos, hoje):
+    """Combina um SAG Projeto 'Aberto' com os campos derivados (atraso, motivo, pausas, progresso)."""
+    dias_atraso = None
+    semanas_atraso = None
+    if projeto.get("termino_previsto"):
+        data_prazo = datetime.strptime(projeto["termino_previsto"], "%Y-%m-%d").date()
+        dias_atraso = (hoje - data_prazo).days
+        semanas_atraso = dias_atraso // 7
+    tema = classificar_tema(anotacoes)
+    categoria = categoria_motivo(tema)
+    pausas = detectar_pausas(anotacoes)
+    ultima_anotacao = anotacoes[-1]["anotacao"] if anotacoes else "Sem anotações registradas."
+    return {
+        "name": projeto["name"],
+        "nome_do_projeto": projeto.get("nome_do_projeto"),
+        "nome_cliente": projeto.get("nome_cliente"),
+        "nome_lider_projeto_grv": projeto.get("nome_lider_projeto_grv"),
+        "tipo_de_projeto": projeto.get("tipo_de_projeto"),
+        "termino_previsto": projeto.get("termino_previsto"),
+        "inicio_previsto": projeto.get("inicio_previsto"),
+        "percentual_conclusao": projeto.get("percentual_conclusao") or 0.0,
+        "modulos": [
+            {"nome": m.get("nome_modulo"), "status": m.get("status"), "percentual_conclusao": m.get("percentual_conclusao") or 0.0}
+            for m in modulos
+        ],
+        "_prazo_vencido": calcular_atrasado(projeto.get("termino_previsto"), hoje) == "atrasado",
+        "_dias_atraso": dias_atraso,
+        "_semanas_atraso": semanas_atraso,
+        "_dias_sem_atualizacao": dias_desde_ultima_anotacao(anotacoes, hoje),
+        "_motivo": ultima_anotacao,
+        "_tema": tema,
+        "_categoria_motivo": categoria,
+        "_motivo_plausivel": categoria == "motivo",
+        "_justificativa_plausibilidade": (
+            f'Classificado automaticamente como "{tema}".' if categoria == "motivo"
+            else "Sem causa externa identificada automaticamente nas anotações."
+        ),
+        "_teve_pausa": len(pausas) > 0,
+        "_numero_pausas": len(pausas),
+        "_prioridade": calcular_prioridade(dias_atraso),
+    }
+
+
+def extrair_dia_mudanca_status(versions, status_alvo):
+    """Primeira data (YYYY-MM-DD) em que o campo 'status' mudou para um dos status_alvo."""
+    for v in versions:
+        mudancas = json.loads(v["data"]).get("changed", [])
+        for mudanca in mudancas:
+            campo, _antigo, novo = mudanca
+            if campo == "status" and novo in status_alvo:
+                return v["creation"].split(" ")[0]
+    return None
+
+
+def montar_projeto_finalizado(projeto, versions, modulos):
+    """Combina um SAG Projeto concluido (Consulta/Fechado) com o log de quando mudou de status."""
+    dia_mudanca = extrair_dia_mudanca_status(versions, ("Consulta", "Fechado"))
+    dias_entre = None
+    if dia_mudanca and projeto.get("termino_previsto"):
+        d_mudanca = datetime.strptime(dia_mudanca, "%Y-%m-%d").date()
+        d_prazo = datetime.strptime(projeto["termino_previsto"], "%Y-%m-%d").date()
+        dias_entre = (d_mudanca - d_prazo).days
+    ano_inicio = int(projeto["inicio_previsto"][:4]) if projeto.get("inicio_previsto") else None
+    return {
+        "name": projeto["name"],
+        "nome_cliente": projeto.get("nome_cliente"),
+        "status": projeto.get("status"),
+        "nome_lider_projeto_grv": projeto.get("nome_lider_projeto_grv"),
+        "termino_previsto": projeto.get("termino_previsto"),
+        "percentual_conclusao": projeto.get("percentual_conclusao") or 0.0,
+        "modulos": [
+            {"nome": m.get("nome_modulo"), "status": m.get("status"), "percentual_conclusao": m.get("percentual_conclusao") or 0.0}
+            for m in modulos
+        ],
+        "_ano_inicio": ano_inicio,
+        "_dia_mudanca": dia_mudanca,
+        "_dias_entre_prazo_e_status": dias_entre,
+    }
+
+
+def calcular_visao_geral_por_ano(projetos, info_conclusao, hoje):
+    """Agrupa os projetos por ano de inicio_previsto e calcula os KPIs da Visao Geral.
+
+    info_conclusao: dict {nome_projeto: dias_entre_prazo_e_status} para projetos
+    Consulta/Fechado (vem de montar_projeto_finalizado). Retorna
+    {"2024": {...}, "2025": {...}, ..., "todos": {...}}.
+    """
+    def kpis_de(lista):
+        abertos = [p for p in lista if p["status"] == "Aberto"]
+        atrasados = [p for p in abertos if calcular_atrasado(p.get("termino_previsto"), hoje) == "atrasado"]
+        concluidos = [p for p in lista if p["status"] in ("Consulta", "Fechado")]
+        concluidos_no_prazo = concluidos_atrasados = concluidos_sem_info = 0
+        for p in concluidos:
+            dias = info_conclusao.get(p["name"])
+            if dias is None:
+                concluidos_sem_info += 1
+            elif dias > 0:
+                concluidos_atrasados += 1
+            else:
+                concluidos_no_prazo += 1
+        pausados = [p for p in lista if p["status"] == "Pausado"]
+        cancelados = [p for p in lista if p["status"] in ("Cancelado", "Interrompido", "Modelo")]
+        return {
+            "total": len(lista),
+            "atrasados": len(atrasados),
+            "abertos_no_prazo": len(abertos) - len(atrasados),
+            "pausados": len(pausados),
+            "concluidos": len(concluidos),
+            "concluidos_no_prazo": concluidos_no_prazo,
+            "concluidos_atrasados": concluidos_atrasados,
+            "concluidos_sem_info": concluidos_sem_info,
+            "cancelados": len(cancelados),
+        }
+
+    anos = sorted({p["inicio_previsto"][:4] for p in projetos if p.get("inicio_previsto")})
+    resultado = {ano: kpis_de([p for p in projetos if (p.get("inicio_previsto") or "")[:4] == ano]) for ano in anos}
+    resultado["todos"] = kpis_de(projetos)
+    return resultado
+
+
+def _contar_por(projetos, campo):
+    contagem = {}
+    for p in projetos:
+        chave = p.get(campo) or "(vazio)"
+        contagem[chave] = contagem.get(chave, 0) + 1
+    return contagem
+
+
+def gerar_dashboard_data(opener, hoje):
+    projetos = buscar_projetos(opener)
+    modulos_por_projeto = buscar_todos_modulos(opener)
+
+    vencidos, nao_vencidos, finalizados = [], [], []
+    anotacoes_map, pausas_info, info_conclusao = {}, {}, {}
+
+    for p in projetos:
+        nome = p["name"]
+        modulos = modulos_por_projeto.get(nome, [])
+        if p["status"] == "Aberto":
+            anotacoes = buscar_anotacoes(opener, nome)
+            anotacoes_map[nome] = [{"data": a.get("data"), "texto": a.get("anotacao")} for a in anotacoes]
+            pausas = detectar_pausas(anotacoes)
+            pausas_info[nome] = [{"data": e.get("data"), "motivo": e.get("anotacao"), "prazo": None} for e in pausas]
+            entry = montar_projeto_atrasado(p, anotacoes, modulos, hoje)
+            if entry["_prazo_vencido"]:
+                vencidos.append(entry)
+            elif p.get("ritmo_andamento") == "Atrasado":
+                nao_vencidos.append(entry)
+        elif p["status"] in ("Consulta", "Fechado"):
+            versions = buscar_versions_status(opener, nome)
+            entry = montar_projeto_finalizado(p, versions, modulos)
+            finalizados.append(entry)
+            info_conclusao[nome] = entry["_dias_entre_prazo_e_status"]
+
+    resumo = {
+        "total_implantacao_reimplantacao": len(projetos),
+        "por_tipo": _contar_por(projetos, "tipo_de_projeto"),
+        "por_status": _contar_por(projetos, "status"),
+        "abertos": sum(1 for p in projetos if p["status"] == "Aberto"),
+        "atrasados_flag_sistema": sum(1 for p in projetos if p.get("ritmo_andamento") == "Atrasado"),
+        "atrasados_prazo_vencido": len(vencidos),
+        "atrasados_prazo_nao_vencido": len(nao_vencidos),
+    }
+
+    lideres_count = {}
+    for p in vencidos:
+        lideres_count[p["nome_lider_projeto_grv"]] = lideres_count.get(p["nome_lider_projeto_grv"], 0) + 1
+    lideres = sorted(lideres_count.items(), key=lambda kv: kv[1], reverse=True)
+
+    return {
+        "gerado_em": datetime.now().isoformat(timespec="seconds"),
+        "atrasados": {
+            "resumo": resumo,
+            "vencidos": vencidos,
+            "nao_vencidos": nao_vencidos,
+            "lideres": [list(l) for l in lideres],
+        },
+        "visao_geral_por_ano": calcular_visao_geral_por_ano(projetos, info_conclusao, hoje),
+        "finalizados": {"projetos": finalizados},
+        "cat_labels": {
+            "motivo": "Motivo identificado",
+            "sem_motivo": "Sem motivo claro",
+            "confuso": "Registro confuso",
+        },
+        "cat_cores": {
+            "motivo": "#0ca30c",
+            "sem_motivo": "#d03b3b",
+            "confuso": "#52514e",
+            "inconsistente": "#898781",
+        },
+        "anotacoes_map": anotacoes_map,
+        "pausas_info": pausas_info,
+    }
+
+
+def escrever_arquivo_js(dados, caminho):
+    """Escreve 'const DASHBOARD_DATA = {...};' de forma atomica (escreve em temp, depois renomeia)."""
+    conteudo = "const DASHBOARD_DATA = " + json.dumps(dados, ensure_ascii=False) + ";\n"
+    diretorio = os.path.dirname(os.path.abspath(caminho)) or "."
+    fd, tmp_path = tempfile.mkstemp(dir=diretorio, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(conteudo)
+        os.replace(tmp_path, caminho)
+    except Exception:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+        raise
+
+
+def main():
+    usuario = os.environ.get("NXLITE_USER")
+    senha = os.environ.get("NXLITE_PASS")
+    if not usuario or not senha:
+        print("Defina NXLITE_USER e NXLITE_PASS antes de rodar.", file=sys.stderr)
+        sys.exit(1)
+
+    caminho_saida = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashboard_data.js")
+    opener = make_opener()
+    try:
+        fazer_login(opener, usuario, senha)
+        dados = gerar_dashboard_data(opener, date.today())
+        escrever_arquivo_js(dados, caminho_saida)
+    except Exception as e:
+        print(f"Falha ao atualizar os dados, dashboard_data.js NAO foi sobrescrito: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    print(f"OK: {caminho_saida} atualizado em {dados['gerado_em']}")
+    print(f"  atrasados: {len(dados['atrasados']['vencidos'])}  finalizados: {len(dados['finalizados']['projetos'])}")
+
+
+if __name__ == "__main__":
+    main()

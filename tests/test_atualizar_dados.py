@@ -155,5 +155,105 @@ class TestBuscarVersionsStatus(unittest.TestCase):
         self.assertEqual(len(resultado), 1)
 
 
+class TestMontarProjetoAtrasado(unittest.TestCase):
+    def test_projeto_vencido_com_tema_identificado(self):
+        projeto = {
+            "name": "SAGP-00001", "nome_do_projeto": "Teste", "nome_cliente": "Cliente X",
+            "nome_lider_projeto_grv": "Fulano", "tipo_de_projeto": "Implantação",
+            "termino_previsto": "2026-08-01", "inicio_previsto": "2026-01-01",
+            "percentual_conclusao": 40.0,
+        }
+        anotacoes = [{"data": "2026-09-01", "anotacao": "Aguardando retorno do cliente sobre o financeiro"}]
+        modulos = [{"nome_modulo": "Financeiro", "status": "Consulta", "percentual_conclusao": 40.0}]
+        entry = ad.montar_projeto_atrasado(projeto, anotacoes, modulos, date(2026, 10, 2))
+        self.assertTrue(entry["_prazo_vencido"])
+        self.assertEqual(entry["_dias_atraso"], 62)
+        self.assertEqual(entry["_tema"], "Aguardando decisão/validação do cliente")
+        self.assertEqual(entry["_categoria_motivo"], "motivo")
+        self.assertTrue(entry["_motivo_plausivel"])
+        self.assertEqual(entry["_prioridade"], "alta")
+        self.assertEqual(entry["modulos"][0]["nome"], "Financeiro")
+
+    def test_projeto_sem_anotacoes_e_sem_motivo(self):
+        projeto = {"name": "SAGP-00002", "nome_cliente": "Y", "termino_previsto": "2026-09-20", "percentual_conclusao": 0}
+        entry = ad.montar_projeto_atrasado(projeto, [], [], date(2026, 10, 2))
+        self.assertEqual(entry["_tema"], ad.SEM_MOTIVO)
+        self.assertEqual(entry["_categoria_motivo"], "sem_motivo")
+        self.assertFalse(entry["_motivo_plausivel"])
+        self.assertEqual(entry["_dias_sem_atualizacao"], None)
+
+    def test_projeto_no_prazo_tem_dias_atraso_negativo(self):
+        projeto = {"name": "SAGP-00003", "nome_cliente": "Z", "termino_previsto": "2026-12-25", "percentual_conclusao": 0}
+        entry = ad.montar_projeto_atrasado(projeto, [], [], date(2026, 10, 2))
+        self.assertFalse(entry["_prazo_vencido"])
+        self.assertLess(entry["_dias_atraso"], 0)
+        self.assertEqual(entry["_prioridade"], "normal")
+
+
+class TestExtrairDiaMudancaStatus(unittest.TestCase):
+    def test_encontra_mudanca_para_status_alvo(self):
+        versions = [
+            {"creation": "2026-05-01 10:00:00", "data": json.dumps({"changed": [["nome_lider_projeto_grv", "A", "B"]]})},
+            {"creation": "2026-06-15 09:30:00", "data": json.dumps({"changed": [["status", "Aberto", "Consulta"]]})},
+        ]
+        self.assertEqual(ad.extrair_dia_mudanca_status(versions, ("Consulta", "Fechado")), "2026-06-15")
+
+    def test_sem_mudanca_retorna_none(self):
+        versions = [{"creation": "2026-05-01 10:00:00", "data": json.dumps({"changed": []})}]
+        self.assertIsNone(ad.extrair_dia_mudanca_status(versions, ("Consulta", "Fechado")))
+
+
+class TestMontarProjetoFinalizado(unittest.TestCase):
+    def test_concluido_depois_do_prazo(self):
+        projeto = {"name": "SAGP-00010", "nome_cliente": "W", "status": "Consulta",
+                   "nome_lider_projeto_grv": "Fulana", "termino_previsto": "2026-05-01",
+                   "inicio_previsto": "2026-01-10", "percentual_conclusao": 100.0}
+        versions = [{"creation": "2026-05-20 14:00:00", "data": json.dumps({"changed": [["status", "Aberto", "Consulta"]]})}]
+        entry = ad.montar_projeto_finalizado(projeto, versions, [])
+        self.assertEqual(entry["_dia_mudanca"], "2026-05-20")
+        self.assertEqual(entry["_dias_entre_prazo_e_status"], 19)
+        self.assertEqual(entry["_ano_inicio"], 2026)
+
+    def test_sem_log_de_mudanca(self):
+        projeto = {"name": "SAGP-00011", "nome_cliente": "V", "status": "Fechado",
+                   "termino_previsto": "2026-05-01", "inicio_previsto": "2025-11-01"}
+        entry = ad.montar_projeto_finalizado(projeto, [], [])
+        self.assertIsNone(entry["_dia_mudanca"])
+        self.assertIsNone(entry["_dias_entre_prazo_e_status"])
+        self.assertEqual(entry["_ano_inicio"], 2025)
+
+
+class TestCalcularVisaoGeralPorAno(unittest.TestCase):
+    def test_agrupa_por_ano_e_soma_todos(self):
+        hoje = date(2026, 10, 2)
+        projetos = [
+            {"name": "P1", "status": "Aberto", "inicio_previsto": "2026-01-01", "termino_previsto": "2026-01-01"},
+            {"name": "P2", "status": "Aberto", "inicio_previsto": "2026-02-01", "termino_previsto": "2027-01-01"},
+            {"name": "P3", "status": "Consulta", "inicio_previsto": "2026-01-01", "termino_previsto": "2026-01-01"},
+            {"name": "P4", "status": "Pausado", "inicio_previsto": "2025-01-01", "termino_previsto": None},
+            {"name": "P5", "status": "Cancelado", "inicio_previsto": "2025-06-01", "termino_previsto": None},
+        ]
+        info_conclusao = {"P3": 5}
+        resultado = ad.calcular_visao_geral_por_ano(projetos, info_conclusao, hoje)
+        self.assertEqual(resultado["2026"]["total"], 3)
+        self.assertEqual(resultado["2026"]["atrasados"], 1)
+        self.assertEqual(resultado["2026"]["abertos_no_prazo"], 1)
+        self.assertEqual(resultado["2026"]["concluidos"], 1)
+        self.assertEqual(resultado["2026"]["concluidos_atrasados"], 1)
+        self.assertEqual(resultado["2025"]["total"], 2)
+        self.assertEqual(resultado["2025"]["pausados"], 1)
+        self.assertEqual(resultado["2025"]["cancelados"], 1)
+        self.assertEqual(resultado["todos"]["total"], 5)
+        self.assertEqual(resultado["todos"]["concluidos_sem_info"], 0)
+
+    def test_concluido_sem_info_quando_sem_log(self):
+        hoje = date(2026, 10, 2)
+        projetos = [{"name": "P1", "status": "Consulta", "inicio_previsto": "2026-01-01", "termino_previsto": "2026-01-01"}]
+        resultado = ad.calcular_visao_geral_por_ano(projetos, {"P1": None}, hoje)
+        self.assertEqual(resultado["2026"]["concluidos_sem_info"], 1)
+        self.assertEqual(resultado["2026"]["concluidos_no_prazo"], 0)
+        self.assertEqual(resultado["2026"]["concluidos_atrasados"], 0)
+
+
 if __name__ == "__main__":
     unittest.main()
