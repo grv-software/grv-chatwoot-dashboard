@@ -201,6 +201,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
 .an-team-table td { padding:8px 10px; border-bottom:1px solid var(--border); font-variant-numeric:tabular-nums; text-align:right; color:var(--text2); }
 .an-team-table td:first-child { text-align:left; font-weight:600; color:var(--text); }
 .an-team-table tr:last-child td { border:none; }
+.an-rank-sem-cliente td { color:var(--text3); font-style:italic; }
 
 @media (prefers-reduced-motion:reduce) { .an-dist-fill { transition:none; } }
 #kpi-filter-note.auth-warn { color:var(--yellow); background:rgba(234,179,8,.07); border-color:rgba(234,179,8,.25); }
@@ -929,6 +930,18 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter','Segoe UI
     <div id="an-equipes-wrap"></div>
   </div>
 
+  <!-- ── 5 · CLIENTES QUE MAIS ABRIRAM CONVERSAS ── -->
+  <div class="section-divider" style="margin-top:16px"><span class="section-divider-label">5 · Clientes que mais abriram conversas</span></div>
+  <div class="chart-card chart-full" id="an-clientes-card">
+    <div class="chart-card-hdr">
+      <div>
+        <div class="chart-card-title">Clientes que mais abriram conversas</div>
+        <div class="chart-card-sub" id="an-clientes-sub">—</div>
+      </div>
+    </div>
+    <div id="an-clientes-wrap"></div>
+  </div>
+
 </div>
 
 <!-- AGENTES PAGE -->
@@ -1346,6 +1359,8 @@ if (_WEIGHT_TMA + _WEIGHT_TMR + _WEIGHT_FCR + _WEIGHT_MSG + _WEIGHT_CSAT !== 100
 }
 let _teamCompData    = null; /* dados de comparação por equipe/inbox */
 let _chartTeamCache  = {};   /* {`${id}:${since}:${until}`: {data, ts}} — TTL 5min */
+let _clientesRankingData  = null;
+let _clientesRankingCache = {}; /* {`${since}:${until}`: {data, ts}} — TTL 5min */
 let _authLimited     = false; /* true quando API de relatórios retornou 401/403 */
 
 /* ── AGENTES TAB STATE ── */
@@ -2755,6 +2770,7 @@ async function fetchChartData() {
     _chartData = periods.map((p, i) => ({ ...p, ...results[i] }));
     _chartTrendBase = baseline ? { ...baseline, since: trendBase.since, until: trendBase.until } : null;
     _teamCompData = await fetchTeamComparison(periods).catch(() => null);
+    _clientesRankingData = await fetchClientesRanking(periods).catch(() => null);
     renderCharts();
   } catch (err) { console.error('fetchChartData:', err); }
   finally {
@@ -2859,6 +2875,24 @@ async function fetchTeamComparison(periods) {
   }
 
   return { items, total: items.length, withData: items.length };
+}
+
+async function fetchClientesRanking(periods) {
+  const since = periods[0].since;
+  const until = periods[periods.length - 1].until;
+  const key = `${since}:${until}`;
+  const now = Date.now(), TTL = 5 * 60 * 1000;
+  if (_clientesRankingCache[key] && now - _clientesRankingCache[key].ts < TTL) return _clientesRankingCache[key].data;
+
+  try {
+    const res = await fetch(`/api/clientes-ranking?since=${since}&until=${until}`);
+    const data = await res.json();
+    if (!res.ok) data._erro = data.error || `HTTP ${res.status}`;
+    _clientesRankingCache[key] = { data, ts: now };
+    return data;
+  } catch (e) {
+    return { _erro: e.message };
+  }
 }
 
 /* Retorna {since, until} para o período selecionado */
@@ -3776,6 +3810,48 @@ function renderAnaliseEquipes() {
     `Contribuição de ${itens.length} equipes, da que mais atendeu para a que menos atendeu. ${itens[0].name} lidera com ${itens[0].conversations_count} atendimentos.`);
 }
 
+function renderAnaliseClientesRanking(data) {
+  const wrap = document.getElementById('an-clientes-wrap');
+  const sub  = document.getElementById('an-clientes-sub');
+  if (!wrap) return;
+
+  if (!data || data._erro === 'Frappe not configured') {
+    wrap.innerHTML = '<div class="chart-na">Integração com o CRM ainda não configurada</div>';
+    if (sub) sub.textContent = '';
+    return;
+  }
+  if (!data || data._erro) {
+    wrap.innerHTML = '<div class="chart-na">Não consegui carregar o ranking agora</div>';
+    if (sub) sub.textContent = '';
+    return;
+  }
+
+  const { clientes, semCliente, truncado, periodo } = data;
+  if (sub) sub.textContent = `${harnessFmtPeriodo(periodo.since, periodo.until)}${truncado ? ' · amostra parcial' : ''}`;
+
+  if (!clientes.length) {
+    wrap.innerHTML = '<div class="chart-na">Nenhum dado no período</div>';
+    return;
+  }
+
+  wrap.innerHTML = `
+    <table class="an-team-table">
+      <thead><tr><th>#</th><th>Cliente</th><th>Conversas</th></tr></thead>
+      <tbody>
+        ${clientes.map((c, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${esc(c.nome)}</td>
+            <td>${c.total.toLocaleString('pt-BR')}</td>
+          </tr>`).join('')}
+        ${semCliente > 0 ? `
+          <tr class="an-rank-sem-cliente" title="Conversas do Chatwoot sem cadastro de cliente correspondente no CRM">
+            <td></td><td>Sem cliente vinculado</td><td>${semCliente.toLocaleString('pt-BR')}</td>
+          </tr>` : ''}
+      </tbody>
+    </table>`;
+}
+
 function renderCharts() {
   if (!window.Chart || !_chartData.length) return;
   if (document.getElementById('graficos-page')?.style.display === 'none') {
@@ -3915,6 +3991,7 @@ function renderCharts() {
   destroyChart('tmr-team');
   destroyChart('teams');
   renderAnaliseEquipes();
+  renderAnaliseClientesRanking(_clientesRankingData);
 
 }
 
